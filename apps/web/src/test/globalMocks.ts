@@ -1,0 +1,42 @@
+jest.mock('@copilotkit/react-ui', () => ({
+  useChatContext: jest.fn(() => ({ icons: {} })),
+  CopilotChat: jest.fn(() => null),
+}));
+
+jest.mock('@copilotkit/react-core', () => ({
+  useCopilotChatInternal: jest.fn(),
+  useCopilotAction: jest.fn(),
+  useCopilotReadable: jest.fn(),
+  useRenderToolCall: jest.fn(),
+  useHumanInTheLoop: jest.fn(),
+  useCoAgent: jest.fn(() => ({ state: {} })),
+  CopilotKit: jest.fn(({ children }: { children: React.ReactNode }) => children),
+}));
+
+jest.mock('@/lib/mastraClient', () => ({
+  mastraClient: {
+    listMemoryThreads: jest.fn(),
+    createMemoryThread: jest.fn(),
+    deleteThread: jest.fn(),
+    listThreadMessages: jest.fn(),
+  },
+}));
+
+jest.mock('@/constants/agent', () => ({
+  RUNTIME_URL: 'http://localhost',
+  MASTRA_URL: 'http://localhost:4111',
+  COPILOTKIT_PUBLIC_LICENSE_KEY: 'test-key',
+  AGENT_NAME: 'travelAgent',
+  FETCH_THREADS_DELAY_MS: 0,
+  FETCH_TITLE_DELAY_MS: 0,
+  FETCH_TITLE_RETRY_MS: 0,
+  CHAT_ROLE: { USER: 'user', ASSISTANT: 'assistant', TOOL: 'tool' },
+  ALLOWED_CHAT_ROLES: ['user', 'assistant', 'tool'],
+  ASSISTANT_MESSAGE_FAILED_TERMS: [],
+}));
+
+// jsdom does not provide fetch — mock globally so components that call fetch on mount don't crash
+global.fetch = jest.fn().mockResolvedValue({
+  ok: true,
+  json: jest.fn().mockResolvedValue({ files: [] }),
+});

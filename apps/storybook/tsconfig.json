@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@repo/typescript-config/base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "paths": {
+      "@/*": ["../web/src/*"]
+    }
+  },
+  "include": [
+    ".storybook/**/*",
+    "src/**/*",
+    "../../web/src/**/*.stories.ts",
+    "../../web/src/**/*.stories.tsx"
+  ],
+  "exclude": ["node_modules", "storybook-static"]
+}

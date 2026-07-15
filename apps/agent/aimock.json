@@ -1,0 +1,6 @@
+{
+  "port": 4010,
+  "llmock": {
+    "fixtures": "./fixtures"
+  }
+}

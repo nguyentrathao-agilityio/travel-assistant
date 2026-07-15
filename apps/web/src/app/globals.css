@@ -1,0 +1,118 @@
+@import '@copilotkit/react-ui/styles.css';
+@import '../styles/theme.css';
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    @apply border-border-tertiary;
+  }
+
+  body {
+    @apply bg-background-primary text-text-primary;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: var(--color-scrollbar-track);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--color-scrollbar-thumb);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-scrollbar-thumb-hover);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Card shadow utilities using theme tokens */
+  .shadow {
+    box-shadow: var(--shadow);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .typing-dot {
+    display: inline-block;
+    height: 0.5rem;
+    width: 0.5rem;
+    border-radius: 9999px;
+    background-color: currentColor;
+    opacity: 0.3;
+    animation: typingDot 1s infinite ease-in-out;
+  }
+
+  .typing-dot.delay-75 {
+    animation-delay: 0.15s;
+  }
+
+  .typing-dot.delay-150 {
+    animation-delay: 0.3s;
+  }
+
+  @keyframes typingDot {
+    0%,
+    100% {
+      opacity: 0.3;
+      transform: translateY(0);
+    }
+    50% {
+      opacity: 1;
+      transform: translateY(-2px);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* User message gradient */
+  .bg-user-gradient {
+    background-image: linear-gradient(135deg, var(--color-brand-500), var(--color-brand-700));
+  }
+
+  /* Assistant message gradient */
+  .bg-assistant-gradient {
+    background-image: linear-gradient(
+      135deg,
+      var(--color-assistant-gradient-start),
+      var(--color-assistant-gradient-end)
+    );
+  }
+}

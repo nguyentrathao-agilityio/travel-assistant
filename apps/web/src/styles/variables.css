@@ -1,0 +1,171 @@
+/* styles/variables.css — single source of truth for all design tokens */
+
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #e0f2fe;
+  --color-background-success: #e6f8f0;
+  --color-background-info: #e6f1fb;
+  --color-background-recommended: #e6f8f5;
+  --color-background-confirm: #f0eefc;
+  --color-background-page: #f9f9f9;
+
+  --color-text-primary: #1c2a3a;
+  --color-text-secondary: #4a5c70;
+  --color-text-tertiary: #7b8a9a;
+
+  --color-border-tertiary: rgba(0, 0, 0, 0.08);
+  --color-border-secondary: rgba(0, 0, 0, 0.15);
+  --color-border-info: #3b82f6;
+
+  --color-scrollbar-thumb: rgba(28, 42, 58, 0.144);
+  --color-scrollbar-thumb-hover: rgba(28, 42, 58, 0.242);
+  --color-scrollbar-track: rgba(28, 42, 58, 0.08);
+
+  --font-size-display: 2rem;
+  --font-size-heading: 1.125rem;
+  --font-size-card-title: 0.9375rem;
+  --font-size-option-title: 0.875rem;
+  --font-size-body: 0.8125rem;
+  --font-size-meta: 0.75rem;
+  --font-size-label: 0.6875rem;
+  --font-size-badge: 0.6875rem;
+
+  --line-height-display: 1.3;
+  --line-height-heading: 1.4;
+  --line-height-card-title: 1.4;
+  --line-height-option-title: 1.4;
+  --line-height-body: 1.5;
+  --line-height-meta: 1.5;
+  --line-height-label: 1.4;
+  --line-height-badge: 1.2;
+
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --color-badge-success-bg: #d1fae5;
+  --color-badge-success-text: #065f46;
+  --color-badge-primary-bg: #dbeafe;
+  --color-badge-primary-text: #1e40af;
+  --color-badge-warning-bg: #fef3c7;
+  --color-badge-warning-text: #92400e;
+  --color-badge-secondary-bg: #d1fae5;
+  --color-badge-secondary-text: #065f46;
+  --color-badge-accent-bg: #e0e7ff;
+  --color-badge-accent-text: #4338ca;
+  --color-badge-danger-bg: #fee2e2;
+  --color-badge-danger-text: #991b1b;
+
+  /* Sidebar light theme */
+  --color-sidebar-bg: #f8fafc;
+  --color-sidebar-border: #e2e8f0;
+  --color-sidebar-item-active: #d1e3f8;
+  --color-sidebar-item-hover: #dbeafe;
+  --color-sidebar-text: #378add;
+  --color-sidebar-text-muted: #4a5c70;
+  --color-sidebar-label: #7b8a9a;
+  --color-sidebar-dot-active: #1e40af;
+  --color-sidebar-dot-idle: #b0c4de;
+
+  --color-user-bubble-text: #ffffff;
+
+  /* App background gradient (light) */
+  --color-background-gradient-start: #f7fbff;
+  --color-background-gradient-end: #eef6ff;
+  --color-assistant-gradient-start: rgba(96, 165, 250, 0.85);
+  --color-assistant-gradient-end: rgba(129, 140, 248, 0.9);
+
+  /* Shadows (light) */
+  --shadow: 0 6px 18px rgba(28, 42, 58, 0.06), 0 2px 6px rgba(28, 42, 58, 0.04);
+  --shadow-soft: 0 4px 12px rgba(28, 42, 58, 0.04);
+  --shadow-input-hover: 0 8px 24px rgba(28, 42, 58, 0.12), 0 4px 8px rgba(28, 42, 58, 0.08);
+  --shadow-input-focus: 0 0 0 2px rgba(55, 138, 221, 0.2), 0 8px 24px rgba(28, 42, 58, 0.12);
+
+  /* Airline avatar palette — static, not theme-switched */
+  --color-airline-icon-danger: #d32f2f;
+  --color-airline-icon-accent: #7b1fa2;
+  --color-airline-icon-primary: #1565c0;
+  --color-airline-icon-success: #2e7d32;
+  --color-airline-icon-warning: #e65100;
+  --color-icon-on-vivid: #fff;
+
+  /* Semantic icon colors */
+  --color-icon-time: #d97706;
+  --color-icon-ticket: #7c3aed;
+  --color-icon-link: #2563eb;
+  --color-icon-transport: #0891b2;
+  --color-icon-morning: #f59e0b;
+  --color-icon-afternoon: #ea580c;
+  --color-icon-evening: #4f46e5;
+  --color-icon-money: #059669;
+}
+
+.dark {
+  --color-background-primary: #0a192f;
+  --color-background-secondary: #0d1f35;
+  --color-background-success: #122b23;
+  --color-background-info: #112d52;
+  --color-background-recommended: #11324d;
+  --color-background-confirm: #25214d;
+  --color-background-page: #0b2540;
+
+  --color-text-primary: #e6f1ff;
+  --color-text-secondary: #a8c8e4;
+  --color-text-tertiary: #88a2be;
+
+  --color-border-tertiary: rgba(136, 162, 190, 0.2);
+  --color-border-secondary: rgba(136, 162, 190, 0.3);
+  --color-border-info: #5d90b8;
+
+  --color-scrollbar-thumb: rgba(255, 255, 255, 0.16);
+  --color-scrollbar-thumb-hover: rgba(255, 255, 255, 0.24);
+  --color-scrollbar-track: rgba(255, 255, 255, 0.08);
+
+  /* Sidebar dark theme */
+  --color-sidebar-bg: #0d1f35;
+  --color-sidebar-border: #1d3a5f;
+  --color-sidebar-item-active: #163050;
+  --color-sidebar-item-hover: #1a3558;
+  --color-sidebar-text: #e8f0f8;
+  --color-sidebar-text-muted: #a8c8e4;
+  --color-sidebar-label: #5d90b8;
+  --color-sidebar-dot-active: #378add;
+  --color-sidebar-dot-idle: #2a4a70;
+
+  --color-badge-success-bg: #122b23;
+  --color-badge-success-text: #6ee7b7;
+  --color-badge-primary-bg: #112d52;
+  --color-badge-primary-text: #93c5fd;
+  --color-badge-warning-bg: #3a2e13;
+  --color-badge-warning-text: #fcd34d;
+  --color-badge-secondary-bg: #11324d;
+  --color-badge-secondary-text: #6ee7b7;
+  --color-badge-accent-bg: #25214d;
+  --color-badge-accent-text: #c4b5fd;
+  --color-badge-danger-bg: #4a1d1d;
+  --color-badge-danger-text: #fca5a5;
+
+  /* Semantic icon colors */
+  --color-icon-time: #fbbf24;
+  --color-icon-ticket: #a78bfa;
+  --color-icon-link: #60a5fa;
+  --color-icon-transport: #22d3ee;
+  --color-icon-morning: #fcd34d;
+  --color-icon-afternoon: #fb923c;
+  --color-icon-evening: #818cf8;
+  --color-icon-money: #34d399;
+
+  /* App background gradient (dark) */
+  --color-background-gradient-start: #071529;
+  --color-background-gradient-end: #0b2540;
+  --color-assistant-gradient-start: rgba(54, 123, 169, 0.95);
+  --color-assistant-gradient-end: rgba(25, 53, 105, 0.98);
+
+  /* Shadows (dark) */
+  --shadow: 0 8px 24px rgba(67, 87, 147, 0.32), 0 2px 6px rgba(56, 74, 122, 0.2);
+  --shadow-soft: 0 4px 12px rgba(3, 10, 30, 0.18);
+  --shadow-input-hover: 0 8px 24px rgba(67, 87, 147, 0.5), 0 4px 8px rgba(56, 74, 122, 0.35);
+  --shadow-input-focus: 0 0 0 2px rgba(55, 138, 221, 0.4), 0 8px 24px rgba(67, 87, 147, 0.5);
+}

@@ -1,0 +1,12 @@
+{
+  "fixtures": [
+    {
+      "match": {
+        "userMessage": "Generate a single, concise travel tip"
+      },
+      "response": {
+        "content": "Wear light breathable clothing and stay hydrated."
+      }
+    }
+  ]
+}

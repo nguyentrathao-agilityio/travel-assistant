@@ -8,7 +8,8 @@
     "rootDir": "src",
     "lib": ["ES2022"],
     "paths": {
-      "@/*": ["./src/mastra/*"]
+      "@/*": ["./src/mastra/*"],
+      "@langgraph/*": ["./src/langgraph/*"]
     }
   },
   "include": ["src/**/*"],

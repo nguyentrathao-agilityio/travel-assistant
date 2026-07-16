@@ -1,1 +1,8 @@
-export const WEATHER_ENDPOINT = '/weather';
+export const ENDPOINTS = {
+  WEATHER: '/weather',
+  FLIGHTS: '/flights',
+  PLACES_SEARCH: '/places/search',
+  PLACES_ROUTE: '/places/route',
+  HOTELS: '/hotels/availability',
+  TIPS: '/tips',
+};

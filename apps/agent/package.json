@@ -4,9 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "mastra dev",
-    "build": "mastra build",
-    "start": "mastra start",
+    "dev": "tsc && tsc-alias && langgraphjs dev --port 8123 --no-browser",
     "lint": "eslint . --ext .ts",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -17,9 +15,7 @@
     "eval:ci": "evalite run",
     "eval:export": "evalite export --output eval-report",
     "aimock": "aimock --config aimock.json",
-    "aimock:record": "aimock --config aimock.json --record",
-    "langgraph:build": "tsc",
-    "langgraph:dev": "pnpm langgraph:build && langgraphjs dev --port 8123 --no-browser"
+    "aimock:record": "aimock --config aimock.json --record"
   },
   "dependencies": {
     "@ag-ui/client": "^0.0.53",
@@ -27,6 +23,7 @@
     "@ag-ui/mastra": "^1.0.3",
     "@ai-sdk/openai": "^3.0.0",
     "@copilotkit/runtime": "^1.57.1",
+    "@hono/node-server": "^1.19.13",
     "@langchain/core": "^1.1.48",
     "@langchain/langgraph": "^1.3.4",
     "@langchain/openai": "^1.4.7",
@@ -56,6 +53,7 @@
     "evalite": "^0.19.0",
     "mastra": "^1.0.0",
     "msw": "^2.14.6",
+    "tsc-alias": "^1.9.1",
     "tsx": "^4.16.2",
     "typescript": "6.0.3",
     "vitest": "^4.1.9"

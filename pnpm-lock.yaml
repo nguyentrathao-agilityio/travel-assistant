@@ -61,6 +61,9 @@ importers:
       '@copilotkit/runtime':
         specifier: ^1.57.1
         version: 1.57.1(@cfworker/json-schema@4.1.1)(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1))(@langchain/langgraph-sdk@1.9.27(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@langchain/openai@1.5.5(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1))(ws@8.20.1))(@opentelemetry/api@1.9.1)(langchain@1.4.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1))(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(ws@8.20.1))(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@hono/node-server':
+        specifier: ^1.19.13
+        version: 1.19.14(hono@4.12.30)
       '@langchain/core':
         specifier: ^1.1.48
         version: 1.2.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1)
@@ -134,15 +137,21 @@ importers:
       autoevals:
         specifier: ^0.3.0
         version: 0.3.0(ws@8.20.1)(zod@3.25.76)
+      concurrently:
+        specifier: ^10.0.3
+        version: 10.0.3
       evalite:
         specifier: ^0.19.0
         version: 0.19.0
       mastra:
         specifier: ^1.0.0
-        version: 1.9.3(@hono/node-server@1.19.14(hono@4.12.19))(@mastra/core@1.36.0(@bufbuild/protobuf@2.12.0)(@cfworker/json-schema@4.1.1)(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(zod@3.25.76))(@types/json-schema@7.0.15)(ai@6.0.207(zod@3.25.76))(express@5.2.1)(openapi-types@12.1.3)(rxjs@7.8.1)(zod@3.25.76))(rxjs@7.8.1)(typescript@6.0.3)(zod@3.25.76)
+        version: 1.9.3(@hono/node-server@1.19.14(hono@4.12.30))(@mastra/core@1.36.0(@bufbuild/protobuf@2.12.0)(@cfworker/json-schema@4.1.1)(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(zod@3.25.76))(@types/json-schema@7.0.15)(ai@6.0.207(zod@3.25.76))(express@5.2.1)(openapi-types@12.1.3)(rxjs@7.8.1)(zod@3.25.76))(rxjs@7.8.1)(typescript@6.0.3)(zod@3.25.76)
       msw:
         specifier: ^2.14.6
         version: 2.14.6(@types/node@22.19.19)(typescript@6.0.3)
+      tsc-alias:
+        specifier: ^1.9.1
+        version: 1.9.1
       tsx:
         specifier: ^4.16.2
         version: 4.22.1
@@ -6249,6 +6258,13 @@ packages:
         integrity: sha512-Ko0uX15oIUS7wJ3Rb30Fs6SkVbLmPBAKdlm7q9+ak9bbIeFf0MwuBsQV6z7+X768/cHsfg+WlysDWJcmthjsjQ==,
       }
 
+  binary-extensions@2.3.0:
+    resolution:
+      {
+        integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==,
+      }
+    engines: { node: '>=8' }
+
   binary-search@1.3.6:
     resolution:
       {
@@ -6612,6 +6628,13 @@ packages:
         integrity: sha512-shv45WN2u0yN9EHH1bisNrv+fy4Cw+eLM5lOoriP67mePrwbHZ1kJqg90C8GEU7K1A8gJsicEoVZHcuBbuul/w==,
       }
 
+  chokidar@3.6.0:
+    resolution:
+      {
+        integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==,
+      }
+    engines: { node: '>= 8.10.0' }
+
   chokidar@4.0.3:
     resolution:
       {
@@ -6711,6 +6734,13 @@ packages:
         integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==,
       }
     engines: { node: '>=12' }
+
+  cliui@9.0.1:
+    resolution:
+      {
+        integrity: sha512-k7ndgKhwoQveBL+/1tqGJYNz097I7WOvwbmmU2AR5+magtbjPWQTS1C5vzGkBC8Ym8UWRzfKUzUUqFLypY4Q+w==,
+      }
+    engines: { node: '>=20' }
 
   clsx@2.1.1:
     resolution:
@@ -6833,6 +6863,13 @@ packages:
       }
     engines: { node: '>= 12' }
 
+  commander@9.5.0:
+    resolution:
+      {
+        integrity: sha512-KRs7WVDKg86PWiuAqhDrAQnTXZKraVcCc6vFdL14qrZ/DcWwuRo7VoiYXalXO7S5GKpqYiVEwCbgFDfxNHKJBQ==,
+      }
+    engines: { node: ^12.20.0 || >=14 }
+
   commondir@1.0.1:
     resolution:
       {
@@ -6895,6 +6932,14 @@ packages:
       {
         integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==,
       }
+
+  concurrently@10.0.3:
+    resolution:
+      {
+        integrity: sha512-hc3LH4UaKWd/bbyDK/IGVa4RB6PtQ3CUYwtrkzqHn+wIG3Hr5fhpRlk0L/gCa8ZE1L/Ufj50Zho69cI5w8SQBA==,
+      }
+    engines: { node: '>=22' }
+    hasBin: true
 
   confbox@0.1.8:
     resolution:
@@ -9584,6 +9629,13 @@ packages:
       }
     engines: { node: '>= 0.4' }
 
+  is-binary-path@2.1.0:
+    resolution:
+      {
+        integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==,
+      }
+    engines: { node: '>=8' }
+
   is-boolean-object@1.2.2:
     resolution:
       {
@@ -11785,6 +11837,13 @@ packages:
       }
     engines: { node: ^20.17.0 || >=22.9.0 }
 
+  mylas@2.1.14:
+    resolution:
+      {
+        integrity: sha512-BzQguy9W9NJgoVn2mRWzbFrFWWztGCcng2QI9+41frfk+Athwgx3qhqhvStz7ExeUUu7Kzw427sNzHpEZNINog==,
+      }
+    engines: { node: '>=16.0.0' }
+
   nanoid@3.3.12:
     resolution:
       {
@@ -12609,6 +12668,13 @@ packages:
         integrity: sha512-y+ichcgc2LrADuhLNAx8DFjVfgz91pRxfZdI3UDhxHvcVEZsenLO+7XaU5vOp0u/7V/wZ+plyuQxtrDlZJ+yeg==,
       }
 
+  plimit-lit@1.6.1:
+    resolution:
+      {
+        integrity: sha512-B7+VDyb8Tl6oMJT9oSO2CW8XC/T4UcJGrwOVoNGwOQsQYhlpfajmrMj5xeejqaASq3V/EqThyOeATEOMuSEXiA==,
+      }
+    engines: { node: '>=12' }
+
   points-on-curve@0.2.0:
     resolution:
       {
@@ -12987,6 +13053,13 @@ packages:
         integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==,
       }
 
+  queue-lit@1.5.2:
+    resolution:
+      {
+        integrity: sha512-tLc36IOPeMAubu8BkW8YDBV+WyIgKlYU7zUNs0J5Vk9skSZ4JfGlPOqplP0aHdfv7HL0B2Pg6nwiq60Qc6M2Hw==,
+      }
+    engines: { node: '>=12' }
+
   queue-microtask@1.2.3:
     resolution:
       {
@@ -13196,6 +13269,13 @@ packages:
       {
         integrity: sha512-v05I2k7xN8zXvPD9N+z/uhXPaj0sUFCe2rcWZIpBsqxfP7xXFQ0tipAd/wjj1YxWyWtUS5IDJpOG82JKt2EAVA==,
       }
+
+  readdirp@3.6.0:
+    resolution:
+      {
+        integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==,
+      }
+    engines: { node: '>=8.10.0' }
 
   readdirp@4.1.2:
     resolution:
@@ -13565,6 +13645,12 @@ packages:
         integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==,
       }
 
+  rxjs@7.8.2:
+    resolution:
+      {
+        integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==,
+      }
+
   sade@1.8.1:
     resolution:
       {
@@ -13778,6 +13864,13 @@ packages:
     resolution:
       {
         integrity: sha512-ObmnIF4hXNg1BqhnHmgbDETF8dLPCggZWBjkQfhZpbszZnYur5DUljTcCHii5LC3J5E0yeO/1LIMyH+UvHQgyw==,
+      }
+    engines: { node: '>= 0.4' }
+
+  shell-quote@1.8.4:
+    resolution:
+      {
+        integrity: sha512-VsC6n6vz1ihYYyZZwX7YZSF5l5x36ca17OC+a69h94YqB7X6XLwf+5MOgynYir2SLFUbl8gIYvBo8K8RoNQ6bQ==,
       }
     engines: { node: '>= 0.4' }
 
@@ -14259,6 +14352,13 @@ packages:
       }
     engines: { node: '>=16' }
 
+  supports-color@10.2.2:
+    resolution:
+      {
+        integrity: sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g==,
+      }
+    engines: { node: '>=18' }
+
   supports-color@7.2.0:
     resolution:
       {
@@ -14548,6 +14648,13 @@ packages:
       }
     engines: { node: '>=12' }
 
+  tree-kill@1.2.2:
+    resolution:
+      {
+        integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==,
+      }
+    hasBin: true
+
   trim-lines@3.0.1:
     resolution:
       {
@@ -14629,6 +14736,14 @@ packages:
         optional: true
       '@swc/wasm':
         optional: true
+
+  tsc-alias@1.9.1:
+    resolution:
+      {
+        integrity: sha512-sFZdVFthH8uvdplPJrOYGOHcxu6UPtcAcY678JPwEQiMzgLZYFO7Qc/rzELp7ingTc+OxtzH6n+8Pn2eVQep6w==,
+      }
+    engines: { node: '>=16.20.2' }
+    hasBin: true
 
   tsconfck@3.1.6:
     resolution:
@@ -15604,12 +15719,26 @@ packages:
       }
     engines: { node: '>=12' }
 
+  yargs-parser@22.0.0:
+    resolution:
+      {
+        integrity: sha512-rwu/ClNdSMpkSrUb+d6BRsSkLUq1fmfsY6TOpYzTwvwkg1/NRG85KBy3kq++A8LKQwX6lsu+aWad+2khvuXrqw==,
+      }
+    engines: { node: ^20.19.0 || ^22.12.0 || >=23 }
+
   yargs@17.7.2:
     resolution:
       {
         integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==,
       }
     engines: { node: '>=12' }
+
+  yargs@18.0.0:
+    resolution:
+      {
+        integrity: sha512-4UEqdc2RYGHZc7Doyqkrqiln3p9X2DZVxaGbwhn2pi7MrRagKaOcIKe8L3OxYcbhXLgLFUS3zAYuQjKBQgmuNg==,
+      }
+    engines: { node: ^20.19.0 || ^22.12.0 || >=23 }
 
   yauzl@2.10.0:
     resolution:
@@ -17274,18 +17403,18 @@ snapshots:
     dependencies:
       hono: 4.12.30
 
-  '@hono/node-ws@1.3.1(@hono/node-server@1.19.14(hono@4.12.19))(hono@4.12.19)':
+  '@hono/node-ws@1.3.1(@hono/node-server@1.19.14(hono@4.12.30))(hono@4.12.19)':
     dependencies:
-      '@hono/node-server': 1.19.14(hono@4.12.19)
+      '@hono/node-server': 1.19.14(hono@4.12.30)
       hono: 4.12.19
       ws: 8.20.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@hono/node-ws@1.3.1(@hono/node-server@1.19.14(hono@4.12.19))(hono@4.12.30)':
+  '@hono/node-ws@1.3.1(@hono/node-server@1.19.14(hono@4.12.30))(hono@4.12.30)':
     dependencies:
-      '@hono/node-server': 1.19.14(hono@4.12.19)
+      '@hono/node-server': 1.19.14(hono@4.12.30)
       hono: 4.12.30
       ws: 8.20.1
     transitivePeerDependencies:
@@ -17616,7 +17745,7 @@ snapshots:
     dependencies:
       '@babel/code-frame': 7.29.0
       '@hono/node-server': 1.19.14(hono@4.12.30)
-      '@hono/node-ws': 1.3.1(@hono/node-server@1.19.14(hono@4.12.19))(hono@4.12.30)
+      '@hono/node-ws': 1.3.1(@hono/node-server@1.19.14(hono@4.12.30))(hono@4.12.30)
       '@hono/zod-validator': 0.7.6(hono@4.12.30)(zod@3.25.76)
       '@langchain/core': 1.2.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1)
       '@langchain/langgraph': 1.4.8(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@3.25.76)
@@ -17979,12 +18108,12 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@mastra/deployer@1.35.0(@hono/node-server@1.19.14(hono@4.12.19))(@mastra/core@1.36.0(@bufbuild/protobuf@2.12.0)(@cfworker/json-schema@4.1.1)(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(zod@3.25.76))(@types/json-schema@7.0.15)(ai@6.0.207(zod@3.25.76))(express@5.2.1)(openapi-types@12.1.3)(rxjs@7.8.1)(zod@3.25.76))(typescript@6.0.3)(zod@3.25.76)':
+  '@mastra/deployer@1.35.0(@hono/node-server@1.19.14(hono@4.12.30))(@mastra/core@1.36.0(@bufbuild/protobuf@2.12.0)(@cfworker/json-schema@4.1.1)(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(zod@3.25.76))(@types/json-schema@7.0.15)(ai@6.0.207(zod@3.25.76))(express@5.2.1)(openapi-types@12.1.3)(rxjs@7.8.1)(zod@3.25.76))(typescript@6.0.3)(zod@3.25.76)':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/preset-typescript': 7.28.5(@babel/core@7.29.0)
       '@babel/traverse': 7.29.0
-      '@hono/node-ws': 1.3.1(@hono/node-server@1.19.14(hono@4.12.19))(hono@4.12.19)
+      '@hono/node-ws': 1.3.1(@hono/node-server@1.19.14(hono@4.12.30))(hono@4.12.19)
       '@mastra/core': 1.36.0(@bufbuild/protobuf@2.12.0)(@cfworker/json-schema@4.1.1)(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(zod@3.25.76))(@types/json-schema@7.0.15)(ai@6.0.207(zod@3.25.76))(express@5.2.1)(openapi-types@12.1.3)(rxjs@7.8.1)(zod@3.25.76)
       '@mastra/server': 1.35.0(@mastra/core@1.36.0(@bufbuild/protobuf@2.12.0)(@cfworker/json-schema@4.1.1)(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(zod@3.25.76))(@types/json-schema@7.0.15)(ai@6.0.207(zod@3.25.76))(express@5.2.1)(openapi-types@12.1.3)(rxjs@7.8.1)(zod@3.25.76))(zod@3.25.76)
       '@optimize-lodash/rollup-plugin': 5.1.0(rollup@4.60.4)
@@ -20024,6 +20153,8 @@ snapshots:
 
   bignumber.js@9.3.1: {}
 
+  binary-extensions@2.3.0: {}
+
   binary-search@1.3.6: {}
 
   bindings@1.5.0:
@@ -20255,6 +20386,18 @@ snapshots:
 
   cheminfo-types@1.15.0: {}
 
+  chokidar@3.6.0:
+    dependencies:
+      anymatch: 3.1.3
+      braces: 3.0.3
+      glob-parent: 5.1.2
+      is-binary-path: 2.1.0
+      is-glob: 4.0.3
+      normalize-path: 3.0.0
+      readdirp: 3.6.0
+    optionalDependencies:
+      fsevents: 2.3.3
+
   chokidar@4.0.3:
     dependencies:
       readdirp: 4.1.2
@@ -20306,6 +20449,12 @@ snapshots:
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
 
+  cliui@9.0.1:
+    dependencies:
+      string-width: 7.2.0
+      strip-ansi: 7.2.0
+      wrap-ansi: 9.0.2
+
   clsx@2.1.1: {}
 
   co@4.6.0: {}
@@ -20352,6 +20501,8 @@ snapshots:
   commander@7.2.0: {}
 
   commander@8.3.0: {}
+
+  commander@9.5.0: {}
 
   commondir@1.0.1: {}
 
@@ -20404,6 +20555,15 @@ snapshots:
       validate.io-function: 1.0.2
 
   concat-map@0.0.1: {}
+
+  concurrently@10.0.3:
+    dependencies:
+      chalk: 5.6.2
+      rxjs: 7.8.2
+      shell-quote: 1.8.4
+      supports-color: 10.2.2
+      tree-kill: 1.2.2
+      yargs: 18.0.0
 
   confbox@0.1.8: {}
 
@@ -22300,6 +22460,10 @@ snapshots:
     dependencies:
       has-bigints: 1.1.0
 
+  is-binary-path@2.1.0:
+    dependencies:
+      binary-extensions: 2.3.0
+
   is-boolean-object@1.2.2:
     dependencies:
       call-bound: 1.0.4
@@ -23288,14 +23452,14 @@ snapshots:
 
   marked@16.4.2: {}
 
-  mastra@1.9.3(@hono/node-server@1.19.14(hono@4.12.19))(@mastra/core@1.36.0(@bufbuild/protobuf@2.12.0)(@cfworker/json-schema@4.1.1)(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(zod@3.25.76))(@types/json-schema@7.0.15)(ai@6.0.207(zod@3.25.76))(express@5.2.1)(openapi-types@12.1.3)(rxjs@7.8.1)(zod@3.25.76))(rxjs@7.8.1)(typescript@6.0.3)(zod@3.25.76):
+  mastra@1.9.3(@hono/node-server@1.19.14(hono@4.12.30))(@mastra/core@1.36.0(@bufbuild/protobuf@2.12.0)(@cfworker/json-schema@4.1.1)(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(zod@3.25.76))(@types/json-schema@7.0.15)(ai@6.0.207(zod@3.25.76))(express@5.2.1)(openapi-types@12.1.3)(rxjs@7.8.1)(zod@3.25.76))(rxjs@7.8.1)(typescript@6.0.3)(zod@3.25.76):
     dependencies:
       '@babel/parser': 7.29.3
       '@babel/types': 7.29.0
       '@clack/prompts': 1.4.0
       '@expo/devcert': 1.2.1
       '@mastra/core': 1.36.0(@bufbuild/protobuf@2.12.0)(@cfworker/json-schema@4.1.1)(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(zod@3.25.76))(@types/json-schema@7.0.15)(ai@6.0.207(zod@3.25.76))(express@5.2.1)(openapi-types@12.1.3)(rxjs@7.8.1)(zod@3.25.76)
-      '@mastra/deployer': 1.35.0(@hono/node-server@1.19.14(hono@4.12.19))(@mastra/core@1.36.0(@bufbuild/protobuf@2.12.0)(@cfworker/json-schema@4.1.1)(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(zod@3.25.76))(@types/json-schema@7.0.15)(ai@6.0.207(zod@3.25.76))(express@5.2.1)(openapi-types@12.1.3)(rxjs@7.8.1)(zod@3.25.76))(typescript@6.0.3)(zod@3.25.76)
+      '@mastra/deployer': 1.35.0(@hono/node-server@1.19.14(hono@4.12.30))(@mastra/core@1.36.0(@bufbuild/protobuf@2.12.0)(@cfworker/json-schema@4.1.1)(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(zod@3.25.76))(@types/json-schema@7.0.15)(ai@6.0.207(zod@3.25.76))(express@5.2.1)(openapi-types@12.1.3)(rxjs@7.8.1)(zod@3.25.76))(typescript@6.0.3)(zod@3.25.76)
       '@mastra/loggers': 1.1.1(@mastra/core@1.36.0(@bufbuild/protobuf@2.12.0)(@cfworker/json-schema@4.1.1)(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(quansync@0.2.11)(zod-to-json-schema@3.25.2(zod@3.25.76))(zod@3.25.76))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(zod@3.25.76))(@types/json-schema@7.0.15)(ai@6.0.207(zod@3.25.76))(express@5.2.1)(openapi-types@12.1.3)(rxjs@7.8.1)(zod@3.25.76))
       archiver: 7.0.1
       commander: 14.0.3
@@ -24077,6 +24241,8 @@ snapshots:
 
   mute-stream@3.0.0: {}
 
+  mylas@2.1.14: {}
+
   nanoid@3.3.12: {}
 
   napi-build-utils@2.0.0: {}
@@ -24545,6 +24711,10 @@ snapshots:
       exsolve: 1.0.8
       pathe: 2.0.3
 
+  plimit-lit@1.6.1:
+    dependencies:
+      queue-lit: 1.5.2
+
   points-on-curve@0.2.0: {}
 
   points-on-path@0.2.1:
@@ -24729,6 +24899,8 @@ snapshots:
   quansync@0.2.11: {}
 
   querystringify@2.2.0: {}
+
+  queue-lit@1.5.2: {}
 
   queue-microtask@1.2.3: {}
 
@@ -24921,6 +25093,10 @@ snapshots:
   readdir-glob@1.1.3:
     dependencies:
       minimatch: 5.1.9
+
+  readdirp@3.6.0:
+    dependencies:
+      picomatch: 2.3.2
 
   readdirp@4.1.2: {}
 
@@ -25219,6 +25395,10 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  rxjs@7.8.2:
+    dependencies:
+      tslib: 2.8.1
+
   sade@1.8.1:
     dependencies:
       mri: 1.2.0
@@ -25388,6 +25568,8 @@ snapshots:
   shebang-regex@3.0.0: {}
 
   shell-quote@1.8.3: {}
+
+  shell-quote@1.8.4: {}
 
   shiki@3.23.0:
     dependencies:
@@ -25715,6 +25897,8 @@ snapshots:
     dependencies:
       copy-anything: 4.0.5
 
+  supports-color@10.2.2: {}
+
   supports-color@7.2.0:
     dependencies:
       has-flag: 4.0.0
@@ -25876,6 +26060,8 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
+  tree-kill@1.2.2: {}
+
   trim-lines@3.0.1: {}
 
   triple-beam@1.4.1: {}
@@ -25925,6 +26111,16 @@ snapshots:
       typescript: 6.0.3
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
+
+  tsc-alias@1.9.1:
+    dependencies:
+      chokidar: 3.6.0
+      commander: 9.5.0
+      get-tsconfig: 4.14.0
+      globby: 11.1.0
+      mylas: 2.1.14
+      normalize-path: 3.0.0
+      plimit-lit: 1.6.1
 
   tsconfck@3.1.6(typescript@6.0.3):
     optionalDependencies:
@@ -26519,6 +26715,8 @@ snapshots:
 
   yargs-parser@21.1.1: {}
 
+  yargs-parser@22.0.0: {}
+
   yargs@17.7.2:
     dependencies:
       cliui: 8.0.1
@@ -26528,6 +26726,15 @@ snapshots:
       string-width: 4.2.3
       y18n: 5.0.8
       yargs-parser: 21.1.1
+
+  yargs@18.0.0:
+    dependencies:
+      cliui: 9.0.1
+      escalade: 3.2.0
+      get-caller-file: 2.0.5
+      string-width: 7.2.0
+      y18n: 5.0.8
+      yargs-parser: 22.0.0
 
   yauzl@2.10.0:
     dependencies:

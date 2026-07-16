@@ -2,7 +2,7 @@ import { tool } from '@langchain/core/tools';
 
 import { getWeather } from '../services/weather';
 import { WeatherInputSchema } from '../schemas/weather';
-import { WEATHER_TOOL_ERROR_MESSAGE } from '../constants';
+import { TOOL_ERROR_MESSAGES } from '../constants';
 
 export const weatherTool = tool(
   async ({ city, days }) => {
@@ -11,7 +11,7 @@ export const weatherTool = tool(
       return JSON.stringify(result);
     } catch (error) {
       return JSON.stringify({
-        error: error instanceof Error ? error.message : WEATHER_TOOL_ERROR_MESSAGE,
+        error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.WEATHER,
       });
     }
   },

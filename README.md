@@ -2,49 +2,61 @@
 
 ## Overview
 
-Welcome to Travel Planner Assistant - an AI-powered travel planning application built with modern agentic technologies including CopilotKit, AG-UI, and Mastra. This project demonstrates advanced AI application development practices such as conversational interfaces, streaming UI responses, multi-tool orchestration, itinerary generation, and Generative UI experiences.
+Welcome to Travel Planner Assistant - an AI-powered travel planning application that simulates a real-world AI travel assistant, helping users plan complete travel experiences through a conversational chatbot interface — from checking the weather at a destination to generating a full multi-day trip schedule with flights, hotels, and local tips.
+
+The practice focuses primarily on building the agent logic and orchestration layer using **LangChainJS** and **LangGraph** — covering agent/tool/model interaction, schema-validated responses, context management, middleware, and graph-based multi-step orchestration with state persistence and interrupt handling. **CopilotKit** and **AG-UI** are used as the supporting frontend/streaming layer to connect this agent logic to a conversational chatbot interface with real-time streaming responses and generative UI.
 
 ## Target
 
 The aim of this project is to build a realistic AI-powered travel planning assistant while helping developers understand modern agentic application architecture and collaborative development workflows.
 
-Specific learning objectives:
+**LangChainJS**
 
-- Build AI-powered applications using CopilotKit
-- Understand AG-UI streaming events and workflows
-- Create conversational chatbot experiences with streaming responses
-- Orchestrate multiple tools within a single AI agent workflow
-- Build progressive Generative UI components
-- Integrate external APIs into AI-powered applications
-- Understand conversational memory and persistence
-- Manage monorepo applications using TurboRepo
-- Build scalable frontend/backend AI architectures
-- Collaborate effectively in a team-based environment
+- Grasp how Agents, Models, and Tools interact to build intelligent workflows.
+- Design predictable responses using message templates and schema validation.
+- Manage conversational context effectively.
+- Apply prebuilt and custom middleware for enhanced control and extensibility.
+- Improve user experience through real-time event streaming.
+
+**LangGraph**
+
+- Orchestrate multi-step logic using graph-based execution.
+- Ensure long-running tasks and state recovery.
+- Handle interrupts and time travel — debug or rewind execution flows safely.
+- Build integrated AI systems — combine LangChainJS logic with LangGraph orchestration for scalable, maintainable AI solutions.
 
 ## Team Size
 
-- 3 Developers:
-  - Huong.Le
-  - My.Le
-  - Nguyen.ThaoTra
+- 1 Developer:
+  - Nguyen.TraThao
 
 ## Prerequisite
 
 - **Visual Studio Code**
-- **Node.js** v24+
-- **pnpm** v10.33.4+
+- **Node.js** v24.15.0
+- **pnpm** v11.1.1
 - **PostgreSQL** (for agent persistence)
 - **Git** (for version control and Husky hooks)
+- **LLM**: gpt-4o mini
+
+## Development Tools
+
+- **Husky**
+- **Prettier**
+- **ESLint**
+- **CommitLint**
 
 ## Technical Stacks
 
+- **TypeScript** v5.9.3
 - **React + Vite**
-- **TypeScript**
 - **TurboRepo**
-- **CopilotKit**
-- **AG-UI**
-- **Mastra**
-- **TailwindCSS**
+- **CopilotKit** v1.57.1
+- **AG-UI** v1.0.2
+- **LangChain** v1.1.48
+- **LangGraph** v1.3.4
+- **LangSmith**
+- **TailwindCSS** v4.3
 - **OpenAI GPT-4o Mini**
 - **PostgreSQL**
 
@@ -65,60 +77,6 @@ Specific learning objectives:
 - **Full Travel Schedule Setup** — Users can generate a complete travel itinerary combining flights, hotels, attractions, local tips, and day-by-day travel schedules through a Generative UI experience.
 
 - **Smart Thread Management** — Empty threads are prevented from being created; users are redirected to existing empty threads when clicking "New Conversation" on another thread, eliminating clutter.
-
-## Folder Structure
-
-```bash
-travel-planner-assistant/
-├── apps/
-│   ├── web/
-│   │   └── src/
-│   │       ├── app/
-│   │       ├── components/
-│   │       │   ├── chat/
-│   │       │   ├── common/
-│   │       │   ├── FlightCard/
-│   │       │   ├── HotelCard/
-│   │       │   ├── WeatherCard/
-│   │       │   ├── RouteCard/
-│   │       │   ├── PlacesCard/
-│   │       │   ├── LocalTipsCard/
-│   │       │   └── TripSummaryCard/
-│   │       ├── constants/
-│   │       ├── hooks/
-│   │       ├── lib/
-│   │       ├── schemas/
-│   │       ├── stores/
-│   │       ├── styles/
-│   │       ├── types/
-│   │       └── utils/
-│   │
-│   ├── agent/
-│   │   └── src/
-│   │       └── mastra/
-│   │           ├── agents/
-│   │           ├── prompts/
-│   │           ├── schemas/
-│   │           ├── services/
-│   │           ├── tools/
-│   │           ├── utils/
-│   │           └── workflows/
-│   │
-│   └── storybook/
-│       └── src/
-│
-├── packages/
-│   ├── eslint-config/
-│   ├── schemas/
-│   ├── types/
-│   └── typescript-config/
-│
-├── .husky/
-├── turbo.json
-├── pnpm-workspace.yaml
-├── package.json
-└── README.md
-```
 
 ## Step by Step to Run This App in Your Local
 
@@ -153,10 +111,10 @@ POSTGRES_URL=postgresql://user:password@localhost:5432/travel_assistant
 ### `apps/web/.env.local`
 
 ```env
-# CopilotKit runtime — Mastra exposes this via registerCopilotKit()
+# CopilotKit runtime endpoint exposed by the agent server
 VITE_RUNTIME_URL=http://localhost:4111/chat
 
-# Mastra REST base — used by mastraClient (thread list, message fetch, etc.)
+# Agent server REST base — used for thread list, message fetch, etc.
 VITE_MASTRA_URL=http://localhost:4111
 
 # CopilotKit public license key — required for premium features
@@ -166,33 +124,8 @@ VITE_COPILOTKIT_PUBLIC_LICENSE_KEY=
 **Notes:**
 
 - The frontend application runs on `http://localhost:3000`
-- The Mastra agent server runs on `http://localhost:4111`
+- The agent server runs on `http://localhost:4111`
 - CopilotKit runtime endpoint: `http://localhost:4111/chat`
-
-## Features Documentation
-
-### AI Chat Features
-
-- **Conversational Chatbot**: AI-powered travel assistant interface
-- **Streaming Responses**: Real-time AG-UI response streaming
-- **Conversation Memory**: Multi-turn context handling with PostgreSQL persistence
-- **Generative UI**: Progressive UI rendering during tool execution
-
-### Travel Features
-
-- **Weather Check**: Live destination weather lookup
-- **Route Recommendation**: Smart city route planning
-- **Flight Booking**: Simulated flight browsing and booking
-- **Hotel Booking**: Simulated hotel recommendation system
-- **Places Discovery**: Attractions and hidden gems exploration
-- **Local Tips**: Practical travel and cultural advice
-
-### Itinerary Features
-
-- **Full Travel Schedule**: Complete day-by-day itinerary generation
-- **Booking Coordination**: Flights and hotels integrated into schedules
-- **Daily Recommendations**: Suggested attractions and activities
-- **Interactive Planning**: Modify and refine generated itineraries
 
 ## TurboRepo Commands
 
@@ -253,7 +186,10 @@ Jest (via Vitest) for unit and component tests
 
 - [Vite Documentation](https://vitejs.dev/guide/)
 - [CopilotKit Documentation](https://docs.copilotkit.ai)
-- [Mastra Documentation](https://mastra.ai/docs)
+- [AG-UI Documentation](https://docs.ag-ui.com)
+- [LangChainJS Documentation](https://js.langchain.com/docs)
+- [LangGraphJS Documentation](https://langchain-ai.github.io/langgraphjs/)
+- [LangSmith Documentation](https://docs.smith.langchain.com)
 - [TailwindCSS Documentation](https://tailwindcss.com/docs)
 - [TurboRepo Documentation](https://turbo.build/repo/docs)
 - [OpenAI Platform](https://platform.openai.com/docs)

@@ -1,11 +1,8 @@
-import { WeatherResultSchema } from '@repo/schemas';
 import { z } from 'zod';
 
 import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '../llm';
-import { WeatherResponse, WeatherResponseSchema } from '../schemas/weather';
-import { WEATHER_ENDPOINT } from '../constants';
-
-const API_URL = process.env.API_URL;
+import { WeatherResponse, WeatherResponseSchema, WeatherResultSchema } from '../schemas/weather';
+import { API_URL, ENDPOINTS } from '../constants';
 
 type WeatherToolOutput = z.infer<typeof WeatherResultSchema>;
 
@@ -53,7 +50,7 @@ export const getWeather = async (inputData: {
 }): Promise<WeatherToolOutput> => {
   const { city, days = 5 } = inputData;
 
-  const endpoint = `${API_URL}${WEATHER_ENDPOINT}`;
+  const endpoint = `${API_URL}${ENDPOINTS.WEATHER}`;
   const params = new URLSearchParams({
     city: city.trim(),
     days: String(days),

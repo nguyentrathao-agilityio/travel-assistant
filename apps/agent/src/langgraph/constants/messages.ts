@@ -1,2 +1,17 @@
-export const WEATHER_TOOL_ERROR_MESSAGE =
-  "Weather data isn't available for that location right now. Please try again in a moment.";
+export const TOOL_ERROR_MESSAGES = {
+  WEATHER:
+    "Weather data isn't available for that location right now. Please try again in a moment.",
+  FLIGHTS: "I couldn't search flights right now. Please try again or adjust your dates.",
+  HOTELS: 'Hotel search failed. Try different dates or another city.',
+  PLACES: "Couldn't load places for that destination. Please try again.",
+  ROUTE: "Couldn't build a route for that city. Please try again.",
+  LOCAL_TIPS: 'Local tips are unavailable right now. Please try again.',
+} as const;
+
+export const ERROR_MESSAGES = {
+  NO_API_URL: 'API_URL environment variable is not set',
+  SEARCH_FAILED: (status: number, statusText: string) =>
+    `Flight search failed: ${status} ${statusText}`,
+  INVALID_RESPONSE: 'Invalid flight search response shape',
+  UNKNOWN: 'An unexpected error occurred during flight search',
+} as const;

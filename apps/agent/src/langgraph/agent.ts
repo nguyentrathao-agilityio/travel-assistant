@@ -8,7 +8,7 @@ import { GraphState } from './state';
 import { createCallModelNode } from './nodes';
 
 // Tools
-import { weatherTools } from './tools';
+import { tools } from './tools';
 
 // LLM
 import { createChatModel } from './llm';
@@ -18,7 +18,7 @@ import { OPENAI_API_KEY } from './constants';
 
 export const graph = new StateGraph(GraphState)
   .addNode('agent', createCallModelNode(createChatModel({ apiKey: OPENAI_API_KEY! })))
-  .addNode('tools', new ToolNode(weatherTools))
+  .addNode('tools', new ToolNode(tools))
   .addEdge(START, 'agent')
   .addConditionalEdges('agent', toolsCondition, ['tools', END])
   .addEdge('tools', 'agent')

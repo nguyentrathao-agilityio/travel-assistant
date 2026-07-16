@@ -1,0 +1,26 @@
+import { tool } from '@langchain/core/tools';
+
+import { getLocalTips } from '../services/tips';
+import { TipsInputSchema } from '../schemas/tips';
+import { TOOL_ERROR_MESSAGES } from '../constants';
+
+export const tipsTool = tool(
+  async (input) => {
+    try {
+      const result = await getLocalTips(input);
+      return JSON.stringify(result);
+    } catch (error) {
+      return JSON.stringify({
+        error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.LOCAL_TIPS,
+      });
+    }
+  },
+  {
+    name: 'get_local_tips',
+    description: `Get local travel tips for a city or country — covering transport, money, safety, culture, food, connectivity, health, etiquette, best time to visit, and language.
+    Required: country (not city — always resolve: Da Nang→Vietnam, Bangkok→Thailand, Bali→Indonesia, etc.).
+    Optional: city (pass when available for more specific results), category (transport|money|safety|culture|food|connectivity|health|etiquette|best_time|language — use when user asks about a specific topic), essentialOnly.
+    Only call when country is known.`,
+    schema: TipsInputSchema,
+  }
+);

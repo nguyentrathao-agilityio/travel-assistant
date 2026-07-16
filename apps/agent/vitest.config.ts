@@ -14,6 +14,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src/mastra'),
+      '@langgraph': resolve(__dirname, 'src/langgraph'),
     },
   },
 });

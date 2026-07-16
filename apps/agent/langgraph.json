@@ -1,0 +1,9 @@
+{
+  "node_version": "24",
+  "dependencies": ["."],
+  "graphs": {
+    "travel": "./dist/langgraph/agent.js:graph"
+  },
+  "env": ".env",
+  "dockerfile_lines": []
+}

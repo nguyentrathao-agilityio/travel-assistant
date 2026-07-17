@@ -16,7 +16,7 @@ export const placesTool = tool(
     }
   },
   {
-    name: 'get_places',
+    name: 'placesTool',
     description: `Search places of interest in a city — attractions, restaurants, cafes, activities, nightlife, and shopping.
     Required: city.
     Optional: category (attraction|restaurant|cafe|activity|nightlife|shopping), price_level (1=free/cheap … 4=luxury), recommended (true = editor picks only), sort (default: rating_desc), min_rating.

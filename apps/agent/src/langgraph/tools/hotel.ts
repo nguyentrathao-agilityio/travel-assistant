@@ -16,7 +16,7 @@ export const hotelTool = tool(
     }
   },
   {
-    name: 'search_hotels',
+    name: 'hotelTool',
     description: `Search available hotels for a destination with flexible filters.
     Required: city, checkIn (YYYY-MM-DD), checkOut (YYYY-MM-DD).
     Optional: minStars (1-5), maxPrice (per night USD), amenities (e.g. ["wifi","pool","breakfast"]), availableOnly (default true — only available hotels), adults, children, rooms.

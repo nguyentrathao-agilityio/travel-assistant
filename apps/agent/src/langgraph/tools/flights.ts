@@ -16,7 +16,7 @@ export const flightsTool = tool(
     }
   },
   {
-    name: 'search_flights',
+    name: 'flightsTool',
     description: `Search available flights between two airports on a given date.
   Required: origin (IATA 3-letter code), destination (IATA 3-letter code), departure_date (YYYY-MM-DD).
   Optional: adults (default 1 — do NOT ask), return_date (YYYY-MM-DD — include for round trips), airline, max_price, max_stops.

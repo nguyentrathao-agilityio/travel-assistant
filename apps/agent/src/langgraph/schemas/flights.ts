@@ -113,4 +113,5 @@ export const FlightSearchResultSchema = z.object({
 
 export type FlightInput = z.infer<typeof FlightInputSchema>;
 export type ApiFlightSearchResponse = z.infer<typeof ApiFlightSearchResponseSchema>;
+export type Flight = z.infer<typeof FlightSchema>;
 export type FlightSearchResult = z.infer<typeof FlightSearchResultSchema>;

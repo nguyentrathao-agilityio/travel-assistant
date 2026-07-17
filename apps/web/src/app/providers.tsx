@@ -34,7 +34,6 @@ export const Providers = ({ children }: ProvidersProps) => {
         agent={AGENT_NAME}
         threadId={sessionId}
         headers={headers}
-        useSingleEndpoint={false}
       >
         {children}
         <Toaster richColors position="bottom-center" offset="80px" />

@@ -1,0 +1,45 @@
+import type { Hono } from 'hono';
+import {
+  CopilotRuntime,
+  InMemoryAgentRunner,
+  createCopilotHonoHandler,
+} from '@copilotkit/runtime/v2';
+import { LangGraphAgent } from '@copilotkit/runtime/langgraph';
+import type { Assistant } from '@langchain/langgraph-sdk';
+
+import { LANGGRAPH_DEPLOYMENT_URL } from '../constants';
+
+class BridgedLangGraphAgent extends LangGraphAgent {
+  override async getAssistant(): Promise<Assistant> {
+    const assistants = await this.client.assistants.search({
+      graphId: this.graphId,
+      limit: 100,
+    });
+
+    const assistant = assistants.find((candidate) => candidate.graph_id === this.graphId);
+    if (assistant) return assistant;
+
+    return super.getAssistant();
+  }
+}
+
+export function registerCopilotKit(app: Hono): void {
+  const travelAgent = new BridgedLangGraphAgent({
+    deploymentUrl: LANGGRAPH_DEPLOYMENT_URL,
+    graphId: 'travel',
+  });
+
+  const runtime = new CopilotRuntime({
+    agents: { travelAgent },
+    runner: new InMemoryAgentRunner(),
+  });
+
+  const copilotApp = createCopilotHonoHandler({
+    runtime,
+    basePath: '/chat',
+    mode: 'single-route',
+    cors: { origin: '*', credentials: false },
+  });
+
+  app.route('/', copilotApp);
+}

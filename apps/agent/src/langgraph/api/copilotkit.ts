@@ -8,6 +8,7 @@ import { LangGraphAgent } from '@copilotkit/runtime/langgraph';
 import type { Assistant } from '@langchain/langgraph-sdk';
 
 import { LANGGRAPH_DEPLOYMENT_URL } from '../constants';
+import { createCopilotKitHooks } from './hooks';
 
 class BridgedLangGraphAgent extends LangGraphAgent {
   override async getAssistant(): Promise<Assistant> {
@@ -29,8 +30,10 @@ export function registerCopilotKit(app: Hono): void {
     graphId: 'travel',
   });
 
+  const agents = { travelAgent };
+
   const runtime = new CopilotRuntime({
-    agents: { travelAgent },
+    agents,
     runner: new InMemoryAgentRunner(),
   });
 
@@ -39,6 +42,7 @@ export function registerCopilotKit(app: Hono): void {
     basePath: '/chat',
     mode: 'single-route',
     cors: { origin: '*', credentials: false },
+    hooks: createCopilotKitHooks(Object.keys(agents)),
   });
 
   app.route('/', copilotApp);

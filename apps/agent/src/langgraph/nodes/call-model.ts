@@ -1,16 +1,18 @@
 import { SystemMessage } from '@langchain/core/messages';
+import type { BindToolsInput } from '@langchain/core/language_models/chat_models';
 import type { ChatOpenAI } from '@langchain/openai';
 
 import { tools } from '../tools';
 import type { GraphStateType } from '../state';
-import { SYSTEM_PROMPT } from '../constants';
+import { buildSystemPrompt } from '../utils';
 
 export const createCallModelNode = (model: ChatOpenAI) => {
-  const modelWithTools = model.bindTools(tools);
-
   return async (state: GraphStateType) => {
+    const frontendTools = (state.tools ?? []) as BindToolsInput[];
+    const modelWithTools = model.bindTools([...tools, ...frontendTools]);
+
     const response = await modelWithTools.invoke([
-      new SystemMessage(SYSTEM_PROMPT),
+      new SystemMessage(buildSystemPrompt(state)),
       ...state.messages,
     ]);
     return { messages: [response] };

@@ -23,5 +23,6 @@ export const hotelTool = tool(
     Compute checkOut from check-in + nights when the user gives a duration — do NOT ask.
     Always pass availableOnly: true unless the user explicitly wants unavailable options too.`,
     schema: HotelInputSchema,
+    returnDirect: true,
   }
 );

@@ -22,5 +22,6 @@ export const tipsTool = tool(
     Optional: city (pass when available for more specific results), category (transport|money|safety|culture|food|connectivity|health|etiquette|best_time|language — use when user asks about a specific topic), essentialOnly.
     Only call when country is known.`,
     schema: TipsInputSchema,
+    returnDirect: true,
   }
 );

@@ -1,5 +1,5 @@
 import { useThreadStore } from '@/stores/threadStore';
-import { mastraClient } from '@/lib/mastraClient';
+import { langgraphClient } from '@/lib/langgraphClient';
 
 jest.mock('@/constants', () => ({
   SESSION_STORAGE_KEY: 'travel_session_id',
@@ -18,11 +18,13 @@ jest.mock('sonner', () => ({
   toast: { error: jest.fn() },
 }));
 
-jest.mock('@/lib/mastraClient', () => ({
-  mastraClient: {
-    listMemoryThreads: jest.fn(),
-    createMemoryThread: jest.fn(),
-    deleteThread: jest.fn(),
+jest.mock('@/lib/langgraphClient', () => ({
+  langgraphClient: {
+    threads: {
+      search: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+    },
   },
 }));
 
@@ -32,14 +34,19 @@ jest.mock('@/stores/tripStateStore', () => ({
   },
 }));
 
-const mockMastraClient = mastraClient as jest.Mocked<typeof mastraClient>;
+const mockLanggraphClient = langgraphClient as unknown as {
+  threads: {
+    search: jest.Mock;
+    create: jest.Mock;
+    delete: jest.Mock;
+  };
+};
 
 const makeThread = (id: string, title = 'Thread', daysAgo = 0) => ({
-  id,
-  title,
-  createdAt: new Date(Date.now() - daysAgo * 86_400_000).toISOString(),
-  updatedAt: new Date(Date.now() - daysAgo * 86_400_000).toISOString(),
-  resourceId: 'travelAgent',
+  thread_id: id,
+  metadata: { title, resourceId: 'travelAgent' },
+  created_at: new Date(Date.now() - daysAgo * 86_400_000).toISOString(),
+  updated_at: new Date(Date.now() - daysAgo * 86_400_000).toISOString(),
 });
 
 beforeEach(() => {
@@ -67,19 +74,29 @@ describe('useThreadStore — synchronous actions', () => {
   });
 
   it('setThreads replaces the threads list', () => {
-    const threads = [makeThread('t1'), makeThread('t2')];
+    const threads = [
+      { id: 't1', title: 'Thread', createdAt: new Date().toISOString() },
+      { id: 't2', title: 'Thread', createdAt: new Date().toISOString() },
+    ];
     useThreadStore.getState().setThreads(threads);
     expect(useThreadStore.getState().threads).toHaveLength(2);
   });
 
   it('updateThread patches a specific thread by id', () => {
-    useThreadStore.setState({ threads: [makeThread('t1', 'Old Title')] });
+    useThreadStore.setState({
+      threads: [{ id: 't1', title: 'Old Title', createdAt: new Date().toISOString() }],
+    });
     useThreadStore.getState().updateThread('t1', { title: 'New Title' });
     expect(useThreadStore.getState().threads[0].title).toBe('New Title');
   });
 
   it('updateThread does not affect other threads', () => {
-    useThreadStore.setState({ threads: [makeThread('t1', 'A'), makeThread('t2', 'B')] });
+    useThreadStore.setState({
+      threads: [
+        { id: 't1', title: 'A', createdAt: new Date().toISOString() },
+        { id: 't2', title: 'B', createdAt: new Date().toISOString() },
+      ],
+    });
     useThreadStore.getState().updateThread('t1', { title: 'Updated' });
     expect(useThreadStore.getState().threads[1].title).toBe('B');
   });
@@ -93,19 +110,8 @@ describe('useThreadStore — synchronous actions', () => {
 
 describe('useThreadStore — fetchThreads', () => {
   it('sets isLoading while fetching and resets after', async () => {
-    mockMastraClient.listMemoryThreads.mockResolvedValueOnce({
-      total: 0,
-      page: 1,
-      perPage: 20,
-      hasMore: false,
-      threads: [],
-    });
-    mockMastraClient.createMemoryThread.mockResolvedValueOnce({
-      id: 'mock-id',
-      resourceId: 'travelAgent',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+    mockLanggraphClient.threads.search.mockResolvedValueOnce([]);
+    mockLanggraphClient.threads.create.mockResolvedValueOnce(makeThread('mock-id'));
     const fetchPromise = useThreadStore.getState().fetchThreads();
     expect(useThreadStore.getState().isLoading).toBe(true);
     await fetchPromise;
@@ -114,21 +120,9 @@ describe('useThreadStore — fetchThreads', () => {
 
   it('populates threads from API response', async () => {
     const activeId = useThreadStore.getState().activeThreadId;
-    mockMastraClient.listMemoryThreads.mockResolvedValueOnce({
-      total: 1,
-      page: 1,
-      perPage: 20,
-      hasMore: false,
-      threads: [
-        {
-          id: activeId,
-          resourceId: 'travelAgent',
-          title: 'Trip to Da Nang',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ],
-    });
+    mockLanggraphClient.threads.search.mockResolvedValueOnce([
+      makeThread(activeId, 'Trip to Da Nang'),
+    ]);
     await useThreadStore.getState().fetchThreads();
     expect(useThreadStore.getState().threads).toHaveLength(1);
     expect(useThreadStore.getState().threads[0].title).toBe('Trip to Da Nang');
@@ -136,7 +130,7 @@ describe('useThreadStore — fetchThreads', () => {
 
   it('shows error toast on API failure', async () => {
     const { toast } = jest.requireMock('sonner');
-    mockMastraClient.listMemoryThreads.mockRejectedValueOnce(new Error('Network error'));
+    mockLanggraphClient.threads.search.mockRejectedValueOnce(new Error('Network error'));
     await useThreadStore.getState().fetchThreads();
     expect(toast.error).toHaveBeenCalledWith('Failed to load threads.');
   });
@@ -144,64 +138,52 @@ describe('useThreadStore — fetchThreads', () => {
 
 describe('useThreadStore — createThread', () => {
   it('adds a new thread to the list optimistically', async () => {
-    mockMastraClient.createMemoryThread.mockResolvedValueOnce({
-      id: 'mock-id',
-      resourceId: 'travelAgent',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+    mockLanggraphClient.threads.create.mockResolvedValueOnce(makeThread('mock-id'));
     await useThreadStore.getState().createThread();
     expect(useThreadStore.getState().threads).toHaveLength(1);
   });
 
   it('sets activeThreadId to the new thread', async () => {
-    mockMastraClient.createMemoryThread.mockResolvedValueOnce({
-      id: 'mock-id',
-      resourceId: 'travelAgent',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+    mockLanggraphClient.threads.create.mockResolvedValueOnce(makeThread('mock-id'));
     await useThreadStore.getState().createThread();
     const newThread = useThreadStore.getState().threads[0];
     expect(useThreadStore.getState().activeThreadId).toBe(newThread?.id);
   });
 
   it('does not create a second thread while isCreating', async () => {
-    mockMastraClient.createMemoryThread.mockResolvedValue({
-      id: 'mock-id',
-      resourceId: 'travelAgent',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+    mockLanggraphClient.threads.create.mockResolvedValue(makeThread('mock-id'));
     useThreadStore.setState({ isCreating: true });
     await useThreadStore.getState().createThread();
-    expect(mockMastraClient.createMemoryThread).not.toHaveBeenCalled();
+    expect(mockLanggraphClient.threads.create).not.toHaveBeenCalled();
   });
 });
 
 describe('useThreadStore — deleteThread', () => {
   it('removes the thread from the list', async () => {
-    const thread = makeThread('t1');
+    const thread = { id: 't1', title: 'Thread', createdAt: new Date().toISOString() };
     useThreadStore.setState({ threads: [thread], activeThreadId: 'other' });
-    mockMastraClient.deleteThread.mockResolvedValueOnce({ success: true, message: '' });
+    mockLanggraphClient.threads.delete.mockResolvedValueOnce(undefined);
     await useThreadStore.getState().deleteThread('t1');
     expect(useThreadStore.getState().threads).toHaveLength(0);
   });
 
   it('switches to next thread when deleting the active one', async () => {
     useThreadStore.setState({
-      threads: [makeThread('t1'), makeThread('t2')],
+      threads: [
+        { id: 't1', title: 'Thread', createdAt: new Date().toISOString() },
+        { id: 't2', title: 'Thread', createdAt: new Date().toISOString() },
+      ],
       activeThreadId: 't1',
     });
-    mockMastraClient.deleteThread.mockResolvedValueOnce({ success: true, message: '' });
+    mockLanggraphClient.threads.delete.mockResolvedValueOnce(undefined);
     await useThreadStore.getState().deleteThread('t1');
     expect(useThreadStore.getState().activeThreadId).toBe('t2');
   });
 
   it('restores threads on API error', async () => {
-    const thread = makeThread('t1');
+    const thread = { id: 't1', title: 'Thread', createdAt: new Date().toISOString() };
     useThreadStore.setState({ threads: [thread], activeThreadId: 'other' });
-    mockMastraClient.deleteThread.mockRejectedValueOnce(new Error('Server error'));
+    mockLanggraphClient.threads.delete.mockRejectedValueOnce(new Error('Server error'));
     await useThreadStore.getState().deleteThread('t1');
     expect(useThreadStore.getState().threads).toHaveLength(1);
   });

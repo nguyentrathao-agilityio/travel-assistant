@@ -13,18 +13,19 @@ jest.mock('@copilotkit/react-core', () => ({
   CopilotKit: jest.fn(({ children }: { children: React.ReactNode }) => children),
 }));
 
-jest.mock('@/lib/mastraClient', () => ({
-  mastraClient: {
-    listMemoryThreads: jest.fn(),
-    createMemoryThread: jest.fn(),
-    deleteThread: jest.fn(),
-    listThreadMessages: jest.fn(),
+jest.mock('@/lib/langgraphClient', () => ({
+  langgraphClient: {
+    threads: {
+      search: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+      getState: jest.fn(),
+    },
   },
 }));
 
 jest.mock('@/constants/agent', () => ({
   RUNTIME_URL: 'http://localhost',
-  MASTRA_URL: 'http://localhost:4111',
   COPILOTKIT_PUBLIC_LICENSE_KEY: 'test-key',
   AGENT_NAME: 'travelAgent',
   FETCH_THREADS_DELAY_MS: 0,

@@ -3,16 +3,12 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 // Lib
-import { mastraClient } from '@/lib';
-
-// Constants
-import { AGENT_NAME } from '@/constants';
-
-// Schemas
-import { ThreadMessagesResponseSchema } from '@repo/schemas';
+import { langgraphClient } from '@/lib';
 
 // Utils
-import { toAgUiMessages, deduplicateHitlResends } from '@/utils';
+import { toAgUiMessage } from '@/utils';
+
+import type { LangGraphRawMessage } from '@/utils';
 
 /**
  * Fetches history for a resumed thread and injects it into CopilotKit's message state.
@@ -44,16 +40,16 @@ export const useInjectThreadHistory = (
     setError(null);
     setMessagesRef.current([]);
 
-    mastraClient
-      .listThreadMessages(threadId, { agentId: AGENT_NAME })
-      .then((result) => {
+    langgraphClient.threads
+      .getState<{ messages?: LangGraphRawMessage[] }>(threadId)
+      .then((state) => {
         if (cancelled) return;
 
-        const parsed = ThreadMessagesResponseSchema.safeParse(result);
-        if (!parsed.success) throw new Error('Unexpected response shape from listThreadMessages');
-
-        const dedupedRaw = deduplicateHitlResends(parsed.data.messages);
-        const agUiMessages = dedupedRaw.flatMap(toAgUiMessages);
+        const rawMessages = state.values.messages ?? [];
+        const agUiMessages = rawMessages.flatMap((message, index) => {
+          const converted = toAgUiMessage(message, `${threadId}:${index}`);
+          return converted ? [converted] : [];
+        });
 
         if (!agUiMessages.length) return;
 
@@ -64,7 +60,7 @@ export const useInjectThreadHistory = (
         lastInjectedThreadIdRef.current = null;
 
         // Thread exists locally but not yet on the backend — no history to load.
-        if (err.message?.toLowerCase().includes('thread not found')) return;
+        if (err.message?.toLowerCase().includes('not found')) return;
 
         setError(err);
         toast.error('Failed to load chat history. Please try again.');

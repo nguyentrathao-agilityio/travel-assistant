@@ -1,5 +1,4 @@
 export const RUNTIME_URL = import.meta.env.VITE_RUNTIME_URL;
-export const MASTRA_URL = import.meta.env.VITE_MASTRA_URL;
 export const COPILOTKIT_PUBLIC_LICENSE_KEY = import.meta.env.VITE_COPILOTKIT_PUBLIC_LICENSE_KEY;
 export const AGENT_NAME = 'travelAgent';
 

@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 
 // Lib
-import { mastraClient } from '@/lib';
+import { langgraphClient } from '@/lib';
 
 // Constants
-import { AGENT_NAME, CHAT_ROLE } from '@/constants';
+import { CHAT_ROLE } from '@/constants';
 
 // Utils
-import { extractText } from '@/utils';
+import { langgraphMessageText } from '@/utils';
 
-import type { MastraRawMessage } from '@/types';
+import type { LangGraphRawMessage } from '@/utils';
 
 export interface ThreadMessage {
   id: string;
@@ -17,11 +17,14 @@ export interface ThreadMessage {
   text: string;
 }
 
-const toThreadMessage = (raw: MastraRawMessage): ThreadMessage => ({
-  id: raw.id,
-  role: raw.role as ThreadMessage['role'],
-  text: extractText(raw.content),
-});
+const toThreadMessage = (raw: LangGraphRawMessage, fallbackId: string): ThreadMessage => {
+  const role = raw.role ?? raw.type ?? '';
+  return {
+    id: raw.id ?? fallbackId,
+    role: role === 'human' ? CHAT_ROLE.USER : (role as ThreadMessage['role']),
+    text: langgraphMessageText(raw.content),
+  };
+};
 
 const isVisibleMessage = (message: ThreadMessage): boolean =>
   (message.role === CHAT_ROLE.USER || message.role === CHAT_ROLE.ASSISTANT) &&
@@ -33,7 +36,7 @@ export interface UseThreadMessagesResult {
 }
 
 /**
- * Fetches and parses the message history for a given Mastra thread.
+ * Fetches and parses the message history for a given LangGraph thread checkpoint.
  * Returns only user/assistant messages with non-empty text (tool messages are excluded).
  *
  * Resets and re-fetches automatically when `threadId` changes.
@@ -52,13 +55,15 @@ export const useThreadMessages = (threadId: string | null): UseThreadMessagesRes
     let cancelled = false;
     setLoading(true);
 
-    mastraClient
-      .listThreadMessages(threadId, { agentId: AGENT_NAME })
-      .then((result) => {
+    langgraphClient.threads
+      .getState<{ messages?: LangGraphRawMessage[] }>(threadId)
+      .then((state) => {
         if (cancelled) return;
 
-        const rawMessages = (result as { messages?: MastraRawMessage[] }).messages ?? [];
-        const visibleMessages = rawMessages.map(toThreadMessage).filter(isVisibleMessage);
+        const rawMessages = state.values.messages ?? [];
+        const visibleMessages = rawMessages
+          .map((raw, index) => toThreadMessage(raw, `${threadId}:${index}`))
+          .filter(isVisibleMessage);
 
         setMessages(visibleMessages);
       })

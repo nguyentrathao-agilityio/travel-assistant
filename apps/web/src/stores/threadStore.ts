@@ -2,10 +2,12 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { toast } from 'sonner';
 
-import { mastraClient } from '@/lib/mastraClient';
+import { langgraphClient } from '@/lib/langgraphClient';
 import { useTripStateStore } from '@/stores/tripStateStore';
 import { SESSION_STORAGE_KEY, AGENT_NAME } from '@/constants';
 import { ERROR_MESSAGES } from '@/constants/messages';
+
+import type { Thread } from '@langchain/langgraph-sdk';
 
 export interface ThreadItem {
   id: string;
@@ -13,17 +15,12 @@ export interface ThreadItem {
   createdAt: string;
 }
 
-const toThreadItem = (raw: {
-  id: string;
-  title?: string;
-  createdAt?: string | Date;
-}): ThreadItem => ({
-  id: raw.id,
-  title: raw.title ?? null,
-  createdAt:
-    raw.createdAt instanceof Date
-      ? raw.createdAt.toISOString()
-      : (raw.createdAt ?? new Date().toISOString()),
+const GRAPH_ID = 'travel';
+
+const toThreadItem = (thread: Thread): ThreadItem => ({
+  id: thread.thread_id,
+  title: typeof thread.metadata?.title === 'string' ? thread.metadata.title : null,
+  createdAt: thread.created_at,
 });
 
 interface ThreadStore {
@@ -70,12 +67,11 @@ export const useThreadStore = create<ThreadStore>()(
       fetchThreads: async () => {
         set({ isLoading: true });
         try {
-          const response = await mastraClient.listMemoryThreads({
-            resourceId: AGENT_NAME,
-            agentId: AGENT_NAME,
+          const rawThreads = await langgraphClient.threads.search({
+            metadata: { resourceId: AGENT_NAME },
+            limit: 100,
           });
 
-          const { threads: rawThreads = [] } = response;
           const items = rawThreads.map(toThreadItem);
 
           const currentThreadId = get().activeThreadId;
@@ -92,10 +88,11 @@ export const useThreadStore = create<ThreadStore>()(
             }
 
             // No threads on server — create one for the current session.
-            await mastraClient.createMemoryThread({
-              resourceId: AGENT_NAME,
-              agentId: AGENT_NAME,
+            await langgraphClient.threads.create({
               threadId: currentThreadId,
+              graphId: GRAPH_ID,
+              ifExists: 'do_nothing',
+              metadata: { resourceId: AGENT_NAME },
             });
             items.unshift({
               id: currentThreadId,
@@ -148,10 +145,11 @@ export const useThreadStore = create<ThreadStore>()(
         }));
 
         try {
-          await mastraClient.createMemoryThread({
-            resourceId: AGENT_NAME,
-            agentId: AGENT_NAME,
+          await langgraphClient.threads.create({
             threadId,
+            graphId: GRAPH_ID,
+            ifExists: 'do_nothing',
+            metadata: { resourceId: AGENT_NAME },
           });
         } catch {
           toast.error(ERROR_MESSAGES.CREATE_THREAD);
@@ -176,7 +174,7 @@ export const useThreadStore = create<ThreadStore>()(
         }
 
         try {
-          await mastraClient.deleteThread(threadId, { agentId: AGENT_NAME });
+          await langgraphClient.threads.delete(threadId);
         } catch {
           set({ threads: threadsSnapshot });
           toast.error(ERROR_MESSAGES.DELETE_THREAD);

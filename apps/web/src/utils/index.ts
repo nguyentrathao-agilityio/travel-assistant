@@ -5,7 +5,7 @@ export * from './date';
 export * from './flight';
 export * from './format';
 export * from './hotel';
-export * from './mastraMessage';
+export * from './langgraphMessage';
 export * from './route';
 export * from './thread';
 export * from './weather';

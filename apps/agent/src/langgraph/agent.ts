@@ -1,11 +1,8 @@
-import { StateGraph, START, END } from '@langchain/langgraph';
-import { ToolNode } from '@langchain/langgraph/prebuilt';
+import { createAgent, dynamicSystemPromptMiddleware } from 'langchain';
+import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 
 // State
 import { GraphState } from './state';
-
-// Nodes
-import { createCallModelNode, routeAfterAgent } from './nodes';
 
 // Tools
 import { tools } from './tools';
@@ -13,13 +10,21 @@ import { tools } from './tools';
 // LLM
 import { createChatModel } from './llm';
 
-// Constants
-import { OPENAI_API_KEY } from './constants';
+// Persistence
+import { OPENAI_API_KEY, POSTGRES_URL } from './constants';
 
-export const graph = new StateGraph(GraphState)
-  .addNode('agent', createCallModelNode(createChatModel({ apiKey: OPENAI_API_KEY! })))
-  .addNode('toolExecutor', new ToolNode(tools))
-  .addEdge(START, 'agent')
-  .addConditionalEdges('agent', routeAfterAgent, ['toolExecutor', END])
-  .addEdge('toolExecutor', 'agent')
-  .compile();
+// Utils
+import { buildSystemPrompt } from './utils';
+import type { GraphStateType } from './state';
+
+const agent = createAgent({
+  model: createChatModel({ apiKey: OPENAI_API_KEY! }),
+  tools,
+  stateSchema: GraphState,
+  middleware: [
+    dynamicSystemPromptMiddleware((state) => buildSystemPrompt(state as unknown as GraphStateType)),
+  ],
+  checkpointer: PostgresSaver.fromConnString(POSTGRES_URL!),
+});
+
+export const graph = agent.graph;

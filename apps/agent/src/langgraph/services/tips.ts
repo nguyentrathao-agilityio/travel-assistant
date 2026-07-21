@@ -31,7 +31,7 @@ const mapTip = (tip: ApiTip): TipItem => ({
   title: tip.title,
   content: tip.content,
   isEssential: tip.is_essential,
-  location: tip.location,
+  location: tip.location ?? null,
 });
 
 /** Strips markdown code fences from a string, returning the inner content. */
@@ -120,6 +120,7 @@ export const getLocalTips = async (input: z.infer<typeof TipsInputSchema>): Prom
 
   const raw = await res.json();
   const parsed = ApiTipsResponseSchema.safeParse(raw);
+
   if (!parsed.success) {
     throw new Error(`Invalid response from ${url}: ${parsed.error.message}`);
   }

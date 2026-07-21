@@ -38,7 +38,7 @@ const mapTip = (tip: ApiTip): TipItem => ({
   title: tip.title,
   content: tip.content,
   isEssential: tip.is_essential,
-  location: tip.location,
+  location: tip.location ?? null,
 });
 
 /** Strips markdown code fences from a string, returning the inner content. */

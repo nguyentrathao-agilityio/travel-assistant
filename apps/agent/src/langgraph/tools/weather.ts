@@ -21,5 +21,6 @@ export const weatherTool = tool(
       Required: city. Optional: days (1-16, defaults to 5).
       Only call this tool when city is available.`,
     schema: WeatherInputSchema,
+    returnDirect: true,
   }
 );

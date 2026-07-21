@@ -23,5 +23,6 @@ export const destinationExplorerTool = tool(
       Required: city in ASCII English without diacritics (e.g. "Da Nang" not "Đà Nẵng", "Ho Chi Minh City" not "TP HCM").
       Optional: country (inferred from weather location if omitted), forecastDays (1-16, defaults to 5).`,
     schema: DestinationExplorerInputSchema,
+    returnDirect: true,
   }
 );

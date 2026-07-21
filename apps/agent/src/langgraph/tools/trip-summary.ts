@@ -25,5 +25,6 @@ export const tripSummaryTool = tool(
       flightOrigin: IATA code of the departure airport. If not in context, ask the user "Where are you flying from?" BEFORE calling this tool — without it, no flight will appear in the summary. Set skipFlights: true instead only if the user has already booked a flight.
       Optional: startDate (YYYY-MM-DD), endDate (YYYY-MM-DD), travelers, skipHotel (true if user already has a hotel booked).`,
     schema: TripSummaryInputSchema,
+    returnDirect: true,
   }
 );

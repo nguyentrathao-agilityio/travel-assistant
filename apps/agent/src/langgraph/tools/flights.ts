@@ -27,5 +27,6 @@ export const flightsTool = tool(
   If unsure of the correct IATA code, ask the user which airport they prefer.
   Only call when all required fields are present.`,
     schema: FlightInputSchema,
+    returnDirect: true,
   }
 );

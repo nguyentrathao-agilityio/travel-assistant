@@ -25,5 +25,6 @@ export const placesTool = tool(
     If the user's request doesn't indicate a category (e.g. "what should I see in X?"), ask the user which category they want before calling — do not guess or call this tool more than once per request.
     Only call when city is available.`,
     schema: PlacesInputSchema,
+    returnDirect: true,
   }
 );

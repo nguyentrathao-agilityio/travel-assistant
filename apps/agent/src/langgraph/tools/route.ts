@@ -21,5 +21,6 @@ export const routeTool = tool(
     Required: city. Optional: maxStops (2-8, defaults to 5).
     Only call this tool when city is available.`,
     schema: RouteInputSchema,
+    returnDirect: true,
   }
 );

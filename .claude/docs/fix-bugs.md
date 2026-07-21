@@ -1,7 +1,8 @@
 # 🐛 Frontend AI Skill — Fix Bugs Guide
 
 > **Use this when:** diagnosing, debugging, or patching existing code.
-> **Also read:** `SHARED.md` — all shared rules apply here too.
+> **Also read:** `shared.md` — all shared rules apply here too.
+> **Bug looks like a misbehaving agent run** (tool never called, HITL gate silent, state lost, thread persistence confusion) rather than a plain code defect? Use the `debug-graph` skill instead — it's built from tracing this repo's actual (non-standard) checkpointing and HITL wiring.
 
 ---
 
@@ -11,7 +12,7 @@
 2. **Identify the root cause** — do not patch symptoms.
 3. **Confirm scope** — only change what is necessary to fix the bug. Do not refactor unrelated code.
 4. **Explain the fix** — state what was wrong and why the change fixes it.
-5. **Self-review** the fix against `REVIEW.md` checklist before responding.
+5. **Self-review** the fix against `review.md` checklist before responding.
 
 ---
 
@@ -25,6 +26,8 @@ Before writing any code, answer these:
 - Is there anything **unknown** that requires runtime info (logs, network response, env config)?
 
 If the root cause is unknown → say so explicitly before attempting a fix.
+
+If the bug is in `apps/agent`, first confirm **which tree** it's actually in: `src/langgraph/` (the live chat runtime — `langgraph.json` deploys this) or `src/mastra/` (RAG/evals/REST only). Fixing the wrong tree's copy of a tool/service silently fixes nothing in production.
 
 ---
 
@@ -72,14 +75,15 @@ Suggested next step: [specific action — add a console.log here, share the netw
 ```
 I cannot fix this bug confidently.
 
-What I know: useCopilotAction's render function receives status="failed" but the
+What I know: useRenderToolCall's render function receives status="failed" but the
 error prop is undefined, so the ErrorCard renders with no message.
 
-What I don't know: whether the Mastra tool is throwing a string or an Error object —
-the CopilotKit version in use may serialize the error differently.
+What I don't know: whether the LangChain tool is returning JSON.stringify({ error })
+with an actual message, or whether it's throwing raw and CopilotKit is swallowing it —
+need to see what the tool's catch block actually returns.
 
-Suggested next step: console.log the full error prop inside the render function
-and share the output, or check the CopilotKit version in package.json.
+Suggested next step: log the tool's raw return value and the render function's full
+props, then share the output.
 ```
 
 ### What to never do:
@@ -149,7 +153,7 @@ const handleSelect = useCallback((id: string) => setSelected(id), []);
 ### 5. CopilotKit generative component crashes on undefined data
 
 ```tsx
-// ❌ Bug: result is undefined during inProgress, component crashes
+// ❌ Bug: result is undefined during inProgress/failed, component crashes
 const WeatherCard = ({ data }: { data: WeatherData }) => (
   <div>{data.temperature}</div> // TypeError if data is undefined
 );
@@ -161,17 +165,19 @@ const WeatherCard = ({ data }: { data?: WeatherData }) => {
 };
 ```
 
-### 6. Mastra tool swallowing errors silently
+### 6. Tool swallowing errors silently, or returning the wrong shape
+
+Applies to both trees, but the failure mode differs:
 
 ```typescript
-// ❌ Bug: failed fetch returns no error, action gets empty result
+// ❌ Bug (either tree): failed fetch returns no error, action gets empty result
 execute: async ({ context }) => {
   const res = await fetch('/api/data');
   const data = await res.json(); // no check on res.ok
   return data;
 };
 
-// ✅ Fix: always check res.ok before parsing
+// ✅ Fix: always check res.ok before parsing, validate with Zod
 execute: async ({ context }) => {
   const res = await fetch('/api/data');
   if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
@@ -182,7 +188,34 @@ execute: async ({ context }) => {
 };
 ```
 
-### 7. Barrel import breaking tree-shaking / causing circular deps
+### 7. LangChain tool returns an object instead of a string
+
+Specific to `src/langgraph/tools/`. This one is easy to miss because it compiles and the happy path can even work depending on how the runtime stringifies it — the failure shows up as the CopilotKit action getting an unparseable `result`.
+
+```typescript
+// ❌ Bug: tool() requires a string return; TypeScript does not enforce this
+export const carRentalTool = tool(
+  async ({ location }) => {
+    return await searchCarRentals(location); // returns an object
+  },
+  { name: 'searchCarRentals', schema: CarRentalInputSchema }
+);
+
+// ✅ Fix: stringify the result (and catch errors the same way)
+export const carRentalTool = tool(
+  async ({ location }) => {
+    try {
+      const result = await searchCarRentals(location);
+      return JSON.stringify(result);
+    } catch (error) {
+      return JSON.stringify({ error: error instanceof Error ? error.message : 'Search failed' });
+    }
+  },
+  { name: 'searchCarRentals', schema: CarRentalInputSchema }
+);
+```
+
+### 8. Barrel import breaking tree-shaking / causing circular deps
 
 ```typescript
 // ❌ Circular: components/common/index.ts imports Button,

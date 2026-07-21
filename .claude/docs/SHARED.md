@@ -1,7 +1,7 @@
 # 🧠 Frontend AI Skill — Shared Rules
 
 > **Applies to ALL tasks: implement, fix bugs, review.**
-> Every other guide (`IMPLEMENT.md`, `FIX_BUGS.md`, `REVIEW.md`) imports these rules implicitly.
+> Every other guide (`implement.md`, `fix-bugs.md`, `review.md`) imports these rules implicitly.
 
 ---
 
@@ -10,56 +10,54 @@
 You are a **Senior Frontend Engineer** with deep expertise in:
 
 - **React 19** (hooks, context, composition patterns, compiler optimizations)
-- **Next.js** (App Router, SSR/SSG, dynamic imports, metadata)
+- **Vite** (SPA build, code-splitting via `React.lazy`/`Suspense`) — `apps/web` is a Vite SPA, not Next.js: no App Router, no SSR/SSG, no `pages`/`layouts` directory
 - **TypeScript** (strict mode, generic types, type guards)
 - **TailwindCSS v4** (utility-first, design tokens via CSS variables, responsive variants)
 - **Zod** (schema validation, `safeParse`, typed outputs)
 - **lucide-react** (icon library — replaces Tabler)
-- **CopilotKit** (`useCopilotAction`, `useCopilotReadable`, `CopilotPopup/Sidebar`)
-- **Mastra** (AI agent framework, tool definitions, workflow orchestration)
+- **CopilotKit** (`useRenderToolCall` — this repo's actual convention, not raw `useCopilotAction` — `useCoAgent`, `useCopilotReadable`, `CopilotChat`)
+- **LangChain / LangGraph** (`apps/agent/src/langgraph` — the live agent backend: tools, `StateGraph`, checkpointing)
+- **Mastra** (`apps/agent/src/mastra` — RAG ingestion, evals, and REST endpoints; runs alongside the langgraph tree but is not the live chat runtime — see root `CLAUDE.md`)
 
 ---
 
 ## 📁 Folder Structure
 
 ```
-src/
-├── app/                        # Next.js App Router pages & layouts
+apps/web/src/
+├── main.tsx / App.tsx          # Vite entry point — no Next.js App Router
+├── app/                         # providers.tsx (CopilotKit/theme setup), globals.css — not routing
 ├── components/
-│   ├── common/                 # Shared, reusable, low-logic UI components
+│   ├── common/                  # Shared, reusable, low-logic UI components
 │   │   └── Button/
 │   │       └── index.tsx
-│   ├── [feature]/              # Feature-specific components with logic
-│   │   └── FlightCard/
-│   │       └── index.tsx
-│   └── generative/             # Generative UI components (CopilotKit render)
-├── hooks/                      # All custom React hooks (use*)
-├── context/                    # React Context providers & consumers
-├── utils/                      # Pure utility/helper functions
-│   └── index.ts                # Re-exports everything: export * from './cn'
-├── constants/                  # Enums, magic values, config constants
-├── types/                      # TypeScript interfaces & types
-├── services/                   # API calls, data fetching logic
-├── stores/                     # State management (Zustand, etc.)
-├── lib/                        # Third-party lib configs (axios, mastra, etc.)
-├── tools/                      # Mastra tool definitions
-└── styles/                     # Global styles, CSS variables
+│   └── [Name]Card/              # Feature AND generative/CopilotKit-render components — flat
+│       └── index.tsx            # (no nested components/generative/ subfolder — see below)
+├── hooks/                       # All custom React hooks (use*Action.tsx wraps useRenderToolCall)
+├── stores/                      # Zustand stores
+├── utils/                       # Pure utility/helper functions
+│   └── index.ts                 # Re-exports everything: export * from './cn'
+├── constants/                   # Enums, magic values, config constants
+├── types/                       # TypeScript interfaces & types
+├── lib/                         # Third-party lib configs (mastraClient, etc.)
+└── styles/                      # Global styles, CSS variables
 ```
+
+Agent tool definitions (LangChain `tool()` wrappers) live in `apps/agent/src/langgraph/tools/` — a separate app, not under `apps/web/src/`. See the `add-agent-tool` skill for the full cross-app checklist when adding a new one.
 
 **Hard placement rules:**
 
-| What                                | Where                                        |
-| ----------------------------------- | -------------------------------------------- |
-| New helper function                 | `utils/`                                     |
-| New custom hook                     | `hooks/`                                     |
-| Type used in one file only          | Define in that file — no separate types file |
-| Type shared across files / from API | `types/`                                     |
-| New constant                        | `constants/`                                 |
-| New context                         | `context/`                                   |
-| Reusable UI, little/no logic        | `components/common/[Name]/index.tsx`         |
-| Component with business logic       | `components/[feature]/[Name]/index.tsx`      |
-| CopilotKit render components        | `components/generative/`                     |
-| Mastra tool definitions             | `tools/`                                     |
+| What                                | Where                                                                                                                                                                                                                                                                                 |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New helper function                 | `utils/`                                                                                                                                                                                                                                                                              |
+| New custom hook                     | `hooks/`                                                                                                                                                                                                                                                                              |
+| Type used in one file only          | Define in that file — no separate types file                                                                                                                                                                                                                                          |
+| Type shared across files / from API | `types/`, or `packages/types` if shared with `apps/agent`                                                                                                                                                                                                                             |
+| New constant                        | `constants/`                                                                                                                                                                                                                                                                          |
+| Reusable UI, little/no logic        | `components/common/[Name]/index.tsx`                                                                                                                                                                                                                                                  |
+| Component with business logic       | `components/[Name]/index.tsx`                                                                                                                                                                                                                                                         |
+| CopilotKit generative/render UI     | `components/[Name]Card/index.tsx` — same flat level as other components, **not** a nested `generative/` folder (that's the aspirational convention from earlier docs; every existing card — `FlightCard`, `HotelCard`, `WeatherCard`, etc. — lives flat, follow the existing pattern) |
+| LangChain agent tool                | `apps/agent/src/langgraph/tools/` (separate app)                                                                                                                                                                                                                                      |
 
 ---
 
@@ -86,8 +84,8 @@ import { Button, Badge } from '@/components/common';
 **Rules:**
 
 - Every `utils/`, `hooks/`, `constants/`, `components/common/` folder must have an `index.ts` barrel.
-- `export *` preferred — do not `export default` unless Next.js requires it (pages, layouts, `dynamic()`).
-- Named exports everywhere else — easier to tree-shake and refactor.
+- `export *` preferred — do not `export default`.
+- Named exports everywhere — this repo is a Vite SPA, not Next.js, so there is no `pages`/`layouts` exception requiring default exports.
 
 ---
 
@@ -95,7 +93,6 @@ import { Button, Badge } from '@/components/common';
 
 ```typescript
 import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 import { Plane, ArrowRight } from 'lucide-react';
 
@@ -212,17 +209,14 @@ export const DEBOUNCE_DELAY_MS = 300;
 setTimeout(callback, 300);
 ```
 
-### Exports — named only (except Next.js)
+### Exports — named only
 
 ```typescript
 // ✅
 const Button = ({ label }: ButtonProps) => <button>{label}</button>;
 export { Button };
 
-// ✅ Next.js exception
-export default function Page() {}
-
-// ❌ Everywhere else
+// ❌
 export default Button;
 ```
 
@@ -334,13 +328,14 @@ Only `font-regular` (400) and `font-medium` (500) are permitted. Never use `font
 <p className="text-card-title font-medium text-text-primary" />
 <p className="text-body font-regular text-text-secondary" />
 <p className="text-label font-medium uppercase tracking-widest text-text-tertiary" />
+<span className="text-badge font-medium" />
 
-// ❌ — weights above 500 are forbidden
-<h1 className="text-card-title font-bold text-text-primary" />
+// ❌ — font-weight above 500 forbidden
+<h2 className="text-card-title font-bold" />
 <p className="text-body font-semibold" />
 
-// ❌ — arbitrary sizes are forbidden
-<p className="text-[13px] font-[400]" />
+// ❌ — arbitrary values forbidden
+<p className="text-[13px] font-[500]" />
 ```
 
 ### Conditional classes — always `cn()`

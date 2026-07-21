@@ -1,7 +1,8 @@
 # 🏗️ Frontend AI Skill — Implement Guide
 
 > **Use this when:** building a new feature, component, hook, page, or agent integration.
-> **Also read:** `SHARED.md` — all shared rules apply here too.
+> **Also read:** `shared.md` — all shared rules apply here too.
+> **Adding a whole new agent tool/domain?** Use the `add-agent-tool` skill instead of reconstructing the checklist from this doc — it's built from tracing an existing domain's real wiring end to end.
 
 ---
 
@@ -11,7 +12,7 @@
 2. **Search for existing components/utils/hooks** — never redefine what already exists.
 3. **Propose a plan** (which files will be created/changed and why).
 4. **Wait for confirmation** before executing.
-5. **Self-review** output against `REVIEW.md` checklist before responding.
+5. **Self-review** output against `review.md` checklist before responding.
 
 ---
 
@@ -303,9 +304,8 @@ components/
 │   ├── FlightCardHeader.tsx
 │   ├── FlightCardPricing.tsx
 │   └── FlightCardActions.tsx
-└── generative/
-    └── WeatherCard/
-        └── index.tsx
+└── WeatherCard/           ← CopilotKit-render (generative) components live flat
+    └── index.tsx          ← alongside feature components, not under a generative/ subfolder
 ```
 
 ### common/ vs feature components
@@ -314,8 +314,9 @@ components/
 components/common/   → reusable, minimal logic, used in many places
                        Button, Badge, Input, Modal, Skeleton, EmptyState, Divider
 
-components/[name]/   → has business logic, used in specific feature
-                       FlightCard, TripSummary, BookingForm
+components/[Name]/    → has business logic and/or is a CopilotKit-rendered generative
+                       component, used in a specific feature — FlightCard, HotelCard,
+                       WeatherCard, TripSummaryCard
 ```
 
 ### Extract repeated JSX
@@ -405,13 +406,17 @@ const FlightList = ({ params }: FlightListProps) => {
 
 ### Code splitting
 
-```typescript
-import dynamic from 'next/dynamic';
+This repo is a Vite SPA — use `React.lazy` + `Suspense`, not Next.js's `next/dynamic`:
 
-const FlightMap = dynamic(() => import('@/components/FlightMap'), {
-  loading: () => <MapSkeleton />,
-  ssr: false,
-});
+```typescript
+import { lazy, Suspense } from 'react';
+
+const FlightMap = lazy(() => import('@/components/FlightMap'));
+
+// usage
+<Suspense fallback={<MapSkeleton />}>
+  <FlightMap />
+</Suspense>
 ```
 
 ### Memoization — apply when needed, never over-apply
@@ -436,67 +441,63 @@ const FlightCard = memo(({ flight, onSelect }: FlightCardProps) => {
 Each layer has a single responsibility. Never mix concerns across layers.
 
 ```
-Layer 1 — Mastra Tool         throws errors, validates with Zod
+Layer 1 — Agent Tool          throws errors, validates with Zod
 Layer 2 — CopilotKit Action   handles status + routes to UI state
 Layer 3 — Generative UI       renders data, never fetches
 Layer 4 — Chat UI             handles stream indicators
 ```
 
-### Layer 1 — Mastra Tool (`src/tools/`)
+### Layer 1 — Agent Tool (`apps/agent/src/langgraph/tools/`)
 
 **Responsibility:** fetch, validate with Zod, throw on failure. No UI logic.
 
+The live agent runtime is **LangGraph**, not Mastra — new tools go in `apps/agent/src/langgraph/tools/`. LangChain's `tool()` has a contract this codebase's Mastra `createTool` doesn't: **the execute function must return a string**, typically `JSON.stringify(result)`. Returning a raw object compiles fine but breaks the CopilotKit action's ability to parse `result` at runtime — see the `review-copilotkit-layers` skill for the full list of this-stack-specific failure modes.
+
 ```typescript
-// tools/weatherTool.ts
-import { createTool } from '@mastra/core/tools';
-import { z } from 'zod';
+// tools/weather.ts (apps/agent/src/langgraph/tools/weather.ts, real pattern)
+import { tool } from '@langchain/core/tools';
+import { getWeather } from '../services/weather';
+import { WeatherInputSchema } from '../schemas/weather';
+import { TOOL_ERROR_MESSAGES } from '../constants';
 
-const WeatherDataSchema = z.object({
-  location: z.string(),
-  temperature: z.number(),
-  condition: z.string(),
-});
-
-export const weatherTool = createTool({
-  id: 'get-weather',
-  description: 'Get current weather for a location',
-  inputSchema: z.object({
-    location: z.string().describe('City name or coordinates'),
-  }),
-  outputSchema: WeatherDataSchema,
-  execute: async ({ context }) => {
-    const res = await fetch(`/api/mock/weather?location=${context.location}`);
-    if (!res.ok) throw new Error(`Failed to fetch weather: ${res.statusText}`);
-
-    const raw = await res.json();
-    const parsed = WeatherDataSchema.safeParse(raw);
-    if (!parsed.success) throw new Error('Invalid weather data shape');
-
-    return parsed.data;
+export const weatherTool = tool(
+  async ({ city, days }) => {
+    try {
+      const result = await getWeather({ city, days });
+      return JSON.stringify(result); // must be a string
+    } catch (error) {
+      return JSON.stringify({
+        error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.WEATHER,
+      });
+    }
   },
-});
+  {
+    name: 'weatherTool',
+    description: 'Get current weather conditions and forecast for a destination.',
+    schema: WeatherInputSchema,
+  }
+);
 ```
 
-**Rules:**
+The service behind the tool (`services/weather.ts`) does the actual fetch/validate work: check `res.ok` → throw with a clear message, `safeParse` the response with Zod → throw if the shape is wrong, never render UI or set state.
 
-- Always check `res.ok` → throw with a clear message
-- Always `safeParse` with Zod → throw if shape is wrong
-- Never render UI, never set state, never show loading
+`apps/agent/src/mastra/` also has a `createTool`-based pattern (object in, object out, no manual `JSON.stringify`) — that tree is for RAG, evals, and REST endpoints, not the live chat path. Don't mirror a new tool into `src/mastra` unless RAG/eval coverage is explicitly wanted; see the `add-agent-tool` skill.
 
 ### Layer 2 — CopilotKit Action
 
-**Responsibility:** bridge tool status → UI state. The only layer that knows `inProgress` / `failed`.
+**Responsibility:** bridge tool status → UI state. The only layer that knows the status values below.
+
+This repo's actual convention is `useRenderToolCall`, not raw `useCopilotAction`:
 
 ```typescript
-useCopilotAction({
-  name: 'getWeather',
+// hooks/useWeatherAction.tsx (apps/web/src/hooks, real pattern)
+useRenderToolCall({
+  name: TOOL_NAMES.WEATHER,
   description: 'Show current weather for a location',
-  parameters: [
-    { name: 'location', type: 'string', description: 'City name', required: true },
-  ],
+  parameters: [{ name: 'location', type: 'string', description: 'City name', required: true }],
   render: ({ status, result, error }) => {
-    if (status === 'inProgress') return <WeatherCardSkeleton />;
-    if (status === 'failed')     return <ErrorCard message={error ?? 'Failed to load weather'} />;
+    if (isToolPending(status)) return <WeatherCardSkeleton />;
+    if (status === 'failed') return <ErrorCard message={error ?? 'Failed to load weather'} />;
     return <WeatherCard data={result} />;
   },
 });
@@ -504,16 +505,16 @@ useCopilotAction({
 
 **Rules:**
 
-- Map every `status` value — never leave a case unhandled
+- Map every `status` value — never leave a case unhandled (a hook that only special-cases the loading status silently passes an undefined/error `result` into the generative component on failure)
 - Pass clean `result` down to generative component — no async in the component
-- `error` message comes from the tool's `throw`
+- `error` message comes from the tool's `throw` / `JSON.stringify({ error })`
 
-### Layer 3 — Generative UI (`src/components/generative/`)
+### Layer 3 — Generative UI (`apps/web/src/components/`)
 
 **Responsibility:** render clean data. Stateless. Follows design system exactly. Never fetches.
 
 ```tsx
-// components/generative/WeatherCard/index.tsx
+// components/WeatherCard/index.tsx
 import { Cloud } from 'lucide-react';
 import type { WeatherData } from '@/types';
 
@@ -522,7 +523,7 @@ interface WeatherCardProps {
 }
 
 /**
- * Renders weather data passed from CopilotKit action result.
+ * Renders weather data passed from the CopilotKit action result.
  * Loading/error states are handled by the layer above — not here.
  */
 const WeatherCard = ({ data }: WeatherCardProps) => {
@@ -555,17 +556,17 @@ export { WeatherCard };
 **Responsibility:** stream indicators only. No knowledge of individual tool states.
 
 ```tsx
-<MessageList messages={messages} isStreaming={isStreaming} />
+<CopilotChat Messages={CustomMessages} Input={CustomInput} />
 ```
 
 ### Layer summary
 
-| Layer                | Loading                  | Error                  |
-| -------------------- | ------------------------ | ---------------------- |
-| Mastra Tool          | —                        | `throw new Error(...)` |
-| CopilotKit Action    | `<Skeleton />`           | `<ErrorCard />`        |
-| Generative Component | `if (!data) return null` | —                      |
-| Chat UI              | `<TypingIndicator />`    | —                      |
+| Layer                | Loading                  | Error                                 |
+| -------------------- | ------------------------ | ------------------------------------- |
+| Agent Tool           | —                        | `throw` / `JSON.stringify({ error })` |
+| CopilotKit Action    | `<Skeleton />`           | `<ErrorCard />`                       |
+| Generative Component | `if (!data) return null` | —                                     |
+| Chat UI              | Stream indicator         | —                                     |
 
 ---
 
@@ -575,31 +576,6 @@ export { WeatherCard };
 useCopilotReadable({
   description: "The user's current trip plan including selected flights and hotels",
   value: tripPlan,
-});
-```
-
----
-
-## 🧩 Mastra Tool Conventions
-
-```typescript
-export const searchFlightsTool = createTool({
-  id: 'search-flights',
-  description: 'Search available flights between two cities on a given date',
-  inputSchema: z.object({
-    origin: z.string().describe('IATA airport code, e.g. HAN'),
-    destination: z.string().describe('IATA airport code, e.g. SGN'),
-    date: z.string().describe('Departure date in YYYY-MM-DD format'),
-    passengers: z.number().min(1).max(9).default(1),
-  }),
-  outputSchema: z.object({
-    flights: z.array(FlightSchema),
-    totalCount: z.number(),
-  }),
-  execute: async ({ context }) => {
-    const { origin, destination, date, passengers } = context;
-    return { flights: [], totalCount: 0 };
-  },
 });
 ```
 

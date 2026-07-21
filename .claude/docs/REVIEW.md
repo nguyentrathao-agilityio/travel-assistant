@@ -7,15 +7,7 @@
 
 ## 🗂️ When to Use Which Guide
 
-| Situation                                        | Primary Guide  | Also Read   |
-| ------------------------------------------------ | -------------- | ----------- |
-| Building a new component, hook, page, feature    | `IMPLEMENT.md` | `SHARED.md` |
-| Integrating Mastra tool or CopilotKit action     | `IMPLEMENT.md` | `SHARED.md` |
-| Diagnosing or fixing a bug                       | `FIX_BUGS.md`  | `SHARED.md` |
-| Reviewing code for correctness / standards       | `REVIEW.md`    | `SHARED.md` |
-| Anything that involves writing or modifying code | `SHARED.md`    | —           |
-
-> **When unsure:** start with `SHARED.md`, then pick the most specific guide.
+See the **Task → Docs** table in root `CLAUDE.md` — that table is the single source of truth for routing; it isn't duplicated here. This file (`review.md`) is always the last step for implement/fix-bugs tasks, and the primary guide when the task is a standalone review/audit.
 
 ---
 
@@ -33,11 +25,10 @@
 
 - [ ] New file placed in the correct folder? (`utils/`, `hooks/`, `constants/`, `components/common/`, etc.)
 - [ ] Component with little logic → `components/common/[Name]/index.tsx`?
-- [ ] Component with business logic → `components/[feature]/[Name]/index.tsx`?
-- [ ] Generative UI components → `components/generative/[Name]/index.tsx`?
-- [ ] Mastra tools → `tools/`?
+- [ ] Component with business logic or generative/CopilotKit-render UI → `components/[Name]/index.tsx`? (flat — this repo does not use a nested `components/generative/` folder; every existing card lives at this level)
+- [ ] Agent tools → `apps/agent/src/langgraph/tools/` (the live agent tree — not `apps/agent/src/mastra/tools/` unless RAG/eval coverage is explicitly wanted)?
 - [ ] Barrel `index.ts` updated to export the new file?
-- [ ] All exports are **named exports** (no `export default` except Next.js pages/layouts)?
+- [ ] All exports are **named exports** (no `export default` — this repo is a Vite SPA, not Next.js, so there's no pages/layouts exception)?
 
 ---
 
@@ -54,13 +45,18 @@
 
 ### 🧩 Agent / CopilotKit Layer Separation
 
-- [ ] Mastra tool: throws on `!res.ok`?
-- [ ] Mastra tool: validates with Zod `safeParse` and throws if shape is invalid?
-- [ ] Mastra tool: no UI logic, no state, no loading indicators?
-- [ ] CopilotKit action: handles all `status` values (`inProgress`, `failed`, default)?
+- [ ] LangChain tool (`src/langgraph/tools/`): returns `JSON.stringify(result)` — a **string**, not a raw object? (LangChain's `tool()` contract; TypeScript will not catch a plain-object return here)
+- [ ] LangChain tool: body wrapped in try/catch, errors returned as `JSON.stringify({ error: ... })`?
+- [ ] Mastra tool (`src/mastra/tools/`, if that's what's being touched): throws on `!res.ok`, validates with Zod `safeParse` and throws if the shape is invalid?
+- [ ] Service layer (either tree): checks `res.ok` before parsing, validates the response with Zod, escapes query params?
+- [ ] Tool/service: no UI logic, no state, no loading indicators?
+- [ ] CopilotKit action: uses `useRenderToolCall` (this repo's actual convention), not raw `useCopilotAction`?
+- [ ] CopilotKit action: handles all `status` values (`inProgress`, `failed`, default) — not just the loading case?
 - [ ] Generative component: guards against `undefined` data with early return?
 - [ ] Generative component: no `useState`, no `useEffect`, no fetch calls?
 - [ ] Chat UI: only handles stream indicator — no tool-level awareness?
+
+For a full pass on a new or modified tool/action/component trio, run the `review-copilotkit-layers` skill — it covers this stack's specific silent-failure modes (LangChain's string-return contract, status-branch coverage) that this checklist summarizes but the skill verifies file-by-file.
 
 ---
 
@@ -78,7 +74,7 @@
 - [ ] No `any` or unsafe type casts used?
 - [ ] External data validated with Zod before use?
 - [ ] Types used in one file only → defined in that file (no unnecessary `types/` file)?
-- [ ] Types shared across files → moved to `types/`?
+- [ ] Types shared across files → moved to `types/` (or `packages/types` if shared with `apps/agent`)?
 
 ---
 

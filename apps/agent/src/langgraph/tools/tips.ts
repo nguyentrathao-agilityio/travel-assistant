@@ -18,8 +18,13 @@ export const tipsTool = tool(
   {
     name: 'localTipsTool',
     description: `Get local travel tips for a city or country — covering transport, money, safety, culture, food, connectivity, health, etiquette, best time to visit, and language.
-    Required: country (not city — always resolve: Da Nang→Vietnam, Bangkok→Thailand, Bali→Indonesia, etc.).
-    Optional: city (pass when available for more specific results), category (transport|money|safety|culture|food|connectivity|health|etiquette|best_time|language — use when user asks about a specific topic), essentialOnly.
+    Required: country (not city — always resolve, e.g. Da Nang → Vietnam, Bangkok → Thailand, Bali → Indonesia).
+
+    Optional:
+      - city (pass when available for more specific results)
+      - category (transport | money | safety | culture | food | connectivity | health | etiquette | best_time | language — use when user asks about a specific topic)
+      - essential_only
+
     Only call when country is known.`,
     schema: TipsInputSchema,
     returnDirect: true,

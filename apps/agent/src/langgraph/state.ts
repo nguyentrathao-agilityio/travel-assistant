@@ -20,6 +20,8 @@ export const GraphState = Annotation.Root({
   endDate: Annotation<string | undefined>(lastValue<string>()),
   travelers: Annotation<number | undefined>(lastValue<number>()),
   tools: Annotation<unknown[] | undefined>(lastValue<unknown[]>()),
+  clientDate: Annotation<string | undefined>(lastValue<string>()),
+  clientTimezone: Annotation<string | undefined>(lastValue<string>()),
 });
 
 export type GraphStateType = typeof GraphState.State;

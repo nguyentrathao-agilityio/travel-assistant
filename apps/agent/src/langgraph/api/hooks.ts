@@ -32,6 +32,7 @@ const stampRequestStart = ({ request, path }: HookContext): Request => {
   console.log(`[copilotkit] -> ${request.method} ${path}`);
   const headers = new Headers(request.headers);
   headers.set(REQUEST_START_HEADER_NAME, Date.now().toString());
+
   return new Request(request, { headers });
 };
 

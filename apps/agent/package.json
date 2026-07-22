@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "db:setup": "tsx src/langgraph/setup-checkpointer.ts",
+    "build": "tsc && tsc-alias",
     "dev": "tsc && tsc-alias && langgraphjs dev --port 8123 --no-browser",
     "lint": "eslint . --ext .ts",
     "test": "vitest run",

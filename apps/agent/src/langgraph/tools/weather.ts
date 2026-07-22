@@ -18,8 +18,10 @@ export const weatherTool = tool(
   {
     name: 'weatherTool',
     description: `Get current weather conditions and forecast for a destination.
-      Required: city. Optional: days (1-16, defaults to 5).
-      Only call this tool when city is available.`,
+    Required: city.
+    Optional: days (1-16, defaults to 5).
+
+    Only call this tool when city is available.`,
     schema: WeatherInputSchema,
     returnDirect: true,
   }

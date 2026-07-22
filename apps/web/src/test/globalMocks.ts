@@ -33,6 +33,7 @@ jest.mock('@/constants/agent', () => ({
   FETCH_TITLE_RETRY_MS: 0,
   CHAT_ROLE: { USER: 'user', ASSISTANT: 'assistant', TOOL: 'tool' },
   ALLOWED_CHAT_ROLES: ['user', 'assistant', 'tool'],
+  COAGENT_STATE_RENDER_MESSAGE_NAME: 'coagent-state-render',
   ASSISTANT_MESSAGE_FAILED_TERMS: [],
 }));
 

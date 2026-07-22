@@ -14,6 +14,8 @@ export const CHAT_ROLE = {
 
 export const ALLOWED_CHAT_ROLES = Object.values(CHAT_ROLE);
 
+export const COAGENT_STATE_RENDER_MESSAGE_NAME = 'coagent-state-render';
+
 export const ASSISTANT_MESSAGE_FAILED_TERMS = [
   'unable to',
   "can't",

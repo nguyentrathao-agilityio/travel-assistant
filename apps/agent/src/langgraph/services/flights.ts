@@ -61,7 +61,7 @@ export const searchFlights = async (
 
     const raw: unknown = await res.json();
     const parsed = ApiFlightSearchResponseSchema.safeParse(raw);
-    console.log('Parsed flight search response:', parsed);
+
     if (!parsed.success) throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
 
     const { data } = parsed;

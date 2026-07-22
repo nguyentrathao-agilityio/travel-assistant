@@ -47,7 +47,7 @@ export const useInjectThreadHistory = (
       .then((state) => {
         if (cancelled) return;
 
-        const rawMessages = state.values.messages ?? [];
+        const rawMessages = state.values?.messages ?? [];
         const agUiMessages = rawMessages.flatMap((message, index) => {
           const converted = toAgUiMessage(message, `${threadId}:${index}`);
           return converted ? [converted] : [];

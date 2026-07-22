@@ -67,4 +67,24 @@ describe('useInjectThreadHistory', () => {
     rerender({ threadId: 'thread-1', isResumed: true });
     expect(mockGetState).toHaveBeenCalledWith('thread-1');
   });
+
+  it('does not error when the thread has never had a run (no values field)', async () => {
+    const { toast } = jest.requireMock('sonner');
+    mockGetState.mockResolvedValueOnce({
+      thread_id: 'thread-1',
+      // no `values` key at all — matches the real API for a never-run thread
+      next: [],
+      checkpoint: {},
+      metadata: {},
+      created_at: null,
+      parent_checkpoint: null,
+      tasks: [],
+    });
+
+    const { result } = renderHook(() => useInjectThreadHistory('thread-1', true));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(toast.error).not.toHaveBeenCalled();
+    expect(result.current.error).toBeNull();
+  });
 });

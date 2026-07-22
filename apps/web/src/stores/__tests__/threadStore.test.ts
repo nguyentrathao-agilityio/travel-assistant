@@ -129,6 +129,23 @@ describe('useThreadStore — fetchThreads', () => {
     expect(useThreadStore.getState().threads[0].title).toBe('Trip to Da Nang');
   });
 
+  it('populates a brand-new thread that has no values field yet (never run)', async () => {
+    const activeId = useThreadStore.getState().activeThreadId;
+    mockLanggraphClient.threads.search.mockResolvedValueOnce([
+      {
+        thread_id: activeId,
+        metadata: { resourceId: 'travelAgent', graph_id: 'travel' },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        status: 'idle',
+        config: {},
+      },
+    ]);
+    await useThreadStore.getState().fetchThreads();
+    expect(useThreadStore.getState().threads).toHaveLength(1);
+    expect(useThreadStore.getState().threads[0].title).toBeNull();
+  });
+
   it('shows error toast on API failure', async () => {
     const { toast } = jest.requireMock('sonner');
     mockLanggraphClient.threads.search.mockRejectedValueOnce(new Error('Network error'));

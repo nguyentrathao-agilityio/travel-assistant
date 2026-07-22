@@ -4,7 +4,11 @@ import type { MessagesProps } from '@copilotkit/react-ui';
 import { ChatEmptyState } from '../ChatEmptyState';
 import { ChatHistoryLoading } from '../ChatHistoryLoading';
 import { useScrollToBottom } from '@/hooks';
-import { SECONDARY_SUGGESTIONS, TOOL_SUGGESTION_ITEMS } from '@/constants';
+import {
+  COAGENT_STATE_RENDER_MESSAGE_NAME,
+  SECONDARY_SUGGESTIONS,
+  TOOL_SUGGESTION_ITEMS,
+} from '@/constants';
 import { Button } from '@/components';
 import { useSuggestionStore } from '@/stores';
 
@@ -27,6 +31,9 @@ const ChatMessages = ({
   ...restProps
 }: ChatMessagesProps) => {
   const { scrollContainerRef } = useScrollToBottom(messages.length);
+  const hasRealMessages = messages.some(
+    (message) => !('name' in message) || message.name !== COAGENT_STATE_RENDER_MESSAGE_NAME
+  );
   const lastTool = useSuggestionStore((s) => s.lastTool);
   const activeSuggestions =
     (lastTool ? TOOL_SUGGESTION_ITEMS[lastTool] : undefined) ?? SECONDARY_SUGGESTIONS;
@@ -45,7 +52,7 @@ const ChatMessages = ({
     >
       {isHistoryLoading ? (
         <ChatHistoryLoading />
-      ) : !messages?.length && !inProgress ? (
+      ) : !hasRealMessages && !inProgress ? (
         <ChatEmptyState onSuggestionClick={handleSuggestionClick} />
       ) : (
         <>

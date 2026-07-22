@@ -22,7 +22,7 @@ export const useInjectThreadHistory = (
 
   const lastInjectedThreadIdRef = useRef<string | null>(null);
   const setMessagesRef = useRef(setMessages);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(isResumed);
   const [error, setError] = useState<Error | null>(null);
 
   useLayoutEffect(() => {

@@ -2,8 +2,11 @@ import { renderHook } from '@testing-library/react';
 import { useInjectThreadHistory } from '@/hooks/useInjectThreadHistory';
 import { langgraphClient } from '@/lib';
 
+let mockIsAvailable = true;
+const mockSetMessages = jest.fn();
+
 jest.mock('@copilotkit/react-core', () => ({
-  useCopilotChatInternal: () => ({ setMessages: jest.fn() }),
+  useCopilotChatInternal: () => ({ setMessages: mockSetMessages, isAvailable: mockIsAvailable }),
 }));
 
 jest.mock('@/constants', () => ({
@@ -25,7 +28,10 @@ jest.mock('@/utils', () => ({
 
 const mockGetState = langgraphClient.threads.getState as jest.Mock;
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockIsAvailable = true;
+});
 
 describe('useInjectThreadHistory', () => {
   it('does not fetch when isResumed is false', () => {
@@ -40,6 +46,25 @@ describe('useInjectThreadHistory', () => {
 
   it('fetches messages when isResumed=true and threadId is provided', () => {
     renderHook(() => useInjectThreadHistory('thread-1', true));
+    expect(mockGetState).toHaveBeenCalledWith('thread-1');
+  });
+
+  it('does not fetch while CopilotKit agent connection is not yet available', () => {
+    mockIsAvailable = false;
+    renderHook(() => useInjectThreadHistory('thread-1', true));
+    expect(mockGetState).not.toHaveBeenCalled();
+  });
+
+  it('fetches once the agent connection becomes available', () => {
+    mockIsAvailable = false;
+    const { rerender } = renderHook(
+      ({ threadId, isResumed }) => useInjectThreadHistory(threadId, isResumed),
+      { initialProps: { threadId: 'thread-1', isResumed: true } }
+    );
+    expect(mockGetState).not.toHaveBeenCalled();
+
+    mockIsAvailable = true;
+    rerender({ threadId: 'thread-1', isResumed: true });
     expect(mockGetState).toHaveBeenCalledWith('thread-1');
   });
 });

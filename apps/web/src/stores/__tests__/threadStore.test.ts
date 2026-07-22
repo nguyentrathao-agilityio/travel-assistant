@@ -44,9 +44,10 @@ const mockLanggraphClient = langgraphClient as unknown as {
 
 const makeThread = (id: string, title = 'Thread', daysAgo = 0) => ({
   thread_id: id,
-  metadata: { title, resourceId: 'travelAgent' },
+  metadata: { resourceId: 'travelAgent' },
   created_at: new Date(Date.now() - daysAgo * 86_400_000).toISOString(),
   updated_at: new Date(Date.now() - daysAgo * 86_400_000).toISOString(),
+  values: { messages: [{ id: `${id}-msg`, type: 'human', content: title }] },
 });
 
 beforeEach(() => {

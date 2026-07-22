@@ -18,7 +18,7 @@ export const useInjectThreadHistory = (
   threadId: string,
   isResumed: boolean
 ): { isLoading: boolean; error: Error | null } => {
-  const { setMessages } = useCopilotChatInternal();
+  const { setMessages, isAvailable } = useCopilotChatInternal();
 
   const lastInjectedThreadIdRef = useRef<string | null>(null);
   const setMessagesRef = useRef(setMessages);
@@ -32,6 +32,8 @@ export const useInjectThreadHistory = (
   useEffect(() => {
     if (!isResumed) return;
     if (!threadId) return;
+    if (!isAvailable) return;
+
     if (lastInjectedThreadIdRef.current === threadId) return;
 
     lastInjectedThreadIdRef.current = threadId;
@@ -60,7 +62,7 @@ export const useInjectThreadHistory = (
         lastInjectedThreadIdRef.current = null;
 
         // Thread exists locally but not yet on the backend — no history to load.
-        if (err.message?.toLowerCase().includes('not found')) return;
+        if (err.message.toLowerCase().includes('not found')) return;
 
         setError(err);
         toast.error('Failed to load chat history. Please try again.');
@@ -73,7 +75,7 @@ export const useInjectThreadHistory = (
       cancelled = true;
       lastInjectedThreadIdRef.current = null;
     };
-  }, [threadId, isResumed]);
+  }, [threadId, isResumed, isAvailable]);
 
   return { isLoading, error };
 };

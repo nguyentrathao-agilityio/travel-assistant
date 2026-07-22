@@ -7,7 +7,7 @@ import { useTripStateStore } from '@/stores/tripStateStore';
 import { SESSION_STORAGE_KEY, AGENT_NAME } from '@/constants';
 import { ERROR_MESSAGES } from '@/constants/messages';
 
-import type { Thread } from '@langchain/langgraph-sdk';
+import type { Thread, Message } from '@langchain/langgraph-sdk';
 
 export interface ThreadItem {
   id: string;
@@ -17,11 +17,18 @@ export interface ThreadItem {
 
 const GRAPH_ID = 'travel';
 
-const toThreadItem = (thread: Thread): ThreadItem => ({
-  id: thread.thread_id,
-  title: typeof thread.metadata?.title === 'string' ? thread.metadata.title : null,
-  createdAt: thread.created_at,
-});
+const isHumanTextMessage = (message: Message): message is Message & { content: string } =>
+  message.type === 'human' && typeof message.content === 'string';
+
+const toThreadItem = (thread: Thread): ThreadItem => {
+  const { messages } = thread.values as { messages?: Message[] };
+
+  return {
+    id: thread.thread_id,
+    title: messages?.find(isHumanTextMessage)?.content ?? null,
+    createdAt: thread.created_at,
+  };
+};
 
 interface ThreadStore {
   activeThreadId: string;
@@ -72,7 +79,9 @@ export const useThreadStore = create<ThreadStore>()(
             limit: 100,
           });
 
+          console.log('rawThreads', rawThreads);
           const items = rawThreads.map(toThreadItem);
+          console.log('items', items);
 
           const currentThreadId = get().activeThreadId;
           const isActiveMissing =

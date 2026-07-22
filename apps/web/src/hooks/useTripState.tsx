@@ -11,6 +11,9 @@ import { useThreadStore, useTripStateStore } from '@/stores';
 import type { Flight, HotelAvailability, SelectedFlight, TripState } from '@repo/types';
 import { useShallow } from 'zustand/shallow';
 
+// Utils
+import { todayClientIso, clientTimezone as getClientTimezone } from '@/utils';
+
 export const useTripState = () => {
   const sessionId = useThreadStore((s) => s.activeThreadId);
   const { setTripState, clearTripState } = useTripStateStore(
@@ -22,7 +25,11 @@ export const useTripState = () => {
 
   const { state, setState } = useCoAgent<TripState>({
     name: AGENT_NAME,
-    initialState: (): TripState => useTripStateStore.getState().tripStates[sessionId] ?? {},
+    initialState: (): TripState => ({
+      ...(useTripStateStore.getState().tripStates[sessionId] ?? {}),
+      clientDate: todayClientIso(),
+      clientTimezone: getClientTimezone(),
+    }),
   });
 
   const hasRestoredRef = useRef(false);
@@ -31,7 +38,10 @@ export const useTripState = () => {
     if (hasRestoredRef.current) return;
     hasRestoredRef.current = true;
     const saved = useTripStateStore.getState().tripStates[sessionId];
-    setState(() => (saved && Object.keys(saved).length > 0 ? saved : {}));
+    const clientDate = { clientDate: todayClientIso(), clientTimezone: getClientTimezone() };
+    setState(() =>
+      saved && Object.keys(saved).length > 0 ? { ...saved, ...clientDate } : clientDate
+    );
   }, []);
 
   useEffect(() => {

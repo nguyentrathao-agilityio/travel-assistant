@@ -1,5 +1,6 @@
 import type { GraphStateType } from '../state';
 import { SYSTEM_PROMPT } from '../constants';
+import { todayIso } from './date';
 
 const BOOKING_STATE_RULES = `Rules:
 - Treat every non-null value as already confirmed by the user.
@@ -64,5 +65,12 @@ export const buildSystemPrompt = (state: GraphStateType): string => {
     bookingState,
   ].join('\n\n');
 
-  return [SYSTEM_PROMPT, bookingStateSection].join('\n\n');
+  const today = state.clientDate ?? todayIso();
+  const clientDateSection = [
+    '## Client Date & Timezone',
+    `today: ${today} ← always use this value for "today" / "tonight" / relative dates; never guess a date`,
+    ...(state.clientTimezone ? [`timezone: ${state.clientTimezone}`] : []),
+  ].join('\n');
+
+  return [SYSTEM_PROMPT, bookingStateSection, clientDateSection].join('\n\n');
 };

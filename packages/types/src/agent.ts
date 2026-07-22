@@ -14,4 +14,6 @@ export interface TripState {
   startDate?: string;
   endDate?: string;
   travelers?: number;
+  clientDate?: string;
+  clientTimezone?: string;
 }

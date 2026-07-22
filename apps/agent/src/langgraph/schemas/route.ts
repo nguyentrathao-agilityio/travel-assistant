@@ -8,7 +8,7 @@ export const PlaceSchema = z.object({
   city: z.string(),
   category: z.string(),
   description: z.string(),
-  opening_hours: z.string().optional(),
+  opening_hours: z.string().nullable().optional(),
   price_level: z.number(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),

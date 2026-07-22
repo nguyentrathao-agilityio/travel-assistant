@@ -120,7 +120,6 @@ export const getTripSummary = async (
   const suggestedHotel =
     hotels?.results?.filter((h) => h.available).sort((a, b) => b.rating - a.rating)[0] ?? null;
 
-  // ── Cost estimate ────────────────────────────────────────────────────
   const currency = suggestedFlight?.currency ?? suggestedHotel?.currency ?? 'USD';
 
   const flightTotal = suggestedFlight ? suggestedFlight.price * travelers : 0;

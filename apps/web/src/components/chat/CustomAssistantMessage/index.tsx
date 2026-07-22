@@ -52,6 +52,8 @@ const CustomAssistantMessage = (props: AssistantMessageProps) => {
     onThumbsDown,
     feedback,
   } = props;
+  console.log('markdownTagRenderers', markdownTagRenderers);
+  console.log('message', message);
 
   const content = message?.content;
   const assistantUi = message?.generativeUI?.() ?? null;

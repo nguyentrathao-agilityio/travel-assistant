@@ -21,7 +21,7 @@ const isHumanTextMessage = (message: Message): message is Message & { content: s
   message.type === 'human' && typeof message.content === 'string';
 
 const toThreadItem = (thread: Thread): ThreadItem => {
-  const { messages } = thread.values as { messages?: Message[] };
+  const { messages } = (thread.values as { messages?: Message[] } | undefined) ?? {};
 
   return {
     id: thread.thread_id,
@@ -79,10 +79,7 @@ export const useThreadStore = create<ThreadStore>()(
             limit: 100,
           });
 
-          console.log('rawThreads', rawThreads);
           const items = rawThreads.map(toThreadItem);
-          console.log('items', items);
-
           const currentThreadId = get().activeThreadId;
           const isActiveMissing =
             currentThreadId && !items.find((item) => item.id === currentThreadId);

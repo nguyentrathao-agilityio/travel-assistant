@@ -50,6 +50,17 @@ describe('ChatMessages', () => {
       render(<ChatMessages {...defaultProps} messages={[makeMessage('m1')]} />);
       expect(screen.queryByTestId('empty-state')).not.toBeInTheDocument();
     });
+
+    it("renders ChatEmptyState when the only message is CopilotKit's synthetic coagent-state-render placeholder", () => {
+      const placeholder = {
+        id: 'coagent-state-render-travelAgent',
+        role: 'assistant',
+        content: '',
+        name: 'coagent-state-render',
+      } as unknown as CKMessage;
+      render(<ChatMessages {...defaultProps} messages={[placeholder]} />);
+      expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    });
   });
 
   describe('message list', () => {

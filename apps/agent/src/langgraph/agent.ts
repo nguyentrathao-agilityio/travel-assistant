@@ -1,5 +1,6 @@
 import { createAgent, dynamicSystemPromptMiddleware } from 'langchain';
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
+import { createCopilotkitMiddleware } from '@copilotkit/sdk-js/langgraph';
 
 // State
 import { GraphState } from './state';
@@ -40,6 +41,7 @@ const agent = createAgent({
   ],
   stateSchema: GraphState,
   middleware: [
+    createCopilotkitMiddleware({ exposeState: false }),
     dynamicSystemPromptMiddleware((state) => buildSystemPrompt(state as unknown as GraphStateType)),
   ],
   checkpointer: PostgresSaver.fromConnString(POSTGRES_URL!),

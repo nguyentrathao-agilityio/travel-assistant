@@ -15,7 +15,8 @@ export const useBookedActions = () => {
 
   useCopilotAction({
     name: ACTIONS.SHOW_BOOKED_FLIGHTS,
-    description: 'Display booked flights as a card when user asks about their selected flights.',
+    description:
+      'Display the currently selected flights as a card. Always call this when the user asks which flight they selected.',
     parameters: [],
     handler: async () => 'Flights displayed',
     render: ({ status }) => {
@@ -24,7 +25,7 @@ export const useBookedActions = () => {
       const departure = state.flights?.departure;
       const returnFlight = state.flights?.return;
 
-      if (!departure && !returnFlight) return <>You have not booked any flights yet.</>;
+      if (!departure && !returnFlight) return <>You have not selected any flights yet.</>;
 
       return (
         <div className="border-border-secondary flex w-full max-w-2xl flex-col overflow-hidden rounded-lg border">
@@ -42,7 +43,8 @@ export const useBookedActions = () => {
 
   useCopilotAction({
     name: ACTIONS.SHOW_BOOKED_HOTEL,
-    description: 'Display booked hotels as a card when user asks about their selected hotels.',
+    description:
+      'Display the currently selected hotel as a card. Always call this when the user asks which hotel they selected.',
     parameters: [],
     handler: async () => 'Hotels displayed',
     render: ({ status }) => {
@@ -50,7 +52,7 @@ export const useBookedActions = () => {
 
       const hotel = state.hotel;
 
-      if (!hotel) return <>You have not booked any hotels yet.</>;
+      if (!hotel) return <>You have not selected a hotel yet.</>;
 
       return (
         <div className="border-border-secondary flex w-full max-w-2xl flex-col overflow-hidden rounded-lg border">

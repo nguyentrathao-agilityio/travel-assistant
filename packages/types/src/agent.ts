@@ -6,10 +6,13 @@ export interface SelectedFlight {
   return?: Flight;
 }
 
+export type SelectionStatus = 'selected' | 'confirmed' | 'booked';
+
 export interface TripState {
   flights?: SelectedFlight;
+  flightSelectionStatus?: SelectionStatus;
   hotel?: HotelAvailability;
-  itineraryActive?: boolean;
+  hotelSelectionStatus?: SelectionStatus;
   destination?: string;
   startDate?: string;
   endDate?: string;

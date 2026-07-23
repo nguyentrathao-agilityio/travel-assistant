@@ -1,5 +1,5 @@
 import { useCoAgent } from '@copilotkit/react-core';
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useMemo, useRef } from 'react';
 
 // Constants
 import { AGENT_NAME } from '@/constants';
@@ -16,8 +16,9 @@ import { todayClientIso, clientTimezone as getClientTimezone } from '@/utils';
 
 export const useTripState = () => {
   const sessionId = useThreadStore((s) => s.activeThreadId);
-  const { setTripState, clearTripState } = useTripStateStore(
+  const { savedState, setTripState, clearTripState } = useTripStateStore(
     useShallow((state) => ({
+      savedState: state.tripStates[sessionId] ?? {},
       setTripState: state.setTripState,
       clearTripState: state.clearTripState,
     }))
@@ -48,24 +49,63 @@ export const useTripState = () => {
     if (!hasRestoredRef.current) return;
     if (!state || Object.keys(state).length === 0) return;
 
-    setTripState(sessionId, state);
-  }, [state, sessionId, setTripState]);
+    // A new backend snapshot may omit UI-owned booking selections. Merge
+    // defined remote fields into the per-thread cache instead of replacing
+    // the confirmed hotel/flight with undefined.
+    const definedState = Object.fromEntries(
+      Object.entries(state).filter(([, value]) => value !== undefined)
+    ) as TripState;
+    const nextState = { ...savedState, ...definedState };
+
+    if (JSON.stringify(nextState) !== JSON.stringify(savedState)) {
+      setTripState(sessionId, nextState);
+    }
+  }, [state, savedState, sessionId, setTripState]);
+
+  const effectiveState = useMemo<TripState>(
+    () => ({
+      ...savedState,
+      ...(state ?? {}),
+      flights: state?.flights ?? savedState.flights,
+      flightSelectionStatus: state?.flightSelectionStatus ?? savedState.flightSelectionStatus,
+      hotel: state?.hotel ?? savedState.hotel,
+      hotelSelectionStatus: state?.hotelSelectionStatus ?? savedState.hotelSelectionStatus,
+    }),
+    [state, savedState]
+  );
 
   const selectFlight = useCallback(
     (flight: Flight, type: keyof SelectedFlight) => {
+      const current = useTripStateStore.getState().tripStates[sessionId] ?? {};
+      setTripState(sessionId, {
+        ...current,
+        flights: { ...(current.flights ?? {}), [type]: flight },
+        flightSelectionStatus: 'confirmed',
+      });
       setState((prev) => ({
         ...(prev ?? {}),
         flights: { ...(prev?.flights ?? {}), [type]: flight },
+        flightSelectionStatus: 'confirmed',
       }));
     },
-    [setState]
+    [sessionId, setState, setTripState]
   );
 
   const selectHotel = useCallback(
     (hotel: HotelAvailability) => {
-      setState((prev) => ({ ...(prev ?? {}), hotel }));
+      const current = useTripStateStore.getState().tripStates[sessionId] ?? {};
+      setTripState(sessionId, {
+        ...current,
+        hotel,
+        hotelSelectionStatus: 'confirmed',
+      });
+      setState((prev) => ({
+        ...(prev ?? {}),
+        hotel,
+        hotelSelectionStatus: 'confirmed',
+      }));
     },
-    [setState]
+    [sessionId, setState, setTripState]
   );
 
   const clearTrip = useCallback(() => {
@@ -74,5 +114,5 @@ export const useTripState = () => {
     clearTripState(sessionId);
   }, [setState, sessionId, clearTripState]);
 
-  return { state, selectFlight, selectHotel, clearTrip };
+  return { state: effectiveState, selectFlight, selectHotel, clearTrip };
 };

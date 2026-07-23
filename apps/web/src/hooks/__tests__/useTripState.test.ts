@@ -15,11 +15,21 @@ jest.mock('@copilotkit/react-core', () => ({
 jest.mock('@/constants', () => ({ AGENT_NAME: 'travelAgent' }));
 
 const mockClearTripState = jest.fn();
+const mockSetTripState = jest.fn();
 
 jest.mock('@/stores', () => {
   const tripStateHook = (
-    selector: (s: { setTripState: jest.Mock; clearTripState: jest.Mock }) => unknown
-  ) => selector({ setTripState: jest.fn(), clearTripState: mockClearTripState });
+    selector: (s: {
+      tripStates: Record<string, object>;
+      setTripState: jest.Mock;
+      clearTripState: jest.Mock;
+    }) => unknown
+  ) =>
+    selector({
+      tripStates: {},
+      setTripState: mockSetTripState,
+      clearTripState: mockClearTripState,
+    });
 
   Object.assign(tripStateHook, { getState: () => ({ tripStates: {} }) });
 
@@ -71,6 +81,7 @@ const makeHotel = (): HotelAvailability => ({
 beforeEach(() => {
   mockSetState.mockClear();
   mockUseCoAgent.mockClear();
+  mockSetTripState.mockClear();
 });
 
 describe('useTripState', () => {
@@ -89,6 +100,11 @@ describe('useTripState', () => {
     const updater = mockSetState.mock.calls[0][0];
     const newState = updater({});
     expect(newState.flights?.departure?.id).toBe('f1');
+    expect(newState.flightSelectionStatus).toBe('confirmed');
+    expect(mockSetTripState).toHaveBeenCalledWith(
+      'session-1',
+      expect.objectContaining({ flightSelectionStatus: 'confirmed' })
+    );
   });
 
   it('selectHotel calls setState with the hotel', () => {
@@ -101,6 +117,14 @@ describe('useTripState', () => {
     const updater = mockSetState.mock.calls[0][0];
     const newState = updater({});
     expect(newState.hotel?.id).toBe('h1');
+    expect(newState.hotelSelectionStatus).toBe('confirmed');
+    expect(mockSetTripState).toHaveBeenCalledWith(
+      'session-1',
+      expect.objectContaining({
+        hotel: expect.objectContaining({ id: 'h1' }),
+        hotelSelectionStatus: 'confirmed',
+      })
+    );
   });
 
   it('clearTrip calls setState with empty object', () => {

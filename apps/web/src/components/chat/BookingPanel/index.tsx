@@ -1,20 +1,16 @@
-import { useCoAgent } from '@copilotkit/react-core';
 import { ArrowRight, Building2, Plane } from 'lucide-react';
 
 // Components
 import { Typography } from '@/components';
 
-// Constants
-import { AGENT_NAME } from '@/constants';
+// Hooks
+import { useTripState } from '@/hooks';
 
 // Utils
 import { formatTime } from '@/utils';
 
-// Types
-import type { TripState } from '@repo/types';
-
 const BookingPanel = () => {
-  const { state } = useCoAgent<TripState>({ name: AGENT_NAME, initialState: {} });
+  const { state } = useTripState();
 
   const departure = state?.flights?.departure;
   const returnFlight = state?.flights?.return;

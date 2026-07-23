@@ -182,8 +182,6 @@ export const ACTIONS = {
   CONFIRM_TRIP_SUMMARY: 'confirmTripSummary',
   SHOW_BOOKED_FLIGHTS: 'show-booked-flights',
   SHOW_BOOKED_HOTEL: 'show-booked-hotel',
-  WAIT_FOR_FLIGHT_SELECTION: 'waitForFlightSelection',
-  WAIT_FOR_HOTEL_BOOKING: 'waitForHotelBooking',
   GET_FLIGHT_INFO: 'get-flight-info',
   GET_HOTEL_INFO: 'get-hotel-info',
 } as const;

@@ -5,7 +5,7 @@ import { ArrowRight, Plane } from 'lucide-react';
 import { cn, computeBadges, formatDateFull, formatPrice, formatTime } from '@/utils';
 
 // Components
-import { ConfirmBanner, FilterBar, LoadingCard, Typography } from '@/components';
+import { ConfirmBanner, FilterBar, Typography } from '@/components';
 import type { FilterOption } from '@/components';
 import { FlightOptionItem } from './FlightOptionItem';
 
@@ -25,6 +25,7 @@ interface FlightCardProps {
   adults?: number;
   className?: string;
   onSelect?: (flight: Flight, type: FlightTab) => void;
+  onContinueBooking?: (departure: Flight, returnFlight?: Flight) => void;
   isConfirmed?: boolean;
   initialDeparture?: Flight | null;
   initialReturn?: Flight | null;
@@ -39,6 +40,7 @@ const FlightCard = ({
   adults = 1,
   className,
   onSelect,
+  onContinueBooking,
   isConfirmed = false,
   initialDeparture = null,
   initialReturn = null,
@@ -81,10 +83,12 @@ const FlightCard = ({
   }, []);
 
   const handleConfirm = useCallback(() => {
-    if (selectedDeparture) onSelect?.(selectedDeparture, FLIGHT_TAB.DEPARTURE);
+    if (!selectedDeparture) return;
+    onSelect?.(selectedDeparture, FLIGHT_TAB.DEPARTURE);
     if (selectedReturn) onSelect?.(selectedReturn, FLIGHT_TAB.RETURN);
+    onContinueBooking?.(selectedDeparture, selectedReturn ?? undefined);
     setConfirmed(true);
-  }, [selectedDeparture, selectedReturn, onSelect]);
+  }, [selectedDeparture, selectedReturn, onSelect, onContinueBooking]);
 
   const outboundBadges = useMemo(() => computeBadges(data?.results ?? []), [data?.results]);
   const returnBadges = useMemo(
@@ -107,11 +111,7 @@ const FlightCard = ({
   const activeSelectedId =
     activeTab === FLIGHT_TAB.DEPARTURE ? selectedDeparture?.id : selectedReturn?.id;
   const activeOnSelect =
-    !onSelect || confirmed
-      ? undefined
-      : activeTab === FLIGHT_TAB.DEPARTURE
-        ? handleSelectDeparture
-        : handleSelectReturn;
+    activeTab === FLIGHT_TAB.DEPARTURE ? handleSelectDeparture : handleSelectReturn;
 
   const showBanner =
     !confirmed &&
@@ -183,7 +183,7 @@ const FlightCard = ({
                   key={flight.id}
                   flight={flight}
                   isSelected={activeSelectedId === flight.id}
-                  onSelect={activeOnSelect}
+                  onSelect={onSelect ? activeOnSelect : undefined}
                   badge={badge?.label}
                   badgeVariant={badge?.variant}
                 />

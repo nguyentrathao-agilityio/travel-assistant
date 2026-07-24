@@ -117,6 +117,32 @@ describe('HotelCard', () => {
       expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'h1' }));
     });
 
+    it('continues the booking flow after confirming a selection', async () => {
+      const onContinueBooking = jest.fn();
+      const user = userEvent.setup();
+      render(
+        <HotelCard data={makeData()} onSelect={jest.fn()} onContinueBooking={onContinueBooking} />
+      );
+      await user.click(screen.getAllByTestId('hotel-option')[0]);
+      await user.click(screen.getByRole('button', { name: /confirm/i }));
+      expect(onContinueBooking).toHaveBeenCalledWith(expect.objectContaining({ id: 'h1' }));
+    });
+
+    it('allows selecting a different hotel after confirming the current selection', async () => {
+      const onSelect = jest.fn();
+      const user = userEvent.setup();
+      render(<HotelCard data={makeData()} onSelect={onSelect} />);
+
+      const hotelOptions = screen.getAllByTestId('hotel-option');
+      await user.click(hotelOptions[0]);
+      await user.click(screen.getByRole('button', { name: /confirm/i }));
+      await user.click(hotelOptions[1]);
+      await user.click(screen.getByRole('button', { name: /confirm/i }));
+
+      expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'h2' }));
+      expect(onSelect).toHaveBeenCalledTimes(2);
+    });
+
     it('hides confirm banner after clicking Change', async () => {
       const user = userEvent.setup();
       render(<HotelCard data={makeData()} onSelect={jest.fn()} />);

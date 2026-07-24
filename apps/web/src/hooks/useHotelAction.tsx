@@ -1,4 +1,5 @@
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useCallback } from 'react';
+import { useCopilotChatInternal, useRenderToolCall } from '@copilotkit/react-core';
 
 // Constants
 import { TOOL_NAMES, TOOL_STATUS } from '@/constants';
@@ -17,6 +18,18 @@ import { HotelAvailability, HotelSearchResultSchema } from '@repo/schemas';
 
 export const useHotelAction = () => {
   const { selectHotel, state } = useTripState();
+  const { sendMessage } = useCopilotChatInternal();
+
+  const handleContinueBooking = useCallback(
+    (hotel: { id: string; name: string }) => {
+      void sendMessage({
+        id: crypto.randomUUID(),
+        role: 'user',
+        content: `I selected hotel ${hotel.id} (${hotel.name}). Continue the booking and ask only for missing guest details.`,
+      });
+    },
+    [sendMessage]
+  );
 
   useRenderToolCall({
     name: TOOL_NAMES.HOTEL,
@@ -69,6 +82,7 @@ export const useHotelAction = () => {
               checkIn={args.checkIn}
               checkOut={args.checkOut}
               onSelect={selectHotel}
+              onContinueBooking={handleContinueBooking}
               isConfirmed={!!state.hotel}
               initialHotel={selectedHotel}
             />

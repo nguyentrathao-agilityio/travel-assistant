@@ -5,7 +5,7 @@ import { Building2 } from 'lucide-react';
 import { cn, computeHotelBadges, formatDateRange, formatPrice } from '@/utils';
 
 // Components
-import { LoadingCard, Typography, ConfirmBanner } from '@/components';
+import { Typography, ConfirmBanner } from '@/components';
 import { HotelOptionItem } from './HotelOptionItem';
 
 // Types
@@ -18,6 +18,7 @@ interface HotelCardProps {
   checkOut?: string;
   className?: string;
   onSelect?: (hotel: HotelAvailability) => void;
+  onContinueBooking?: (hotel: HotelAvailability) => void;
   isConfirmed?: boolean;
   initialHotel?: HotelAvailability | null;
 }
@@ -29,6 +30,7 @@ const HotelCard = ({
   checkOut,
   className,
   onSelect,
+  onContinueBooking,
   isConfirmed = false,
   initialHotel = null,
 }: HotelCardProps) => {
@@ -49,9 +51,10 @@ const HotelCard = ({
     const selectedHotel = data?.results.find((h) => h.id === selectedId);
     if (selectedHotel) {
       onSelect?.(selectedHotel);
+      onContinueBooking?.(selectedHotel);
       setConfirmed(true);
     }
-  }, [selectedId, data?.results, onSelect]);
+  }, [selectedId, data?.results, onSelect, onContinueBooking]);
 
   const badges = useMemo(() => computeHotelBadges(data?.results ?? []), [data?.results]);
   const selectedHotel = data?.results.find((h) => h.id === selectedId);
@@ -106,7 +109,6 @@ const HotelCard = ({
                 onSelect={handleSelect}
                 badge={badge?.label}
                 badgeVariant={badge?.variant}
-                isConfirmed={confirmed}
               />
             );
           })

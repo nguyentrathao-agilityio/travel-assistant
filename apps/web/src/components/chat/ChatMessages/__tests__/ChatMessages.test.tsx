@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import { createRef } from 'react';
 import type { MessagesProps } from '@copilotkit/react-ui';
 import { useCopilotChatInternal } from '@copilotkit/react-core';
 import { ChatMessages } from '../index';
+import { reconcileConversationMessages } from '@/hooks/useConversationMessages';
 
 jest.mock('../../ChatEmptyState', () => ({
   ChatEmptyState: ({ onSuggestionClick }: { onSuggestionClick: () => void }) => (
@@ -48,7 +48,7 @@ const defaultProps = {
   onThumbsDown: jest.fn(),
   messageFeedback: undefined,
   markdownTagRenderers: {},
-  sendRef: createRef<((text: string) => Promise<unknown>) | null>(),
+  sendMessage: jest.fn(),
 };
 
 describe('ChatMessages', () => {
@@ -99,9 +99,24 @@ describe('ChatMessages', () => {
     it('renders only the latest message when stream reconciliation repeats an ID', () => {
       const messages = [makeMessage('booking-result'), makeMessage('booking-result')];
 
-      render(<ChatMessages {...defaultProps} messages={messages} />);
+      render(
+        <ChatMessages {...defaultProps} messages={reconcileConversationMessages([], messages)} />
+      );
 
       expect(screen.getAllByTestId('message')).toHaveLength(1);
+    });
+
+    it('merges persisted history with live messages without duplicating IDs', () => {
+      const messages = reconcileConversationMessages(
+        [makeMessage('history-1'), makeMessage('shared')],
+        [makeMessage('shared'), makeMessage('live-1')]
+      );
+      render(<ChatMessages {...defaultProps} messages={messages} />);
+
+      expect(screen.getAllByTestId('message')).toHaveLength(3);
+      expect(screen.getByText('history-1')).toBeInTheDocument();
+      expect(screen.getByText('shared')).toBeInTheDocument();
+      expect(screen.getByText('live-1')).toBeInTheDocument();
     });
 
     it('shows a typing indicator while waiting for the first assistant message', () => {
@@ -133,7 +148,9 @@ describe('ChatMessages', () => {
         makeBookingMessage('assistant-2', 'tool-2'),
       ];
 
-      render(<ChatMessages {...defaultProps} messages={messages} />);
+      render(
+        <ChatMessages {...defaultProps} messages={reconcileConversationMessages([], messages)} />
+      );
 
       expect(screen.getAllByTestId('message')).toHaveLength(1);
     });
@@ -145,7 +162,9 @@ describe('ChatMessages', () => {
         makeBookingMessage('assistant-2', 'tool-2'),
       ];
 
-      render(<ChatMessages {...defaultProps} messages={messages} />);
+      render(
+        <ChatMessages {...defaultProps} messages={reconcileConversationMessages([], messages)} />
+      );
 
       expect(screen.getAllByTestId('message')).toHaveLength(3);
     });

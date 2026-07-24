@@ -3,7 +3,7 @@ export * from './useBookingInfo';
 export * from './useFlightAction';
 export * from './useHotelAction';
 export * from './useConversationMessages';
-export * from './useInjectThreadHistory';
+export * from './useThreadHistory';
 export * from './useLocalTipsAction';
 export * from './usePlacesAction';
 export * from './useRouteAction';

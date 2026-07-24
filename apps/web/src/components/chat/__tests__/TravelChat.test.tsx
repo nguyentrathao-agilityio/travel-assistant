@@ -6,6 +6,16 @@ jest.mock('@/stores', () => ({
   useThreadStore: jest.fn((selector: (s: object) => unknown) =>
     selector({ activeThreadId: 'thread-1', isResumed: false, threads: [] })
   ),
+  useConversationRendererStore: jest.fn((selector: (s: object) => unknown) =>
+    selector({
+      setThreadHistory: jest.fn(),
+      setSendMessage: jest.fn(),
+      threadId: 'thread-1',
+      persistedMessages: [],
+      isHistoryLoading: false,
+      sendMessage: null,
+    })
+  ),
 }));
 
 jest.mock('zustand/shallow', () => ({ useShallow: (fn: unknown) => fn }));
@@ -20,8 +30,10 @@ jest.mock('@/hooks', () => ({
   useHotelAction: jest.fn(),
   useTripSummaryAction: jest.fn(),
   useDestinationExplorerAction: jest.fn(),
-  useInjectThreadHistory: jest.fn().mockReturnValue({ isLoading: false, error: null }),
+  useThreadHistory: jest.fn().mockReturnValue({ messages: [], isLoading: false, error: null }),
+  useConversationMessages: jest.fn((_persisted, live) => live),
   useBookingInfo: jest.fn(),
+  useBookingAction: jest.fn(),
   useBookedActions: jest.fn(),
   useThemeAction: jest.fn(),
   useTripState: jest.fn().mockReturnValue({ state: {} }),

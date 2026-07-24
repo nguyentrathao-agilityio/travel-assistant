@@ -10,7 +10,7 @@ import { LocalTipsCard, SetLastTool, ToolLoading } from '@/components';
 import { TOOL_NAMES } from '@/constants';
 
 // Utils
-import { isToolPending } from '@/utils';
+import { isToolPending, safeParseToolResult } from '@/utils';
 
 export const useLocalTipsAction = () => {
   useRenderToolCall({
@@ -31,7 +31,7 @@ export const useLocalTipsAction = () => {
       if (isToolPending(status))
         return <ToolLoading target={`local tips in ${args.city || args.country}`} />;
 
-      const parsed = TipsResultSchema.safeParse(result);
+      const parsed = safeParseToolResult(TipsResultSchema, result);
       if (!parsed.success) return <></>;
       if (parsed.data.count === 0) return <></>;
 

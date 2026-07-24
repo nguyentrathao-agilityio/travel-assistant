@@ -5,7 +5,10 @@ import { useLocalTipsAction } from '@/hooks/useLocalTipsAction';
 
 jest.mock('@/constants', () => ({ TOOL_NAMES: { LOCAL_TIPS: 'localTipsTool' } }));
 jest.mock('@/components', () => ({ LocalTipsCard: () => null }));
-jest.mock('@/utils', () => ({ isToolPending: (s: string) => s === 'inProgress' }));
+jest.mock('@/utils', () => ({
+  ...jest.requireActual('@/utils/toolResult'),
+  isToolPending: (s: string) => s === 'inProgress',
+}));
 
 const mockSafeParse = jest.fn<{ success: boolean; data?: unknown }, unknown[]>(() => ({
   success: false,

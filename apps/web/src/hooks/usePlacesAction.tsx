@@ -10,7 +10,7 @@ import { PlacesCard, SetLastTool, ToolLoading } from '@/components';
 import { TOOL_NAMES } from '@/constants';
 
 // Utils
-import { isToolPending } from '@/utils';
+import { isToolPending, safeParseToolResult } from '@/utils';
 
 export const usePlacesAction = () => {
   useRenderToolCall({
@@ -24,7 +24,7 @@ export const usePlacesAction = () => {
     render: ({ status, result, args }) => {
       if (isToolPending(status)) return <ToolLoading target={`places in ${args.city}`} />;
 
-      const parsed = PlacesSearchResultSchema.safeParse(result);
+      const parsed = safeParseToolResult(PlacesSearchResultSchema, result);
 
       if (!parsed.success) return <></>;
       if (parsed.data.total === 0) return <></>;

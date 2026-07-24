@@ -15,6 +15,9 @@ import {
   tipsTool,
   tripSummaryTool,
   destinationExplorerTool,
+  bookFlightTool,
+  bookHotelTool,
+  cancelBookingTool,
 } from './tools';
 
 // LLM
@@ -38,6 +41,9 @@ const agent = createAgent({
     tipsTool,
     tripSummaryTool,
     destinationExplorerTool,
+    bookFlightTool,
+    bookHotelTool,
+    cancelBookingTool,
   ],
   stateSchema: GraphState,
   middleware: [

@@ -20,6 +20,9 @@ export const TOOL_NAMES = {
   ROUTE: 'routeTool',
   TRIP_SUMMARY: 'tripSummaryTool',
   DESTINATION_EXPLORER: 'destinationExplorerTool',
+  BOOK_FLIGHT: 'bookFlightTool',
+  BOOK_HOTEL: 'bookHotelTool',
+  CANCEL_BOOKING: 'cancelBookingTool',
 } as const;
 
 export const TOOL_SUGGESTION_ITEMS: Readonly<Partial<Record<string, readonly SuggestionItem[]>>> = {

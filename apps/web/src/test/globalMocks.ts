@@ -4,11 +4,18 @@ jest.mock('@copilotkit/react-ui', () => ({
 }));
 
 jest.mock('@copilotkit/react-core', () => ({
-  useCopilotChatInternal: jest.fn(),
+  useCopilotChatInternal: jest.fn(() => ({
+    sendMessage: jest.fn(),
+    messages: [],
+    setMessages: jest.fn(),
+    isAvailable: true,
+    interrupt: null,
+  })),
   useCopilotAction: jest.fn(),
   useCopilotReadable: jest.fn(),
   useRenderToolCall: jest.fn(),
   useHumanInTheLoop: jest.fn(),
+  useLangGraphInterrupt: jest.fn(),
   useCoAgent: jest.fn(() => ({ state: {} })),
   CopilotKit: jest.fn(({ children }: { children: React.ReactNode }) => children),
 }));

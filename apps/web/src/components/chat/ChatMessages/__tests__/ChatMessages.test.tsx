@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import type { MessagesProps } from '@copilotkit/react-ui';
+import { useCopilotChatInternal } from '@copilotkit/react-core';
 import { ChatMessages } from '../index';
 
 jest.mock('../../ChatEmptyState', () => ({
@@ -13,6 +14,22 @@ type CKMessage = MessagesProps['messages'][number];
 
 const makeMessage = (id: string, role = 'user'): CKMessage =>
   ({ id, role, content: '' }) as unknown as CKMessage;
+
+const makeBookingMessage = (id: string, toolCallId: string): CKMessage =>
+  ({
+    id,
+    role: 'assistant',
+    toolCalls: [
+      {
+        id: toolCallId,
+        type: 'function',
+        function: {
+          name: 'bookHotelTool',
+          arguments: '{"hotelId":"hotel-1"}',
+        },
+      },
+    ],
+  }) as unknown as CKMessage;
 
 const RenderMessage = ({ message }: { message: CKMessage }) => (
   <div data-testid="message">{(message as { id: string }).id}</div>
@@ -35,6 +52,13 @@ const defaultProps = {
 };
 
 describe('ChatMessages', () => {
+  beforeEach(() => {
+    jest.mocked(useCopilotChatInternal).mockReturnValue({
+      messages: [],
+      interrupt: null,
+    } as unknown as ReturnType<typeof useCopilotChatInternal>);
+  });
+
   describe('empty state', () => {
     it('renders ChatEmptyState when there are no messages and not in progress', () => {
       render(<ChatMessages {...defaultProps} />);
@@ -72,6 +96,37 @@ describe('ChatMessages', () => {
       expect(screen.getByText('m2')).toBeInTheDocument();
     });
 
+    it('renders only the latest message when stream reconciliation repeats an ID', () => {
+      const messages = [makeMessage('booking-result'), makeMessage('booking-result')];
+
+      render(<ChatMessages {...defaultProps} messages={messages} />);
+
+      expect(screen.getAllByTestId('message')).toHaveLength(1);
+    });
+
+    it('renders one booking tool call when resume replays it with new message IDs', () => {
+      const messages = [
+        makeBookingMessage('assistant-1', 'tool-1'),
+        makeBookingMessage('assistant-2', 'tool-2'),
+      ];
+
+      render(<ChatMessages {...defaultProps} messages={messages} />);
+
+      expect(screen.getAllByTestId('message')).toHaveLength(1);
+    });
+
+    it('keeps identical booking calls made in separate user turns', () => {
+      const messages = [
+        makeBookingMessage('assistant-1', 'tool-1'),
+        makeMessage('user-2'),
+        makeBookingMessage('assistant-2', 'tool-2'),
+      ];
+
+      render(<ChatMessages {...defaultProps} messages={messages} />);
+
+      expect(screen.getAllByTestId('message')).toHaveLength(3);
+    });
+
     it('renders children inside the message list', () => {
       render(
         <ChatMessages {...defaultProps} messages={[makeMessage('m1')]}>
@@ -79,6 +134,17 @@ describe('ChatMessages', () => {
         </ChatMessages>
       );
       expect(screen.getByTestId('child-content')).toBeInTheDocument();
+    });
+
+    it('renders the active LangGraph interrupt', () => {
+      jest.mocked(useCopilotChatInternal).mockReturnValue({
+        messages: [],
+        interrupt: <div data-testid="booking-approval">Confirm booking</div>,
+      } as unknown as ReturnType<typeof useCopilotChatInternal>);
+
+      render(<ChatMessages {...defaultProps} messages={[makeMessage('m1')]} />);
+
+      expect(screen.getByTestId('booking-approval')).toBeInTheDocument();
     });
   });
 });

@@ -20,6 +20,7 @@ jest.mock('@/components', () => ({
 }));
 
 jest.mock('@/utils', () => ({
+  ...jest.requireActual('@/utils/toolResult'),
   isToolPending: (status: string) => status === 'inProgress' || status === 'executing',
 }));
 

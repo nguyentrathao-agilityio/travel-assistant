@@ -10,7 +10,7 @@ import { DestinationExplorerCard, SetLastTool, ToolLoading } from '@/components'
 import { TOOL_NAMES } from '@/constants';
 
 // Utils
-import { isToolPending } from '@/utils';
+import { isToolPending, safeParseToolResult } from '@/utils';
 
 export const useDestinationExplorerAction = () => {
   useRenderToolCall({
@@ -30,7 +30,7 @@ export const useDestinationExplorerAction = () => {
       if (isToolPending(status))
         return <ToolLoading action="Exploring" target={args.city || 'destination'} />;
 
-      const parsed = DestinationExplorerResultSchema.safeParse(result);
+      const parsed = safeParseToolResult(DestinationExplorerResultSchema, result);
       if (!parsed.success) return <></>;
 
       return (

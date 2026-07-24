@@ -9,7 +9,7 @@ import { CHAT_ROLE } from '@/constants';
 // Utils
 import { langgraphMessageText } from '@/utils';
 
-import type { LangGraphRawMessage } from '@/utils';
+import type { LangGraphRawMessage, LangGraphThreadValues } from '@/utils';
 
 export interface ThreadMessage {
   id: string;
@@ -56,7 +56,7 @@ export const useThreadMessages = (threadId: string | null): UseThreadMessagesRes
     setLoading(true);
 
     langgraphClient.threads
-      .getState<{ messages?: LangGraphRawMessage[] }>(threadId)
+      .getState<LangGraphThreadValues>(threadId)
       .then((state) => {
         if (cancelled) return;
 

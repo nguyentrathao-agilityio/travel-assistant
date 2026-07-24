@@ -14,6 +14,7 @@ jest.mock('@copilotkit/react-core', () => ({
   useCopilotAction: jest.fn(),
   useCopilotReadable: jest.fn(),
   useRenderToolCall: jest.fn(),
+  useLazyToolRenderer: jest.fn(() => jest.fn(() => null)),
   useHumanInTheLoop: jest.fn(),
   useLangGraphInterrupt: jest.fn(),
   useCoAgent: jest.fn(() => ({ state: {} })),

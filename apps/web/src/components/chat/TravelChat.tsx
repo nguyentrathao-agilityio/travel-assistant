@@ -1,13 +1,13 @@
 import { CustomAssistantMessage } from '@/components/chat/CustomAssistantMessage';
 import { CustomUserMessage } from '@/components/chat/CustomUserMessage';
-import type { InputProps, MessagesProps } from '@copilotkit/react-ui';
+import type { InputProps } from '@copilotkit/react-ui';
 import { CopilotChat } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
-import { useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { useShallow } from 'zustand/shallow';
 
 // Stores
-import { useThreadStore } from '@/stores';
+import { useConversationRendererStore, useThreadStore } from '@/stores';
 
 // Hooks
 import {
@@ -18,7 +18,7 @@ import {
   useFlightAction,
   useThemeAction,
   useHotelAction,
-  useInjectThreadHistory,
+  useThreadHistory,
   useLocalTipsAction,
   usePlacesAction,
   useRouteAction,
@@ -30,16 +30,24 @@ import {
 // Components
 import { BookingPanel } from './BookingPanel';
 import { ChatInputBar } from './ChatInputBar';
-import { ChatMessages } from './ChatMessages';
+import { ConversationMessages } from './ConversationMessages';
 import { ThemeToggle } from '../ThemeToggle';
 
-export const TravelChat = () => {
-  const sendRef = useRef<((text: string) => Promise<unknown>) | null>(null);
+const ConversationInput = (props: InputProps) => {
+  const setSendMessage = useConversationRendererStore((state) => state.setSendMessage);
 
-  const { activeThreadId, isResumed, threads } = useThreadStore(
+  useEffect(() => {
+    setSendMessage(props.onSend);
+    return () => setSendMessage(null);
+  }, [props.onSend, setSendMessage]);
+
+  return <ChatInputBar {...props} />;
+};
+
+export const TravelChat = () => {
+  const { activeThreadId, threads } = useThreadStore(
     useShallow((state) => ({
       activeThreadId: state.activeThreadId,
-      isResumed: state.isResumed,
       threads: state.threads,
     }))
   );
@@ -47,9 +55,13 @@ export const TravelChat = () => {
   const activeThread = threads.find((thread) => thread.id === activeThreadId);
   const threadTitle = activeThread?.title ?? 'Travel Assistant';
 
-  const { isLoading: isHistoryLoading } = useInjectThreadHistory(activeThreadId, isResumed);
-  const isHistoryLoadingRef = useRef(isHistoryLoading);
-  isHistoryLoadingRef.current = isHistoryLoading;
+  const { messages: persistedMessages, isLoading: isHistoryLoading } =
+    useThreadHistory(activeThreadId);
+  const setThreadHistory = useConversationRendererStore((state) => state.setThreadHistory);
+
+  useLayoutEffect(() => {
+    setThreadHistory(activeThreadId, persistedMessages, isHistoryLoading);
+  }, [activeThreadId, persistedMessages, isHistoryLoading, setThreadHistory]);
 
   useBookingInfo();
   useBookingAction();
@@ -65,23 +77,6 @@ export const TravelChat = () => {
   useBookedActions();
   useThemeAction();
 
-  const CustomInput = useMemo(() => {
-    const InputComp = (props: InputProps) => {
-      sendRef.current = props.onSend;
-      return <ChatInputBar {...props} />;
-    };
-
-    return InputComp;
-  }, []);
-
-  const CustomMessages = useMemo(() => {
-    const MessagesComp = (props: MessagesProps) => (
-      <ChatMessages {...props} sendRef={sendRef} isHistoryLoading={isHistoryLoadingRef.current} />
-    );
-
-    return MessagesComp;
-  }, []);
-
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <header className="z-50 flex h-14 shrink-0 items-center justify-between border-b px-5 shadow">
@@ -95,8 +90,8 @@ export const TravelChat = () => {
       <BookingPanel />
       <CopilotChat
         className="flex flex-1 flex-col overflow-hidden"
-        Messages={CustomMessages}
-        Input={CustomInput}
+        Messages={ConversationMessages}
+        Input={ConversationInput}
         AssistantMessage={CustomAssistantMessage}
         UserMessage={CustomUserMessage}
       />

@@ -1,5 +1,5 @@
 // components/chat/TypingIndicator/index.tsx
-import { cn } from '@/utils/cn';
+import { cn } from '@/utils';
 
 interface TypingIndicatorProps {
   label?: string;

@@ -17,7 +17,6 @@ interface HotelOptionItemProps {
   onSelect?: (id: string) => void;
   badge?: string;
   badgeVariant?: BadgeVariant;
-  isConfirmed?: boolean;
   isInfo?: boolean;
 }
 
@@ -27,7 +26,6 @@ const HotelOptionItem = ({
   onSelect,
   badge,
   badgeVariant = 'success',
-  isConfirmed = false,
   isInfo = false,
 }: HotelOptionItemProps) => {
   const handleSelect = () => onSelect && onSelect(hotel.id);
@@ -109,7 +107,6 @@ const HotelOptionItem = ({
             </Typography>
           </div>
           {onSelect &&
-            !isConfirmed &&
             (isSelected ? (
               <Typography variant="meta" weight="medium" color="tertiary">
                 Selected

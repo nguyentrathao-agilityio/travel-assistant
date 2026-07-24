@@ -1,4 +1,5 @@
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useCallback } from 'react';
+import { useCopilotChatInternal, useRenderToolCall } from '@copilotkit/react-core';
 
 // Components
 import { FlightCard, SetLastTool, ToolLoading } from '@/components';
@@ -24,6 +25,21 @@ const searchParams = FLIGHT_BASE_PARAMS.map((p) => ({
 
 export const useFlightAction = () => {
   const { selectFlight, state } = useTripState();
+  const { sendMessage } = useCopilotChatInternal();
+
+  const handleContinueBooking = useCallback(
+    (departure: Flight, returnFlight?: Flight) => {
+      const returnText = returnFlight
+        ? ` and return flight ${returnFlight.id} (${returnFlight.flightNumber})`
+        : '';
+      void sendMessage({
+        id: crypto.randomUUID(),
+        role: 'user',
+        content: `I selected flight ${departure.id} (${departure.flightNumber})${returnText}. Continue the booking and ask only for missing passenger details.`,
+      });
+    },
+    [sendMessage]
+  );
 
   useRenderToolCall({
     name: TOOL_NAMES.FLIGHTS,
@@ -54,6 +70,7 @@ export const useFlightAction = () => {
             data={result}
             {...args}
             onSelect={selectFlight}
+            onContinueBooking={handleContinueBooking}
             isConfirmed={isConfirmed}
             initialDeparture={confirmedDeparture}
             initialReturn={confirmedReturn}

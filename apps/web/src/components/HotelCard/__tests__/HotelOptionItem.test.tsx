@@ -122,18 +122,6 @@ describe('HotelOptionItem', () => {
     expect(screen.getByText('Best value')).toBeInTheDocument();
   });
 
-  it('does not show Select button when isConfirmed is true', () => {
-    render(
-      <HotelOptionItem
-        hotel={makeHotel()}
-        isSelected={false}
-        onSelect={jest.fn()}
-        isConfirmed={true}
-      />
-    );
-    expect(screen.queryByRole('button', { name: 'Select' })).not.toBeInTheDocument();
-  });
-
   it('shows rating value', () => {
     render(<HotelOptionItem hotel={makeHotel()} isSelected={false} />);
     expect(screen.getByText(/4.2\/5/)).toBeInTheDocument();

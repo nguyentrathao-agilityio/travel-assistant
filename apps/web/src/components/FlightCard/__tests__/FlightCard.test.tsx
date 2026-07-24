@@ -103,6 +103,35 @@ describe('FlightCard', () => {
       expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'f1' }), 'departure');
     });
 
+    it('continues the booking flow after confirming a selection', async () => {
+      const onContinueBooking = jest.fn();
+      const user = userEvent.setup();
+      render(
+        <FlightCard data={makeData()} onSelect={jest.fn()} onContinueBooking={onContinueBooking} />
+      );
+      await user.click(screen.getAllByTestId('flight-option')[0]);
+      await user.click(screen.getByRole('button', { name: /confirm/i }));
+      expect(onContinueBooking).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'f1' }),
+        undefined
+      );
+    });
+
+    it('allows selecting a different flight after confirming the current selection', async () => {
+      const onSelect = jest.fn();
+      const user = userEvent.setup();
+      render(<FlightCard data={makeData()} onSelect={onSelect} />);
+
+      const flightOptions = screen.getAllByTestId('flight-option');
+      await user.click(flightOptions[0]);
+      await user.click(screen.getByRole('button', { name: /confirm/i }));
+      await user.click(flightOptions[1]);
+      await user.click(screen.getByRole('button', { name: /confirm/i }));
+
+      expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'f2' }), 'departure');
+      expect(onSelect).toHaveBeenCalledTimes(2);
+    });
+
     it('hides confirm banner and clears selection when Change is clicked', async () => {
       const user = userEvent.setup();
       render(<FlightCard data={makeData()} onSelect={jest.fn()} />);

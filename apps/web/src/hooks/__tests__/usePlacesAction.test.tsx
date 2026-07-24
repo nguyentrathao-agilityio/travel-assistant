@@ -13,7 +13,10 @@ jest.mock('@/components', () => ({
   SetLastTool: () => null,
   ToolLoading: () => null,
 }));
-jest.mock('@/utils', () => ({ isToolPending: (s: string) => s === 'inProgress' }));
+jest.mock('@/utils', () => ({
+  ...jest.requireActual('@/utils/toolResult'),
+  isToolPending: (s: string) => s === 'inProgress',
+}));
 
 const mockSafeParse = jest.fn<{ success: boolean; data?: unknown }, unknown[]>(() => ({
   success: false,
@@ -87,5 +90,16 @@ describe('usePlacesAction', () => {
     expect(result).not.toBeNull();
     const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;
     expect(card).not.toBeNull();
+  });
+
+  it('parses a persisted JSON result before schema validation', () => {
+    const placesData = { total: 1, results: [{ id: 'p1' }] };
+    mockSafeParse.mockReturnValue({ success: true, data: placesData });
+    renderHook(() => usePlacesAction());
+    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
+
+    render({ status: 'complete', args: {}, result: JSON.stringify(placesData) });
+
+    expect(mockSafeParse).toHaveBeenCalledWith(placesData);
   });
 });

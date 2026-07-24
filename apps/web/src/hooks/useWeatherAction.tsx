@@ -4,7 +4,7 @@ import { useRenderToolCall } from '@copilotkit/react-core';
 import { TOOL_NAMES } from '@/constants';
 
 // Utils
-import { isToolPending } from '@/utils';
+import { isToolPending, safeParseToolResult } from '@/utils';
 
 // Schemas
 import { WeatherResultSchema } from '@repo/schemas';
@@ -24,7 +24,7 @@ export const useWeatherAction = () => {
       if (isToolPending(status))
         return <ToolLoading target={`weather in ${args.city} for ${args.days || 5} days`} />;
 
-      const parsed = WeatherResultSchema.safeParse(result);
+      const parsed = safeParseToolResult(WeatherResultSchema, result);
       if (!parsed.success) return <></>;
 
       return (

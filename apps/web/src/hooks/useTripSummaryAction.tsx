@@ -11,7 +11,7 @@ import { useTripState } from './useTripState';
 import { SetLastTool, ToolLoading, TripSummaryCard } from '@/components';
 
 // Utils
-import { isToolPending } from '@/utils';
+import { isToolPending, safeParseToolResult } from '@/utils';
 
 export const useTripSummaryAction = () => {
   const { state } = useTripState();
@@ -54,7 +54,7 @@ export const useTripSummaryAction = () => {
           <ToolLoading action="Generating" target={`trip plan summary in ${args.destination}`} />
         );
 
-      const parsed = TripSummaryResultSchema.safeParse(result);
+      const parsed = safeParseToolResult(TripSummaryResultSchema, result);
       if (!parsed.success) return <></>;
 
       return (

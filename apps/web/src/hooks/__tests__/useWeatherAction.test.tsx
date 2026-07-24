@@ -10,7 +10,10 @@ jest.mock('@/components', () => ({
   ToolLoading: () => null,
   SetLastTool: () => null,
 }));
-jest.mock('@/utils', () => ({ isToolPending: (s: string) => s === 'inProgress' }));
+jest.mock('@/utils', () => ({
+  ...jest.requireActual('@/utils/toolResult'),
+  isToolPending: (s: string) => s === 'inProgress',
+}));
 
 const mockSafeParse = jest.fn<{ success: boolean; data?: unknown }, [unknown]>(() => ({
   success: false,

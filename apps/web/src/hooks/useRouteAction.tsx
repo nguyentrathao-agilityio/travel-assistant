@@ -10,7 +10,7 @@ import { RouteCard, SetLastTool, ToolLoading } from '@/components';
 import { TOOL_NAMES } from '@/constants';
 
 // Utils
-import { isToolPending } from '@/utils';
+import { isToolPending, safeParseToolResult } from '@/utils';
 
 export const useRouteAction = () => {
   useRenderToolCall({
@@ -23,7 +23,7 @@ export const useRouteAction = () => {
     render: ({ status, result, args }) => {
       if (isToolPending(status)) return <ToolLoading target={`a route in ${args.city}`} />;
 
-      const parsed = RouteResultSchema.safeParse(result);
+      const parsed = safeParseToolResult(RouteResultSchema, result);
       if (!parsed.success) return <></>;
       if (parsed.data.stops.length === 0) return <></>;
 

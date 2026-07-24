@@ -1,10 +1,6 @@
 import { useTripStateStore } from '@/stores/tripStateStore';
 import type { TripState } from '@repo/types';
 
-jest.mock('@/constants', () => ({
-  TRIP_STATES_STORAGE_KEY: 'trip-states',
-}));
-
 const makeState = (destination = 'Da Nang'): TripState => ({
   destination,
   startDate: '2026-07-01',
@@ -26,6 +22,12 @@ describe('useTripStateStore', () => {
     const state = makeState();
     useTripStateStore.getState().setTripState('thread-1', state);
     expect(useTripStateStore.getState().tripStates['thread-1']).toEqual(state);
+  });
+
+  it('keeps trip state in memory without writing it to browser storage', () => {
+    useTripStateStore.getState().setTripState('thread-1', makeState());
+
+    expect(localStorage).toHaveLength(0);
   });
 
   it('setTripState updates existing state for a thread', () => {

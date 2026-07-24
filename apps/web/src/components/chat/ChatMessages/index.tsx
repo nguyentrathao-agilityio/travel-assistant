@@ -2,8 +2,10 @@ import { useCallback, useMemo } from 'react';
 import { type RefObject } from 'react';
 import type { MessagesProps } from '@copilotkit/react-ui';
 import { useCopilotChatInternal } from '@copilotkit/react-core';
+import { Bot } from 'lucide-react';
 import { ChatEmptyState } from '../ChatEmptyState';
 import { ChatHistoryLoading } from '../ChatHistoryLoading';
+import { TypingIndicator } from '../TypingIndicator';
 import { useScrollToBottom } from '@/hooks';
 import {
   COAGENT_STATE_RENDER_MESSAGE_NAME,
@@ -78,6 +80,17 @@ const normalizeMessages = (messages: ChatMessage[]): ChatMessage[] => {
     .reverse();
 };
 
+const PendingAssistantMessage = () => (
+  <div className="flex max-w-[80%] gap-3 py-2">
+    <div className="bg-assistant-gradient flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white">
+      <Bot size={18} aria-hidden="true" />
+    </div>
+    <div className="bg-background-secondary text-text-primary rounded-[28px] px-4 py-2 shadow">
+      <TypingIndicator className="p-0" />
+    </div>
+  </div>
+);
+
 /**
  * Custom messages area for CopilotKit's `Messages` prop.
  * Shows the empty state when there are no messages, otherwise renders the message list.
@@ -92,6 +105,11 @@ const ChatMessages = ({
   ...restProps
 }: ChatMessagesProps) => {
   const displayMessages = useMemo(() => normalizeMessages(messages), [messages]);
+  const latestConversationMessage = [...displayMessages]
+    .reverse()
+    .find((message) => !('name' in message) || message.name !== COAGENT_STATE_RENDER_MESSAGE_NAME);
+  const showPendingAssistant =
+    inProgress && (!latestConversationMessage || latestConversationMessage.role === 'user');
 
   const { scrollContainerRef } = useScrollToBottom(displayMessages.length);
   const { interrupt } = useCopilotChatInternal();
@@ -132,6 +150,7 @@ const ChatMessages = ({
                 {...restProps}
               />
             ))}
+            {showPendingAssistant && <PendingAssistantMessage />}
             {interrupt}
           </div>
           {children}

@@ -104,6 +104,29 @@ describe('ChatMessages', () => {
       expect(screen.getAllByTestId('message')).toHaveLength(1);
     });
 
+    it('shows a typing indicator while waiting for the first assistant message', () => {
+      render(<ChatMessages {...defaultProps} messages={[makeMessage('user-1')]} inProgress />);
+
+      expect(screen.getByRole('status', { name: 'AI is thinking' })).toBeInTheDocument();
+    });
+
+    it('does not duplicate the typing indicator after an assistant message arrives', () => {
+      const assistantMessage = {
+        ...makeMessage('assistant-1', 'assistant'),
+        content: 'I can help with that.',
+      } as CKMessage;
+
+      render(
+        <ChatMessages
+          {...defaultProps}
+          messages={[makeMessage('user-1'), assistantMessage]}
+          inProgress
+        />
+      );
+
+      expect(screen.queryByRole('status', { name: 'AI is thinking' })).not.toBeInTheDocument();
+    });
+
     it('renders one booking tool call when resume replays it with new message IDs', () => {
       const messages = [
         makeBookingMessage('assistant-1', 'tool-1'),

@@ -2,6 +2,7 @@ export * from './useBookedActions';
 export * from './useBookingInfo';
 export * from './useFlightAction';
 export * from './useHotelAction';
+export * from './useConversationMessages';
 export * from './useInjectThreadHistory';
 export * from './useLocalTipsAction';
 export * from './usePlacesAction';

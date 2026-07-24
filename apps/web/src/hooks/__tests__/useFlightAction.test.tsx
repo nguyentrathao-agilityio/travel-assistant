@@ -21,6 +21,7 @@ jest.mock('@/components', () => ({
 }));
 
 jest.mock('@/utils', () => ({
+  ...jest.requireActual('@/utils/toolResult'),
   isToolPending: (status: string) => status === 'inProgress' || status === 'executing',
 }));
 
@@ -90,6 +91,20 @@ describe('useFlightAction', () => {
       args: { origin: 'HAN', destination: 'SGN' },
     });
     expect(result).not.toBeNull();
+    const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;
+    expect(card).not.toBeNull();
+  });
+
+  it('renders a persisted flight result serialized as JSON', () => {
+    renderHook(() => useFlightAction());
+    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
+    const serializedResult = JSON.stringify({
+      count: 1,
+      results: [{ id: 'f1', flightNumber: 'VN100' }],
+    });
+
+    const result = render({ status: 'complete', result: serializedResult, args: {} });
+
     const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;
     expect(card).not.toBeNull();
   });

@@ -20,6 +20,9 @@ import { TOOL_NAMES, TOOL_STATUS } from '@/constants';
 // Types
 import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
 
+// Utils
+import { parseToolResult } from '@/utils';
+
 const bookingResultSchema = z.object({
   id: z.string(),
   confirmationCode: z.string(),
@@ -84,15 +87,6 @@ const bookingToolParameters: Record<string, ToolParameterDefinition[]> = {
   [TOOL_NAMES.CANCEL_BOOKING]: [
     { name: 'bookingId', type: 'string', description: 'Booking ID', required: true },
   ],
-};
-
-const parseToolResult = (result: unknown): unknown => {
-  if (typeof result !== 'string') return result;
-  try {
-    return JSON.parse(result) as unknown;
-  } catch {
-    return result;
-  }
 };
 
 const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean) => {

@@ -8,7 +8,7 @@ import { TOOL_NAMES, TOOL_STATUS } from '@/constants';
 import { HotelCard, SetLastTool, ToolLoading } from '@/components';
 
 // Utils
-import { isToolPending } from '@/utils';
+import { isToolPending, safeParseToolResult } from '@/utils';
 
 // Hooks
 import { useTripState } from '@/hooks';
@@ -65,7 +65,7 @@ export const useHotelAction = () => {
         );
 
       if (status === TOOL_STATUS.COMPLETE && result) {
-        const parsed = HotelSearchResultSchema.safeParse(result);
+        const parsed = safeParseToolResult(HotelSearchResultSchema, result);
         if (!parsed.success) return <></>;
         if (parsed.data.results.length === 0) return <></>;
 

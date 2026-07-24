@@ -5,7 +5,7 @@ import { useCopilotChatInternal, useRenderToolCall } from '@copilotkit/react-cor
 import { FlightCard, SetLastTool, ToolLoading } from '@/components';
 
 // Utils
-import { isToolPending } from '@/utils';
+import { isToolPending, parseToolResult } from '@/utils';
 
 // Constants
 import { FLIGHT_BASE_PARAMS, TOOL_NAMES } from '@/constants';
@@ -14,7 +14,7 @@ import { FLIGHT_BASE_PARAMS, TOOL_NAMES } from '@/constants';
 import { useTripState } from '@/hooks';
 
 // Types
-import type { Flight } from '@repo/types';
+import type { Flight, FlightSearchResult } from '@repo/types';
 
 const FLIGHT_SEARCH_REQUIRED = ['origin', 'destination', 'departure_date'];
 
@@ -52,22 +52,24 @@ export const useFlightAction = () => {
             target={`flights from ${args.origin} to ${args.destination} on ${args.departure_date}`}
           />
         );
-      if (!result?.results) return <></>;
-      if (!result?.results?.length) return <></>;
+      const parsedResult = parseToolResult(result) as FlightSearchResult | undefined;
+      if (!parsedResult?.results?.length) return <></>;
 
       const confirmedDeparture =
-        result?.results?.find((flight: Flight) => flight.id === state?.flights?.departure?.id) ??
-        null;
+        parsedResult.results.find(
+          (flight: Flight) => flight.id === state?.flights?.departure?.id
+        ) ?? null;
       const confirmedReturn =
-        result?.returnResults?.find((flight: Flight) => flight.id === state?.flights?.return?.id) ??
-        null;
+        parsedResult.returnResults?.find(
+          (flight: Flight) => flight.id === state?.flights?.return?.id
+        ) ?? null;
       const isConfirmed = !!confirmedDeparture;
 
       return (
         <>
           <SetLastTool toolName={TOOL_NAMES.FLIGHTS} />
           <FlightCard
-            data={result}
+            data={parsedResult}
             {...args}
             onSelect={selectFlight}
             onContinueBooking={handleContinueBooking}

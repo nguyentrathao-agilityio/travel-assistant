@@ -12,6 +12,7 @@ import { useThreadStore } from '@/stores';
 // Hooks
 import {
   useBookedActions,
+  useBookingAction,
   useBookingInfo,
   useDestinationExplorerAction,
   useFlightAction,
@@ -51,6 +52,7 @@ export const TravelChat = () => {
   isHistoryLoadingRef.current = isHistoryLoading;
 
   useBookingInfo();
+  useBookingAction();
   useFlightAction();
   useHotelAction();
   useWeatherAction();

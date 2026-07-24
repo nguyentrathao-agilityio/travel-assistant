@@ -13,9 +13,8 @@ import type { SelectedFlight, Hotel } from '@repo/types';
 import { TripSummaryResult } from '@repo/schemas';
 
 // Utils
-import { cn } from '@/utils';
+import { cn, replaceCostEstimateWithBookings } from '@/utils';
 import { useMemo } from 'react';
-import { replaceCostEstimateWithBookings } from '@/utils/summary';
 
 interface TripSummaryCardProps {
   /** Full summary from the trip-summary-tool */

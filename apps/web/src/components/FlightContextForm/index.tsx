@@ -6,8 +6,7 @@ import { Plane } from 'lucide-react';
 import { Button, Card, Divider } from '@/components';
 
 // Utils
-import { cn } from '@/utils';
-import { todayClientIso } from '@/utils/date';
+import { cn, todayClientIso } from '@/utils';
 
 // Constants
 import { FLIGHT_OPTIONAL_FIELDS, FLIGHT_REQUIRED_FIELDS } from '@/constants';

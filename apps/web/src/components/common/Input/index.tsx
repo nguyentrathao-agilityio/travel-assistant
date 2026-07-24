@@ -1,7 +1,7 @@
 import { memo, useCallback, useId } from 'react';
 import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react';
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/utils';
 import { Search } from 'lucide-react';
 
 interface InputProps {

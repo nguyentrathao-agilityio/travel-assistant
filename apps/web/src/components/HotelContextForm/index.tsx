@@ -5,8 +5,7 @@ import type { ChangeEvent } from 'react';
 import { Button } from '@/components';
 
 // Utils
-import { cn } from '@/utils';
-import { todayClientIso } from '@/utils/date';
+import { cn, todayClientIso } from '@/utils';
 
 // Constants
 import { HOTEL_OPTIONAL_FIELDS, HOTEL_REQUIRED_FIELDS } from '@/constants';

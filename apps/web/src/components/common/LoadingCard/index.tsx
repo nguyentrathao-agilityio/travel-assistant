@@ -1,5 +1,5 @@
 // components/common/LoadingCard.tsx
-import { cn } from '@/utils/cn';
+import { cn } from '@/utils';
 
 const SkeletonLine = ({
   width = 'w-full',

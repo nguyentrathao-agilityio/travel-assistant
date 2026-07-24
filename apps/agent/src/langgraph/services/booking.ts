@@ -1,0 +1,164 @@
+import { createHash } from 'node:crypto';
+import { z } from 'zod';
+
+import { API_URL, ENDPOINTS, ERROR_MESSAGES } from '../constants';
+import {
+  ApiBookingSchema,
+  ApiFlightSchema,
+  BookingSchema,
+  FlightBookingInputSchema,
+  HotelBookingInputSchema,
+  HotelSearchResponseSchema,
+} from '../schemas';
+import type {
+  Booking,
+  CancelBookingInput,
+  FlightBookingInput,
+  HotelBookingInput,
+} from '../schemas';
+
+type ApiBooking = z.infer<typeof ApiBookingSchema>;
+
+const mapApiBooking = (apiBooking: ApiBooking): Booking => ({
+  id: apiBooking.id,
+  confirmationCode: apiBooking.confirmation_code,
+  type: apiBooking.type,
+  referenceId: apiBooking.reference_id,
+  customerName: apiBooking.customer_name,
+  customerEmail: apiBooking.customer_email,
+  totalPrice: apiBooking.total_price,
+  currency: apiBooking.currency,
+  status: apiBooking.status,
+  createdAt: apiBooking.created_at,
+  ...(apiBooking.details && { details: apiBooking.details }),
+  ...(apiBooking.notes && { notes: apiBooking.notes }),
+  summary: apiBooking.summary,
+});
+
+const parseBookingResponse = async (response: Response): Promise<Booking> => {
+  const responseBody: unknown = await response.json();
+  const apiBooking = ApiBookingSchema.safeParse(responseBody);
+
+  if (!apiBooking.success) throw new Error('Invalid booking response');
+
+  const booking = BookingSchema.safeParse(mapApiBooking(apiBooking.data));
+  if (!booking.success) throw new Error('Invalid mapped booking response');
+
+  return booking.data;
+};
+
+const createIdempotencyKey = (action: string, payload: object): string =>
+  createHash('sha256')
+    .update(`${action}:${JSON.stringify(payload)}`)
+    .digest('hex');
+
+const request = async (path: string, init?: RequestInit): Promise<Response> => {
+  if (!API_URL) throw new Error(ERROR_MESSAGES.NO_API_URL);
+  const response = await fetch(`${API_URL}${path}`, init);
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`${response.status} ${message || response.statusText}`);
+  }
+  return response;
+};
+
+export const getFlight = async (flightId: string) => {
+  const response = await request(`${ENDPOINTS.FLIGHTS}/${encodeURIComponent(flightId)}`);
+  const responseBody: unknown = await response.json();
+  const flight = ApiFlightSchema.safeParse(responseBody);
+
+  if (!flight.success) throw new Error('Invalid flight response');
+
+  return flight.data;
+};
+
+export const revalidateHotel = async (input: HotelBookingInput) => {
+  const validated = HotelBookingInputSchema.parse(input);
+  const params = new URLSearchParams({
+    city: validated.city,
+    check_in: validated.checkIn,
+    check_out: validated.checkOut,
+    rooms: String(validated.rooms),
+    adults: String(validated.adults),
+    children: String(validated.children),
+    available_only: 'true',
+  });
+  const response = await request(`${ENDPOINTS.HOTELS}?${params.toString()}`);
+  const responseBody: unknown = await response.json();
+  const availability = HotelSearchResponseSchema.safeParse(responseBody);
+
+  if (!availability.success) throw new Error('Invalid hotel availability response');
+
+  const hotel = availability.data.results.find(({ id }) => id === validated.hotelId);
+  if (!hotel?.available) throw new Error('The selected hotel is no longer available');
+  if (hotel.available_rooms < validated.rooms) throw new Error('Not enough rooms are available');
+
+  return hotel;
+};
+
+export const bookFlight = async (input: FlightBookingInput): Promise<Booking> => {
+  const validated = FlightBookingInputSchema.parse(input);
+  const flight = await getFlight(validated.flightId);
+  if (flight.seats_available < validated.adults) {
+    throw new Error('Not enough seats are available');
+  }
+  const payload = {
+    flight_number: flight.flight_number,
+    origin: flight.origin,
+    destination: flight.destination,
+    departure_date: flight.departure_time.slice(0, 10),
+    passenger_name: validated.customerName,
+    passenger_email: validated.customerEmail,
+    passenger_phone: validated.customerPhone,
+    ...(validated.notes && { notes: validated.notes }),
+  };
+  const response = await request(ENDPOINTS.FLIGHT_BOOKING, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'Idempotency-Key': createIdempotencyKey('flight', payload),
+    },
+    body: JSON.stringify(payload),
+  });
+  return parseBookingResponse(response);
+};
+
+export const bookHotel = async (input: HotelBookingInput): Promise<Booking> => {
+  const validated = HotelBookingInputSchema.parse(input);
+  await revalidateHotel(validated);
+  const payload = {
+    hotel_id: validated.hotelId,
+    check_in: validated.checkIn,
+    check_out: validated.checkOut,
+    rooms: validated.rooms,
+    adults: validated.adults,
+    children: validated.children,
+    guest_name: validated.customerName,
+    guest_email: validated.customerEmail,
+    guest_phone: validated.customerPhone,
+    ...(validated.notes && { notes: validated.notes }),
+  };
+  const response = await request(ENDPOINTS.HOTEL_BOOKING, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'Idempotency-Key': createIdempotencyKey('hotel', payload),
+    },
+    body: JSON.stringify(payload),
+  });
+  return parseBookingResponse(response);
+};
+
+export const getBooking = async (bookingId: string): Promise<Booking> => {
+  const response = await request(`${ENDPOINTS.BOOKINGS}/${encodeURIComponent(bookingId)}`);
+  return parseBookingResponse(response);
+};
+
+export const cancelBooking = async (input: CancelBookingInput): Promise<Booking> => {
+  await getBooking(input.bookingId);
+  const response = await request(
+    `${ENDPOINTS.BOOKINGS}/${encodeURIComponent(input.bookingId)}/cancel`,
+    { method: 'POST' }
+  );
+  return parseBookingResponse(response);
+};

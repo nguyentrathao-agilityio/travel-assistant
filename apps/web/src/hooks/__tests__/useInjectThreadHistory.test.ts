@@ -1,13 +1,7 @@
-import { renderHook } from '@testing-library/react';
-import { useInjectThreadHistory } from '@/hooks/useInjectThreadHistory';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { useThreadHistory } from '@/hooks/useThreadHistory';
 import { langgraphClient } from '@/lib';
-
-let mockIsAvailable = true;
-const mockSetMessages = jest.fn();
-
-jest.mock('@copilotkit/react-core', () => ({
-  useCopilotChatInternal: () => ({ setMessages: mockSetMessages, isAvailable: mockIsAvailable }),
-}));
+import type { LangGraphRawMessage } from '@/utils';
 
 jest.mock('@/constants', () => ({
   AGENT_NAME: 'travelAgent',
@@ -16,61 +10,56 @@ jest.mock('@/constants', () => ({
 
 jest.mock('@/lib', () => ({
   langgraphClient: {
-    threads: { getState: jest.fn().mockResolvedValue({ values: { messages: [] } }) },
+    threads: { get: jest.fn().mockResolvedValue({ values: { messages: [] } }) },
   },
 }));
 
 jest.mock('sonner', () => ({ toast: { error: jest.fn() } }));
 
 jest.mock('@/utils', () => ({
-  toAgUiMessage: () => null,
+  toAgUiMessage: jest.fn(() => null),
 }));
 
-const mockGetState = langgraphClient.threads.getState as jest.Mock;
+const mockGetThread = langgraphClient.threads.get as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockIsAvailable = true;
 });
 
-describe('useInjectThreadHistory', () => {
-  it('does not fetch when isResumed is false', () => {
-    renderHook(() => useInjectThreadHistory('thread-1', false));
-    expect(mockGetState).not.toHaveBeenCalled();
+describe('useThreadHistory', () => {
+  it('loads every valid thread ID, including a newly created thread', async () => {
+    const { result } = renderHook(() => useThreadHistory('thread-1'));
+    expect(mockGetThread).toHaveBeenCalledWith('thread-1');
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
   });
 
   it('does not fetch when threadId is empty string', () => {
-    renderHook(() => useInjectThreadHistory('', true));
-    expect(mockGetState).not.toHaveBeenCalled();
+    renderHook(() => useThreadHistory(''));
+    expect(mockGetThread).not.toHaveBeenCalled();
   });
 
-  it('fetches messages when isResumed=true and threadId is provided', () => {
-    renderHook(() => useInjectThreadHistory('thread-1', true));
-    expect(mockGetState).toHaveBeenCalledWith('thread-1');
+  it('fetches messages when threadId is provided', async () => {
+    const { result } = renderHook(() => useThreadHistory('thread-1'));
+    expect(mockGetThread).toHaveBeenCalledWith('thread-1');
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
   });
 
-  it('does not fetch while CopilotKit agent connection is not yet available', () => {
-    mockIsAvailable = false;
-    renderHook(() => useInjectThreadHistory('thread-1', true));
-    expect(mockGetState).not.toHaveBeenCalled();
-  });
+  it('returns converted history independently from CopilotKit live state', async () => {
+    const { toAgUiMessage } = jest.requireMock('@/utils');
+    const converted = { id: 'message-1', role: 'user', content: 'hello' };
+    jest.mocked(toAgUiMessage).mockReturnValueOnce(converted);
+    mockGetThread.mockResolvedValueOnce({
+      values: { messages: [{ id: 'message-1', type: 'human', content: 'hello' }] },
+    });
 
-  it('fetches once the agent connection becomes available', () => {
-    mockIsAvailable = false;
-    const { rerender } = renderHook(
-      ({ threadId, isResumed }) => useInjectThreadHistory(threadId, isResumed),
-      { initialProps: { threadId: 'thread-1', isResumed: true } }
-    );
-    expect(mockGetState).not.toHaveBeenCalled();
+    const { result } = renderHook(() => useThreadHistory('thread-1'));
 
-    mockIsAvailable = true;
-    rerender({ threadId: 'thread-1', isResumed: true });
-    expect(mockGetState).toHaveBeenCalledWith('thread-1');
+    await waitFor(() => expect(result.current.messages).toEqual([converted]));
   });
 
   it('does not error when the thread has never had a run (no values field)', async () => {
     const { toast } = jest.requireMock('sonner');
-    mockGetState.mockResolvedValueOnce({
+    mockGetThread.mockResolvedValueOnce({
       thread_id: 'thread-1',
       // no `values` key at all — matches the real API for a never-run thread
       next: [],
@@ -81,10 +70,54 @@ describe('useInjectThreadHistory', () => {
       tasks: [],
     });
 
-    const { result } = renderHook(() => useInjectThreadHistory('thread-1', true));
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    const { result } = renderHook(() => useThreadHistory('thread-1'));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(toast.error).not.toHaveBeenCalled();
     expect(result.current.error).toBeNull();
+  });
+
+  it('ignores a stale response after switching threads', async () => {
+    const { toAgUiMessage } = jest.requireMock('@/utils');
+    let resolveFirstRequest:
+      | ((state: { values: { messages: Array<{ id: string; content: string }> } }) => void)
+      | undefined;
+
+    mockGetThread
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFirstRequest = resolve;
+          })
+      )
+      .mockResolvedValueOnce({
+        values: { messages: [{ id: 'thread-2-message', content: 'second' }] },
+      });
+    jest.mocked(toAgUiMessage).mockImplementation((message: LangGraphRawMessage) => ({
+      id: message.id,
+      role: 'user',
+      content: String(message.content),
+    }));
+
+    const { result, rerender } = renderHook(({ threadId }) => useThreadHistory(threadId), {
+      initialProps: { threadId: 'thread-1' },
+    });
+
+    rerender({ threadId: 'thread-2' });
+    await waitFor(() =>
+      expect(result.current.messages).toEqual([
+        { id: 'thread-2-message', role: 'user', content: 'second' },
+      ])
+    );
+
+    act(() => {
+      resolveFirstRequest?.({
+        values: { messages: [{ id: 'thread-1-message', content: 'first' }] },
+      });
+    });
+
+    expect(result.current.messages).toEqual([
+      { id: 'thread-2-message', role: 'user', content: 'second' },
+    ]);
   });
 });

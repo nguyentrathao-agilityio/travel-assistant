@@ -1,56 +1,36 @@
-import { createAgent, dynamicSystemPromptMiddleware } from 'langchain';
+import { END, START, StateGraph } from '@langchain/langgraph';
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
-import { createCopilotkitMiddleware } from '@copilotkit/sdk-js/langgraph';
 
-// State
+import { EXTERNAL_API_RETRY_POLICY, POSTGRES_URL } from './constants';
+import {
+  BRANCH_NAMES,
+  bookFlightBranch,
+  bookHotelBranch,
+  cancelBookingBranch,
+  classifyNode,
+  exploreBranch,
+  generalBranch,
+  planBranch,
+} from './nodes';
 import { GraphState } from './state';
 
-// Tools
-import {
-  weatherTool,
-  flightsTool,
-  hotelTool,
-  routeTool,
-  placesTool,
-  tipsTool,
-  tripSummaryTool,
-  destinationExplorerTool,
-  bookFlightTool,
-  bookHotelTool,
-  cancelBookingTool,
-} from './tools';
+export const buildGraph = () =>
+  new StateGraph(GraphState)
+    .addNode('classify', classifyNode, { ends: BRANCH_NAMES })
+    .addNode('explore', exploreBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
+    .addNode('plan', planBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
+    .addNode('bookFlight', bookFlightBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
+    .addNode('bookHotel', bookHotelBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
+    .addNode('cancelBooking', cancelBookingBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
+    .addNode('general', generalBranch)
+    .addEdge(START, 'classify')
+    .addEdge('explore', END)
+    .addEdge('plan', END)
+    .addEdge('bookFlight', END)
+    .addEdge('bookHotel', END)
+    .addEdge('cancelBooking', END)
+    .addEdge('general', END);
 
-// LLM
-import { createChatModel } from './llm';
-
-// Persistence
-import { OPENAI_API_KEY, POSTGRES_URL } from './constants';
-
-// Utils
-import { buildSystemPrompt } from './utils';
-import type { GraphStateType } from './state';
-
-const agent = createAgent({
-  model: createChatModel({ apiKey: OPENAI_API_KEY! }),
-  tools: [
-    weatherTool,
-    flightsTool,
-    hotelTool,
-    routeTool,
-    placesTool,
-    tipsTool,
-    tripSummaryTool,
-    destinationExplorerTool,
-    bookFlightTool,
-    bookHotelTool,
-    cancelBookingTool,
-  ],
-  stateSchema: GraphState,
-  middleware: [
-    createCopilotkitMiddleware({ exposeState: false }),
-    dynamicSystemPromptMiddleware((state) => buildSystemPrompt(state as unknown as GraphStateType)),
-  ],
+export const graph = buildGraph().compile({
   checkpointer: PostgresSaver.fromConnString(POSTGRES_URL!),
 });
-
-export const graph = agent.graph;

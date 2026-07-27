@@ -27,7 +27,7 @@ Before writing any code, answer these:
 
 If the root cause is unknown → say so explicitly before attempting a fix.
 
-If the bug is in `apps/agent`, it's in `src/langgraph/` — that's the only agent tree (`langgraph.json` deploys it).
+If the bug is in `apps/agent`, it's in `src/` — that's the only agent tree (`langgraph.json` deploys it).
 
 ---
 
@@ -190,7 +190,7 @@ execute: async ({ context }) => {
 
 ### 7. LangChain tool returns an object instead of a string
 
-Specific to `src/langgraph/tools/`. This one is easy to miss because it compiles and the happy path can even work depending on how the runtime stringifies it — the failure shows up as the CopilotKit action getting an unparseable `result`.
+Specific to `src/tools/`. This one is easy to miss because it compiles and the happy path can even work depending on how the runtime stringifies it — the failure shows up as the CopilotKit action getting an unparseable `result`.
 
 ```typescript
 // ❌ Bug: tool() requires a string return; TypeScript does not enforce this

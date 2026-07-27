@@ -8,10 +8,7 @@
     "rootDir": "src",
     "lib": ["ES2022"],
     "declaration": false,
-    "declarationMap": false,
-    "paths": {
-      "@langgraph/*": ["./src/langgraph/*"]
-    }
+    "declarationMap": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

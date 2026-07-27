@@ -29,5 +29,5 @@ Before implementing or reviewing any agent-tool integration (LangGraph tool → 
 - `lucide-react` for all icons
 - No hardcoded colors — CSS variables + Tailwind tokens only
 - Zod `safeParse` for all external data — throw on failure
-- LangChain tools (`apps/agent/src/langgraph/tools/`) must `return JSON.stringify(result)` — a string, not an object; TypeScript won't catch a plain-object return here
+- LangChain tools (`apps/agent/src/tools/`) must `return JSON.stringify(result)` — a string, not an object; TypeScript won't catch a plain-object return here
 - `review.md` checklist before every response — no exceptions

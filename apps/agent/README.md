@@ -41,4 +41,4 @@ npx http-server .
 # Opens http://localhost:8080
 ```
 
-Test files live alongside their source under `src/langgraph/**/__tests__/`.
+Test files live alongside their source under `src/**/__tests__/`.

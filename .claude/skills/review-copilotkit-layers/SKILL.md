@@ -11,12 +11,12 @@ A tool integration here spans three files across two frameworks' contracts: a La
 
 ## Checklist
 
-**LangChain tool — `src/langgraph/tools/*.ts`**
+**LangChain tool — `src/tools/*.ts`**
 
 - [ ] Returns `JSON.stringify(result)` — a **string** — not a raw object. LangChain's `tool()` contract requires a string return. Returning an object breaks the CopilotKit action's ability to parse `result`, and TypeScript does not catch this — `tool()`'s inferred return type doesn't enforce it.
 - [ ] Body wrapped in try/catch; errors returned as `JSON.stringify({ error: ... })` rather than thrown raw (see `tools/weather.ts`).
 
-**Service — `src/langgraph/services/*.ts`**
+**Service — `src/services/*.ts`**
 
 - [ ] Checks `res.ok` before parsing — a non-2xx response must throw a clear error, not get parsed as JSON (which throws an opaque `SyntaxError` on an HTML error page).
 - [ ] Validates the parsed response with Zod `safeParse`, throws on failure — don't let an unvalidated shape reach the UI.

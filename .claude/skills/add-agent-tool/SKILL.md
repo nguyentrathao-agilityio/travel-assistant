@@ -11,15 +11,15 @@ A new domain capability touches ~15-19 files across the agent backend, shared pa
 
 ## Where to build
 
-`apps/agent/src/langgraph/` is the only agent tree (wired into `langgraph.json`, `pnpm dev`). Build new tools here.
+`apps/agent/src/` is the only agent tree (wired into `langgraph.json`, `pnpm dev`). Build new tools here.
 
-`src/langgraph/schemas/*` inlines its own schemas rather than importing `@repo/schemas` (see the "now inlined for full independence" comment in `schemas/hotel.ts`) — follow that: define the new domain's schemas directly under `src/langgraph/schemas/`. `packages/types` (`@repo/types`) is still the real shared contract for frontend-facing shapes (`TripState`, `HotelAvailability`, etc.) — add new shared types there.
+`src/schemas/*` inlines its own schemas rather than importing `@repo/schemas` (see the "now inlined for full independence" comment in `schemas/hotel.ts`) — follow that: define the new domain's schemas directly under `src/schemas/`. `packages/types` (`@repo/types`) is still the real shared contract for frontend-facing shapes (`TripState`, `HotelAvailability`, etc.) — add new shared types there.
 
 ## File checklist
 
 Pick the closest existing domain and mirror it file-for-file (`hotel` = date range + single pick, richest example; `flights` = departure/return pair; `weather`/`tips` = single lookup, no selection state).
 
-**Backend — `apps/agent/src/langgraph/`**
+**Backend — `apps/agent/src/`**
 
 1. `schemas/<domain>.ts` — input schema, API response schema (snake_case), tool-output schema (camelCase)
 2. `services/<domain>.ts` — fetch + `res.ok` check + Zod `safeParse` + snake_case→camelCase mapping (see `services/weather.ts`)
@@ -47,7 +47,7 @@ Pick the closest existing domain and mirror it file-for-file (`hotel` = date ran
 
 ## Before writing code
 
-State the plan (which files, mirroring which existing domain) and get it confirmed — this is a 15+ file change, and `.claude/docs/implement.md` already requires a confirmed plan before touching existing files. Call out anything you're inferring rather than confirming as open questions: the shape of the external API endpoint (lives outside this repo), whether `packages/schemas` (`@repo/schemas`, still used by some frontend code) also needs an entry, whether tests are expected (see existing `**/__tests__/` folders under `src/langgraph/` for the current pattern — Vitest, `vi.mock`/`vi.hoisted` for mocking).
+State the plan (which files, mirroring which existing domain) and get it confirmed — this is a 15+ file change, and `.claude/docs/implement.md` already requires a confirmed plan before touching existing files. Call out anything you're inferring rather than confirming as open questions: the shape of the external API endpoint (lives outside this repo), whether `packages/schemas` (`@repo/schemas`, still used by some frontend code) also needs an entry, whether tests are expected (see existing `**/__tests__/` folders under `src/` for the current pattern — Vitest, `vi.mock`/`vi.hoisted` for mocking).
 
 ## After writing code
 

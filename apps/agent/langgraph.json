@@ -2,10 +2,10 @@
   "node_version": "24",
   "dependencies": ["."],
   "graphs": {
-    "travel": "./dist/langgraph/agent.js:graph"
+    "travel": "./dist/agent.js:graph"
   },
   "http": {
-    "app": "./dist/langgraph/api/app.js:app"
+    "app": "./dist/api/app.js:app"
   },
   "env": ".env",
   "dockerfile_lines": []

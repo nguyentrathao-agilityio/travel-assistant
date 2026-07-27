@@ -447,14 +447,14 @@ Layer 3 — Generative UI       renders data, never fetches
 Layer 4 — Chat UI             handles stream indicators
 ```
 
-### Layer 1 — Agent Tool (`apps/agent/src/langgraph/tools/`)
+### Layer 1 — Agent Tool (`apps/agent/src/tools/`)
 
 **Responsibility:** fetch, validate with Zod, throw on failure. No UI logic.
 
-New tools go in `apps/agent/src/langgraph/tools/`. LangChain's `tool()` has a contract to watch for: **the execute function must return a string**, typically `JSON.stringify(result)`. Returning a raw object compiles fine but breaks the CopilotKit action's ability to parse `result` at runtime — see the `review-copilotkit-layers` skill for the full list of this-stack-specific failure modes.
+New tools go in `apps/agent/src/tools/`. LangChain's `tool()` has a contract to watch for: **the execute function must return a string**, typically `JSON.stringify(result)`. Returning a raw object compiles fine but breaks the CopilotKit action's ability to parse `result` at runtime — see the `review-copilotkit-layers` skill for the full list of this-stack-specific failure modes.
 
 ```typescript
-// tools/weather.ts (apps/agent/src/langgraph/tools/weather.ts, real pattern)
+// tools/weather.ts (apps/agent/src/tools/weather.ts, real pattern)
 import { tool } from '@langchain/core/tools';
 import { getWeather } from '../services/weather';
 import { WeatherInputSchema } from '../schemas/weather';

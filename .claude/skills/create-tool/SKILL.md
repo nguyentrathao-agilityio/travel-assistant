@@ -1,6 +1,6 @@
 ---
 name: create-tool
-description: Use when writing or reviewing a single LangChain tool in this repo — a new tool() wrapper under src/langgraph/tools/ plus its schema and service — for a backend-only tool or an additional tool on an existing domain, not a full new domain with frontend UI.
+description: Use when writing or reviewing a single LangChain tool in this repo — a new tool() wrapper under src/tools/ plus its schema and service — for a backend-only tool or an additional tool on an existing domain, not a full new domain with frontend UI.
 ---
 
 # Create Tool
@@ -16,9 +16,9 @@ A LangChain tool in this repo is always 3 files: schema, service, tool wrapper �
 
 ## The 3 files
 
-1. **Schema** (`src/langgraph/schemas/<name>.ts`) — 3 schemas per tool: input schema (what the LLM must provide), API response schema (snake_case, matches the raw external API), tool-output schema (camelCase, what the service returns after mapping).
+1. **Schema** (`src/schemas/<name>.ts`) — 3 schemas per tool: input schema (what the LLM must provide), API response schema (snake_case, matches the raw external API), tool-output schema (camelCase, what the service returns after mapping).
 
-2. **Service** (`src/langgraph/services/<name>.ts`) — real pattern, from `services/weather.ts`:
+2. **Service** (`src/services/<name>.ts`) — real pattern, from `services/weather.ts`:
 
 ```typescript
 export const searchX = async (input: { /* ... */ }): Promise<XToolOutput> => {
@@ -45,7 +45,7 @@ export const searchX = async (input: { /* ... */ }): Promise<XToolOutput> => {
 };
 ```
 
-3. **Tool** (`src/langgraph/tools/<name>.ts`) — the LangChain wrapper, from `tools/weather.ts`:
+3. **Tool** (`src/tools/<name>.ts`) — the LangChain wrapper, from `tools/weather.ts`:
 
 ```typescript
 export const xTool = tool(

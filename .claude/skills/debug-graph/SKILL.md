@@ -7,11 +7,11 @@ description: Use when a LangGraph agent run in this repo misbehaves — a tool n
 
 ## Overview
 
-`apps/agent/src/langgraph` is a two-node `StateGraph` (`agent` ⇄ `toolExecutor`) with no LangGraph-native checkpointer and no LangGraph-native `interrupt()` — this repo's HITL and persistence both work differently than textbook LangGraph, which is the source of most confusing bugs here. Check the actual mechanism below before assuming standard LangGraph semantics.
+`apps/agent/src` is a two-node `StateGraph` (`agent` ⇄ `toolExecutor`) with no LangGraph-native checkpointer and no LangGraph-native `interrupt()` — this repo's HITL and persistence both work differently than textbook LangGraph, which is the source of most confusing bugs here. Check the actual mechanism below before assuming standard LangGraph semantics.
 
 ## Persistence: no checkpointer in code
 
-`grep -rn "checkpointer\|MemorySaver\|PostgresSaver" apps/agent/src/langgraph` returns nothing — `agent.ts` compiles with `.compile()` and no checkpointer option. Persistence is entirely external: `pnpm dev` runs `langgraphjs up --postgres-uri "$POSTGRES_URL" --port 8123`, so threads/state persist because the CLI attaches Postgres, not because the graph asked for it.
+`grep -rn "checkpointer\|MemorySaver\|PostgresSaver" apps/agent/src` returns nothing — `agent.ts` compiles with `.compile()` and no checkpointer option. Persistence is entirely external: `pnpm dev` runs `langgraphjs up --postgres-uri "$POSTGRES_URL" --port 8123`, so threads/state persist because the CLI attaches Postgres, not because the graph asked for it.
 
 **Implication:** `pnpm dev:studio` (`langgraphjs dev --port 8124`) does **not** pass `--postgres-uri` — it's a separate, unpersisted instance on a different port. If a thread's state "disappears" while debugging, check which of the two dev servers (:8123 vs :8124) you're actually pointed at before suspecting a code bug.
 
@@ -31,7 +31,7 @@ If a tool "does nothing" when called, check in this order:
 
 ## Human-in-the-loop: no LangGraph `interrupt()` — this is a CopilotKit-only mechanism
 
-There is no `interrupt()`/`NodeInterrupt`/`Command` anywhere in `apps/agent/src/langgraph`. What looks like an interrupt is actually: a frontend hook (`useFlightSelectionGate.tsx`, `useHotelBookingGate.tsx`) registers a CopilotKit `useHumanInTheLoop` action (e.g. `waitForFlightSelection`), which — while the hook is mounted — gets synced into the graph's `state.tools` and bound alongside backend tools in `nodes/call-model.ts`. When the LLM calls that action, `routeAfterAgent` sees a non-local tool name and routes to `END`, and CopilotKit's AG-UI bridge surfaces it to the frontend as a pending action — no graph-side pause/resume involved at all.
+There is no `interrupt()`/`NodeInterrupt`/`Command` anywhere in `apps/agent/src`. What looks like an interrupt is actually: a frontend hook (`useFlightSelectionGate.tsx`, `useHotelBookingGate.tsx`) registers a CopilotKit `useHumanInTheLoop` action (e.g. `waitForFlightSelection`), which — while the hook is mounted — gets synced into the graph's `state.tools` and bound alongside backend tools in `nodes/call-model.ts`. When the LLM calls that action, `routeAfterAgent` sees a non-local tool name and routes to `END`, and CopilotKit's AG-UI bridge surfaces it to the frontend as a pending action — no graph-side pause/resume involved at all.
 
 **If a HITL gate never fires, check in this order** (this exact chain is broken today for both existing gates):
 

@@ -16,7 +16,7 @@ You are a **Senior Frontend Engineer** with deep expertise in:
 - **Zod** (schema validation, `safeParse`, typed outputs)
 - **lucide-react** (icon library — replaces Tabler)
 - **CopilotKit** (`useRenderToolCall` — this repo's actual convention, not raw `useCopilotAction` — `useCoAgent`, `useCopilotReadable`, `CopilotChat`)
-- **LangChain / LangGraph** (`apps/agent/src/langgraph` — the agent backend: tools, `StateGraph`, checkpointing)
+- **LangChain / LangGraph** (`apps/agent/src` — the agent backend: tools, `StateGraph`, checkpointing)
 
 ---
 
@@ -42,7 +42,7 @@ apps/web/src/
 └── styles/                      # Global styles, CSS variables
 ```
 
-Agent tool definitions (LangChain `tool()` wrappers) live in `apps/agent/src/langgraph/tools/` — a separate app, not under `apps/web/src/`. See the `add-agent-tool` skill for the full cross-app checklist when adding a new one.
+Agent tool definitions (LangChain `tool()` wrappers) live in `apps/agent/src/tools/` — a separate app, not under `apps/web/src/`. See the `add-agent-tool` skill for the full cross-app checklist when adding a new one.
 
 **Hard placement rules:**
 
@@ -56,7 +56,7 @@ Agent tool definitions (LangChain `tool()` wrappers) live in `apps/agent/src/lan
 | Reusable UI, little/no logic        | `components/common/[Name]/index.tsx`                                                                                                                                                                                                                                                  |
 | Component with business logic       | `components/[Name]/index.tsx`                                                                                                                                                                                                                                                         |
 | CopilotKit generative/render UI     | `components/[Name]Card/index.tsx` — same flat level as other components, **not** a nested `generative/` folder (that's the aspirational convention from earlier docs; every existing card — `FlightCard`, `HotelCard`, `WeatherCard`, etc. — lives flat, follow the existing pattern) |
-| LangChain agent tool                | `apps/agent/src/langgraph/tools/` (separate app)                                                                                                                                                                                                                                      |
+| LangChain agent tool                | `apps/agent/src/tools/` (separate app)                                                                                                                                                                                                                                                |
 
 ---
 

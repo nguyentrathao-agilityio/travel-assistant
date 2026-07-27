@@ -35,7 +35,7 @@ Single test file / single test, agent (`apps/agent`, Vitest):
 
 ```bash
 cd apps/agent
-pnpm vitest run src/langgraph/nodes/__tests__/classify.test.ts
+pnpm vitest run src/nodes/__tests__/classify.test.ts
 pnpm vitest run -t "returns the classified intent"
 pnpm test:watch                   # watch mode
 ```
@@ -71,14 +71,14 @@ Git hooks: Husky runs `lint-staged` on commit (eslint --fix + prettier) and Comm
 
 ### Agent backend: LangGraph
 
-`apps/agent/src/langgraph/` is the conversational agent. A `StateGraph` (`agent.ts`) with an `agent` node (`nodes/call-model.ts`, binds backend + frontend/CopilotKit tools) and a `toolExecutor` node (`ToolNode`), routed by `nodes/route-after-agent.ts` (backend tool calls → `toolExecutor`; frontend-only/HITL tool calls → `END` so CopilotKit's AG-UI bridge can surface them as interrupts). Served via `langgraphjs up` on `:8123`; `src/langgraph/api/app.ts` mounts a Hono app exposing `/chat` through `@copilotkit/runtime/v2` (`registerCopilotKit` in `api/copilotkit.ts`), wrapping the graph in a `BridgedLangGraphAgent`. `api/hooks.ts` adds request/response logging and rejects CopilotKit requests for unregistered agent IDs.
+`apps/agent/src/` is the conversational agent. A `StateGraph` (`agent.ts`) with an `agent` node (`nodes/call-model.ts`, binds backend + frontend/CopilotKit tools) and a `toolExecutor` node (`ToolNode`), routed by `nodes/route-after-agent.ts` (backend tool calls → `toolExecutor`; frontend-only/HITL tool calls → `END` so CopilotKit's AG-UI bridge can surface them as interrupts). Served via `langgraphjs up` on `:8123`; `src/api/app.ts` mounts a Hono app exposing `/chat` through `@copilotkit/runtime/v2` (`registerCopilotKit` in `api/copilotkit.ts`), wrapping the graph in a `BridgedLangGraphAgent`. `api/hooks.ts` adds request/response logging and rejects CopilotKit requests for unregistered agent IDs.
 
-Its own `tools/`, `services/`, `schemas/` are organized per domain (flights, hotel, weather, route, places, tips, destination-explorer, trip-summary, booking). Path alias: `@langgraph/*` → `src/langgraph/*` (see `apps/agent/tsconfig.json` and `vitest.config.ts`).
+Its own `tools/`, `services/`, `schemas/` are organized per domain (flights, hotel, weather, route, places, tips, destination-explorer, trip-summary, booking) directly under `apps/agent/src/` — no path alias needed, it's the only tree.
 
 ### Frontend: CopilotKit-driven state and generative UI
 
 - `apps/web/src/app/providers.tsx` wraps the app in `<CopilotKit>`, pointed at the LangGraph runtime (`VITE_RUNTIME_URL`), keyed by the active thread ID, with the user's OpenAI key and client date/timezone sent as headers on every request.
-- **Trip state sync**: `hooks/useTripState.tsx` uses `useCoAgent<TripState>` to two-way-sync booking state (`flights`, `hotel`, etc.) between the graph's `GraphState` (`apps/agent/src/langgraph/state.ts`) and a Zustand store (`stores/tripStateStore.ts`, persisted to localStorage per thread). The graph treats these fields as **frontend-owned, last-write-wins** (see the `lastValue` reducer in `state.ts`) — graph nodes read them, never write them.
+- **Trip state sync**: `hooks/useTripState.tsx` uses `useCoAgent<TripState>` to two-way-sync booking state (`flights`, `hotel`, etc.) between the graph's `GraphState` (`apps/agent/src/state.ts`) and a Zustand store (`stores/tripStateStore.ts`, persisted to localStorage per thread). The graph treats these fields as **frontend-owned, last-write-wins** (see the `lastValue` reducer in `state.ts`) — graph nodes read them, never write them.
 - **Tool → UI pattern**: each domain has a `use<Domain>Action` hook (e.g. `useFlightAction`) that calls `useRenderToolCall` to register a CopilotKit-renderable action mirroring a backend tool, switches on `status` (`inProgress`/`complete`/etc.), and renders the matching card component (`components/FlightCard`, `HotelCard`, `WeatherCard`, `RouteCard`, `PlacesCard`, `LocalTipsCard`, `TripSummaryCard`, `DestinationExplorerCard`). See `.claude/docs/FLIGHT_FLOW.md` for the full request/response trace through the layers, and `.claude/docs/IMPLEMENT.md` for the mandated 4-layer separation (LangGraph tool → CopilotKit action → generative UI component → chat UI) that new tool integrations must follow.
 - Some flows gate on human confirmation before proceeding (`useFlightSelectionGate`, `useHotelBookingGate`, `useBookedActions`) — these are the frontend-only actions that `route-after-agent.ts` routes to `END` as interrupts rather than executing as backend tools.
 

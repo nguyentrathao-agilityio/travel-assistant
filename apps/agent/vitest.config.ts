@@ -1,5 +1,4 @@
 import { defineConfig } from 'vitest/config';
-import { resolve } from 'path';
 
 export default defineConfig({
   test: {
@@ -9,11 +8,6 @@ export default defineConfig({
     outputFile: { html: './test-report/index.html' },
     env: {
       API_URL: 'http://localhost:4020',
-    },
-  },
-  resolve: {
-    alias: {
-      '@langgraph': resolve(__dirname, 'src/langgraph'),
     },
   },
 });

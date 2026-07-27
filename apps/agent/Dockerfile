@@ -13,9 +13,9 @@ RUN pnpm --filter agent build
 
 WORKDIR /deps/repo/apps/agent
 
-ENV LANGSERVE_GRAPHS='{"travel":"./dist/langgraph/agent.js:graph"}'
+ENV LANGSERVE_GRAPHS='{"travel":"./dist/agent.js:graph"}'
 
-ENV LANGGRAPH_HTTP='{"app":"./dist/langgraph/api/app.js:app","disable_assistants":false,"disable_threads":false,"disable_runs":false,"disable_store":false,"disable_meta":false}'
+ENV LANGGRAPH_HTTP='{"app":"./dist/api/app.js:app","disable_assistants":false,"disable_threads":false,"disable_runs":false,"disable_store":false,"disable_meta":false}'
 
 RUN if [ -f /api/langgraph_api/js/build.mts ]; then \
       tsx /api/langgraph_api/js/build.mts; \

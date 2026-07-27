@@ -47,5 +47,5 @@ There is no `interrupt()`/`NodeInterrupt`/`Command` anywhere in `apps/agent/src/
 
 - **Per-request HTTP logging**: `api/hooks.ts` logs every CopilotKit request/response/error with duration (`[copilotkit] -> METHOD path`, `<- ... status Nms`, `x ... failed after Nms`) — first place to check for a slow or failing request.
 - **Step-by-step graph execution**: there's no custom event emission or `streamMode` config in this repo — for node-by-node tracing, use LangSmith (`LANGSMITH_TRACING=true`, `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` env vars from `apps/agent/.env.example`), not console logging.
-- **Visual graph inspection**: `pnpm dev:studio` (port 8124) is a real, working LangGraph Studio-style dev server — it's just undocumented in `apps/agent/README.md` (which still describes the old Mastra setup) and the root README.
+- **Visual graph inspection**: `pnpm dev:studio` (port 8124) is a real, working LangGraph Studio-style dev server — it's just undocumented in `apps/agent/README.md` and the root README.
 - `nodes/call-model.ts` has no try/catch around `model.invoke()` — an LLM call failure there is not caught locally; it propagates up through the graph run rather than being wrapped into a tool-style error message.

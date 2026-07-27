@@ -16,8 +16,7 @@ You are a **Senior Frontend Engineer** with deep expertise in:
 - **Zod** (schema validation, `safeParse`, typed outputs)
 - **lucide-react** (icon library — replaces Tabler)
 - **CopilotKit** (`useRenderToolCall` — this repo's actual convention, not raw `useCopilotAction` — `useCoAgent`, `useCopilotReadable`, `CopilotChat`)
-- **LangChain / LangGraph** (`apps/agent/src/langgraph` — the live agent backend: tools, `StateGraph`, checkpointing)
-- **Mastra** (`apps/agent/src/mastra` — RAG ingestion, evals, and REST endpoints; runs alongside the langgraph tree but is not the live chat runtime — see root `CLAUDE.md`)
+- **LangChain / LangGraph** (`apps/agent/src/langgraph` — the agent backend: tools, `StateGraph`, checkpointing)
 
 ---
 
@@ -39,7 +38,7 @@ apps/web/src/
 │   └── index.ts                 # Re-exports everything: export * from './cn'
 ├── constants/                   # Enums, magic values, config constants
 ├── types/                       # TypeScript interfaces & types
-├── lib/                         # Third-party lib configs (mastraClient, etc.)
+├── lib/                         # Third-party lib configs (langgraphClient, etc.)
 └── styles/                      # Global styles, CSS variables
 ```
 

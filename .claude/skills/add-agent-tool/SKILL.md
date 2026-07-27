@@ -9,12 +9,9 @@ description: Use when adding a new travel-domain agent capability (search/book s
 
 A new domain capability touches ~15-19 files across the agent backend, shared packages, and frontend. Missing one doesn't fail the build — the tool silently never reaches the LLM, or reaches it but its UI never renders. This is the checklist, built from tracing how `hotel` is actually wired end to end.
 
-## Which tree to build in
+## Where to build
 
-`apps/agent/src/` has two backend trees:
-
-- **`src/langgraph/`** — the live agent (wired into `langgraph.json`, `pnpm dev`). Build new tools here.
-- **`src/mastra/`** — REST/RAG/evals/tests only. It has its own CopilotKit `/chat` route, but the frontend's `VITE_RUNTIME_URL` points at the langgraph server, not this one — its `/chat` is not live traffic. Don't duplicate the new tool here unless the user explicitly wants RAG/eval coverage too; ask first.
+`apps/agent/src/langgraph/` is the only agent tree (wired into `langgraph.json`, `pnpm dev`). Build new tools here.
 
 `src/langgraph/schemas/*` inlines its own schemas rather than importing `@repo/schemas` (see the "now inlined for full independence" comment in `schemas/hotel.ts`) — follow that: define the new domain's schemas directly under `src/langgraph/schemas/`. `packages/types` (`@repo/types`) is still the real shared contract for frontend-facing shapes (`TripState`, `HotelAvailability`, etc.) — add new shared types there.
 
@@ -50,7 +47,7 @@ Pick the closest existing domain and mirror it file-for-file (`hotel` = date ran
 
 ## Before writing code
 
-State the plan (which files, mirroring which existing domain) and get it confirmed — this is a 15+ file change, and `.claude/docs/implement.md` already requires a confirmed plan before touching existing files. Call out anything you're inferring rather than confirming as open questions: the shape of the external API endpoint (lives outside this repo), whether `packages/schemas` (`@repo/schemas`, still used by some frontend code) also needs an entry, whether tests are expected (none exist under `src/langgraph/` today — `src/mastra/services/__tests__/` is the only tested tree).
+State the plan (which files, mirroring which existing domain) and get it confirmed — this is a 15+ file change, and `.claude/docs/implement.md` already requires a confirmed plan before touching existing files. Call out anything you're inferring rather than confirming as open questions: the shape of the external API endpoint (lives outside this repo), whether `packages/schemas` (`@repo/schemas`, still used by some frontend code) also needs an entry, whether tests are expected (see existing `**/__tests__/` folders under `src/langgraph/` for the current pattern — Vitest, `vi.mock`/`vi.hoisted` for mocking).
 
 ## After writing code
 

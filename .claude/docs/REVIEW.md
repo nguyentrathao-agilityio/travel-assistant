@@ -26,7 +26,7 @@ See the **Task → Docs** table in root `CLAUDE.md` — that table is the single
 - [ ] New file placed in the correct folder? (`utils/`, `hooks/`, `constants/`, `components/common/`, etc.)
 - [ ] Component with little logic → `components/common/[Name]/index.tsx`?
 - [ ] Component with business logic or generative/CopilotKit-render UI → `components/[Name]/index.tsx`? (flat — this repo does not use a nested `components/generative/` folder; every existing card lives at this level)
-- [ ] Agent tools → `apps/agent/src/langgraph/tools/` (the live agent tree — not `apps/agent/src/mastra/tools/` unless RAG/eval coverage is explicitly wanted)?
+- [ ] Agent tools → `apps/agent/src/langgraph/tools/`?
 - [ ] Barrel `index.ts` updated to export the new file?
 - [ ] All exports are **named exports** (no `export default` — this repo is a Vite SPA, not Next.js, so there's no pages/layouts exception)?
 
@@ -47,8 +47,7 @@ See the **Task → Docs** table in root `CLAUDE.md` — that table is the single
 
 - [ ] LangChain tool (`src/langgraph/tools/`): returns `JSON.stringify(result)` — a **string**, not a raw object? (LangChain's `tool()` contract; TypeScript will not catch a plain-object return here)
 - [ ] LangChain tool: body wrapped in try/catch, errors returned as `JSON.stringify({ error: ... })`?
-- [ ] Mastra tool (`src/mastra/tools/`, if that's what's being touched): throws on `!res.ok`, validates with Zod `safeParse` and throws if the shape is invalid?
-- [ ] Service layer (either tree): checks `res.ok` before parsing, validates the response with Zod, escapes query params?
+- [ ] Service layer: checks `res.ok` before parsing, validates the response with Zod, escapes query params?
 - [ ] Tool/service: no UI logic, no state, no loading indicators?
 - [ ] CopilotKit action: uses `useRenderToolCall` (this repo's actual convention), not raw `useCopilotAction`?
 - [ ] CopilotKit action: handles all `status` values (`inProgress`, `failed`, default) — not just the loading case?

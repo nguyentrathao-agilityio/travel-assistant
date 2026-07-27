@@ -10,10 +10,9 @@
     "declaration": false,
     "declarationMap": false,
     "paths": {
-      "@/*": ["./src/mastra/*"],
       "@langgraph/*": ["./src/langgraph/*"]
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", ".mastra"]
+  "exclude": ["node_modules", "dist"]
 }

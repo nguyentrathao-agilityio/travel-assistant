@@ -451,7 +451,7 @@ Layer 4 — Chat UI             handles stream indicators
 
 **Responsibility:** fetch, validate with Zod, throw on failure. No UI logic.
 
-The live agent runtime is **LangGraph**, not Mastra — new tools go in `apps/agent/src/langgraph/tools/`. LangChain's `tool()` has a contract this codebase's Mastra `createTool` doesn't: **the execute function must return a string**, typically `JSON.stringify(result)`. Returning a raw object compiles fine but breaks the CopilotKit action's ability to parse `result` at runtime — see the `review-copilotkit-layers` skill for the full list of this-stack-specific failure modes.
+New tools go in `apps/agent/src/langgraph/tools/`. LangChain's `tool()` has a contract to watch for: **the execute function must return a string**, typically `JSON.stringify(result)`. Returning a raw object compiles fine but breaks the CopilotKit action's ability to parse `result` at runtime — see the `review-copilotkit-layers` skill for the full list of this-stack-specific failure modes.
 
 ```typescript
 // tools/weather.ts (apps/agent/src/langgraph/tools/weather.ts, real pattern)
@@ -480,8 +480,6 @@ export const weatherTool = tool(
 ```
 
 The service behind the tool (`services/weather.ts`) does the actual fetch/validate work: check `res.ok` → throw with a clear message, `safeParse` the response with Zod → throw if the shape is wrong, never render UI or set state.
-
-`apps/agent/src/mastra/` also has a `createTool`-based pattern (object in, object out, no manual `JSON.stringify`) — that tree is for RAG, evals, and REST endpoints, not the live chat path. Don't mirror a new tool into `src/mastra` unless RAG/eval coverage is explicitly wanted; see the `add-agent-tool` skill.
 
 ### Layer 2 — CopilotKit Action
 

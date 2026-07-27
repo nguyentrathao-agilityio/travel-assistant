@@ -6,7 +6,6 @@ node_modules
 .next
 dist
 build
-.mastra
 out
 
 # TurboRepo
@@ -39,7 +38,6 @@ pnpm-debug.log*
 # Testing
 coverage
 .nyc_output
-eval-report
 test-report
 
 # TypeScript
@@ -49,6 +47,5 @@ test-report
 .cache
 tmp
 temp
-apps/agent/src/mastra/public
 .vercel
 .env*.local

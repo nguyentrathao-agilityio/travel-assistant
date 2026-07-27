@@ -8,5 +8,5 @@
     "skipLibCheck": true,
     "esModuleInterop": true
   },
-  "exclude": ["**/node_modules", "**/.next", "**/dist", "**/.mastra"]
+  "exclude": ["**/node_modules", "**/.next", "**/dist"]
 }

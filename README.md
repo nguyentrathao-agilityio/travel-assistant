@@ -111,11 +111,8 @@ POSTGRES_URL=postgresql://user:password@localhost:5432/travel_assistant
 ### `apps/web/.env.local`
 
 ```env
-# CopilotKit runtime endpoint exposed by the agent server
-VITE_RUNTIME_URL=http://localhost:4111/chat
-
-# Agent server REST base — used for thread list, message fetch, etc.
-VITE_MASTRA_URL=http://localhost:4111
+# CopilotKit runtime endpoint exposed by the LangGraph agent server
+VITE_RUNTIME_URL=http://localhost:8123/chat
 
 # CopilotKit public license key — required for premium features
 VITE_COPILOTKIT_PUBLIC_LICENSE_KEY=
@@ -124,8 +121,8 @@ VITE_COPILOTKIT_PUBLIC_LICENSE_KEY=
 **Notes:**
 
 - The frontend application runs on `http://localhost:3000`
-- The agent server runs on `http://localhost:4111`
-- CopilotKit runtime endpoint: `http://localhost:4111/chat`
+- The agent server (LangGraph) runs on `http://localhost:8123`
+- CopilotKit runtime endpoint: `http://localhost:8123/chat`
 
 ## TurboRepo Commands
 

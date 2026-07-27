@@ -27,7 +27,7 @@ Before writing any code, answer these:
 
 If the root cause is unknown → say so explicitly before attempting a fix.
 
-If the bug is in `apps/agent`, first confirm **which tree** it's actually in: `src/langgraph/` (the live chat runtime — `langgraph.json` deploys this) or `src/mastra/` (RAG/evals/REST only). Fixing the wrong tree's copy of a tool/service silently fixes nothing in production.
+If the bug is in `apps/agent`, it's in `src/langgraph/` — that's the only agent tree (`langgraph.json` deploys it).
 
 ---
 

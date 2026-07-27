@@ -17,7 +17,7 @@
 
 `review.md` is always last — run the checklist before every response.
 
-Before implementing or reviewing any agent-tool integration (LangGraph tool → CopilotKit action → generative card), invoke the relevant Skill above via the Skill tool. The `.claude/docs/*` guides are generic across the frontend; the skills encode this stack's specific failure modes (e.g. the LangChain tool contract requiring a stringified return, the dual `langgraph`/`mastra` backend trees) that the generic guides don't cover.
+Before implementing or reviewing any agent-tool integration (LangGraph tool → CopilotKit action → generative card), invoke the relevant Skill above via the Skill tool. The `.claude/docs/*` guides are generic across the frontend; the skills encode this stack's specific failure modes (e.g. the LangChain tool contract requiring a stringified return) that the generic guides don't cover.
 
 ## Always Active
 

@@ -1,11 +1,27 @@
 import { describe, expect, it } from 'vitest';
 
 import type { GraphStateType } from '../../state';
-import { buildSystemPrompt } from '../build-system-prompt';
+import { buildBranchSystemPrompt } from '../build-system-prompt';
 
-describe('buildSystemPrompt booking selection', () => {
-  it('exposes the confirmed hotel to the next agent turn without claiming it is booked', () => {
+const baseState = {
+  clientDate: '2026-07-23',
+  clientTimezone: 'Asia/Ho_Chi_Minh',
+} as unknown as GraphStateType;
+
+describe('buildBranchSystemPrompt', () => {
+  it('omits booking rules and booking context when not requested', () => {
+    const prompt = buildBranchSystemPrompt(baseState, {
+      toolsSection: '## Available Tools\n- placesTool',
+    });
+
+    expect(prompt).toContain('placesTool');
+    expect(prompt).not.toContain('does NOT mean an external booking or payment completed');
+    expect(prompt).not.toContain('Current Booking State');
+  });
+
+  it('includes booking rules and the confirmed selection when requested', () => {
     const state = {
+      ...baseState,
       hotelSelectionStatus: 'confirmed',
       hotel: {
         id: 'h1',
@@ -28,18 +44,26 @@ describe('buildSystemPrompt booking selection', () => {
         nights: 3,
         totalPrice: 300,
       },
-      clientDate: '2026-07-23',
-      clientTimezone: 'Asia/Ho_Chi_Minh',
     } as unknown as GraphStateType;
 
-    const prompt = buildSystemPrompt(state);
+    const prompt = buildBranchSystemPrompt(state, {
+      toolsSection: '## Available Tools\n- bookHotelTool',
+      includeBookingRules: true,
+      includeBookingContext: true,
+    });
 
-    expect(prompt).toContain('hotelSelectionStatus: confirmed');
-    expect(prompt).toContain('name: Ocean View Hotel');
-    expect(prompt).toContain('city: Da Nang');
-    expect(prompt).toContain('totalPrice: 300');
-    expect(prompt).toContain('currency: USD');
     expect(prompt).toContain('does NOT mean an external booking or payment completed');
     expect(prompt).toContain('call the frontend action "show-booked-hotel"');
+    expect(prompt).toContain('hotelSelectionStatus: confirmed');
+    expect(prompt).toContain('name: Ocean View Hotel');
+  });
+
+  it('always includes client date and timezone', () => {
+    const prompt = buildBranchSystemPrompt(baseState, {
+      toolsSection: '## Available Tools\n- weatherTool',
+    });
+
+    expect(prompt).toContain('today: 2026-07-23');
+    expect(prompt).toContain('timezone: Asia/Ho_Chi_Minh');
   });
 });

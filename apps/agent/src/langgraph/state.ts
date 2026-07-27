@@ -1,28 +1,22 @@
-import { Annotation } from '@langchain/langgraph';
-import { CopilotKitStateAnnotation } from '@copilotkit/sdk-js/langgraph';
+import { StateSchema } from '@langchain/langgraph';
+import { CopilotKitStateSchema, zodState } from '@copilotkit/sdk-js/langgraph';
+import { z } from 'zod';
 import type { SelectedFlight, HotelAvailability, SelectionStatus } from '@repo/types';
+import { IntentSchema } from './schemas/intent';
 
-/**
- * Last-write-wins reducer for bookingState fields — the frontend (via
- * useCoAgent<TripState>) is the sole writer; graph nodes only read these.
- */
-const lastValue = <T>() => ({
-  reducer: (_current: T | undefined, update: T | undefined) => update,
-  default: (): T | undefined => undefined,
-});
-
-export const GraphState = Annotation.Root({
-  ...CopilotKitStateAnnotation.spec,
-  flights: Annotation<SelectedFlight | undefined>(lastValue<SelectedFlight>()),
-  flightSelectionStatus: Annotation<SelectionStatus | undefined>(lastValue<SelectionStatus>()),
-  hotel: Annotation<HotelAvailability | undefined>(lastValue<HotelAvailability>()),
-  hotelSelectionStatus: Annotation<SelectionStatus | undefined>(lastValue<SelectionStatus>()),
-  destination: Annotation<string | undefined>(lastValue<string>()),
-  startDate: Annotation<string | undefined>(lastValue<string>()),
-  endDate: Annotation<string | undefined>(lastValue<string>()),
-  travelers: Annotation<number | undefined>(lastValue<number>()),
-  clientDate: Annotation<string | undefined>(lastValue<string>()),
-  clientTimezone: Annotation<string | undefined>(lastValue<string>()),
+export const GraphState = new StateSchema({
+  ...CopilotKitStateSchema.fields,
+  flights: zodState(z.custom<SelectedFlight>().optional()),
+  flightSelectionStatus: zodState(z.custom<SelectionStatus>().optional()),
+  hotel: zodState(z.custom<HotelAvailability>().optional()),
+  hotelSelectionStatus: zodState(z.custom<SelectionStatus>().optional()),
+  destination: zodState(z.string().optional()),
+  startDate: zodState(z.string().optional()),
+  endDate: zodState(z.string().optional()),
+  travelers: zodState(z.number().optional()),
+  clientDate: zodState(z.string().optional()),
+  clientTimezone: zodState(z.string().optional()),
+  intent: zodState(IntentSchema.optional()),
 });
 
 export type GraphStateType = typeof GraphState.State;

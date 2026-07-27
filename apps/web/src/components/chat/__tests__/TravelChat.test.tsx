@@ -31,6 +31,7 @@ jest.mock('@/hooks', () => ({
   useTripSummaryAction: jest.fn(),
   useDestinationExplorerAction: jest.fn(),
   useThreadHistory: jest.fn().mockReturnValue({ messages: [], isLoading: false, error: null }),
+  useSeedAgentHistory: jest.fn(),
   useConversationMessages: jest.fn((_persisted, live) => live),
   useBookingInfo: jest.fn(),
   useBookingAction: jest.fn(),

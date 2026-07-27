@@ -19,6 +19,7 @@ import {
   useThemeAction,
   useHotelAction,
   useThreadHistory,
+  useSeedAgentHistory,
   useLocalTipsAction,
   usePlacesAction,
   useRouteAction,
@@ -58,6 +59,8 @@ export const TravelChat = () => {
   const { messages: persistedMessages, isLoading: isHistoryLoading } =
     useThreadHistory(activeThreadId);
   const setThreadHistory = useConversationRendererStore((state) => state.setThreadHistory);
+
+  useSeedAgentHistory(activeThreadId, persistedMessages, isHistoryLoading);
 
   useLayoutEffect(() => {
     setThreadHistory(activeThreadId, persistedMessages, isHistoryLoading);

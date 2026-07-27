@@ -152,6 +152,29 @@ describe('useThreadStore — fetchThreads', () => {
     await useThreadStore.getState().fetchThreads();
     expect(toast.error).toHaveBeenCalledWith('Failed to load threads.');
   });
+
+  it('derives a title from a human message with content-part-array shape (not just plain string)', async () => {
+    const activeId = useThreadStore.getState().activeThreadId;
+    mockLanggraphClient.threads.search.mockResolvedValueOnce([
+      {
+        thread_id: activeId,
+        metadata: { resourceId: 'travelAgent' },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        values: {
+          messages: [
+            {
+              id: `${activeId}-msg`,
+              type: 'human',
+              content: [{ type: 'text', text: 'Get local tips' }],
+            },
+          ],
+        },
+      },
+    ]);
+    await useThreadStore.getState().fetchThreads();
+    expect(useThreadStore.getState().threads[0].title).toBe('Get local tips');
+  });
 });
 
 describe('useThreadStore — createThread', () => {

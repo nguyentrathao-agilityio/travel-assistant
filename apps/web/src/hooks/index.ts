@@ -4,6 +4,7 @@ export * from './useFlightAction';
 export * from './useHotelAction';
 export * from './useConversationMessages';
 export * from './useThreadHistory';
+export * from './useSeedAgentHistory';
 export * from './useLocalTipsAction';
 export * from './usePlacesAction';
 export * from './useRouteAction';

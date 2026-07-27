@@ -6,14 +6,11 @@ import { ChatEmptyState } from '../ChatEmptyState';
 import { ChatHistoryLoading } from '../ChatHistoryLoading';
 import { TypingIndicator } from '../TypingIndicator';
 import { useScrollToBottom } from '@/hooks';
-import {
-  COAGENT_STATE_RENDER_MESSAGE_NAME,
-  SECONDARY_SUGGESTIONS,
-  TOOL_SUGGESTION_ITEMS,
-} from '@/constants';
+import { SECONDARY_SUGGESTIONS, TOOL_SUGGESTION_ITEMS } from '@/constants';
 import { Button } from '@/components';
 import { useSuggestionStore } from '@/stores';
 import type { SendMessage } from '@/stores';
+import { isRealConversationMessage } from '@/utils';
 
 interface ChatMessagesProps extends MessagesProps {
   sendMessage: SendMessage | null;
@@ -44,17 +41,17 @@ const ChatMessages = ({
   RenderMessage,
   ...restProps
 }: ChatMessagesProps) => {
-  const latestConversationMessage = [...messages]
-    .reverse()
-    .find((message) => !('name' in message) || message.name !== COAGENT_STATE_RENDER_MESSAGE_NAME);
+  const latestConversationMessage = [...messages].reverse().find(isRealConversationMessage);
+  // Only show the typing placeholder while waiting on a reply to the user's own message —
+  // once the assistant's streamed message appears, its own bubble takes over.
   const showPendingAssistant =
     inProgress && (!latestConversationMessage || latestConversationMessage.role === 'user');
 
   const { scrollContainerRef } = useScrollToBottom(messages.length);
   const { interrupt } = useCopilotChatInternal();
-  const hasRealMessages = messages.some(
-    (message) => !('name' in message) || message.name !== COAGENT_STATE_RENDER_MESSAGE_NAME
-  );
+  // Excludes CopilotKit's synthetic "coagent-state-render" placeholder so a thread with
+  // only that entry still shows the empty state instead of the message list.
+  const hasRealMessages = messages.some(isRealConversationMessage);
   const lastTool = useSuggestionStore((s) => s.lastTool);
   const activeSuggestions =
     (lastTool ? TOOL_SUGGESTION_ITEMS[lastTool] : undefined) ?? SECONDARY_SUGGESTIONS;

@@ -6,6 +6,7 @@ import { langgraphClient } from '@/lib/langgraphClient';
 import { useTripStateStore } from '@/stores/tripStateStore';
 import { SESSION_STORAGE_KEY, AGENT_NAME } from '@/constants';
 import { ERROR_MESSAGES } from '@/constants/messages';
+import { langgraphMessageText } from '@/utils';
 
 import type { Thread, Message } from '@langchain/langgraph-sdk';
 
@@ -17,15 +18,21 @@ export interface ThreadItem {
 
 const GRAPH_ID = 'travel';
 
-const isHumanTextMessage = (message: Message): message is Message & { content: string } =>
-  message.type === 'human' && typeof message.content === 'string';
+const firstHumanMessageText = (messages: Message[] | undefined): string | null => {
+  for (const message of messages ?? []) {
+    if (message.type !== 'human') continue;
+    const text = langgraphMessageText(message.content).trim();
+    if (text) return text;
+  }
+  return null;
+};
 
 const toThreadItem = (thread: Thread): ThreadItem => {
   const { messages } = (thread.values as { messages?: Message[] } | undefined) ?? {};
 
   return {
     id: thread.thread_id,
-    title: messages?.find(isHumanTextMessage)?.content ?? null,
+    title: firstHumanMessageText(messages),
     createdAt: thread.created_at,
   };
 };

@@ -23,6 +23,7 @@ const mockActions = {
   setThreads: () => {},
   updateThread: () => {},
   fetchThreads: () => Promise.resolve(undefined),
+  fetchMoreThreads: () => Promise.resolve(undefined),
   createThread: () => Promise.resolve(undefined),
   deleteThread: () => Promise.resolve(undefined),
   selectThread: () => {},
@@ -64,6 +65,8 @@ export const WithThreads: Story = {
         isResumed: false,
         threads: MOCK_THREADS,
         isLoading: false,
+        isLoadingMore: false,
+        hasMoreThreads: false,
         isCreating: false,
         ...mockActions,
       },
@@ -81,6 +84,8 @@ export const Empty: Story = {
         isResumed: false,
         threads: [],
         isLoading: false,
+        isLoadingMore: false,
+        hasMoreThreads: false,
         isCreating: false,
         ...mockActions,
       },
@@ -98,6 +103,8 @@ export const Loading: Story = {
         isResumed: false,
         threads: [],
         isLoading: true,
+        isLoadingMore: false,
+        hasMoreThreads: false,
         isCreating: false,
         ...mockActions,
       },
@@ -115,7 +122,28 @@ export const Creating: Story = {
         isResumed: false,
         threads: MOCK_THREADS,
         isLoading: false,
+        isLoadingMore: false,
+        hasMoreThreads: false,
         isCreating: true,
+        ...mockActions,
+      },
+      true
+    );
+  },
+};
+
+export const LoadingMore: Story = {
+  name: 'Loading more threads (scrolled to bottom)',
+  beforeEach() {
+    useThreadStore.setState(
+      {
+        activeThreadId: 'thread-1',
+        isResumed: false,
+        threads: MOCK_THREADS,
+        isLoading: false,
+        isLoadingMore: true,
+        hasMoreThreads: true,
+        isCreating: false,
         ...mockActions,
       },
       true

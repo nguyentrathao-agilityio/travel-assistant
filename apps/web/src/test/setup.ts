@@ -8,3 +8,11 @@ if (!global.crypto?.randomUUID) {
     configurable: true,
   });
 }
+
+if (!global.IntersectionObserver) {
+  global.IntersectionObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof IntersectionObserver;
+}

@@ -188,5 +188,19 @@ describe('ChatMessages', () => {
 
       expect(screen.getByTestId('booking-approval')).toBeInTheDocument();
     });
+
+    it('gives the LangGraph interrupt the same avatar as an assistant message', () => {
+      jest.mocked(useCopilotChatInternal).mockReturnValue({
+        messages: [],
+        interrupt: <div data-testid="booking-approval">Confirm booking</div>,
+      } as unknown as ReturnType<typeof useCopilotChatInternal>);
+
+      const { container } = render(
+        <ChatMessages {...defaultProps} messages={[makeMessage('m1')]} />
+      );
+
+      expect(screen.getByTestId('booking-approval')).toBeInTheDocument();
+      expect(container.querySelector('.bg-assistant-gradient')).toBeInTheDocument();
+    });
   });
 });

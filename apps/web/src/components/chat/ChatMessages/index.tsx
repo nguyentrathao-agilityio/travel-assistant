@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import type { ReactNode } from 'react';
 import type { MessagesProps } from '@copilotkit/react-ui';
 import { useCopilotChatInternal } from '@copilotkit/react-core';
 import { Bot } from 'lucide-react';
@@ -25,6 +26,15 @@ const PendingAssistantMessage = () => (
     <div className="bg-background-secondary text-text-primary rounded-[28px] px-4 py-2 shadow">
       <TypingIndicator className="p-0" />
     </div>
+  </div>
+);
+
+const InterruptMessage = ({ children }: { children: ReactNode }) => (
+  <div className="flex gap-3 py-2">
+    <div className="bg-assistant-gradient flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white">
+      <Bot size={18} aria-hidden="true" />
+    </div>
+    <div className="min-w-0 flex-1">{children}</div>
   </div>
 );
 
@@ -87,7 +97,7 @@ const ChatMessages = ({
               />
             ))}
             {showPendingAssistant && <PendingAssistantMessage />}
-            {interrupt}
+            {interrupt && <InterruptMessage>{interrupt}</InterruptMessage>}
           </div>
           {children}
           {!inProgress && (

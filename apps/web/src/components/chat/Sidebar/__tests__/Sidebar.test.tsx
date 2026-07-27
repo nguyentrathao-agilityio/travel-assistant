@@ -3,9 +3,13 @@ import userEvent from '@testing-library/user-event';
 import { Sidebar } from '../index';
 
 const mockFetchThreads = jest.fn().mockResolvedValue(undefined);
+const mockFetchMoreThreads = jest.fn().mockResolvedValue(undefined);
 const mockCreateThread = jest.fn().mockResolvedValue(undefined);
 const mockDeleteThread = jest.fn().mockResolvedValue(undefined);
 const mockSelectThread = jest.fn();
+
+let mockIsLoadingMore = false;
+let mockHasMoreThreads = false;
 
 jest.mock('@/stores', () => ({
   useThreadStore: (selector: (s: object) => unknown) =>
@@ -16,8 +20,15 @@ jest.mock('@/stores', () => ({
         { id: 'thread-2', title: 'Bangkok trip', createdAt: new Date().toISOString() },
       ],
       isLoading: false,
+      get isLoadingMore() {
+        return mockIsLoadingMore;
+      },
+      get hasMoreThreads() {
+        return mockHasMoreThreads;
+      },
       isCreating: false,
       fetchThreads: mockFetchThreads,
+      fetchMoreThreads: mockFetchMoreThreads,
       createThread: mockCreateThread,
       deleteThread: mockDeleteThread,
       selectThread: mockSelectThread,
@@ -51,9 +62,12 @@ jest.mock('../CollapsedThreadButton', () => ({
 
 beforeEach(() => {
   mockFetchThreads.mockClear();
+  mockFetchMoreThreads.mockClear();
   mockCreateThread.mockClear();
   mockDeleteThread.mockClear();
   mockSelectThread.mockClear();
+  mockIsLoadingMore = false;
+  mockHasMoreThreads = false;
 });
 
 describe('Sidebar', () => {
@@ -156,6 +170,75 @@ describe('Sidebar', () => {
       await user.click(screen.getAllByRole('button', { name: /delete/i })[0]);
       const dialog = screen.getByRole('alertdialog');
       expect(within(dialog).getByText(/trip to da nang/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('pagination', () => {
+    // Real IntersectionObserver requires actual layout, which jsdom doesn't do — mock it so
+    // tests can simulate the sentinel becoming visible directly, including the "list is too
+    // short to scroll" case (the sentinel is visible immediately, with no scroll gesture).
+    class MockIntersectionObserver {
+      static instances: MockIntersectionObserver[] = [];
+      callback: IntersectionObserverCallback;
+      observe = jest.fn();
+      unobserve = jest.fn();
+      disconnect = jest.fn();
+      constructor(callback: IntersectionObserverCallback) {
+        this.callback = callback;
+        MockIntersectionObserver.instances.push(this);
+      }
+      trigger(isIntersecting: boolean) {
+        this.callback([{ isIntersecting } as IntersectionObserverEntry], this as never);
+      }
+    }
+
+    beforeEach(() => {
+      MockIntersectionObserver.instances = [];
+      global.IntersectionObserver =
+        MockIntersectionObserver as unknown as typeof IntersectionObserver;
+    });
+
+    it('fetches more threads as soon as the sentinel is visible, even with no scrolling', () => {
+      mockHasMoreThreads = true;
+      render(<Sidebar />);
+      const [observer] = MockIntersectionObserver.instances;
+      observer.trigger(true);
+      expect(mockFetchMoreThreads).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not fetch when the sentinel is not visible', () => {
+      mockHasMoreThreads = true;
+      render(<Sidebar />);
+      const [observer] = MockIntersectionObserver.instances;
+      observer.trigger(false);
+      expect(mockFetchMoreThreads).not.toHaveBeenCalled();
+    });
+
+    it('does not observe anything when there is nothing more to load', () => {
+      mockHasMoreThreads = false;
+      render(<Sidebar />);
+      expect(screen.queryByTestId('load-more-sentinel')).not.toBeInTheDocument();
+      expect(MockIntersectionObserver.instances).toHaveLength(0);
+    });
+
+    it('stops observing once a search query becomes active', async () => {
+      mockHasMoreThreads = true;
+      const user = userEvent.setup();
+      render(<Sidebar />);
+      const [observer] = MockIntersectionObserver.instances;
+
+      await user.type(screen.getByPlaceholderText('Search...'), 'Tokyo');
+
+      expect(observer.disconnect).toHaveBeenCalled();
+      expect(MockIntersectionObserver.instances).toHaveLength(1);
+    });
+
+    it('shows a loading indicator while fetching more threads', () => {
+      mockIsLoadingMore = true;
+      render(<Sidebar />);
+      expect(
+        screen.getByRole('status', { name: /loading more conversations/i })
+      ).toBeInTheDocument();
     });
   });
 });

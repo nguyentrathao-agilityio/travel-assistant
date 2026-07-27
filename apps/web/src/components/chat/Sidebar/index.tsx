@@ -1,5 +1,5 @@
 import { Loader2, PanelLeftClose, PanelLeftOpen, Plane, Plus, Search } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useShallow } from 'zustand/shallow';
 
 import { Button, Divider } from '@/components';
@@ -26,8 +26,11 @@ export const Sidebar = () => {
     activeThreadId,
     threads,
     isLoading,
+    isLoadingMore,
+    hasMoreThreads,
     isCreating,
     fetchThreads,
+    fetchMoreThreads,
     createThread,
     deleteThread,
     selectThread,
@@ -36,8 +39,11 @@ export const Sidebar = () => {
       activeThreadId: state.activeThreadId,
       threads: state.threads,
       isLoading: state.isLoading,
+      isLoadingMore: state.isLoadingMore,
+      hasMoreThreads: state.hasMoreThreads,
       isCreating: state.isCreating,
       fetchThreads: state.fetchThreads,
+      fetchMoreThreads: state.fetchMoreThreads,
       createThread: state.createThread,
       deleteThread: state.deleteThread,
       selectThread: state.selectThread,
@@ -62,9 +68,30 @@ export const Sidebar = () => {
 
   const handleCancelDelete = useCallback(() => setPendingDeleteId(null), []);
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const loadMoreSentinelRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     fetchThreads();
   }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim() || collapsed || !hasMoreThreads) return;
+
+    const root = scrollContainerRef.current;
+    const sentinel = loadMoreSentinelRef.current;
+    if (!root || !sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) fetchMoreThreads();
+      },
+      { root, rootMargin: '80px' }
+    );
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [searchQuery, collapsed, hasMoreThreads, threads.length, fetchMoreThreads]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -173,6 +200,8 @@ export const Sidebar = () => {
 
       {/* Thread list */}
       <div
+        ref={scrollContainerRef}
+        data-testid="thread-list-scroll"
         className={cn(
           'scrollbar-thin flex-1 overflow-y-auto',
           collapsed && 'flex flex-col items-center'
@@ -224,6 +253,20 @@ export const Sidebar = () => {
               </div>
             );
           })}
+
+        {hasMoreThreads && !collapsed && (
+          <div ref={loadMoreSentinelRef} data-testid="load-more-sentinel" className="h-px" />
+        )}
+
+        {isLoadingMore && !collapsed && (
+          <div
+            className="flex items-center justify-center py-3"
+            role="status"
+            aria-label="Loading more conversations"
+          >
+            <Loader2 size={16} className="text-sidebar-text-muted animate-spin" />
+          </div>
+        )}
       </div>
 
       {pendingDeleteId && (

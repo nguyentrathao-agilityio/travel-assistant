@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 import { langgraphClient } from '@/lib/langgraphClient';
 import { useTripStateStore } from '@/stores/tripStateStore';
-import { SESSION_STORAGE_KEY, AGENT_NAME } from '@/constants';
+import { SESSION_STORAGE_KEY, AGENT_NAME, THREAD_PAGE_SIZE } from '@/constants';
 import { ERROR_MESSAGES } from '@/constants/messages';
 import { langgraphMessageText } from '@/utils';
 
@@ -37,11 +37,32 @@ const toThreadItem = (thread: Thread): ThreadItem => {
   };
 };
 
+const searchThreadsPage = (limit: number, offset: number) =>
+  langgraphClient.threads
+    .search({
+      metadata: { resourceId: AGENT_NAME },
+      limit,
+      offset,
+      sortBy: 'created_at',
+      sortOrder: 'desc',
+    })
+    .then((raw) => raw.map(toThreadItem));
+
+/* Whether the active thread already exists on the server — checked independently of
+ * the paginated list fetch, since a real (older) thread may simply live on a later page. */
+const activeThreadExists = (threadId: string): Promise<boolean> =>
+  langgraphClient.threads
+    .get(threadId)
+    .then(() => true)
+    .catch(() => false);
+
 interface ThreadStore {
   activeThreadId: string;
   isResumed: boolean;
   threads: ThreadItem[];
   isLoading: boolean;
+  isLoadingMore: boolean;
+  hasMoreThreads: boolean;
   isCreating: boolean;
 
   setActiveThreadId: (id: string, resumed?: boolean) => void;
@@ -49,6 +70,7 @@ interface ThreadStore {
   updateThread: (threadId: string, updates: Partial<ThreadItem>) => void;
 
   fetchThreads: () => Promise<void>;
+  fetchMoreThreads: () => Promise<void>;
   createThread: () => Promise<void>;
   deleteThread: (threadId: string) => Promise<void>;
   selectThread: (threadId: string) => void;
@@ -58,7 +80,9 @@ const initialState = {
   activeThreadId: crypto.randomUUID(),
   isResumed: false,
   threads: [] as ThreadItem[],
-  isLoading: false,
+  isLoading: true,
+  isLoadingMore: false,
+  hasMoreThreads: false,
   isCreating: false,
 };
 
@@ -81,22 +105,20 @@ export const useThreadStore = create<ThreadStore>()(
       fetchThreads: async () => {
         set({ isLoading: true });
         try {
-          const rawThreads = await langgraphClient.threads.search({
-            metadata: { resourceId: AGENT_NAME },
-            limit: 100,
-          });
-
-          const items = rawThreads.map(toThreadItem);
           const currentThreadId = get().activeThreadId;
-          const isActiveMissing =
-            currentThreadId && !items.find((item) => item.id === currentThreadId);
+          const [items, activeExists] = await Promise.all([
+            searchThreadsPage(THREAD_PAGE_SIZE, 0),
+            activeThreadExists(currentThreadId),
+          ]);
 
-          if (isActiveMissing) {
+          if (!activeExists) {
             if (items.length > 0) {
-              items.sort(
-                (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-              );
-              set({ threads: items, activeThreadId: items[0].id, isResumed: true });
+              set({
+                threads: items,
+                activeThreadId: items[0].id,
+                isResumed: true,
+                hasMoreThreads: items.length === THREAD_PAGE_SIZE,
+              });
               return;
             }
 
@@ -114,12 +136,31 @@ export const useThreadStore = create<ThreadStore>()(
             });
           }
 
-          items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          set({ threads: items });
+          set({ threads: items, hasMoreThreads: items.length >= THREAD_PAGE_SIZE });
         } catch {
           toast.error(ERROR_MESSAGES.LOAD_THREADS);
         } finally {
           set({ isLoading: false });
+        }
+      },
+
+      fetchMoreThreads: async () => {
+        const { isLoadingMore, hasMoreThreads, threads } = get();
+        if (isLoadingMore || !hasMoreThreads) return;
+
+        set({ isLoadingMore: true });
+        try {
+          const items = await searchThreadsPage(THREAD_PAGE_SIZE, threads.length);
+          const existingIds = new Set(threads.map((thread) => thread.id));
+
+          set((state) => ({
+            threads: [...state.threads, ...items.filter((item) => !existingIds.has(item.id))],
+            hasMoreThreads: items.length === THREAD_PAGE_SIZE,
+          }));
+        } catch {
+          toast.error(ERROR_MESSAGES.LOAD_THREADS);
+        } finally {
+          set({ isLoadingMore: false });
         }
       },
 

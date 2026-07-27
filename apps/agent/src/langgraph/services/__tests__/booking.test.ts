@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { bookFlight, bookHotel } from '../booking';
+import { revalidateHotel, submitFlightBooking, submitHotelBooking } from '../booking';
 
 const flight = {
   id: 'FL_DAD_SGN_20260730_01',
@@ -38,10 +38,9 @@ afterEach(() => {
 });
 
 describe('booking service', () => {
-  it('revalidates a flight and sends a stable idempotency key', async () => {
+  it('submits a flight booking using pre-fetched flight data and a stable idempotency key', async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify(flight), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify(booking), { status: 201 }));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -53,22 +52,43 @@ describe('booking service', () => {
       customerPhone: '+84901234567',
     };
 
-    await bookFlight(input);
-    const firstRequest = fetchMock.mock.calls[1][1] as RequestInit;
+    await submitFlightBooking(input, flight);
+    const firstRequest = fetchMock.mock.calls[0][1] as RequestInit;
     const firstKey = (firstRequest.headers as Record<string, string>)['Idempotency-Key'];
 
-    fetchMock
-      .mockResolvedValueOnce(new Response(JSON.stringify(flight), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify(booking), { status: 201 }));
-    await bookFlight(input);
-    const secondRequest = fetchMock.mock.calls[3][1] as RequestInit;
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(booking), { status: 201 }));
+    await submitFlightBooking(input, flight);
+    const secondRequest = fetchMock.mock.calls[1][1] as RequestInit;
     const secondKey = (secondRequest.headers as Record<string, string>)['Idempotency-Key'];
 
+    expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(firstKey).toHaveLength(64);
     expect(secondKey).toBe(firstKey);
   });
 
-  it('does not create a hotel booking when the selected hotel is unavailable', async () => {
+  it('submits a hotel booking without re-revalidating availability', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(booking), { status: 201 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await submitHotelBooking({
+      hotelId: 'hotel-1',
+      city: 'Da Nang',
+      checkIn: '2026-08-01',
+      checkOut: '2026-08-03',
+      rooms: 1,
+      adults: 2,
+      children: 0,
+      customerName: 'Nguyen Van A',
+      customerEmail: 'a@example.com',
+      customerPhone: '+84901234567',
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects revalidation when the selected hotel is unavailable', async () => {
     const availability = {
       total: 1,
       limit: 20,
@@ -112,7 +132,7 @@ describe('booking service', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(
-      bookHotel({
+      revalidateHotel({
         hotelId: 'hotel-1',
         city: 'Da Nang',
         checkIn: '2026-08-01',

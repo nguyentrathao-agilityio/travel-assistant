@@ -96,12 +96,16 @@ export const revalidateHotel = async (input: HotelBookingInput) => {
   return hotel;
 };
 
-export const bookFlight = async (input: FlightBookingInput): Promise<Booking> => {
-  const validated = FlightBookingInputSchema.parse(input);
-  const flight = await getFlight(validated.flightId);
-  if (flight.seats_available < validated.adults) {
-    throw new Error('Not enough seats are available');
+export const submitFlightBooking = async (
+  input: FlightBookingInput,
+  flight: {
+    flight_number: string;
+    origin: string;
+    destination: string;
+    departure_time: string;
   }
+): Promise<Booking> => {
+  const validated = FlightBookingInputSchema.parse(input);
   const payload = {
     flight_number: flight.flight_number,
     origin: flight.origin,
@@ -123,9 +127,8 @@ export const bookFlight = async (input: FlightBookingInput): Promise<Booking> =>
   return parseBookingResponse(response);
 };
 
-export const bookHotel = async (input: HotelBookingInput): Promise<Booking> => {
+export const submitHotelBooking = async (input: HotelBookingInput): Promise<Booking> => {
   const validated = HotelBookingInputSchema.parse(input);
-  await revalidateHotel(validated);
   const payload = {
     hotel_id: validated.hotelId,
     check_in: validated.checkIn,

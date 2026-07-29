@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "db:setup": "tsx src/scripts/setup-checkpointer.ts",
+    "db:setup": "dotenv -e .env -- tsx src/scripts/setup-checkpointer.ts",
     "build": "tsc && tsc-alias",
     "dev": "tsc && tsc-alias && langgraphjs dev --port 8123 --no-browser",
     "lint": "eslint . --ext .ts",
@@ -34,6 +34,7 @@
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.0.0",
     "@vitest/ui": "^4.1.9",
+    "dotenv-cli": "^11.0.0",
     "tsc-alias": "^1.9.1",
     "tsx": "^4.16.2",
     "typescript": "6.0.3",

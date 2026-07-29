@@ -12,6 +12,7 @@ import {
   PLAN_TOOLS_SECTION,
 } from '../constants';
 import { createChatModel } from '../llm';
+import { memoryStore, searchMemories } from '../services';
 import {
   bookFlightTool,
   bookHotelTool,
@@ -54,9 +55,10 @@ const buildBranch = (tools: StructuredToolInterface[], sections: BranchPromptSec
     stateSchema: GraphState,
     middleware: [
       createCopilotkitMiddleware({ exposeState: false }),
-      dynamicSystemPromptMiddleware((state) =>
-        buildBranchSystemPrompt(state as unknown as GraphStateType, sections)
-      ),
+      dynamicSystemPromptMiddleware(async (state) => {
+        const memories = sections.includeMemoryContext ? await searchMemories(memoryStore) : [];
+        return buildBranchSystemPrompt(state as unknown as GraphStateType, sections, memories);
+      }),
     ],
   }).graph;
 
@@ -66,6 +68,7 @@ export const planBranch = buildBranch(PLAN_TOOLS, {
   toolsSection: PLAN_TOOLS_SECTION,
   includeBookingRules: true,
   includeBookingContext: true,
+  includeMemoryContext: true,
 });
 
 export const bookFlightBranch = buildBranch(BOOK_FLIGHT_TOOLS, {

@@ -11,6 +11,7 @@ import {
   exploreBranch,
   generalBranch,
   planBranch,
+  saveMemoryNode,
 } from './nodes';
 import { GraphState } from './state';
 
@@ -23,13 +24,15 @@ export const buildGraph = () =>
     .addNode('bookHotel', bookHotelBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
     .addNode('cancelBooking', cancelBookingBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
     .addNode('general', generalBranch)
+    .addNode('saveMemory', saveMemoryNode)
     .addEdge(START, 'classify')
-    .addEdge('explore', END)
-    .addEdge('plan', END)
-    .addEdge('bookFlight', END)
-    .addEdge('bookHotel', END)
-    .addEdge('cancelBooking', END)
-    .addEdge('general', END);
+    .addEdge('explore', 'saveMemory')
+    .addEdge('plan', 'saveMemory')
+    .addEdge('bookFlight', 'saveMemory')
+    .addEdge('bookHotel', 'saveMemory')
+    .addEdge('cancelBooking', 'saveMemory')
+    .addEdge('general', 'saveMemory')
+    .addEdge('saveMemory', END);
 
 export const graph = buildGraph().compile({
   checkpointer: PostgresSaver.fromConnString(POSTGRES_URL!),

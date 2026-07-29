@@ -66,4 +66,34 @@ describe('buildBranchSystemPrompt', () => {
     expect(prompt).toContain('today: 2026-07-23');
     expect(prompt).toContain('timezone: Asia/Ho_Chi_Minh');
   });
+
+  it('omits the remembered preferences section when not requested, even if memories are passed', () => {
+    const prompt = buildBranchSystemPrompt(
+      baseState,
+      { toolsSection: '## Available Tools\n- weatherTool' },
+      ['Departure city: Da Nang']
+    );
+
+    expect(prompt).not.toContain('Remembered Preferences');
+  });
+
+  it('omits the remembered preferences section when requested but none are passed', () => {
+    const prompt = buildBranchSystemPrompt(baseState, {
+      toolsSection: '## Available Tools\n- flightsTool',
+      includeMemoryContext: true,
+    });
+
+    expect(prompt).not.toContain('Remembered Preferences');
+  });
+
+  it('includes remembered preferences when requested and present', () => {
+    const prompt = buildBranchSystemPrompt(
+      baseState,
+      { toolsSection: '## Available Tools\n- flightsTool', includeMemoryContext: true },
+      ['Departure city: Da Nang']
+    );
+
+    expect(prompt).toContain('Remembered Preferences');
+    expect(prompt).toContain('- Departure city: Da Nang');
+  });
 });

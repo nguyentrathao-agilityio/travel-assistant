@@ -6,3 +6,4 @@ export * from './envs';
 export * from './route';
 export * from './classify';
 export * from './retry';
+export * from './memory';

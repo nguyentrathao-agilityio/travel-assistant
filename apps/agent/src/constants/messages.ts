@@ -12,6 +12,7 @@ export const TOOL_ERROR_MESSAGES = {
   TRIP_SUMMARY: 'Trip summary failed. Try asking me to search flights and hotels separately.',
   DESTINATION_EXPLORER:
     'Destination explorer failed. Try searching places, tips, or weather separately.',
+  MEMORY: "Couldn't access remembered preferences right now.",
 } as const;
 
 export const ERROR_MESSAGES = {

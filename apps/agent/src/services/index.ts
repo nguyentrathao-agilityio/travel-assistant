@@ -7,3 +7,5 @@ export * from './tips';
 export * from './trip-summary';
 export * from './destination-explorer';
 export * from './booking';
+export * from './memory';
+export * from './memory-store';

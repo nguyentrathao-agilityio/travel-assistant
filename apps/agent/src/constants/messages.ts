@@ -13,6 +13,7 @@ export const TOOL_ERROR_MESSAGES = {
   DESTINATION_EXPLORER:
     'Destination explorer failed. Try searching places, tips, or weather separately.',
   MEMORY: "Couldn't access remembered preferences right now.",
+  KNOWLEDGE: "Couldn't search the knowledge base right now. Please try again.",
 } as const;
 
 export const ERROR_MESSAGES = {

@@ -6,6 +6,7 @@ export * from './places';
 export * from './tips';
 export * from './trip-summary';
 export * from './destination-explorer';
+export * from './knowledge';
 export * from './booking';
 export * from './intent';
 export * from './memory';

@@ -90,10 +90,34 @@ describe('buildBranchSystemPrompt', () => {
     const prompt = buildBranchSystemPrompt(
       baseState,
       { toolsSection: '## Available Tools\n- flightsTool', includeMemoryContext: true },
-      ['Departure city: Da Nang']
+      ['Preferred seat class: Economy']
     );
 
     expect(prompt).toContain('Remembered Preferences');
-    expect(prompt).toContain('- Departure city: Da Nang');
+    expect(prompt).toContain('- Preferred seat class: Economy');
+  });
+
+  it('excludes location-shaped remembered facts (city/destination/airport) even when requested', () => {
+    const prompt = buildBranchSystemPrompt(
+      baseState,
+      { toolsSection: '## Available Tools\n- weatherTool', includeMemoryContext: true },
+      ['Departure city: Da Nang', 'Preferred travel destination: Ha Giang, Vietnam']
+    );
+
+    expect(prompt).not.toContain('Remembered Preferences');
+    expect(prompt).not.toContain('Departure city');
+    expect(prompt).not.toContain('Ha Giang');
+  });
+
+  it('keeps non-location facts while dropping location-shaped ones from a mixed list', () => {
+    const prompt = buildBranchSystemPrompt(
+      baseState,
+      { toolsSection: '## Available Tools\n- weatherTool', includeMemoryContext: true },
+      ['Departure city: Da Nang', "User's name: Nhien"]
+    );
+
+    expect(prompt).toContain('Remembered Preferences');
+    expect(prompt).toContain("- User's name: Nhien");
+    expect(prompt).not.toContain('Departure city');
   });
 });

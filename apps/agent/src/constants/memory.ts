@@ -19,7 +19,8 @@ question the assistant just asked (e.g. assistant: "Where are you flying from?",
 Do NOT extract one-off trip details that only apply to the current search (a specific
 destination, date, or traveler count for THIS request) — only preferences that should apply to
 future, unrelated requests too. Do NOT extract anything from greetings, thanks, or unrelated
-chit-chat.
+chit-chat. Do NOT extract app/UI settings (theme, language, notification preferences, or similar)
+— they are not a travel preference.
 
 Return the fact as a short plain-language string (e.g. "Departure city: Da Nang"), or null if
 the latest message contains no such durable fact.`;

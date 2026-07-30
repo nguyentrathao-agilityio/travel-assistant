@@ -6,6 +6,12 @@ import { StoredMemorySchema } from '../schemas/memory';
 
 const normalize = (memory: string) => memory.trim().toLowerCase();
 
+// "Departure city: Da Nang" -> "departure city"
+const keyOf = (memory: string): string | null => {
+  const separatorIndex = memory.indexOf(':');
+  return separatorIndex === -1 ? null : normalize(memory.slice(0, separatorIndex));
+};
+
 /**
  * Reads every fact stored in the dev long-term-memory namespace, dropping
  * any entry that no longer matches the expected shape.
@@ -19,12 +25,25 @@ export const searchMemories = async (store: BaseStore): Promise<string[]> => {
 };
 
 /**
- * Stores a durable fact about the user, skipping it if an equivalent
- * (case-insensitive) fact is already remembered.
+ * Stores a durable fact, skipping exact duplicates and superseding any existing fact with the
+ * same "key:" prefix (e.g. a new "Departure city: …" replaces the old one).
  */
 export const saveMemory = async (store: BaseStore, memory: string): Promise<void> => {
-  const existing = await searchMemories(store);
-  if (existing.some((entry) => normalize(entry) === normalize(memory))) return;
+  const items = await store.search(MEMORY_NAMESPACE, { limit: 100 });
+  const existing = items
+    .map((item) => ({ key: item.key, parsed: StoredMemorySchema.safeParse(item.value) }))
+    .filter(
+      (entry): entry is { key: string; parsed: { success: true; data: { memory: string } } } =>
+        entry.parsed.success
+    );
+
+  if (existing.some(({ parsed }) => normalize(parsed.data.memory) === normalize(memory))) return;
+
+  const newKey = keyOf(memory);
+  if (newKey) {
+    const superseded = existing.filter(({ parsed }) => keyOf(parsed.data.memory) === newKey);
+    await Promise.all(superseded.map(({ key }) => store.delete(MEMORY_NAMESPACE, key)));
+  }
 
   await store.put(MEMORY_NAMESPACE, randomUUID(), { memory }, false);
 };

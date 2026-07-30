@@ -20,6 +20,7 @@ import {
   destinationExplorerTool,
   flightsTool,
   hotelTool,
+  knowledgeSearchTool,
   placesTool,
   routeTool,
   tipsTool,
@@ -33,6 +34,7 @@ export const EXPLORE_TOOLS: StructuredToolInterface[] = [
   destinationExplorerTool,
   placesTool,
   tipsTool,
+  knowledgeSearchTool,
 ];
 export const PLAN_TOOLS: StructuredToolInterface[] = [
   flightsTool,
@@ -40,6 +42,7 @@ export const PLAN_TOOLS: StructuredToolInterface[] = [
   routeTool,
   weatherTool,
   tripSummaryTool,
+  knowledgeSearchTool,
 ];
 export const BOOK_FLIGHT_TOOLS: StructuredToolInterface[] = [bookFlightTool];
 export const BOOK_HOTEL_TOOLS: StructuredToolInterface[] = [bookHotelTool];

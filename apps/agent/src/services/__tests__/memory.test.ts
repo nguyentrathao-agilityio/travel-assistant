@@ -14,6 +14,7 @@ const makeStore = (items: { key: string; value: Record<string, unknown> }[] = []
       }))
     ),
     put: vi.fn().mockResolvedValue(undefined),
+    delete: vi.fn().mockResolvedValue(undefined),
   }) as unknown as BaseStore;
 
 describe('searchMemories', () => {
@@ -60,5 +61,34 @@ describe('saveMemory', () => {
     await saveMemory(store, 'lives in da nang');
 
     expect(store.put).not.toHaveBeenCalled();
+  });
+
+  it('replaces an existing fact that shares the same "key:" prefix instead of stacking a contradiction', async () => {
+    const store = makeStore([{ key: 'old-id', value: { memory: 'Departure city: HAN' } }]);
+
+    await saveMemory(store, 'Departure city: Da Nang');
+
+    expect(store.delete).toHaveBeenCalledWith(['dev', 'memories'], 'old-id');
+    expect(store.put).toHaveBeenCalledTimes(1);
+    const [, , value] = (store.put as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(value).toEqual({ memory: 'Departure city: Da Nang' });
+  });
+
+  it('leaves facts with a different key untouched', async () => {
+    const store = makeStore([{ key: 'a', value: { memory: 'Home city: Da Nang' } }]);
+
+    await saveMemory(store, 'Departure city: HAN');
+
+    expect(store.delete).not.toHaveBeenCalled();
+    expect(store.put).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not dedupe or supersede across facts with no "key:" shape', async () => {
+    const store = makeStore([{ key: 'a', value: { memory: 'Enjoys hiking' } }]);
+
+    await saveMemory(store, 'Enjoys beaches');
+
+    expect(store.delete).not.toHaveBeenCalled();
+    expect(store.put).toHaveBeenCalledTimes(1);
   });
 });

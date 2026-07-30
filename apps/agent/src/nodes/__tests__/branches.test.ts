@@ -14,10 +14,17 @@ const nameOf = (tools: { name: string }[]) => tools.map((t) => t.name).sort();
 describe('branch tool wiring', () => {
   it('binds each branch to exactly its own tools, with no cross-branch leakage', () => {
     expect(nameOf(EXPLORE_TOOLS)).toEqual(
-      ['destinationExplorerTool', 'localTipsTool', 'placesTool'].sort()
+      ['destinationExplorerTool', 'knowledgeSearchTool', 'localTipsTool', 'placesTool'].sort()
     );
     expect(nameOf(PLAN_TOOLS)).toEqual(
-      ['flightsTool', 'hotelTool', 'routeTool', 'tripSummaryTool', 'weatherTool'].sort()
+      [
+        'flightsTool',
+        'hotelTool',
+        'knowledgeSearchTool',
+        'routeTool',
+        'tripSummaryTool',
+        'weatherTool',
+      ].sort()
     );
     expect(nameOf(BOOK_FLIGHT_TOOLS)).toEqual(['bookFlightTool']);
     expect(nameOf(BOOK_HOTEL_TOOLS)).toEqual(['bookHotelTool']);
@@ -31,7 +38,17 @@ describe('branch tool wiring', () => {
       ...BOOK_HOTEL_TOOLS,
       ...CANCEL_BOOKING_TOOLS,
     ];
-    const uniqueNames = new Set(allNamedTools.map((t) => t.name));
-    expect(uniqueNames.size).toBe(allNamedTools.length);
+    const occurrences = allNamedTools.reduce<Record<string, number>>((counts, item) => {
+      counts[item.name] = (counts[item.name] ?? 0) + 1;
+      return counts;
+    }, {});
+    expect(occurrences).toEqual(
+      expect.objectContaining({
+        knowledgeSearchTool: 2,
+        bookFlightTool: 1,
+        bookHotelTool: 1,
+        cancelBookingTool: 1,
+      })
+    );
   });
 });

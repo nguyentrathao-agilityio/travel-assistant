@@ -11,12 +11,20 @@ LangGraph-powered travel agent. Handles flight search, hotel search, route plann
 
 ## Environment variables
 
-| Variable            | Required | Description                                        |
-| ------------------- | -------- | -------------------------------------------------- |
-| `OPENAI_API_KEY`    | yes      | Used for chat and intent classification            |
-| `POSTGRES_URL`      | yes      | PostgreSQL connection string (checkpointing)       |
-| `OPENAI_MODEL`      | no       | Override chat model (default `openai/gpt-4o-mini`) |
-| `LANGSMITH_API_KEY` | for dev  | `langgraph up` needs a LangSmith deployment to run |
+| Variable                 | Required | Description                                            |
+| ------------------------ | -------- | ------------------------------------------------------ |
+| `OPENAI_API_KEY`         | yes      | Used for chat and intent classification                |
+| `POSTGRES_URL`           | yes      | PostgreSQL connection string (checkpointing)           |
+| `OPENAI_MODEL`           | no       | Override chat model (default `openai/gpt-4o-mini`)     |
+| `OPENAI_EMBEDDING_MODEL` | no       | RAG embedding model (default `text-embedding-3-small`) |
+| `LANGSMITH_API_KEY`      | for dev  | `langgraph up` needs a LangSmith deployment to run     |
+
+## Knowledge RAG
+
+The explore and plan branches can search a trusted travel knowledge corpus using hybrid semantic
+and lexical retrieval with metadata filters and citations. Live prices, availability, schedules,
+weather, and routes continue to use dedicated tools. See
+[`docs/travel-rag-plan.md`](../../docs/travel-rag-plan.md) for the architecture and rollout plan.
 
 ## Development
 

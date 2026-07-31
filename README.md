@@ -6,6 +6,78 @@ Welcome to Travel Planner Assistant - an AI-powered travel planning application 
 
 The practice focuses primarily on building the agent logic and orchestration layer using **LangChainJS** and **LangGraph** — covering agent/tool/model interaction, schema-validated responses, context management, middleware, and graph-based multi-step orchestration with state persistence and interrupt handling. **CopilotKit** and **AG-UI** are used as the supporting frontend/streaming layer to connect this agent logic to a conversational chatbot interface with real-time streaming responses and generative UI.
 
+## Architecture
+
+The current agent is a custom LangGraph workflow composed of a router and specialized agent
+subgraphs:
+
+```mermaid
+flowchart LR
+    START((START)) --> CLASSIFY["Classify intent"]
+
+    subgraph ROUTES["Specialized agent branches"]
+        direction TB
+        EXPLORE["Explore<br/>Destinations · Places · Tips · RAG"]
+        PLAN["Plan<br/>Flights · Hotels · Routes · Weather"]
+        BOOK_FLIGHT["Book flight<br/>Revalidate · Approve · Submit"]
+        BOOK_HOTEL["Book hotel<br/>Revalidate · Approve · Submit"]
+        CANCEL["Cancel booking<br/>Retrieve · Approve · Cancel"]
+        GENERAL["General<br/>Travel conversation"]
+    end
+
+    CLASSIFY -->|"explore"| EXPLORE
+    CLASSIFY -->|"plan"| PLAN
+    CLASSIFY -->|"book_flight"| BOOK_FLIGHT
+    CLASSIFY -->|"book_hotel"| BOOK_HOTEL
+    CLASSIFY -->|"cancel_booking"| CANCEL
+    CLASSIFY -->|"general / fallback"| GENERAL
+
+    PLAN -. "handoff" .-> BOOK_FLIGHT
+    PLAN -. "handoff" .-> BOOK_HOTEL
+
+    EXPLORE --> MEMORY["Save memory<br/>best effort"]
+    PLAN --> MEMORY
+    BOOK_FLIGHT --> MEMORY
+    BOOK_HOTEL --> MEMORY
+    CANCEL --> MEMORY
+    GENERAL --> MEMORY
+    MEMORY --> END((END))
+
+    classDef terminal fill:#172554,color:#ffffff,stroke:#60a5fa,stroke-width:2px;
+    classDef router fill:#fef3c7,color:#78350f,stroke:#f59e0b,stroke-width:2px;
+    classDef readAgent fill:#ecfeff,color:#164e63,stroke:#06b6d4;
+    classDef actionAgent fill:#fff1f2,color:#881337,stroke:#f43f5e;
+    classDef memory fill:#f0fdf4,color:#14532d,stroke:#22c55e,stroke-width:2px;
+
+    class START,END terminal;
+    class CLASSIFY router;
+    class EXPLORE,PLAN,GENERAL readAgent;
+    class BOOK_FLIGHT,BOOK_HOTEL,CANCEL actionAgent;
+    class MEMORY memory;
+```
+
+- `classify` uses structured output to identify the user's intent and routes with
+  `Command.goto`.
+- Each business branch is a LangChain agent graph with a domain-specific prompt and restricted
+  tool set.
+- `plan` can hand control to the flight or hotel booking branch through transfer tools.
+- Booking and cancellation tools pause with a LangGraph interrupt and require explicit human
+  approval before producing a side effect.
+- `PostgresSaver` persists per-thread checkpoints so conversations and interrupted runs can
+  resume.
+- `saveMemory` extracts durable travel preferences into a PostgreSQL-backed store after the
+  business branch responds.
+- CopilotKit and AG-UI stream tool artifacts to the React frontend, where domain hooks render
+  interactive cards.
+
+The main implementation entry points are:
+
+- [`apps/agent/src/agent.ts`](apps/agent/src/agent.ts) — parent graph
+- [`apps/agent/src/nodes/`](apps/agent/src/nodes) — classification, branches, routing, and memory
+- [`apps/agent/src/tools/`](apps/agent/src/tools) — agent-facing tool contracts
+- [`apps/agent/src/services/`](apps/agent/src/services) — domain and external API logic
+- [`apps/web/src/hooks/`](apps/web/src/hooks) — CopilotKit tool renderers, state sync, and approval UI
+
 ## Target
 
 The aim of this project is to build a realistic AI-powered travel planning assistant while helping developers understand modern agentic application architecture and collaborative development workflows.

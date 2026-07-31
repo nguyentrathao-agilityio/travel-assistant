@@ -1,0 +1,74 @@
+import type { KnowledgeSource } from '../schemas/knowledge';
+
+/**
+ * Allow-listed official sources. The ingestion command fetches and chunks these pages; adding a
+ * source here does not make it available to retrieval until db:seed-knowledge is run.
+ */
+export const KNOWLEDGE_SOURCES: KnowledgeSource[] = [
+  {
+    id: 'vn-evisa-official',
+    title: 'Vietnam electronic visa portal',
+    sourceUrl: 'https://vietnam.travel/plan-your-trip/official-vietnam-evisa-application',
+    sourceName: 'Vietnam National Authority of Tourism',
+    country: 'Vietnam',
+    category: 'entry',
+    updatedAt: '2026-07-31',
+    validUntil: null,
+    authority: 'official',
+  },
+  {
+    id: 'vn-tourism-practical',
+    title: 'Vietnam practical travel information',
+    sourceUrl: 'https://vietnam.travel/plan-your-trip',
+    sourceName: 'Vietnam National Authority of Tourism',
+    country: 'Vietnam',
+    category: 'planning',
+    updatedAt: '2026-07-31',
+    validUntil: null,
+    authority: 'official',
+  },
+  {
+    id: 'jp-visa-official',
+    title: 'Japan visa and entry guidance',
+    sourceUrl: 'https://www.mofa.go.jp/j_info/visit/visa/index.html',
+    sourceName: 'Ministry of Foreign Affairs of Japan',
+    country: 'Japan',
+    category: 'entry',
+    updatedAt: '2026-07-31',
+    validUntil: null,
+    authority: 'official',
+  },
+  {
+    id: 'jp-travel-planning',
+    title: 'Japan official travel planning guide',
+    sourceUrl: 'https://www.japan.travel/en/plan/',
+    sourceName: 'Japan National Tourism Organization',
+    country: 'Japan',
+    category: 'planning',
+    updatedAt: '2026-07-31',
+    validUntil: null,
+    authority: 'official',
+  },
+  {
+    id: 'thailand-entry-official',
+    title: 'Thailand consular visa information',
+    sourceUrl: 'https://www.mfa.go.th/en/publicservice/5d5bcc2615e39c306000a31a',
+    sourceName: 'Thailand Ministry of Foreign Affairs',
+    country: 'Thailand',
+    category: 'entry',
+    updatedAt: '2026-07-31',
+    validUntil: null,
+    authority: 'official',
+  },
+  {
+    id: 'vn-health-safety',
+    title: 'Vietnam health and safety advice',
+    sourceUrl: 'https://vietnam.travel/plan-your-trip/health-safety',
+    sourceName: 'Vietnam National Authority of Tourism',
+    country: 'Vietnam',
+    category: 'safety',
+    updatedAt: '2026-07-31',
+    validUntil: null,
+    authority: 'official',
+  },
+];

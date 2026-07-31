@@ -1,0 +1,8 @@
+export const KNOWLEDGE_NAMESPACE = ['travel', 'knowledge'];
+export const KNOWLEDGE_EMBEDDING_DIMS = 1536;
+export const KNOWLEDGE_VECTOR_WEIGHT = 0.65;
+export const KNOWLEDGE_MIN_SCORE = 0.15;
+export const KNOWLEDGE_CANDIDATE_MULTIPLIER = 4;
+export const KNOWLEDGE_MIN_CANDIDATES = 20;
+export const KNOWLEDGE_CHUNK_SIZE = 1000;
+export const KNOWLEDGE_CHUNK_OVERLAP = 200;

@@ -2,15 +2,15 @@ import { tool } from '@langchain/core/tools';
 
 import { getWeather } from '../services/weather';
 import { WeatherInputSchema } from '../schemas/weather';
-import { TOOL_ERROR_MESSAGES } from '../constants';
+import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
 
 export const weatherTool = tool(
   async ({ city, days }) => {
     try {
       const result = await getWeather({ city, days });
-      return JSON.stringify(result);
+      return contentAndArtifact(result);
     } catch (error) {
-      return JSON.stringify({
+      return contentAndArtifact({
         error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.WEATHER,
       });
     }
@@ -23,6 +23,6 @@ export const weatherTool = tool(
 
     Only call this tool when city is available.`,
     schema: WeatherInputSchema,
-    returnDirect: true,
+    responseFormat: 'content_and_artifact',
   }
 );

@@ -2,15 +2,15 @@ import { tool } from '@langchain/core/tools';
 
 import { getLocalTips } from '../services/tips';
 import { TipsInputSchema } from '../schemas/tips';
-import { TOOL_ERROR_MESSAGES } from '../constants';
+import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
 
 export const tipsTool = tool(
   async (input) => {
     try {
       const result = await getLocalTips(input);
-      return JSON.stringify(result);
+      return contentAndArtifact(result);
     } catch (error) {
-      return JSON.stringify({
+      return contentAndArtifact({
         error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.LOCAL_TIPS,
       });
     }
@@ -30,6 +30,6 @@ export const tipsTool = tool(
 
     Only call when country is known.`,
     schema: TipsInputSchema,
-    returnDirect: true,
+    responseFormat: 'content_and_artifact',
   }
 );

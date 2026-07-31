@@ -2,15 +2,15 @@ import { tool } from '@langchain/core/tools';
 
 import { getDestinationExplorer } from '../services/destination-explorer';
 import { DestinationExplorerInputSchema } from '../schemas/destination-explorer';
-import { TOOL_ERROR_MESSAGES } from '../constants';
+import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
 
 export const destinationExplorerTool = tool(
   async (input) => {
     try {
       const result = await getDestinationExplorer(input);
-      return JSON.stringify(result);
+      return contentAndArtifact(result);
     } catch (error) {
-      return JSON.stringify({
+      return contentAndArtifact({
         error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.DESTINATION_EXPLORER,
       });
     }
@@ -29,6 +29,6 @@ export const destinationExplorerTool = tool(
 
     Only call when city is known.`,
     schema: DestinationExplorerInputSchema,
-    returnDirect: true,
+    responseFormat: 'content_and_artifact',
   }
 );

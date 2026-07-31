@@ -2,15 +2,15 @@ import { tool } from '@langchain/core/tools';
 
 import { getRoute } from '../services/route';
 import { RouteInputSchema } from '../schemas/route';
-import { TOOL_ERROR_MESSAGES } from '../constants';
+import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
 
 export const routeTool = tool(
   async (input) => {
     try {
       const result = await getRoute(input);
-      return JSON.stringify(result);
+      return contentAndArtifact(result);
     } catch (error) {
-      return JSON.stringify({
+      return contentAndArtifact({
         error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.ROUTE,
       });
     }
@@ -23,6 +23,6 @@ export const routeTool = tool(
     
     Only call this tool when city is available.`,
     schema: RouteInputSchema,
-    returnDirect: true,
+    responseFormat: 'content_and_artifact',
   }
 );

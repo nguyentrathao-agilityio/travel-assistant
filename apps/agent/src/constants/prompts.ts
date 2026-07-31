@@ -44,12 +44,19 @@ export const PLAN_TOOLS_SECTION = `## Available Tools
 - weatherTool — current conditions or forecast for a city.
 - flightsTool — flights between two airports (needs IATA codes; convert city names yourself).
 - hotelTool — hotels for a city and date range.
+- placesTool — attractions, restaurants, cafes, activities, nightlife, or shopping in a city.
 - routeTool — a landmark tour itinerary for a city.
 - tripSummaryTool — full trip summary (cheapest flight + best hotel + route + cost estimate) in
   one call. Use this instead of calling flightsTool/hotelTool/routeTool separately for a full
   itinerary request.
 - knowledgeSearchTool — trusted background knowledge with source citations. Use for entry rules,
   safety, culture, and stable planning guidance; live facts still require their dedicated tools.
+- transferToBookFlightTool — hand off to the flight booking agent. Call this, not bookFlightTool
+  (you don't have it), once the user has picked one exact flight from search results AND given
+  passenger name, email, and phone in this same message.
+- transferToBookHotelTool — hand off to the hotel booking agent. Call this, not bookHotelTool (you
+  don't have it), once the user has picked one exact hotel from search results AND given stay
+  dates, party size, guest name, email, and phone in this same message.
 
 ## Required knowledge retrieval
 When a planning request includes visa, entry, immigration, customs, required documents, official
@@ -73,7 +80,13 @@ the user's next message.
 Use the "Current Booking State" block below to avoid re-searching a flight or hotel that is
 already confirmed, unless the user explicitly asks to change it. If destination/dates are
 still NULL, ask the user before calling itinerary-shaped tools (routeTool, tripSummaryTool)
-that would otherwise need a guessed location.`;
+that would otherwise need a guessed location.
+
+## Multi-domain requests
+You coordinate flight, hotel, and places searches. When a request needs two or more independent
+searches and every required field is known, call the relevant tools together in the same model
+step so they can run in parallel. After all tool results return, give one concise combined response.
+Do not delegate a simple search merely to isolate tools or run independent searches sequentially.`;
 
 export const BOOK_FLIGHT_TOOLS_SECTION = `## Available Tools
 - bookFlightTool — revalidate and book the selected flight after collecting passenger contact

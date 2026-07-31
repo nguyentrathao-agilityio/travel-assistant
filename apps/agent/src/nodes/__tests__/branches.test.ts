@@ -12,7 +12,7 @@ import {
 const nameOf = (tools: { name: string }[]) => tools.map((t) => t.name).sort();
 
 describe('branch tool wiring', () => {
-  it('binds each branch to exactly its own tools, with no cross-branch leakage', () => {
+  it('binds discovery tools to explore and multi-domain search tools to plan', () => {
     expect(nameOf(EXPLORE_TOOLS)).toEqual(
       ['destinationExplorerTool', 'knowledgeSearchTool', 'localTipsTool', 'placesTool'].sort()
     );
@@ -21,7 +21,10 @@ describe('branch tool wiring', () => {
         'flightsTool',
         'hotelTool',
         'knowledgeSearchTool',
+        'placesTool',
         'routeTool',
+        'transferToBookFlightTool',
+        'transferToBookHotelTool',
         'tripSummaryTool',
         'weatherTool',
       ].sort()
@@ -45,6 +48,7 @@ describe('branch tool wiring', () => {
     expect(occurrences).toEqual(
       expect.objectContaining({
         knowledgeSearchTool: 2,
+        placesTool: 2,
         bookFlightTool: 1,
         bookHotelTool: 1,
         cancelBookingTool: 1,

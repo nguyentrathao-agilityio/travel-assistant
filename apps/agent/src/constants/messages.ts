@@ -16,6 +16,14 @@ export const TOOL_ERROR_MESSAGES = {
   KNOWLEDGE: "Couldn't search the knowledge base right now. Please try again.",
 } as const;
 
+export const TOOL_READY_OUTPUT =
+  'The result is ready. Ask one brief, natural next-step question without repeating any result details.';
+
+export const contentAndArtifact = <T>(artifact: T): [string, T] => [
+  JSON.stringify(artifact),
+  artifact,
+];
+
 export const ERROR_MESSAGES = {
   NO_API_URL: 'API_URL environment variable is not set',
   SEARCH_FAILED: (status: number, statusText: string) =>

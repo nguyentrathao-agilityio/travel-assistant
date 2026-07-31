@@ -19,7 +19,10 @@ export const buildGraph = () =>
   new StateGraph(GraphState)
     .addNode('classify', classifyNode, { ends: BRANCH_NAMES })
     .addNode('explore', exploreBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
-    .addNode('plan', planBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
+    .addNode('plan', planBranch, {
+      retryPolicy: EXTERNAL_API_RETRY_POLICY,
+      ends: ['bookFlight', 'bookHotel'],
+    })
     .addNode('bookFlight', bookFlightBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
     .addNode('bookHotel', bookHotelBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
     .addNode('cancelBooking', cancelBookingBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })

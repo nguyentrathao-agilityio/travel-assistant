@@ -16,9 +16,9 @@ import {
   FlightBookingInputSchema,
   HotelBookingInputSchema,
 } from '../schemas';
-import { TOOL_ERROR_MESSAGES } from '../constants';
+import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
 
-const serializeToolResult = (result: unknown): string => JSON.stringify(result);
+const formatToolResult = (result: unknown): [string, unknown] => contentAndArtifact(result);
 
 const parseApprovalResponse = (response: unknown): unknown => {
   if (typeof response !== 'string') return response;
@@ -38,8 +38,9 @@ const requestBookingApproval = (request: BookingApprovalRequest): boolean => {
   );
 };
 
-const serializeToolError = (error: unknown, fallbackMessage: string): string =>
-  serializeToolResult({ error: error instanceof Error ? error.message : fallbackMessage });
+const toolError = (error: unknown, fallbackMessage: string): { error: string } => ({
+  error: error instanceof Error ? error.message : fallbackMessage,
+});
 
 type Flight = Awaited<ReturnType<typeof getFlight>>;
 
@@ -73,11 +74,11 @@ export const bookFlightTool = tool(
     try {
       flight = await getFlight(input.flightId);
     } catch (error) {
-      return serializeToolError(error, TOOL_ERROR_MESSAGES.FLIGHT_BOOKING);
+      return formatToolResult(toolError(error, TOOL_ERROR_MESSAGES.FLIGHT_BOOKING));
     }
 
     if (!requestBookingApproval(buildFlightApprovalRequest(flight, input))) {
-      return serializeToolResult({ status: 'rejected', type: 'flight' });
+      return formatToolResult({ status: 'rejected', type: 'flight' });
     }
 
     try {
@@ -88,13 +89,13 @@ export const bookFlightTool = tool(
 
       if (flightChanged(fresh, flight)) {
         if (!requestBookingApproval(buildFlightApprovalRequest(fresh, input))) {
-          return serializeToolResult({ status: 'rejected', type: 'flight' });
+          return formatToolResult({ status: 'rejected', type: 'flight' });
         }
       }
 
-      return serializeToolResult(await submitFlightBooking(input, fresh));
+      return formatToolResult(await submitFlightBooking(input, fresh));
     } catch (error) {
-      return serializeToolError(error, TOOL_ERROR_MESSAGES.FLIGHT_BOOKING);
+      return formatToolResult(toolError(error, TOOL_ERROR_MESSAGES.FLIGHT_BOOKING));
     }
   },
   {
@@ -104,7 +105,7 @@ export const bookFlightTool = tool(
     This tool revalidates the selected flight, always pauses for explicit human approval, and
     re-verifies price/availability after approval before booking (asking again if anything changed).`,
     schema: FlightBookingInputSchema,
-    returnDirect: true,
+    responseFormat: 'content_and_artifact',
   }
 );
 
@@ -151,11 +152,11 @@ export const bookHotelTool = tool(
     try {
       hotel = await revalidateHotel(input);
     } catch (error) {
-      return serializeToolError(error, TOOL_ERROR_MESSAGES.HOTEL_BOOKING);
+      return formatToolResult(toolError(error, TOOL_ERROR_MESSAGES.HOTEL_BOOKING));
     }
 
     if (!requestBookingApproval(buildHotelApprovalRequest(hotel, input))) {
-      return serializeToolResult({ status: 'rejected', type: 'hotel' });
+      return formatToolResult({ status: 'rejected', type: 'hotel' });
     }
 
     try {
@@ -163,13 +164,13 @@ export const bookHotelTool = tool(
 
       if (hotelChanged(fresh, hotel)) {
         if (!requestBookingApproval(buildHotelApprovalRequest(fresh, input))) {
-          return serializeToolResult({ status: 'rejected', type: 'hotel' });
+          return formatToolResult({ status: 'rejected', type: 'hotel' });
         }
       }
 
-      return serializeToolResult(await submitHotelBooking(input));
+      return formatToolResult(await submitHotelBooking(input));
     } catch (error) {
-      return serializeToolError(error, TOOL_ERROR_MESSAGES.HOTEL_BOOKING);
+      return formatToolResult(toolError(error, TOOL_ERROR_MESSAGES.HOTEL_BOOKING));
     }
   },
   {
@@ -179,7 +180,7 @@ export const bookHotelTool = tool(
     and phone. This tool revalidates availability, always pauses for explicit human approval, and
     re-verifies availability after approval before booking (asking again if anything changed).`,
     schema: HotelBookingInputSchema,
-    returnDirect: true,
+    responseFormat: 'content_and_artifact',
   }
 );
 
@@ -189,7 +190,7 @@ export const cancelBookingTool = tool(
     try {
       booking = await getBooking(input.bookingId);
     } catch (error) {
-      return serializeToolError(error, TOOL_ERROR_MESSAGES.BOOKING_CANCEL);
+      return formatToolResult(toolError(error, TOOL_ERROR_MESSAGES.BOOKING_CANCEL));
     }
 
     const isApproved = requestBookingApproval({
@@ -209,12 +210,12 @@ export const cancelBookingTool = tool(
       allowedDecisions: ['approve', 'reject'],
     });
 
-    if (!isApproved) return serializeToolResult({ status: 'rejected', type: 'cancellation' });
+    if (!isApproved) return formatToolResult({ status: 'rejected', type: 'cancellation' });
 
     try {
-      return serializeToolResult(await cancelBooking(input));
+      return formatToolResult(await cancelBooking(input));
     } catch (error) {
-      return serializeToolError(error, TOOL_ERROR_MESSAGES.BOOKING_CANCEL);
+      return formatToolResult(toolError(error, TOOL_ERROR_MESSAGES.BOOKING_CANCEL));
     }
   },
   {
@@ -222,6 +223,6 @@ export const cancelBookingTool = tool(
     description: `Cancel an existing flight or hotel booking by booking ID or confirmation code.
 Always pauses for explicit human approval before cancellation.`,
     schema: CancelBookingInputSchema,
-    returnDirect: true,
+    responseFormat: 'content_and_artifact',
   }
 );

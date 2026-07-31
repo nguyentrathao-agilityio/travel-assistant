@@ -2,15 +2,15 @@ import { tool } from '@langchain/core/tools';
 
 import { getTripSummary } from '../services/trip-summary';
 import { TripSummaryInputSchema } from '../schemas/trip-summary';
-import { TOOL_ERROR_MESSAGES } from '../constants';
+import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
 
 export const tripSummaryTool = tool(
   async (input) => {
     try {
       const result = await getTripSummary(input);
-      return JSON.stringify(result);
+      return contentAndArtifact(result);
     } catch (error) {
-      return JSON.stringify({
+      return contentAndArtifact({
         error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.TRIP_SUMMARY,
       });
     }
@@ -33,6 +33,6 @@ export const tripSummaryTool = tool(
       - travelers
       - skipHotel (true if user already has a hotel booked)`,
     schema: TripSummaryInputSchema,
-    returnDirect: true,
+    responseFormat: 'content_and_artifact',
   }
 );

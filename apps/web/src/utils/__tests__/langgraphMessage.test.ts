@@ -57,6 +57,26 @@ describe('toAgUiMessage legacy compatibility', () => {
     });
   });
 
+  it('uses a persisted tool artifact as the rich-card result', () => {
+    expect(
+      toAgUiMessage(
+        {
+          id: 'tool-1',
+          type: 'tool',
+          tool_call_id: 'call-1',
+          content: 'The result is ready.',
+          artifact: { total: 1, places: [{ id: 'place-1' }] },
+        },
+        'fallback'
+      )
+    ).toEqual({
+      id: 'tool-1',
+      role: 'tool',
+      toolCallId: 'call-1',
+      content: '{"total":1,"places":[{"id":"place-1"}]}',
+    });
+  });
+
   it('keeps non-JSON tool results as text', () => {
     expect(
       toAgUiMessage(

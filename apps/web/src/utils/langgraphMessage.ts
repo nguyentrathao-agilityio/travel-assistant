@@ -16,6 +16,7 @@ export type LangGraphRawMessage = {
   role?: string;
   type?: string;
   content?: unknown;
+  artifact?: unknown;
   tool_calls?: ToolCall[];
   tool_call_id?: string;
   additional_kwargs?: {
@@ -123,7 +124,10 @@ export const toAgUiMessage = (
       id,
       role: CHAT_ROLE.TOOL,
       toolCallId: message.tool_call_id,
-      content: langgraphToolContent(message.content),
+      // CopilotKit 1.x renders cards from ToolResult.content. LangChain keeps
+      // rich structured output in ToolMessage.artifact, so expose that value
+      // to the UI while leaving ToolMessage.content concise for the model.
+      content: langgraphToolContent(message.artifact ?? message.content),
     };
   }
 

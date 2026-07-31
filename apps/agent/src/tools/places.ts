@@ -2,15 +2,15 @@ import { tool } from '@langchain/core/tools';
 
 import { getPlaces } from '../services/places';
 import { PlacesInputSchema } from '../schemas/places';
-import { TOOL_ERROR_MESSAGES } from '../constants';
+import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
 
 export const placesTool = tool(
   async (input) => {
     try {
       const result = await getPlaces(input);
-      return JSON.stringify(result);
+      return contentAndArtifact(result);
     } catch (error) {
-      return JSON.stringify({
+      return contentAndArtifact({
         error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.PLACES,
       });
     }
@@ -33,6 +33,6 @@ export const placesTool = tool(
       - If the user's request doesn't indicate a category (e.g. "what should I see in X?"), ask which category they want before calling — do not guess or call this tool more than once per request.
       - Only call when city is available.`,
     schema: PlacesInputSchema,
-    returnDirect: true,
+    responseFormat: 'content_and_artifact',
   }
 );

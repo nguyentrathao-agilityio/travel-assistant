@@ -2,15 +2,15 @@ import { tool } from '@langchain/core/tools';
 
 import { searchFlights } from '../services/flights';
 import { FlightInputSchema } from '../schemas/flights';
-import { TOOL_ERROR_MESSAGES } from '../constants';
+import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
 
 export const flightsTool = tool(
   async (input) => {
     try {
       const result = await searchFlights(input);
-      return JSON.stringify(result);
+      return contentAndArtifact(result);
     } catch (error) {
-      return JSON.stringify({
+      return contentAndArtifact({
         error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.FLIGHTS,
       });
     }
@@ -36,6 +36,6 @@ export const flightsTool = tool(
       - If unsure of the correct IATA code, ask the user which airport they prefer.
       - Only call when all required fields are present.`,
     schema: FlightInputSchema,
-    returnDirect: true,
+    responseFormat: 'content_and_artifact',
   }
 );

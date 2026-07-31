@@ -2,15 +2,15 @@ import { tool } from '@langchain/core/tools';
 
 import { searchHotels } from '../services/hotel';
 import { HotelInputSchema } from '../schemas/hotel';
-import { TOOL_ERROR_MESSAGES } from '../constants';
+import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
 
 export const hotelTool = tool(
   async (input) => {
     try {
       const result = await searchHotels(input);
-      return JSON.stringify(result);
+      return contentAndArtifact(result);
     } catch (error) {
-      return JSON.stringify({
+      return contentAndArtifact({
         error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.HOTELS,
       });
     }
@@ -37,6 +37,6 @@ export const hotelTool = tool(
       - Always pass availableOnly: true unless the user explicitly wants unavailable options too.
       - Only call when city, checkIn, and checkOut are known.`,
     schema: HotelInputSchema,
-    returnDirect: true,
+    responseFormat: 'content_and_artifact',
   }
 );

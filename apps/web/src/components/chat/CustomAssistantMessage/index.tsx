@@ -1,10 +1,21 @@
 import { AssistantMessageProps, Markdown } from '@copilotkit/react-ui';
 import { Bot, Copy, ThumbsUp, ThumbsDown, RotateCw } from 'lucide-react';
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 // Components
 import { Button } from '@/components';
 import { TypingIndicator } from '../TypingIndicator';
+
+const hasRenderedContent = (node: Node): boolean => {
+  if (node.nodeType === Node.TEXT_NODE) return Boolean(node.textContent?.trim());
+  if (!(node instanceof HTMLElement || node instanceof SVGElement)) return false;
+
+  const tagName = node.tagName.toLowerCase();
+  if (['canvas', 'iframe', 'img', 'input', 'svg', 'video'].includes(tagName)) return true;
+  if ([...node.childNodes].some(hasRenderedContent)) return true;
+
+  return node.hasAttribute('class') || node.hasAttribute('style');
+};
 
 const CopyButton = ({
   content,
@@ -56,19 +67,47 @@ const CustomAssistantMessage = (props: AssistantMessageProps) => {
   const content = message?.content;
   const assistantUi = message?.generativeUI?.() ?? null;
   const assistantUiPosition = message?.generativeUIPosition ?? 'before';
+  const messageContent = typeof content === 'string' ? content : '';
+  const hasMessage = messageContent.trim().length > 0;
+  const hasPotentialCard = assistantUi !== null && assistantUi !== undefined;
+  const [hasCard, setHasCard] = useState(false);
+  const cardContainerRef = useRef<HTMLDivElement>(null);
 
-  // Render nothing if there's no content, loading state, or generative UI
-  const hasContent = Boolean(content || isLoading || (assistantUi && assistantUi !== <div></div>));
+  useLayoutEffect(() => {
+    const container = cardContainerRef.current;
+    if (!container) {
+      setHasCard(false);
+      return;
+    }
+
+    const updateHasCard = () => setHasCard([...container.childNodes].some(hasRenderedContent));
+    updateHasCard();
+
+    const observer = new MutationObserver(updateHasCard);
+    observer.observe(container, {
+      attributes: true,
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
+    return () => observer.disconnect();
+  }, [assistantUi]);
+
+  // Potential generative UI must mount once so its actual rendered DOM can be inspected.
+  const hasContent = hasMessage || isLoading || hasPotentialCard;
   if (!hasContent) return null;
 
-  const renderBefore = Boolean(assistantUi && assistantUiPosition === 'before');
-  const renderAfter = Boolean(assistantUi && assistantUiPosition !== 'before');
+  const renderBefore = hasPotentialCard && assistantUiPosition === 'before';
+  const renderAfter = hasPotentialCard && assistantUiPosition !== 'before';
 
   return (
     <div className="flex max-w-[80%] gap-3 py-2">
       {/* Avatar */}
-      {(content || renderAfter || renderBefore || (isLoading && !message?.toolCalls)) && (
-        <div className="bg-assistant-gradient flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white">
+      {(hasMessage || hasCard) && (
+        <div
+          aria-label="Assistant avatar"
+          className="bg-assistant-gradient flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
+        >
           <Bot size={18} />
         </div>
       )}
@@ -76,26 +115,26 @@ const CustomAssistantMessage = (props: AssistantMessageProps) => {
       {/* Content container */}
       <div className="flex flex-col gap-2">
         {/* Generative UI (before) */}
-        {renderBefore && <div>{assistantUi}</div>}
+        {renderBefore && <div ref={cardContainerRef}>{assistantUi}</div>}
 
         {/* Message bubble */}
-        {(content || (isLoading && !message?.toolCalls)) && (
+        {(hasMessage || (isLoading && !message?.toolCalls)) && (
           <div
             className={`bg-background-secondary text-text-primary rounded-[28px] px-4 py-2 shadow ${
               isCurrentMessage ? 'ring-border-secondary ring-1' : ''
             }`}
           >
-            {content ? (
-              <Markdown content={content} components={markdownTagRenderers} />
+            {hasMessage ? (
+              <Markdown content={messageContent} components={markdownTagRenderers} />
             ) : (
               <TypingIndicator className="p-0" />
             )}
           </div>
         )}
         {/* Generative UI (after) */}
-        {renderAfter && <div>{assistantUi}</div>}
+        {renderAfter && <div ref={cardContainerRef}>{assistantUi}</div>}
         {/* Action buttons */}
-        {content && (
+        {hasMessage && (
           <div className="flex h-6 items-center gap-2 pl-5">
             <Button
               variant="ghost"
@@ -107,16 +146,13 @@ const CustomAssistantMessage = (props: AssistantMessageProps) => {
               <RotateCw size={16} />
             </Button>
 
-            <CopyButton
-              content={typeof content === 'string' ? content : String(content)}
-              onCopyAction={onCopy}
-            />
+            <CopyButton content={messageContent} onCopyAction={onCopy} />
 
             <Button
               variant="ghost"
               aria-label="Thumbs up"
               title="Thumbs up"
-              onClick={() => onThumbsUp?.(message)}
+              onClick={() => message && onThumbsUp?.(message)}
               className={`p-1.5 ${feedback === 'thumbsUp' ? 'text-brand-600' : 'text-text-tertiary'}`}
             >
               <ThumbsUp size={16} />
@@ -126,7 +162,7 @@ const CustomAssistantMessage = (props: AssistantMessageProps) => {
               variant="ghost"
               aria-label="Thumbs down"
               title="Thumbs down"
-              onClick={() => onThumbsDown?.(message)}
+              onClick={() => message && onThumbsDown?.(message)}
               className={`p-1.5 ${feedback === 'thumbsDown' ? 'text-red-500' : 'text-text-tertiary'}`}
             >
               <ThumbsDown size={16} />

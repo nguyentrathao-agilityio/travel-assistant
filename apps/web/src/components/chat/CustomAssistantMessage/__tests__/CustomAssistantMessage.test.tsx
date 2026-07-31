@@ -68,6 +68,67 @@ describe('CustomAssistantMessage', () => {
   it('renders typing indicator when loading and no content', () => {
     render(<CustomAssistantMessage isLoading={true} isGenerating={false} rawData={null} />);
     expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Assistant avatar')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['null', null],
+    ['an empty fragment', <></>],
+    ['an empty element', <div />],
+    ['an empty string', ''],
+    ['whitespace', '   '],
+  ])('does not render an avatar for %s generative UI', (_label, generativeUI) => {
+    render(
+      <CustomAssistantMessage
+        message={{ ...BASE_MESSAGE, content: '', generativeUI: () => generativeUI } as any}
+        isLoading={false}
+        isGenerating={false}
+        rawData={null}
+      />
+    );
+
+    expect(screen.queryByLabelText('Assistant avatar')).not.toBeInTheDocument();
+  });
+
+  it('does not render an avatar when a custom card component renders an empty fragment', () => {
+    const EmptyCard = () => <></>;
+
+    render(
+      <CustomAssistantMessage
+        message={
+          {
+            ...BASE_MESSAGE,
+            content: '',
+            generativeUI: () => <EmptyCard />,
+          } as any
+        }
+        isLoading={false}
+        isGenerating={false}
+        rawData={null}
+      />
+    );
+
+    expect(screen.queryByLabelText('Assistant avatar')).not.toBeInTheDocument();
+  });
+
+  it('renders an avatar when a card is present without message content', () => {
+    render(
+      <CustomAssistantMessage
+        message={
+          {
+            ...BASE_MESSAGE,
+            content: '',
+            generativeUI: () => <div>Travel card</div>,
+          } as any
+        }
+        isLoading={false}
+        isGenerating={false}
+        rawData={null}
+      />
+    );
+
+    expect(screen.getByText('Travel card')).toBeInTheDocument();
+    expect(screen.getByLabelText('Assistant avatar')).toBeInTheDocument();
   });
 
   it('applies feedback styles when provided', () => {

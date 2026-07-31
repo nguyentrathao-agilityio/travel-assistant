@@ -1,21 +1,39 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { resetKnowledgeIndex, searchKnowledge } from '../knowledge';
+import { KNOWLEDGE_NAMESPACE, KNOWLEDGE_VECTOR_WEIGHT } from '../../constants';
+import type { KnowledgeDocument } from '../../schemas/knowledge';
+import { searchKnowledge } from '../knowledge';
 
-const semanticEmbedder = async (texts: string[]): Promise<number[][]> =>
-  texts.map((text) => {
-    const normalized = text.toLowerCase();
-    return [
-      normalized.includes('visa') || normalized.includes('entry') ? 1 : 0,
-      normalized.includes('japan') ? 1 : 0,
-      normalized.includes('vietnam') ? 1 : 0,
-    ];
-  });
+const document = (overrides: Partial<KnowledgeDocument> = {}): KnowledgeDocument => ({
+  id: 'jp-visa-official:chunk:0000',
+  sourceId: 'jp-visa-official',
+  chunkId: 'jp-visa-official:chunk:0000',
+  chunkIndex: 0,
+  title: 'Japan visa and entry guidance',
+  content: 'Visa and entry requirements depend on nationality.',
+  sourceUrl: 'https://www.mofa.go.jp/j_info/visit/visa/index.html',
+  sourceName: 'Ministry of Foreign Affairs of Japan',
+  country: 'Japan',
+  category: 'entry',
+  updatedAt: '2026-07-31',
+  validUntil: null,
+  authority: 'official',
+  ...overrides,
+});
+
+const item = (value: KnowledgeDocument, score: number) => ({
+  namespace: KNOWLEDGE_NAMESPACE,
+  key: value.chunkId,
+  value,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  score,
+});
 
 describe('searchKnowledge', () => {
-  afterEach(() => resetKnowledgeIndex());
+  it('runs filtered hybrid retrieval and returns chunk citations', async () => {
+    const search = vi.fn().mockResolvedValue([item(document(), 0.91)]);
 
-  it('combines semantic retrieval with metadata filters and citations', async () => {
     const result = await searchKnowledge(
       {
         query: 'What are the visa entry requirements?',
@@ -23,43 +41,63 @@ describe('searchKnowledge', () => {
         category: 'entry',
         maxResults: 3,
       },
-      semanticEmbedder
+      { search } as never
     );
 
+    expect(search).toHaveBeenCalledWith(
+      KNOWLEDGE_NAMESPACE,
+      expect.objectContaining({
+        filter: { country: 'Japan', category: 'entry' },
+        mode: 'hybrid',
+        vectorWeight: KNOWLEDGE_VECTOR_WEIGHT,
+      })
+    );
     expect(result.retrieval.strategy).toBe('hybrid');
-    expect(result.results[0].document.id).toBe('jp-visa-official');
+    expect(result.results[0].document.sourceId).toBe('jp-visa-official');
     expect(result.results[0].citation).toContain('mofa.go.jp');
-    expect(result.results.every(({ document }) => document.country === 'Japan')).toBe(true);
   });
 
-  it('falls back to lexical retrieval when embeddings are unavailable', async () => {
+  it('falls back to lexical retrieval when hybrid retrieval fails', async () => {
+    const search = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('embedding provider unavailable'))
+      .mockResolvedValueOnce([item(document(), 0.8)]);
+
     const result = await searchKnowledge(
-      {
-        query: 'transportation weather culture',
-        country: 'Vietnam',
-        maxResults: 3,
-      },
-      async () => {
-        throw new Error('embedding provider unavailable');
-      }
+      { query: 'Japan visa rules', country: 'Japan', maxResults: 3 },
+      { search } as never
     );
 
+    expect(search).toHaveBeenLastCalledWith(
+      KNOWLEDGE_NAMESPACE,
+      expect.objectContaining({ mode: 'text' })
+    );
     expect(result.retrieval.strategy).toBe('lexical-fallback');
-    expect(result.results[0].document.id).toBe('vn-tourism-practical');
   });
 
-  it('allows country-level guidance when a city filter is supplied', async () => {
+  it('rejects low-score, expired, and wrong-city chunks', async () => {
+    const search = vi
+      .fn()
+      .mockResolvedValue([
+        item(document({ id: 'low', chunkId: 'low' }), 0.1),
+        item(document({ id: 'expired', chunkId: 'expired', validUntil: '2020-01-01' }), 0.9),
+        item(document({ id: 'city', chunkId: 'city', city: 'Tokyo' }), 0.9),
+        item(document({ id: 'country', chunkId: 'country' }), 0.85),
+      ]);
+
     const result = await searchKnowledge(
       {
-        query: 'Vietnam practical planning',
-        country: 'Vietnam',
-        city: 'Da Nang',
-        category: 'planning',
+        query: 'Japan practical planning',
+        country: 'Japan',
+        city: 'Osaka',
         maxResults: 3,
       },
-      semanticEmbedder
+      { search } as never
     );
 
-    expect(result.results.map(({ document }) => document.id)).toContain('vn-tourism-practical');
+    expect(result.results.map(({ document: resultDocument }) => resultDocument.chunkId)).toEqual([
+      'country',
+    ]);
+    expect(result.retrieval.rejectedDocuments).toBe(3);
   });
 });

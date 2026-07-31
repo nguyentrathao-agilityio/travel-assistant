@@ -2,6 +2,7 @@ import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 import { PostgresStore } from '@langchain/langgraph-checkpoint-postgres/store';
 
 import { POSTGRES_URL } from '../constants';
+import { knowledgeStore } from '../services/knowledge-store';
 
 /**
  * One-time migration: creates/updates the checkpoint and long-term-memory
@@ -24,3 +25,5 @@ const setupStore = async (): Promise<void> => {
 
 await setupCheckpointer();
 await setupStore();
+await knowledgeStore.setup();
+await knowledgeStore.stop();

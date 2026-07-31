@@ -76,6 +76,9 @@ importers:
       '@langchain/openai':
         specifier: ^1.4.7
         version: 1.5.5(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1))(ws@8.20.1)
+      '@langchain/textsplitters':
+        specifier: ^1.0.1
+        version: 1.0.1(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1))
       hono:
         specifier: ^4.12.30
         version: 4.12.30
@@ -2564,6 +2567,15 @@ packages:
       {
         integrity: sha512-XW1egQtPfsGI41w2AMZNFZrUIwFSQHTjVMZs0OaTpCAvht/QLoaPN8FQcsysMVypOhupG28J29yOorrc70otBQ==,
       }
+
+  '@langchain/textsplitters@1.0.1':
+    resolution:
+      {
+        integrity: sha512-rheJlB01iVtrOUzttscutRgLybPH9qR79EyzBEbf1u97ljWyuxQfCwIWK+SjoQTM9O8M7GGLLRBSYE26Jmcoww==,
+      }
+    engines: { node: '>=20' }
+    peerDependencies:
+      '@langchain/core': ^1.0.0
 
   '@lit-labs/react@2.1.3':
     resolution:
@@ -15282,6 +15294,11 @@ snapshots:
   '@langchain/protocol@0.0.16': {}
 
   '@langchain/protocol@0.0.18': {}
+
+  '@langchain/textsplitters@1.0.1(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1))':
+    dependencies:
+      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1)
+      js-tiktoken: 1.0.21
 
   '@lit-labs/react@2.1.3(@types/react@19.2.14)':
     dependencies:

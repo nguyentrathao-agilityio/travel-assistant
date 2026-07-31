@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "db:setup": "dotenv -e .env -- tsx src/scripts/setup-checkpointer.ts",
+    "db:seed-knowledge": "dotenv -e .env -- tsx src/scripts/seed-knowledge.ts",
     "build": "tsc && tsc-alias",
     "dev": "tsc && tsc-alias && langgraphjs dev --port 8123 --no-browser",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -22,6 +23,7 @@
     "@langchain/langgraph-checkpoint-postgres": "^1.0.4",
     "@langchain/langgraph-sdk": "^1.9.27",
     "@langchain/openai": "^1.4.7",
+    "@langchain/textsplitters": "^1.0.1",
     "hono": "^4.12.30",
     "langchain": "^1.4.0",
     "openai": "^6.38.0",

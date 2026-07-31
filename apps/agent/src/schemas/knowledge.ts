@@ -18,10 +18,28 @@ export const KnowledgeSearchInputSchema = z.object({
 
 export type KnowledgeSearchInput = z.infer<typeof KnowledgeSearchInputSchema>;
 
-export const KnowledgeDocumentSchema = z.object({
+export const KnowledgeSourceSchema = z.object({
   id: z.string(),
   title: z.string(),
-  content: z.string(),
+  sourceUrl: z.string().url(),
+  sourceName: z.string(),
+  country: z.string().optional(),
+  city: z.string().optional(),
+  category: KnowledgeCategorySchema,
+  updatedAt: z.string(),
+  validUntil: z.string().nullable().default(null),
+  authority: z.enum(['official', 'curated']),
+});
+
+export type KnowledgeSource = z.infer<typeof KnowledgeSourceSchema>;
+
+export const KnowledgeDocumentSchema = z.object({
+  id: z.string(),
+  sourceId: z.string(),
+  chunkId: z.string(),
+  chunkIndex: z.number().int().nonnegative(),
+  title: z.string(),
+  content: z.string().min(1),
   sourceUrl: z.string().url(),
   sourceName: z.string(),
   country: z.string().optional(),
@@ -46,6 +64,7 @@ export const KnowledgeSearchResultSchema = z.object({
   retrieval: z.object({
     strategy: z.enum(['hybrid', 'lexical-fallback']),
     searchedDocuments: z.number().int(),
+    rejectedDocuments: z.number().int(),
   }),
 });
 

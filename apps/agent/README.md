@@ -21,17 +21,22 @@ LangGraph-powered travel agent. Handles flight search, hotel search, route plann
 
 ## Knowledge RAG
 
-The explore and plan branches can search a trusted travel knowledge corpus using hybrid semantic
-and lexical retrieval with metadata filters and citations. Live prices, availability, schedules,
-weather, and routes continue to use dedicated tools. See
-[`docs/travel-rag-plan.md`](../../docs/travel-rag-plan.md) for the architecture and rollout plan.
+The explore and plan branches search an allow-listed travel knowledge base using hybrid semantic
+and lexical retrieval, metadata filters, a minimum relevance threshold, and citations. The
+ingestion command fetches official sources, removes executable markup, splits content into
+overlapping chunks, embeds `title` and `content`, and synchronizes those chunks to a
+pgvector-indexed `PostgresStore`.
+
+Live prices, availability, schedules, weather, and routes continue to use dedicated tools.
 
 ## Development
 
 ```sh
-pnpm db:setup     # one-time: create/migrate Postgres checkpoint tables
-pnpm dev          # tsc + langgraphjs dev server on :8123
-pnpm build        # production build (tsc + tsc-alias)
+pnpm db:setup            # create/migrate checkpoint, store, and pgvector tables
+pnpm db:seed-knowledge   # fetch, chunk, embed, and sync allow-listed sources
+KNOWLEDGE_SOURCE_ID=vn-evisa-official pnpm db:seed-knowledge # refresh one source
+pnpm dev                 # tsc + langgraphjs dev server on :8123
+pnpm build               # production build (tsc + tsc-alias)
 ```
 
 ## Tests

@@ -9,4 +9,6 @@ export * from './destination-explorer';
 export * from './booking';
 export * from './memory';
 export * from './knowledge';
+export * from './knowledge-ingestion';
+export * from './knowledge-store';
 export * from './memory-store';

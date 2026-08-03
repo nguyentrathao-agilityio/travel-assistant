@@ -27,11 +27,14 @@ export const tripSummaryTool = tool(
       - destination, in ASCII English without diacritics (e.g. "Da Nang" not "Đà Nẵng", "Ho Chi Minh City" not "TP HCM")
       - flightOrigin: IATA code of the departure airport. If not in context, ask "Where are you flying from?" BEFORE calling this tool — without it, no flight will appear in the summary. Set skipFlights: true instead only if the user has already booked a flight.
 
-    Optional:
+    Optional (do NOT ask the user for these before calling — omit whichever aren't already known):
       - startDate (YYYY-MM-DD)
       - endDate (YYYY-MM-DD)
       - travelers
-      - skipHotel (true if user already has a hotel booked)`,
+      - skipHotel (true if user already has a hotel booked)
+
+    Once destination and (flightOrigin or skipFlights) are known, call immediately — missing
+    optional fields are not a reason to ask another question first.`,
     schema: TripSummaryInputSchema,
     responseFormat: 'content_and_artifact',
   }

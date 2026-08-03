@@ -14,6 +14,7 @@ interface ProvidersProps {
 
 export const Providers = ({ children }: ProvidersProps) => {
   const sessionId = useThreadStore((state) => state.activeThreadId);
+  const sessionRevision = useThreadStore((state) => state.activeThreadRevision);
   const apiKey = useApiKeyStore((state) => state.apiKey);
 
   const headers = useMemo(
@@ -29,7 +30,7 @@ export const Providers = ({ children }: ProvidersProps) => {
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <CopilotKit
         publicLicenseKey={COPILOTKIT_PUBLIC_LICENSE_KEY}
-        key={sessionId}
+        key={`${sessionId}:${sessionRevision}`}
         runtimeUrl={RUNTIME_URL}
         agent={AGENT_NAME}
         threadId={sessionId}

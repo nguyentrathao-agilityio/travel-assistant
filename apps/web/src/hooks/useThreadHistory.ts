@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { langgraphClient } from '@/lib';
+import { useThreadStore } from '@/stores';
 import { toAgUiMessage } from '@/utils';
 
 import type { AgUiMessage } from '@/types';
@@ -30,6 +31,7 @@ const emptyHistory = (threadId: string, isLoading: boolean): ThreadHistoryState 
  * thread can never be rendered after the user switches conversations.
  */
 export const useThreadHistory = (threadId: string): ThreadHistoryResult => {
+  const threadRevision = useThreadStore((state) => state.activeThreadRevision);
   const [history, setHistory] = useState<ThreadHistoryState>(() =>
     emptyHistory(threadId, Boolean(threadId))
   );
@@ -74,7 +76,7 @@ export const useThreadHistory = (threadId: string): ThreadHistoryResult => {
     return () => {
       isCurrentRequest = false;
     };
-  }, [threadId]);
+  }, [threadId, threadRevision]);
 
   // Effects run after paint. Never expose history belonging to the previous
   // thread during that gap.

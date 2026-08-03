@@ -58,6 +58,7 @@ const activeThreadExists = (threadId: string): Promise<boolean> =>
 
 interface ThreadStore {
   activeThreadId: string;
+  activeThreadRevision: number;
   isResumed: boolean;
   threads: ThreadItem[];
   isLoading: boolean;
@@ -74,10 +75,12 @@ interface ThreadStore {
   createThread: () => Promise<void>;
   deleteThread: (threadId: string) => Promise<void>;
   selectThread: (threadId: string) => void;
+  refreshActiveThread: () => void;
 }
 
 const initialState = {
   activeThreadId: crypto.randomUUID(),
+  activeThreadRevision: 0,
   isResumed: false,
   threads: [] as ThreadItem[],
   isLoading: true,
@@ -236,6 +239,8 @@ export const useThreadStore = create<ThreadStore>()(
       },
 
       selectThread: (threadId: string) => set({ activeThreadId: threadId, isResumed: true }),
+      refreshActiveThread: () =>
+        set((state) => ({ activeThreadRevision: state.activeThreadRevision + 1, isResumed: true })),
     }),
     {
       name: SESSION_STORAGE_KEY,

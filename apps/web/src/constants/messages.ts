@@ -5,4 +5,6 @@ export const ERROR_MESSAGES = {
   DELETE_THREAD: 'Failed to delete thread. Please try again.',
   RENAME_THREAD: 'Failed to rename thread. Please try again.',
   STREAM: 'Something went wrong. Please try again.',
+  LOAD_WORKFLOW_HISTORY: 'Failed to load workflow history.',
+  TIME_TRAVEL: 'Failed to replay this workflow checkpoint.',
 } as const;

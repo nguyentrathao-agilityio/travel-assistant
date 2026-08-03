@@ -27,6 +27,7 @@ const mockActions = {
   createThread: () => Promise.resolve(undefined),
   deleteThread: () => Promise.resolve(undefined),
   selectThread: () => {},
+  refreshActiveThread: () => {},
 };
 
 // ---------------------------------------------------------------------------
@@ -62,6 +63,7 @@ export const WithThreads: Story = {
     useThreadStore.setState(
       {
         activeThreadId: 'thread-1',
+        activeThreadRevision: 0,
         isResumed: false,
         threads: MOCK_THREADS,
         isLoading: false,
@@ -81,6 +83,7 @@ export const Empty: Story = {
     useThreadStore.setState(
       {
         activeThreadId: 'thread-new',
+        activeThreadRevision: 0,
         isResumed: false,
         threads: [],
         isLoading: false,
@@ -100,6 +103,7 @@ export const Loading: Story = {
     useThreadStore.setState(
       {
         activeThreadId: 'thread-1',
+        activeThreadRevision: 0,
         isResumed: false,
         threads: [],
         isLoading: true,
@@ -119,6 +123,7 @@ export const Creating: Story = {
     useThreadStore.setState(
       {
         activeThreadId: 'thread-1',
+        activeThreadRevision: 0,
         isResumed: false,
         threads: MOCK_THREADS,
         isLoading: false,
@@ -138,6 +143,7 @@ export const LoadingMore: Story = {
     useThreadStore.setState(
       {
         activeThreadId: 'thread-1',
+        activeThreadRevision: 0,
         isResumed: false,
         threads: MOCK_THREADS,
         isLoading: false,

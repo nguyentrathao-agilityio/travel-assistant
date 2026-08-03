@@ -4,6 +4,8 @@ import type { InputProps } from '@copilotkit/react-ui';
 import { CopilotChat } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
 import { useEffect, useLayoutEffect } from 'react';
+import { useState } from 'react';
+import { History } from 'lucide-react';
 import { useShallow } from 'zustand/shallow';
 
 // Stores
@@ -33,6 +35,8 @@ import { BookingPanel } from './BookingPanel';
 import { ChatInputBar } from './ChatInputBar';
 import { ConversationMessages } from './ConversationMessages';
 import { ThemeToggle } from '../ThemeToggle';
+import { TimeTravelPanel } from './TimeTravelPanel';
+import { Button } from '../common';
 
 const ConversationInput = (props: InputProps) => {
   const setSendMessage = useConversationRendererStore((state) => state.setSendMessage);
@@ -46,6 +50,7 @@ const ConversationInput = (props: InputProps) => {
 };
 
 export const TravelChat = () => {
+  const [isTimeTravelOpen, setIsTimeTravelOpen] = useState(false);
   const { activeThreadId, threads } = useThreadStore(
     useShallow((state) => ({
       activeThreadId: state.activeThreadId,
@@ -86,10 +91,20 @@ export const TravelChat = () => {
         <div className="flex items-center gap-1">
           <h1 className="text-body text-text-primary font-medium leading-none">{threadTitle}</h1>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label="Open workflow history"
+            title="Workflow history"
+            onClick={() => setIsTimeTravelOpen((open) => !open)}
+          >
+            <History size={17} />
+          </Button>
           <ThemeToggle />
         </div>
       </header>
+      <TimeTravelPanel open={isTimeTravelOpen} onClose={() => setIsTimeTravelOpen(false)} />
       <BookingPanel />
       <CopilotChat
         className="flex flex-1 flex-col overflow-hidden"

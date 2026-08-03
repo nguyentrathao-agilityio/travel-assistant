@@ -10,7 +10,8 @@
     "dev": "tsc && tsc-alias && langgraphjs dev --port 8123 --no-browser",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:evals": "dotenv -e .env -- vitest run -c vitest.config.evals.ts"
   },
   "dependencies": {
     "@ag-ui/client": "^0.0.53",
@@ -24,6 +25,7 @@
     "@langchain/langgraph-sdk": "^1.9.27",
     "@langchain/openai": "^1.4.7",
     "@langchain/textsplitters": "^1.0.1",
+    "agentevals": "^0.0.7",
     "hono": "^4.12.30",
     "langchain": "^1.4.0",
     "openai": "^6.38.0",

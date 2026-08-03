@@ -3,9 +3,10 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
-    exclude: ['**/node_modules/**', '**/dist/**', '**/*.eval.ts'],
-    reporters: ['default', 'html'],
-    outputFile: { html: './test-report/index.html' },
+    include: ['**/*.eval.ts'],
+    exclude: ['**/node_modules/**', '**/dist/**'],
+    fileParallelism: false,
+    testTimeout: 60_000,
     env: {
       API_URL: 'http://localhost:4020',
     },

@@ -29,8 +29,9 @@ export const placesTool = tool(
     Rules:
       - Default behavior: recommended: true, sort: "rating_desc" for best results.
       - Use price_level: 1 for budget, 3-4 for upscale.
-      - Use category to filter by user's intent (food → restaurant, sightseeing → attraction, going out → nightlife).
-      - If the user's request doesn't indicate a category (e.g. "what should I see in X?"), ask which category they want before calling — do not guess or call this tool more than once per request.
+      - Use category to filter by user's intent (food/dishes/restaurants → restaurant, attractions/sights/sightseeing/landmarks/things to see or do/what to visit → attraction, cafes/coffee → cafe, going out/nightlife/bars → nightlife, shopping/markets → shopping). These keyword matches are enough — call immediately, do not ask for confirmation.
+      - Only ask which category the user wants when the request truly gives no signal at all (e.g. bare "what's good in X?" or "any recommendations for X?" with no other cues) — this should be rare, not the default.
+      - Do not call this tool more than once per request.
       - Only call when city is available.`,
     schema: PlacesInputSchema,
     responseFormat: 'content_and_artifact',

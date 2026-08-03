@@ -1,16 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ToolMessage } from '@langchain/core/messages';
 
 const { invokeMock } = vi.hoisted(() => ({ invokeMock: vi.fn() }));
 const saveMemoryMock = vi.fn();
 
-vi.mock('../../llm', () => ({
+vi.mock('../../infrastructure/llm', () => ({
   createChatModel: () => ({
     withStructuredOutput: () => ({ invoke: invokeMock }),
   }),
 }));
 
-vi.mock('../../services', () => ({
+vi.mock('../../infrastructure/persistence/memory-store', () => ({
   memoryStore: { fake: 'store' },
+}));
+
+vi.mock('../../services/memory', () => ({
   saveMemory: (...args: unknown[]) => saveMemoryMock(...args),
 }));
 
@@ -58,6 +62,33 @@ describe('saveMemoryNode', () => {
 
     expect(result).toEqual({});
     expect(saveMemoryMock).not.toHaveBeenCalled();
+  });
+
+  it.each(['bookFlightTool', 'bookHotelTool', 'cancelBookingTool'])(
+    'skips extraction entirely when a %s result is in the recent window, so passenger/guest contact details never get saved as a preference',
+    async (toolName) => {
+      const state = {
+        messages: [new ToolMessage({ content: '{}', tool_call_id: 'call_1', name: toolName })],
+      } as unknown as GraphStateType;
+
+      const result = await saveMemoryNode(state);
+
+      expect(invokeMock).not.toHaveBeenCalled();
+      expect(saveMemoryMock).not.toHaveBeenCalled();
+      expect(result).toEqual({});
+    }
+  );
+
+  it('still extracts normally when the recent window has a non-booking tool result', async () => {
+    invokeMock.mockResolvedValueOnce({ memory: 'Home city: Da Nang' });
+    const state = {
+      messages: [new ToolMessage({ content: '{}', tool_call_id: 'call_1', name: 'weatherTool' })],
+    } as unknown as GraphStateType;
+
+    await saveMemoryNode(state);
+
+    expect(invokeMock).toHaveBeenCalled();
+    expect(saveMemoryMock).toHaveBeenCalledWith({ fake: 'store' }, 'Home city: Da Nang');
   });
 
   it('marks the extraction call as not assistant-visible to the AG-UI bridge', async () => {

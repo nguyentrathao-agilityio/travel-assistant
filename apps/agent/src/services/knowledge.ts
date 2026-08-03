@@ -11,7 +11,7 @@ import type {
   KnowledgeSearchInput,
   KnowledgeSearchResult,
 } from '../schemas/knowledge';
-import { knowledgeStore } from './knowledge-store';
+import { knowledgeStore } from '../infrastructure/persistence';
 
 type KnowledgeStoreLike = Pick<typeof knowledgeStore, 'search'>;
 

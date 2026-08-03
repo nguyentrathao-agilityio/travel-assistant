@@ -5,16 +5,16 @@ import { buildBookingContext } from './system-prompt/booking-context';
 import { buildClientContext } from './system-prompt/client-context';
 import { buildMemoryContext } from './system-prompt/memory-context';
 
-export interface BranchPromptSections {
+export interface AgentPromptSections {
   toolsSection: string;
   includeBookingRules?: boolean;
   includeBookingContext?: boolean;
   includeMemoryContext?: boolean;
 }
 
-export const buildBranchSystemPrompt = (
+export const buildAgentSystemPrompt = (
   state: GraphStateType,
-  sections: BranchPromptSections,
+  sections: AgentPromptSections,
   memories: string[] = []
 ): string =>
   [

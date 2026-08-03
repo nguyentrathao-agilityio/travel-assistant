@@ -3,6 +3,8 @@ export const MEMORY_NAMESPACE = ['dev', 'memories'];
 
 export const MAX_MEMORY_LENGTH = 150;
 
+export const BOOKING_TOOL_NAMES = ['bookFlightTool', 'bookHotelTool', 'cancelBookingTool'];
+
 // How many recent messages the extraction call sees — just enough to catch a user's reply to
 // the assistant's own question (e.g. "Where are you flying from?" → "Da Nang").
 export const MAX_EXTRACT_MEMORY_MESSAGES = 4;

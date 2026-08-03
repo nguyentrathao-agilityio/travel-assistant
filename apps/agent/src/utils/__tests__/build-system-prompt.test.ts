@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
 import type { GraphStateType } from '../../state';
-import { buildBranchSystemPrompt } from '../build-system-prompt';
+import { buildAgentSystemPrompt } from '../build-system-prompt';
 
 const baseState = {
   clientDate: '2026-07-23',
   clientTimezone: 'Asia/Ho_Chi_Minh',
 } as unknown as GraphStateType;
 
-describe('buildBranchSystemPrompt', () => {
+describe('buildAgentSystemPrompt', () => {
   it('omits booking rules and booking context when not requested', () => {
-    const prompt = buildBranchSystemPrompt(baseState, {
+    const prompt = buildAgentSystemPrompt(baseState, {
       toolsSection: '## Available Tools\n- placesTool',
     });
 
@@ -46,7 +46,7 @@ describe('buildBranchSystemPrompt', () => {
       },
     } as unknown as GraphStateType;
 
-    const prompt = buildBranchSystemPrompt(state, {
+    const prompt = buildAgentSystemPrompt(state, {
       toolsSection: '## Available Tools\n- bookHotelTool',
       includeBookingRules: true,
       includeBookingContext: true,
@@ -59,7 +59,7 @@ describe('buildBranchSystemPrompt', () => {
   });
 
   it('always includes client date and timezone', () => {
-    const prompt = buildBranchSystemPrompt(baseState, {
+    const prompt = buildAgentSystemPrompt(baseState, {
       toolsSection: '## Available Tools\n- weatherTool',
     });
 
@@ -68,7 +68,7 @@ describe('buildBranchSystemPrompt', () => {
   });
 
   it('omits the remembered preferences section when not requested, even if memories are passed', () => {
-    const prompt = buildBranchSystemPrompt(
+    const prompt = buildAgentSystemPrompt(
       baseState,
       { toolsSection: '## Available Tools\n- weatherTool' },
       ['Departure city: Da Nang']
@@ -78,7 +78,7 @@ describe('buildBranchSystemPrompt', () => {
   });
 
   it('omits the remembered preferences section when requested but none are passed', () => {
-    const prompt = buildBranchSystemPrompt(baseState, {
+    const prompt = buildAgentSystemPrompt(baseState, {
       toolsSection: '## Available Tools\n- flightsTool',
       includeMemoryContext: true,
     });
@@ -87,7 +87,7 @@ describe('buildBranchSystemPrompt', () => {
   });
 
   it('includes remembered preferences when requested and present', () => {
-    const prompt = buildBranchSystemPrompt(
+    const prompt = buildAgentSystemPrompt(
       baseState,
       { toolsSection: '## Available Tools\n- flightsTool', includeMemoryContext: true },
       ['Preferred seat class: Economy']
@@ -97,27 +97,45 @@ describe('buildBranchSystemPrompt', () => {
     expect(prompt).toContain('- Preferred seat class: Economy');
   });
 
-  it('excludes location-shaped remembered facts (city/destination/airport) even when requested', () => {
-    const prompt = buildBranchSystemPrompt(
+  it('excludes destination-shaped remembered facts (destination/location) even when requested', () => {
+    const prompt = buildAgentSystemPrompt(
       baseState,
       { toolsSection: '## Available Tools\n- weatherTool', includeMemoryContext: true },
-      ['Departure city: Da Nang', 'Preferred travel destination: Ha Giang, Vietnam']
+      ['Preferred travel destination: Ha Giang, Vietnam', 'Favorite location: Hoi An']
     );
 
     expect(prompt).not.toContain('Remembered Preferences');
-    expect(prompt).not.toContain('Departure city');
     expect(prompt).not.toContain('Ha Giang');
+    expect(prompt).not.toContain('Hoi An');
   });
 
-  it('keeps non-location facts while dropping location-shaped ones from a mixed list', () => {
-    const prompt = buildBranchSystemPrompt(
+  it('keeps origin facts (home/departure city or airport) even though they are location-shaped', () => {
+    const prompt = buildAgentSystemPrompt(
+      baseState,
+      { toolsSection: '## Available Tools\n- flightsTool', includeMemoryContext: true },
+      ['Departure city: Da Nang', 'Home city: Da Nang', 'Departure airport: DAD']
+    );
+
+    expect(prompt).toContain('Remembered Preferences');
+    expect(prompt).toContain('- Departure city: Da Nang');
+    expect(prompt).toContain('- Home city: Da Nang');
+    expect(prompt).toContain('- Departure airport: DAD');
+  });
+
+  it('keeps non-location and origin facts while dropping destination-shaped ones from a mixed list', () => {
+    const prompt = buildAgentSystemPrompt(
       baseState,
       { toolsSection: '## Available Tools\n- weatherTool', includeMemoryContext: true },
-      ['Departure city: Da Nang', "User's name: Nhien"]
+      [
+        'Preferred travel destination: Ha Giang, Vietnam',
+        'Departure city: Da Nang',
+        "User's name: Nhien",
+      ]
     );
 
     expect(prompt).toContain('Remembered Preferences');
     expect(prompt).toContain("- User's name: Nhien");
-    expect(prompt).not.toContain('Departure city');
+    expect(prompt).toContain('- Departure city: Da Nang');
+    expect(prompt).not.toContain('Ha Giang');
   });
 });

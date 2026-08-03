@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { CLASSIFY_SYSTEM_PROMPT, PLAN_TOOLS_SECTION } from '../../constants';
+import { CLASSIFY_SYSTEM_PROMPT, PLANNING_AGENT_TOOLS_PROMPT } from '../../constants';
 
 describe('multi-domain coordination instructions', () => {
   it('routes compound search requests to the planning coordinator', () => {
@@ -9,11 +9,11 @@ describe('multi-domain coordination instructions', () => {
   });
 
   it('allows the planning coordinator to use the places specialist tool', () => {
-    expect(PLAN_TOOLS_SECTION).toContain('placesTool');
+    expect(PLANNING_AGENT_TOOLS_PROMPT).toContain('placesTool');
   });
 
   it('runs independent domain searches in parallel and synthesizes once', () => {
-    expect(PLAN_TOOLS_SECTION).toContain('run in parallel');
-    expect(PLAN_TOOLS_SECTION).toContain('one concise combined response');
+    expect(PLANNING_AGENT_TOOLS_PROMPT).toContain('run in parallel');
+    expect(PLANNING_AGENT_TOOLS_PROMPT).toContain('one concise combined response');
   });
 });

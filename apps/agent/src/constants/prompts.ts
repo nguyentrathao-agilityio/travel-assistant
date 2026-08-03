@@ -13,7 +13,7 @@ and provided all required contact details. Booking and cancellation tools enforc
 human approval step; never claim success until the tool returns a confirmation code or cancelled
 status.`;
 
-export const EXPLORE_TOOLS_SECTION = `## Available Tools
+export const EXPLORE_AGENT_TOOLS_PROMPT = `## Available Tools
 - destinationExplorerTool — destination overview (top places + local tips + weather) in one call.
   Use this instead of calling placesTool/localTipsTool separately for "tell me about X" requests.
 - placesTool — attractions, restaurants, cafes, activities, nightlife, or shopping in a city.
@@ -40,7 +40,7 @@ Never call knowledgeSearchTool in the same turn as another tool. If a request ne
 knowledge-base lookup and another tool, call knowledgeSearchTool by itself first and answer that
 part with its citation; handle the rest after the user's next message.`;
 
-export const PLAN_TOOLS_SECTION = `## Available Tools
+export const PLANNING_AGENT_TOOLS_PROMPT = `## Available Tools
 - weatherTool — current conditions or forecast for a city.
 - flightsTool — flights between two airports (needs IATA codes; convert city names yourself).
 - hotelTool — hotels for a city and date range.
@@ -88,25 +88,25 @@ searches and every required field is known, call the relevant tools together in 
 step so they can run in parallel. After all tool results return, give one concise combined response.
 Do not delegate a simple search merely to isolate tools or run independent searches sequentially.`;
 
-export const BOOK_FLIGHT_TOOLS_SECTION = `## Available Tools
+export const FLIGHT_BOOKING_AGENT_TOOLS_PROMPT = `## Available Tools
 - bookFlightTool — revalidate and book the selected flight after collecting passenger contact
   data (name, email, phone). Only call after the user has selected an exact flight and provided
   all contact details. This tool enforces a separate human approval step and re-verifies
   price/availability after approval before booking — never claim success until it returns a
   confirmation code.`;
 
-export const BOOK_HOTEL_TOOLS_SECTION = `## Available Tools
+export const HOTEL_BOOKING_AGENT_TOOLS_PROMPT = `## Available Tools
 - bookHotelTool — revalidate and book the selected hotel after collecting guest contact data
   (name, email, phone). Only call after the user has selected an exact hotel and provided all
   contact details. This tool enforces a separate human approval step and re-verifies
   availability after approval before booking — never claim success until it returns a
   confirmation code.`;
 
-export const CANCEL_BOOKING_TOOLS_SECTION = `## Available Tools
+export const CANCEL_BOOKING_AGENT_TOOLS_PROMPT = `## Available Tools
 - cancelBookingTool — cancel an existing booking after retrieving its ID or confirmation code.
   Always pauses for explicit human approval before cancelling.`;
 
-export const GENERAL_SYSTEM_PROMPT_SUFFIX = `You have no search or booking tools available in this
+export const GENERAL_AGENT_PROMPT_SUFFIX = `You have no search or booking tools available in this
 mode. If the user's request needs flight/hotel search, destination info, or booking/cancelling,
 respond naturally and continue the conversation — their next message will be routed to the right
 tool automatically. If the message is unrelated to travel, decline per the scope rule above

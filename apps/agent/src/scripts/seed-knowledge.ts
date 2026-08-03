@@ -1,6 +1,6 @@
-import { KNOWLEDGE_SOURCES } from '../knowledge/sources';
+import { KNOWLEDGE_SOURCES } from '../knowledge';
 import { ingestKnowledgeSource } from '../services/knowledge-ingestion';
-import { knowledgeStore } from '../services/knowledge-store';
+import { knowledgeStore } from '../infrastructure/persistence';
 
 const seedKnowledge = async (): Promise<void> => {
   const failures: string[] = [];

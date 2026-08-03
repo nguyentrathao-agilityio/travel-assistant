@@ -6,7 +6,7 @@ import {
   OPENAI_API_KEY,
   OPENAI_EMBEDDING_MODEL,
   POSTGRES_URL,
-} from '../constants';
+} from '../../constants';
 
 export const knowledgeStore = PostgresStore.fromConnString(POSTGRES_URL!, {
   index: {

@@ -3,30 +3,30 @@ import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 
 import { EXTERNAL_API_RETRY_POLICY, POSTGRES_URL } from './constants';
 import {
-  BRANCH_NAMES,
-  bookFlightBranch,
-  bookHotelBranch,
-  cancelBookingBranch,
-  classifyNode,
-  exploreBranch,
-  generalBranch,
-  planBranch,
-  saveMemoryNode,
-} from './nodes';
+  cancelBookingAgent,
+  exploreAgent,
+  flightBookingAgent,
+  generalAgent,
+  hotelBookingAgent,
+  planningAgent,
+} from './agents';
+import { BRANCH_NAMES, classifyNode, saveMemoryNode } from './nodes';
 import { GraphState } from './state';
 
 export const buildGraph = () =>
   new StateGraph(GraphState)
     .addNode('classify', classifyNode, { ends: BRANCH_NAMES })
-    .addNode('explore', exploreBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
-    .addNode('plan', planBranch, {
+    .addNode('explore', exploreAgent, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
+    .addNode('plan', planningAgent, {
       retryPolicy: EXTERNAL_API_RETRY_POLICY,
       ends: ['bookFlight', 'bookHotel'],
     })
-    .addNode('bookFlight', bookFlightBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
-    .addNode('bookHotel', bookHotelBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
-    .addNode('cancelBooking', cancelBookingBranch, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
-    .addNode('general', generalBranch)
+    .addNode('bookFlight', flightBookingAgent, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
+    .addNode('bookHotel', hotelBookingAgent, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
+    .addNode('cancelBooking', cancelBookingAgent, {
+      retryPolicy: EXTERNAL_API_RETRY_POLICY,
+    })
+    .addNode('general', generalAgent)
     .addNode('saveMemory', saveMemoryNode)
     .addEdge(START, 'classify')
     .addEdge('explore', 'saveMemory')

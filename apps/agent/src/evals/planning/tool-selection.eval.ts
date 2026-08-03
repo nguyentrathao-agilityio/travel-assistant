@@ -1,13 +1,13 @@
 import { createTrajectoryMatchEvaluator } from 'agentevals';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { expectedToolCalls, runBranch } from './eval-helpers';
+import { expectedToolCalls, runAgent } from '../helpers/trajectory';
 
-describe.skipIf(!process.env.OPENAI_API_KEY)('plan branch tool selection', () => {
-  let planBranch: Awaited<typeof import('../branches')>['planBranch'];
+describe.skipIf(!process.env.OPENAI_API_KEY)('planning agent tool selection', () => {
+  let planningAgent: Awaited<typeof import('../../agents/planning-agent')>['planningAgent'];
 
   beforeAll(async () => {
-    ({ planBranch } = await import('../branches'));
+    ({ planningAgent } = await import('../../agents/planning-agent'));
   });
 
   const evaluator = createTrajectoryMatchEvaluator({
@@ -57,7 +57,7 @@ describe.skipIf(!process.env.OPENAI_API_KEY)('plan branch tool selection', () =>
   it.each(scenarios)(
     '$name -> calls $expectedTools',
     async ({ humanText, expectedTools, extraState }) => {
-      const trajectory = await runBranch(planBranch, humanText, extraState);
+      const trajectory = await runAgent(planningAgent, humanText, extraState);
       const evaluation = await evaluator({
         outputs: { messages: trajectory },
         referenceOutputs: expectedToolCalls(expectedTools),

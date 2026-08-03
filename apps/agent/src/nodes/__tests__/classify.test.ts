@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 const { invokeMock } = vi.hoisted(() => ({ invokeMock: vi.fn() }));
 
-vi.mock('../../llm', () => ({
+vi.mock('../../infrastructure/llm', () => ({
   createChatModel: () => ({
     withStructuredOutput: () => ({ invoke: invokeMock }),
   }),

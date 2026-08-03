@@ -1,7 +1,7 @@
 import { KNOWLEDGE_NAMESPACE } from '../constants';
-import { loadKnowledgeSource, splitKnowledgeSource } from '../knowledge/loader';
+import { loadKnowledgeSource, splitKnowledgeSource } from '../knowledge';
 import type { KnowledgeSource } from '../schemas/knowledge';
-import { knowledgeStore } from './knowledge-store';
+import { knowledgeStore } from '../infrastructure/persistence';
 
 type KnowledgeIngestionStore = Pick<typeof knowledgeStore, 'delete' | 'put' | 'search'>;
 type SourceLoader = typeof loadKnowledgeSource;

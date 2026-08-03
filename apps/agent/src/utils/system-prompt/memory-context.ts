@@ -1,6 +1,11 @@
-// Excluded from the prompt: a remembered city conflicting with the current message's city
-// reliably makes the model decline unrelated single-city tool calls (e.g. weatherTool).
+// Excluded from the prompt: a remembered destination conflicting with the current message's
+// city reliably makes the model decline unrelated single-city tool calls (e.g. weatherTool).
 const LOCATION_FACT_KEY_HINTS = ['city', 'destination', 'location', 'airport'];
+
+// Origin facts describe the traveler, not a tool-call target — they never conflict with
+// whatever destination the current message names, so they're always safe to keep (this is
+// what lets "Find flights to Bangkok" auto-fill a remembered departure city).
+const ORIGIN_FACT_KEY_HINTS = ['home', 'departure'];
 
 const keyOf = (memory: string): string | null => {
   const separatorIndex = memory.indexOf(':');
@@ -9,7 +14,9 @@ const keyOf = (memory: string): string | null => {
 
 const isLocationFact = (memory: string): boolean => {
   const key = keyOf(memory);
-  return key !== null && LOCATION_FACT_KEY_HINTS.some((hint) => key.includes(hint));
+  if (key === null) return false;
+  if (ORIGIN_FACT_KEY_HINTS.some((hint) => key.includes(hint))) return false;
+  return LOCATION_FACT_KEY_HINTS.some((hint) => key.includes(hint));
 };
 
 export const buildMemoryContext = (memories: string[]): string | null => {

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
 
-import { richUiModelMiddleware } from '../branches';
-import { TOOL_READY_OUTPUT } from '../../constants';
+import { TOOL_READY_OUTPUT } from '../../../constants';
+import { richUiModelMiddleware } from '../rich-ui-middleware';
 
 const invokeMiddleware = async (messages: unknown[]) => {
   let captured: { messages: unknown[] } | undefined;
@@ -52,7 +52,7 @@ describe('richUiModelMiddleware', () => {
     expect(result).toBe(plain);
   });
 
-  it('preserves an older rich-card ToolMessage already followed by an AI reaction, so a later branch can still read the real data', async () => {
+  it('preserves an older rich-card ToolMessage already followed by an AI reaction, so a later agent can still read the real data', async () => {
     const flightsResult = new ToolMessage({
       content: JSON.stringify({ results: [{ id: 'FL_DAD_BKK_20260805_01', price: 89 }] }),
       tool_call_id: 'call_search',

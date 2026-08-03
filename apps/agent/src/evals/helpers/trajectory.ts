@@ -1,13 +1,13 @@
 import { AIMessage, HumanMessage, type BaseMessage } from '@langchain/core/messages';
 
-type Branch = { invoke: (input: any) => Promise<unknown> };
+type AgentGraph = { invoke: (input: any) => Promise<unknown> };
 
-export const runBranch = async (
-  branch: Branch,
+export const runAgent = async (
+  agent: AgentGraph,
   humanText: string,
   extraState: Record<string, unknown> = {}
 ): Promise<BaseMessage[]> => {
-  const result = (await branch.invoke({
+  const result = (await agent.invoke({
     messages: [new HumanMessage(humanText)],
     ...extraState,
   })) as { messages: BaseMessage[] };

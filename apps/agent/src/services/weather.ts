@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '../llm';
+import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '../infrastructure/llm';
 import { WeatherResponse, WeatherResponseSchema, WeatherResultSchema } from '../schemas/weather';
 import { API_URL, ENDPOINTS } from '../constants';
 

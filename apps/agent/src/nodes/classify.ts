@@ -7,7 +7,7 @@ import {
   MAX_CLASSIFY_MESSAGES,
   OPENAI_API_KEY,
 } from '../constants';
-import { createChatModel } from '../llm';
+import { createChatModel } from '../infrastructure/llm';
 import { IntentClassificationSchema } from '../schemas/intent';
 import type { GraphStateType } from '../state';
 import { routeByIntent, type BranchName } from './routing';

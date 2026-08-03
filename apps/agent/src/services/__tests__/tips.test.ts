@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const createMock = vi.fn();
-vi.mock('../../llm', () => ({
+vi.mock('../../infrastructure/llm', () => ({
   getOpenAIClient: () => ({ responses: { create: createMock } }),
   OPENAI_CLIENT_MODEL: 'gpt-4o-mini',
 }));

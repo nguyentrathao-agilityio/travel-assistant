@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '../llm';
+import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '../infrastructure/llm';
 import { daysBetween, todayIso } from '../utils';
 import { searchFlights } from './flights';
 import { searchHotels } from './hotel';

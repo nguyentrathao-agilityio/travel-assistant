@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto';
 import { interrupt } from '@langchain/langgraph';
 import type { BookingApprovalRequest } from '@repo/types';
 
-import { BookingApprovalResponseSchema } from '../../schemas';
-import { contentAndArtifact } from '../../constants';
+import { BookingApprovalResponseSchema } from '../schemas/booking';
+import { contentAndArtifact } from '../constants';
 
 export const formatBookingToolResult = (result: unknown): [string, unknown] =>
   contentAndArtifact(result);

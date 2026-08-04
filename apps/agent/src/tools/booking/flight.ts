@@ -9,7 +9,7 @@ import {
   formatBookingToolResult,
   requestBookingApproval,
   withApprovalId,
-} from './shared';
+} from '../../utils/booking-approval';
 
 type Flight = Awaited<ReturnType<typeof getFlight>>;
 

@@ -8,7 +8,7 @@ import {
   formatBookingToolResult,
   requestBookingApproval,
   withApprovalId,
-} from './shared';
+} from '../../utils/booking-approval';
 
 export const cancelBookingTool = tool(
   async (input) => {

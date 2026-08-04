@@ -11,9 +11,10 @@ const TITLE_MAX_LENGTH = 50;
 
 export const useTitleSync = () => {
   const { messages } = useCopilotChatHeadless_c();
+  const threads = useThreadStore((state) => state.threads);
 
   useEffect(() => {
-    const { activeThreadId, threads, updateThread } = useThreadStore.getState();
+    const { activeThreadId, updateThread } = useThreadStore.getState();
     const activeThread = threads.find((thread) => thread.id === activeThreadId);
 
     if (activeThread?.title) return;
@@ -26,5 +27,5 @@ export const useTitleSync = () => {
 
     const title = text.length > TITLE_MAX_LENGTH ? `${text.slice(0, TITLE_MAX_LENGTH)}…` : text;
     updateThread(activeThreadId, { title });
-  }, [messages]);
+  }, [messages, threads]);
 };

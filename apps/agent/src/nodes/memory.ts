@@ -24,6 +24,8 @@ const isBookingToolMessage = (message: GraphStateType['messages'][number]): bool
 export const saveMemoryNode = async (state: GraphStateType): Promise<Partial<GraphStateType>> => {
   try {
     const recentMessages = state.messages.slice(-MAX_EXTRACT_MEMORY_MESSAGES);
+    // Booking tool messages carry the customer's name/email/phone — skip extraction entirely
+    // rather than risk the model pulling that PII into long-term memory.
     if (recentMessages.some(isBookingToolMessage)) return {};
 
     const result = await extractionModel.invoke(

@@ -111,12 +111,10 @@ export const getTripSummary = async (
   const hotels = hotelResult.status === 'fulfilled' ? hotelResult.value : null;
   const route = routeResult.status === 'fulfilled' ? routeResult.value : null;
 
-  // Pick cheapest available flight
   const suggestedFlight = flights?.results?.length
     ? flights.results.reduce((best, f) => (f.price < best.price ? f : best))
     : null;
 
-  // Pick highest-rated available hotel
   const suggestedHotel =
     hotels?.results?.filter((h) => h.available).sort((a, b) => b.rating - a.rating)[0] ?? null;
 

@@ -12,6 +12,12 @@ const freshToolMessageCutoff = (messages: readonly unknown[]): number => {
   return cutoff;
 };
 
+// Rich-card tool results (flights, hotels, weather, etc.) are already rendered on the frontend
+// from `artifact` — collapsing `content` to a generic prompt for the freshest run of tool calls
+// stops the model from repeating that data back in text, without discarding `artifact`. Only
+// messages after the last AI reaction are "fresh"; older ones are left untouched so a later
+// agent can still read the real data (e.g. a flight ID for a booking handoff), and error
+// artifacts are always left untouched so the model still sees and can react to the failure.
 export const richUiModelMiddleware = createMiddleware({
   name: 'RichUiModelContent',
   wrapModelCall: (request, handler) => {

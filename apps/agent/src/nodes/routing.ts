@@ -26,5 +26,6 @@ const INTENT_TO_BRANCH: Record<Intent, BranchName> = {
   general: 'general',
 };
 
+/** Maps a classified intent to its graph branch; an undefined intent (classification failure) falls back to `general`. */
 export const routeByIntent = (intent: Intent | undefined): BranchName =>
   intent ? INTENT_TO_BRANCH[intent] : 'general';

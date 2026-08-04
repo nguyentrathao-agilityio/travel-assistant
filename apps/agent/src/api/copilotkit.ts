@@ -10,6 +10,9 @@ import type { Assistant } from '@langchain/langgraph-sdk';
 import { LANGGRAPH_DEPLOYMENT_URL } from '../constants';
 import { createCopilotKitHooks } from './hooks';
 
+// Overrides the base lookup to resolve the assistant by matching `graph_id` directly, since the
+// base implementation doesn't reliably resolve this deployment's assistant by graph id alone.
+// Falls back to the base behavior if no match is found.
 class BridgedLangGraphAgent extends LangGraphAgent {
   override async getAssistant(): Promise<Assistant> {
     const assistants = await this.client.assistants.search({
@@ -24,6 +27,7 @@ class BridgedLangGraphAgent extends LangGraphAgent {
   }
 }
 
+/** Mounts the CopilotKit `/chat` runtime, bridged to the `travel` LangGraph deployment, on `app`. */
 export function registerCopilotKit(app: Hono): void {
   const travelAgent = new BridgedLangGraphAgent({
     deploymentUrl: LANGGRAPH_DEPLOYMENT_URL,

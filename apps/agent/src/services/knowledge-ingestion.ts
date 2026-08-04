@@ -12,6 +12,12 @@ export type KnowledgeIngestionResult = {
   deletedStaleChunks: number;
 };
 
+/**
+ * Loads and chunks a knowledge source, then upserts its chunks into the store. Re-ingesting a
+ * source that has shrunk or been restructured can produce fewer/different chunk ids than a
+ * previous run, so any chunk id from the old run that the new run didn't reproduce is deleted —
+ * otherwise stale chunks would linger in the store indefinitely.
+ */
 export const ingestKnowledgeSource = async (
   source: KnowledgeSource,
   store: KnowledgeIngestionStore = knowledgeStore,

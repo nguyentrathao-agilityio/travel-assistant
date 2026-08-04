@@ -47,6 +47,9 @@ const parseBookingResponse = async (response: Response): Promise<Booking> => {
   return booking.data;
 };
 
+// Deterministic hash of the request payload, not a random UUID, so an identical retry (e.g. the
+// agent re-invoking the tool after a network blip) reuses the same key and the API can dedupe it
+// instead of creating a duplicate booking.
 const createIdempotencyKey = (action: string, payload: object): string =>
   createHash('sha256')
     .update(`${action}:${JSON.stringify(payload)}`)
@@ -62,6 +65,7 @@ const request = async (path: string, init?: RequestInit): Promise<Response> => {
   return response;
 };
 
+/** Fetches a single flight by id. Throws if not found or the response shape is invalid. */
 export const getFlight = async (flightId: string) => {
   const response = await request(`${ENDPOINTS.FLIGHTS}/${encodeURIComponent(flightId)}`);
   const responseBody: unknown = await response.json();
@@ -72,6 +76,10 @@ export const getFlight = async (flightId: string) => {
   return flight.data;
 };
 
+/**
+ * Re-checks live availability for a previously selected hotel immediately before booking.
+ * Throws if the hotel is no longer available or doesn't have enough rooms left.
+ */
 export const revalidateHotel = async (input: HotelBookingInput) => {
   const validated = HotelBookingInputSchema.parse(input);
   const params = new URLSearchParams({
@@ -96,6 +104,7 @@ export const revalidateHotel = async (input: HotelBookingInput) => {
   return hotel;
 };
 
+/** Creates a flight booking for an already-validated flight. Idempotent per identical payload. */
 export const submitFlightBooking = async (
   input: FlightBookingInput,
   flight: {
@@ -127,6 +136,7 @@ export const submitFlightBooking = async (
   return parseBookingResponse(response);
 };
 
+/** Creates a hotel booking. Idempotent per identical payload; does not re-check availability. */
 export const submitHotelBooking = async (input: HotelBookingInput): Promise<Booking> => {
   const validated = HotelBookingInputSchema.parse(input);
   const payload = {
@@ -152,11 +162,14 @@ export const submitHotelBooking = async (input: HotelBookingInput): Promise<Book
   return parseBookingResponse(response);
 };
 
+/** Fetches a booking by id. Throws if not found or the response shape is invalid. */
 export const getBooking = async (bookingId: string): Promise<Booking> => {
   const response = await request(`${ENDPOINTS.BOOKINGS}/${encodeURIComponent(bookingId)}`);
   return parseBookingResponse(response);
 };
 
+/** Cancels a booking by id. Fetches it first purely to validate it exists, so an invalid id
+ *  surfaces getBooking's error rather than an opaque failure from the cancel endpoint. */
 export const cancelBooking = async (input: CancelBookingInput): Promise<Booking> => {
   await getBooking(input.bookingId);
   const response = await request(

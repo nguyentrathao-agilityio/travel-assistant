@@ -52,6 +52,7 @@ const describeFlights = (flights: GraphStateType['flights']): string => {
   return lines.join('\n');
 };
 
+/** Renders the current flight/hotel selection state as a YAML-like block for the system prompt. */
 export const buildBookingContext = (state: GraphStateType): string =>
   [
     '## Current Booking State',

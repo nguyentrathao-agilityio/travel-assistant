@@ -17,6 +17,7 @@ export const GraphState = new StateSchema({
   clientDate: zodState(z.string().optional()),
   clientTimezone: zodState(z.string().optional()),
   intent: zodState(IntentSchema.optional()),
+  handoffTarget: zodState(z.enum(['bookFlight', 'bookHotel']).optional()),
 });
 
 export type GraphStateType = typeof GraphState.State;

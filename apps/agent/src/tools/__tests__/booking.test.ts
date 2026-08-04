@@ -30,6 +30,11 @@ const toolCall = (name: string, args: object) => ({
   type: 'tool_call' as const,
 });
 
+const approvalResponse = (decision: 'approve' | 'reject') => (request: { approvalId: string }) => ({
+  decision,
+  approvalId: request.approvalId,
+});
+
 const artifactOf = <T>(result: unknown): T => {
   if (typeof result === 'object' && result !== null && 'artifact' in result) {
     return result.artifact as T;
@@ -101,9 +106,25 @@ afterEach(() => {
 });
 
 describe('bookFlightTool', () => {
+  it('requires fresh approval when a resumed response belongs to an older quote', async () => {
+    getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(baseFlight);
+    interruptMock
+      .mockReturnValueOnce({ decision: 'approve', approvalId: 'stale-quote' })
+      .mockImplementationOnce(approvalResponse('approve'));
+    submitFlightBookingMock.mockResolvedValueOnce({ id: 'booking-1' });
+
+    const result = artifactOf<{ id: string }>(
+      await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
+    );
+
+    expect(interruptMock).toHaveBeenCalledTimes(2);
+    expect(submitFlightBookingMock).toHaveBeenCalledWith(flightInput, baseFlight);
+    expect(result).toEqual({ id: 'booking-1' });
+  });
+
   it('books immediately when nothing changed between approval and re-verification', async () => {
     getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(baseFlight);
-    interruptMock.mockReturnValueOnce({ decision: 'approve' });
+    interruptMock.mockImplementationOnce(approvalResponse('approve'));
     submitFlightBookingMock.mockResolvedValueOnce({ id: 'booking-1' });
 
     const result = artifactOf<{ id: string }>(
@@ -119,8 +140,8 @@ describe('bookFlightTool', () => {
     const changedFlight = { ...baseFlight, price: 150 };
     getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(changedFlight);
     interruptMock
-      .mockReturnValueOnce({ decision: 'approve' })
-      .mockReturnValueOnce({ decision: 'approve' });
+      .mockImplementationOnce(approvalResponse('approve'))
+      .mockImplementationOnce(approvalResponse('approve'));
     submitFlightBookingMock.mockResolvedValueOnce({ id: 'booking-1' });
 
     const result = artifactOf<{ id: string }>(
@@ -135,7 +156,7 @@ describe('bookFlightTool', () => {
   it('rejects without booking when seats are no longer sufficient after resuming', async () => {
     const soldOut = { ...baseFlight, seats_available: 0 };
     getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(soldOut);
-    interruptMock.mockReturnValueOnce({ decision: 'approve' });
+    interruptMock.mockImplementationOnce(approvalResponse('approve'));
 
     const result = artifactOf<{ error: string }>(
       await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
@@ -147,7 +168,7 @@ describe('bookFlightTool', () => {
 
   it('rejects without booking when the user declines the first approval', async () => {
     getFlightMock.mockResolvedValueOnce(baseFlight);
-    interruptMock.mockReturnValueOnce({ decision: 'reject' });
+    interruptMock.mockImplementationOnce(approvalResponse('reject'));
 
     const result = artifactOf<{ status: string; type: string }>(
       await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
@@ -161,8 +182,8 @@ describe('bookFlightTool', () => {
     const changedFlight = { ...baseFlight, price: 150 };
     getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(changedFlight);
     interruptMock
-      .mockReturnValueOnce({ decision: 'approve' })
-      .mockReturnValueOnce({ decision: 'reject' });
+      .mockImplementationOnce(approvalResponse('approve'))
+      .mockImplementationOnce(approvalResponse('reject'));
 
     const result = artifactOf<{ status: string; type: string }>(
       await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
@@ -176,7 +197,7 @@ describe('bookFlightTool', () => {
 describe('bookHotelTool', () => {
   it('books immediately when nothing changed between approval and re-verification', async () => {
     revalidateHotelMock.mockResolvedValueOnce(baseHotel).mockResolvedValueOnce(baseHotel);
-    interruptMock.mockReturnValueOnce({ decision: 'approve' });
+    interruptMock.mockImplementationOnce(approvalResponse('approve'));
     submitHotelBookingMock.mockResolvedValueOnce({ id: 'booking-2' });
 
     const result = artifactOf<{ id: string }>(
@@ -192,8 +213,8 @@ describe('bookHotelTool', () => {
     const changedHotel = { ...baseHotel, total_price: 200 };
     revalidateHotelMock.mockResolvedValueOnce(baseHotel).mockResolvedValueOnce(changedHotel);
     interruptMock
-      .mockReturnValueOnce({ decision: 'approve' })
-      .mockReturnValueOnce({ decision: 'approve' });
+      .mockImplementationOnce(approvalResponse('approve'))
+      .mockImplementationOnce(approvalResponse('approve'));
     submitHotelBookingMock.mockResolvedValueOnce({ id: 'booking-2' });
 
     const result = artifactOf<{ id: string }>(
@@ -207,7 +228,7 @@ describe('bookHotelTool', () => {
 
   it('rejects without booking when the user declines the first approval', async () => {
     revalidateHotelMock.mockResolvedValueOnce(baseHotel);
-    interruptMock.mockReturnValueOnce({ decision: 'reject' });
+    interruptMock.mockImplementationOnce(approvalResponse('reject'));
 
     const result = artifactOf<{ status: string; type: string }>(
       await bookHotelTool.invoke(toolCall(bookHotelTool.name, hotelInput))
@@ -232,7 +253,7 @@ describe('cancelBookingTool', () => {
 
   it('returns the cancelled booking as an artifact after approval', async () => {
     getBookingMock.mockResolvedValueOnce(booking);
-    interruptMock.mockReturnValueOnce({ decision: 'approve' });
+    interruptMock.mockImplementationOnce(approvalResponse('approve'));
     cancelBookingMock.mockResolvedValueOnce({ ...booking, status: 'cancelled' });
 
     const result = artifactOf<{ status: string }>(
@@ -245,7 +266,7 @@ describe('cancelBookingTool', () => {
 
   it('does not cancel when approval is rejected', async () => {
     getBookingMock.mockResolvedValueOnce(booking);
-    interruptMock.mockReturnValueOnce({ decision: 'reject' });
+    interruptMock.mockImplementationOnce(approvalResponse('reject'));
 
     const result = artifactOf<{ status: string; type: string }>(
       await cancelBookingTool.invoke(toolCall(cancelBookingTool.name, { bookingId: booking.id }))

@@ -20,6 +20,7 @@ export type BookingDecision = 'approve' | 'reject';
 
 export interface BookingApprovalRequest {
   type: 'booking_approval';
+  approvalId: string;
   action: 'create_flight_booking' | 'create_hotel_booking' | 'cancel_booking';
   title: string;
   description: string;
@@ -32,4 +33,5 @@ export interface BookingApprovalRequest {
 
 export interface BookingApprovalResponse {
   decision: BookingDecision;
+  approvalId: string;
 }

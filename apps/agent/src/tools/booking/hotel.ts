@@ -4,7 +4,12 @@ import type { BookingApprovalRequest } from '@repo/types';
 import { TOOL_ERROR_MESSAGES } from '../../constants';
 import { HotelBookingInputSchema } from '../../schemas';
 import { revalidateHotel, submitHotelBooking } from '../../services';
-import { bookingToolError, formatBookingToolResult, requestBookingApproval } from './shared';
+import {
+  bookingToolError,
+  formatBookingToolResult,
+  requestBookingApproval,
+  withApprovalId,
+} from './shared';
 
 type Hotel = Awaited<ReturnType<typeof revalidateHotel>>;
 
@@ -19,24 +24,25 @@ const buildHotelApprovalRequest = (
     adults: number;
     children: number;
   }
-): BookingApprovalRequest => ({
-  type: 'booking_approval',
-  action: 'create_hotel_booking',
-  title: 'Confirm hotel booking',
-  description: `${hotel.name} · ${input.checkIn} → ${input.checkOut}`,
-  referenceId: hotel.id,
-  details: {
-    guest: input.customerName,
-    email: input.customerEmail,
-    rooms: input.rooms,
-    adults: input.adults,
-    children: input.children,
-    nights: hotel.nights,
-  },
-  totalPrice: hotel.total_price,
-  currency: hotel.currency,
-  allowedDecisions: ['approve', 'reject'],
-});
+): BookingApprovalRequest =>
+  withApprovalId({
+    type: 'booking_approval',
+    action: 'create_hotel_booking',
+    title: 'Confirm hotel booking',
+    description: `${hotel.name} · ${input.checkIn} → ${input.checkOut}`,
+    referenceId: hotel.id,
+    details: {
+      guest: input.customerName,
+      email: input.customerEmail,
+      rooms: input.rooms,
+      adults: input.adults,
+      children: input.children,
+      nights: hotel.nights,
+    },
+    totalPrice: hotel.total_price,
+    currency: hotel.currency,
+    allowedDecisions: ['approve', 'reject'],
+  });
 
 const hotelChanged = (a: Hotel, b: Hotel): boolean =>
   a.total_price !== b.total_price ||

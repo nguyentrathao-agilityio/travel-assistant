@@ -34,8 +34,8 @@ export const saveMemoryNode = async (state: GraphStateType): Promise<Partial<Gra
     );
 
     if (result.memory && result.memory !== 'null') await saveMemory(memoryStore, result.memory);
-  } catch {
-    // ignore — see comment above
+  } catch (error) {
+    console.warn('[memory] Failed to extract or save long-term memory', error);
   }
 
   return {};

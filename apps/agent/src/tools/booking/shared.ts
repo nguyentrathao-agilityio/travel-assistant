@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { interrupt } from '@langchain/langgraph';
 import type { BookingApprovalRequest } from '@repo/types';
 
@@ -17,11 +18,24 @@ const parseApprovalResponse = (response: unknown): unknown => {
   }
 };
 
+export const withApprovalId = (
+  request: Omit<BookingApprovalRequest, 'approvalId'>
+): BookingApprovalRequest => ({
+  ...request,
+  approvalId: createHash('sha256').update(JSON.stringify(request)).digest('hex'),
+});
+
 export const requestBookingApproval = (request: BookingApprovalRequest): boolean => {
-  const response = interrupt(request);
-  return (
-    BookingApprovalResponseSchema.parse(parseApprovalResponse(response)).decision === 'approve'
-  );
+  let parsed = BookingApprovalResponseSchema.parse(parseApprovalResponse(interrupt(request)));
+
+  if (parsed.decision !== 'approve') return false;
+
+  while (parsed.approvalId !== request.approvalId) {
+    parsed = BookingApprovalResponseSchema.parse(parseApprovalResponse(interrupt(request)));
+    if (parsed.decision !== 'approve') return false;
+  }
+
+  return true;
 };
 
 export const bookingToolError = (error: unknown, fallbackMessage: string): { error: string } => ({

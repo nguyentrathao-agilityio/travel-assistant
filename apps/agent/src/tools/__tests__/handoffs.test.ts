@@ -12,8 +12,8 @@ const runtimeConfig = (toolCallId: string, messages: unknown[] = []) =>
   }) as never;
 
 describe('transferToBookFlightTool', () => {
-  it('hands off to the bookFlight node in the parent graph', async () => {
-    const command = await transferToBookFlightTool.invoke(
+  it('records a flight handoff for the parent graph router', async () => {
+    const command = (await transferToBookFlightTool.invoke(
       {
         flightId: 'FL1',
         adults: 2,
@@ -22,11 +22,11 @@ describe('transferToBookFlightTool', () => {
         customerPhone: '+123456',
       },
       runtimeConfig('call_1')
-    );
+    )) as Command;
 
     expect(command).toBeInstanceOf(Command);
-    expect((command as Command).goto).toEqual(['bookFlight']);
-    expect((command as Command).graph).toBe(Command.PARENT);
+    expect((command.update as { handoffTarget: string }).handoffTarget).toBe('bookFlight');
+    expect(command.goto).toEqual([]);
   });
 
   it('restates every booking field in the handoff ToolMessage, matching the calling tool_call_id', async () => {
@@ -77,7 +77,7 @@ describe('transferToBookFlightTool', () => {
 });
 
 describe('transferToBookHotelTool', () => {
-  it('hands off to the bookHotel node in the parent graph with every field restated', async () => {
+  it('records a hotel handoff for the parent graph router with every field restated', async () => {
     const command = (await transferToBookHotelTool.invoke(
       {
         hotelId: 'HTL1',
@@ -94,8 +94,8 @@ describe('transferToBookHotelTool', () => {
       runtimeConfig('call_2')
     )) as Command;
 
-    expect(command.goto).toEqual(['bookHotel']);
-    expect(command.graph).toBe(Command.PARENT);
+    expect((command.update as { handoffTarget: string }).handoffTarget).toBe('bookHotel');
+    expect(command.goto).toEqual([]);
     const toolMessage = (command.update as { messages: unknown[] }).messages.find(
       (m): m is ToolMessage => m instanceof ToolMessage
     );

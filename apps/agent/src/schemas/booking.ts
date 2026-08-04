@@ -71,6 +71,7 @@ export const BookingSchema = z.object({
 
 export const BookingApprovalResponseSchema = z.object({
   decision: z.enum(['approve', 'reject']),
+  approvalId: z.string().min(1),
 });
 
 export type FlightBookingInput = z.infer<typeof FlightBookingInputSchema>;

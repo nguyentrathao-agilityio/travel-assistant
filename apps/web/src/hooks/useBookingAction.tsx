@@ -40,6 +40,7 @@ const bookingResultSchema = z.object({
 
 const bookingApprovalRequestSchema = z.object({
   type: z.literal('booking_approval'),
+  approvalId: z.string(),
   action: z.enum(['create_flight_booking', 'create_hotel_booking', 'cancel_booking']),
   title: z.string(),
   description: z.string(),
@@ -131,7 +132,7 @@ export const useBookingAction = () => {
       if (!approvalRequest.success) return <></>;
 
       const handleDecision = (decision: BookingDecision) => {
-        resolve(JSON.stringify({ decision }));
+        resolve(JSON.stringify({ decision, approvalId: approvalRequest.data.approvalId }));
       };
 
       return <BookingApprovalCard request={approvalRequest.data} onDecision={handleDecision} />;

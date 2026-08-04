@@ -26,9 +26,8 @@ const buildHandoffMessages = (
 export const transferToBookFlightTool = tool(
   async (input, runtime: ToolRuntime<GraphStateType>) =>
     new Command({
-      goto: 'bookFlight',
-      graph: Command.PARENT,
       update: {
+        handoffTarget: 'bookFlight',
         messages: buildHandoffMessages(
           runtime,
           `Transferred to the flight booking agent. Call bookFlightTool now with exactly these ` +
@@ -53,9 +52,8 @@ compare flights — flightsTool already covers that.`,
 export const transferToBookHotelTool = tool(
   async (input, runtime: ToolRuntime<GraphStateType>) =>
     new Command({
-      goto: 'bookHotel',
-      graph: Command.PARENT,
       update: {
+        handoffTarget: 'bookHotel',
         messages: buildHandoffMessages(
           runtime,
           `Transferred to the hotel booking agent. Call bookHotelTool now with exactly these ` +

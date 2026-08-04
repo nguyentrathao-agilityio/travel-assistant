@@ -1,4 +1,5 @@
 import type { Intent } from '../schemas/intent';
+import type { GraphStateType } from '../state';
 
 export type BranchName =
   | 'explore'
@@ -29,3 +30,9 @@ const INTENT_TO_BRANCH: Record<Intent, BranchName> = {
 /** Maps a classified intent to its graph branch; an undefined intent (classification failure) falls back to `general`. */
 export const routeByIntent = (intent: Intent | undefined): BranchName =>
   intent ? INTENT_TO_BRANCH[intent] : 'general';
+
+export type PostPlanningBranch = 'bookFlight' | 'bookHotel' | 'saveMemory';
+
+/** Routes a completed planning agent to its requested handoff, or to normal finalization. */
+export const routeAfterPlanning = (state: GraphStateType): PostPlanningBranch =>
+  state.handoffTarget ?? 'saveMemory';

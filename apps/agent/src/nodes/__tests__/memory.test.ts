@@ -55,6 +55,7 @@ describe('saveMemoryNode', () => {
   });
 
   it('never throws when extraction fails, so a broken save can never block the response', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     invokeMock.mockRejectedValueOnce(new Error('network error'));
     const state = { messages: [] } as unknown as GraphStateType;
 
@@ -62,6 +63,11 @@ describe('saveMemoryNode', () => {
 
     expect(result).toEqual({});
     expect(saveMemoryMock).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[memory] Failed to extract or save long-term memory',
+      expect.any(Error)
+    );
+    warnSpy.mockRestore();
   });
 
   it.each(['bookFlightTool', 'bookHotelTool', 'cancelBookingTool'])(

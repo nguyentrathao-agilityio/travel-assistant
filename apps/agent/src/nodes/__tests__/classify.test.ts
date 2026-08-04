@@ -9,7 +9,6 @@ vi.mock('../../infrastructure/llm', () => ({
 }));
 
 import { classifyNode } from '../classify';
-import { FALLBACK_INTENT } from '../../constants';
 import type { GraphStateType } from '../../state';
 
 describe('classifyNode', () => {
@@ -19,19 +18,15 @@ describe('classifyNode', () => {
 
     const result = await classifyNode(state);
 
-    expect(result.update).toEqual({ intent: 'book_flight' });
+    expect(result.update).toEqual({ intent: 'book_flight', handoffTarget: undefined });
     expect(result.goto).toEqual(['bookFlight']);
   });
 
-  it('falls back to the default intent and its branch when classification throws', async () => {
+  it('lets classification failures bubble so the graph retry policy can handle them', async () => {
     invokeMock.mockRejectedValueOnce(new Error('network error'));
     const state = { messages: [] } as unknown as GraphStateType;
 
-    const result = await classifyNode(state);
-
-    expect(result.update).toEqual({ intent: FALLBACK_INTENT });
-    expect(result.goto).toEqual(['general']);
-    expect(FALLBACK_INTENT).toBe('general');
+    await expect(classifyNode(state)).rejects.toThrow('network error');
   });
 
   it('sends only the most recent messages, not the full history', async () => {

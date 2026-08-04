@@ -4,30 +4,36 @@ import type { BookingApprovalRequest } from '@repo/types';
 import { TOOL_ERROR_MESSAGES } from '../../constants';
 import { FlightBookingInputSchema } from '../../schemas';
 import { getFlight, submitFlightBooking } from '../../services';
-import { bookingToolError, formatBookingToolResult, requestBookingApproval } from './shared';
+import {
+  bookingToolError,
+  formatBookingToolResult,
+  requestBookingApproval,
+  withApprovalId,
+} from './shared';
 
 type Flight = Awaited<ReturnType<typeof getFlight>>;
 
 const buildFlightApprovalRequest = (
   flight: Flight,
   input: { customerName: string; customerEmail: string; adults: number }
-): BookingApprovalRequest => ({
-  type: 'booking_approval',
-  action: 'create_flight_booking',
-  title: 'Confirm flight booking',
-  description: `${flight.airline.name} ${flight.flight_number} · ${flight.origin} → ${flight.destination}`,
-  referenceId: flight.id,
-  details: {
-    passenger: input.customerName,
-    email: input.customerEmail,
-    departure: flight.departure_time,
-    adults: input.adults,
-    seatsAvailable: flight.seats_available,
-  },
-  totalPrice: flight.price * input.adults,
-  currency: flight.currency,
-  allowedDecisions: ['approve', 'reject'],
-});
+): BookingApprovalRequest =>
+  withApprovalId({
+    type: 'booking_approval',
+    action: 'create_flight_booking',
+    title: 'Confirm flight booking',
+    description: `${flight.airline.name} ${flight.flight_number} · ${flight.origin} → ${flight.destination}`,
+    referenceId: flight.id,
+    details: {
+      passenger: input.customerName,
+      email: input.customerEmail,
+      departure: flight.departure_time,
+      adults: input.adults,
+      seatsAvailable: flight.seats_available,
+    },
+    totalPrice: flight.price * input.adults,
+    currency: flight.currency,
+    allowedDecisions: ['approve', 'reject'],
+  });
 
 const flightChanged = (a: Flight, b: Flight): boolean =>
   a.price !== b.price || a.currency !== b.currency || a.departure_time !== b.departure_time;

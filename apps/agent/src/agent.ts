@@ -10,27 +10,27 @@ import {
   hotelBookingAgent,
   planningAgent,
 } from './agents';
-import { BRANCH_NAMES, classifyNode, saveMemoryNode } from './nodes';
+import { BRANCH_NAMES, classifyNode, routeAfterPlanning, saveMemoryNode } from './nodes';
 import { GraphState } from './state';
 
 export const buildGraph = () =>
   new StateGraph(GraphState)
-    .addNode('classify', classifyNode, { ends: BRANCH_NAMES })
+    .addNode('classify', classifyNode, {
+      ends: BRANCH_NAMES,
+      retryPolicy: EXTERNAL_API_RETRY_POLICY,
+    })
     .addNode('explore', exploreAgent, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
     .addNode('plan', planningAgent, {
       retryPolicy: EXTERNAL_API_RETRY_POLICY,
-      ends: ['bookFlight', 'bookHotel'],
     })
-    .addNode('bookFlight', flightBookingAgent, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
-    .addNode('bookHotel', hotelBookingAgent, { retryPolicy: EXTERNAL_API_RETRY_POLICY })
-    .addNode('cancelBooking', cancelBookingAgent, {
-      retryPolicy: EXTERNAL_API_RETRY_POLICY,
-    })
+    .addNode('bookFlight', flightBookingAgent)
+    .addNode('bookHotel', hotelBookingAgent)
+    .addNode('cancelBooking', cancelBookingAgent)
     .addNode('general', generalAgent)
     .addNode('saveMemory', saveMemoryNode)
     .addEdge(START, 'classify')
     .addEdge('explore', 'saveMemory')
-    .addEdge('plan', 'saveMemory')
+    .addConditionalEdges('plan', routeAfterPlanning, ['bookFlight', 'bookHotel', 'saveMemory'])
     .addEdge('bookFlight', 'saveMemory')
     .addEdge('bookHotel', 'saveMemory')
     .addEdge('cancelBooking', 'saveMemory')

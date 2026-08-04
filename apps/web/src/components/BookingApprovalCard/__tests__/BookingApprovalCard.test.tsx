@@ -9,6 +9,7 @@ describe('BookingApprovalCard', () => {
       <BookingApprovalCard
         request={{
           type: 'booking_approval',
+          approvalId: 'approval-1',
           action: 'create_flight_booking',
           title: 'Confirm flight booking',
           description: 'VN101 · DAD → SGN',

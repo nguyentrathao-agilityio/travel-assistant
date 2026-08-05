@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools';
 import type { BookingApprovalRequest } from '@repo/types';
 
-import { TOOL_ERROR_MESSAGES } from '../../constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../../constants';
 import { FlightBookingInputSchema } from '../../schemas';
 import { getFlight, submitFlightBooking } from '../../services';
 import {
@@ -10,6 +10,7 @@ import {
   requestBookingApproval,
   withApprovalId,
 } from '../../utils/booking-approval';
+import { withToolTimeout } from '../../utils/tool-contract';
 
 type Flight = Awaited<ReturnType<typeof getFlight>>;
 
@@ -32,7 +33,7 @@ const buildFlightApprovalRequest = (
     },
     totalPrice: flight.price * input.adults,
     currency: flight.currency,
-    allowedDecisions: ['approve', 'reject'],
+    allowedDecisions: ['approve', 'edit', 'reject'],
   });
 
 const flightChanged = (a: Flight, b: Flight): boolean =>
@@ -42,33 +43,38 @@ export const bookFlightTool = tool(
   async (input) => {
     let flight: Flight;
     try {
-      flight = await getFlight(input.flightId);
+      flight = await withToolTimeout(getFlight(input.flightId));
     } catch (error) {
       return formatBookingToolResult(bookingToolError(error, TOOL_ERROR_MESSAGES.FLIGHT_BOOKING));
     }
 
-    if (!requestBookingApproval(buildFlightApprovalRequest(flight, input))) {
-      return formatBookingToolResult({ status: 'rejected', type: 'flight' });
+    const approval = requestBookingApproval(buildFlightApprovalRequest(flight, input));
+    if (approval.decision !== 'approve') {
+      return formatBookingToolResult({
+        status: approval.decision === 'edit' ? 'edit_requested' : 'rejected',
+        type: 'flight',
+        ...(approval.edits && { edits: approval.edits }),
+      });
     }
 
     try {
-      const fresh = await getFlight(input.flightId);
+      const fresh = await withToolTimeout(getFlight(input.flightId));
       if (fresh.seats_available < input.adults) throw new Error('Not enough seats are available');
 
       if (
         flightChanged(fresh, flight) &&
-        !requestBookingApproval(buildFlightApprovalRequest(fresh, input))
+        requestBookingApproval(buildFlightApprovalRequest(fresh, input)).decision !== 'approve'
       ) {
         return formatBookingToolResult({ status: 'rejected', type: 'flight' });
       }
 
-      return formatBookingToolResult(await submitFlightBooking(input, fresh));
+      return formatBookingToolResult(await withToolTimeout(submitFlightBooking(input, fresh)));
     } catch (error) {
       return formatBookingToolResult(bookingToolError(error, TOOL_ERROR_MESSAGES.FLIGHT_BOOKING));
     }
   },
   {
-    name: 'bookFlightTool',
+    name: TOOL_NAMES.BOOK_FLIGHT,
     description: `Create a real booking in the configured travel API for the user's selected flight.
     Only call after the user selected a flight and supplied passenger name, email, and phone.
     This tool revalidates the selected flight, always pauses for explicit human approval, and

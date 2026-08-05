@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { revalidateHotel, submitFlightBooking, submitHotelBooking } from '../booking';
+import {
+  cancelBooking,
+  revalidateHotel,
+  submitFlightBooking,
+  submitHotelBooking,
+} from '../booking';
 
 const flight = {
   id: 'FL_DAD_SGN_20260730_01',
@@ -86,6 +91,20 @@ describe('booking service', () => {
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses a stable idempotency key for cancellation writes', async () => {
+    const cancelled = { ...booking, status: 'cancelled' };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(booking), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(cancelled), { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await cancelBooking({ bookingId: booking.id });
+
+    const cancelRequest = fetchMock.mock.calls[1][1] as RequestInit;
+    expect((cancelRequest.headers as Record<string, string>)['Idempotency-Key']).toHaveLength(64);
   });
 
   it('rejects revalidation when the selected hotel is unavailable', async () => {

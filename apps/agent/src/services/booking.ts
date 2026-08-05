@@ -6,6 +6,7 @@ import {
   ApiBookingSchema,
   ApiFlightSchema,
   BookingSchema,
+  CancelBookingInputSchema,
   FlightBookingInputSchema,
   HotelBookingInputSchema,
   HotelSearchResponseSchema,
@@ -165,10 +166,14 @@ export const getBooking = async (bookingId: string): Promise<Booking> => {
 
 /** Validates that a booking exists, then cancels it. */
 export const cancelBooking = async (input: CancelBookingInput): Promise<Booking> => {
-  await getBooking(input.bookingId);
+  const validated = CancelBookingInputSchema.parse(input);
+  await getBooking(validated.bookingId);
   const response = await request(
-    `${ENDPOINTS.BOOKINGS}/${encodeURIComponent(input.bookingId)}/cancel`,
-    { method: 'POST' }
+    `${ENDPOINTS.BOOKINGS}/${encodeURIComponent(validated.bookingId)}/cancel`,
+    {
+      method: 'POST',
+      headers: { 'Idempotency-Key': createIdempotencyKey('cancel', validated) },
+    }
   );
   return parseBookingResponse(response);
 };

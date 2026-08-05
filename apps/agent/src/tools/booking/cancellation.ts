@@ -1,6 +1,6 @@
 import { tool } from '@langchain/core/tools';
 
-import { TOOL_ERROR_MESSAGES } from '../../constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../../constants';
 import { CancelBookingInputSchema } from '../../schemas';
 import { cancelBooking, getBooking } from '../../services';
 import {
@@ -9,17 +9,18 @@ import {
   requestBookingApproval,
   withApprovalId,
 } from '../../utils/booking-approval';
+import { withToolTimeout } from '../../utils/tool-contract';
 
 export const cancelBookingTool = tool(
   async (input) => {
     let booking: Awaited<ReturnType<typeof getBooking>>;
     try {
-      booking = await getBooking(input.bookingId);
+      booking = await withToolTimeout(getBooking(input.bookingId));
     } catch (error) {
       return formatBookingToolResult(bookingToolError(error, TOOL_ERROR_MESSAGES.BOOKING_CANCEL));
     }
 
-    const isApproved = requestBookingApproval(
+    const approval = requestBookingApproval(
       withApprovalId({
         type: 'booking_approval',
         action: 'cancel_booking',
@@ -38,18 +39,18 @@ export const cancelBookingTool = tool(
       })
     );
 
-    if (!isApproved) {
+    if (approval.decision !== 'approve') {
       return formatBookingToolResult({ status: 'rejected', type: 'cancellation' });
     }
 
     try {
-      return formatBookingToolResult(await cancelBooking(input));
+      return formatBookingToolResult(await withToolTimeout(cancelBooking(input)));
     } catch (error) {
       return formatBookingToolResult(bookingToolError(error, TOOL_ERROR_MESSAGES.BOOKING_CANCEL));
     }
   },
   {
-    name: 'cancelBookingTool',
+    name: TOOL_NAMES.CANCEL_BOOKING,
     description: `Cancel an existing flight or hotel booking by booking ID or confirmation code.
 Always pauses for explicit human approval before cancellation.`,
     schema: CancelBookingInputSchema,

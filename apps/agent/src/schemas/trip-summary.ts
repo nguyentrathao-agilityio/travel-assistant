@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { isValidIsoDate } from '../utils';
+import { isValidIsoDate } from '../utils/date';
 import { FlightSchema } from './flights';
 import { HotelAvailabilitySchema } from './hotel';
 import { RouteResultSchema } from './route';

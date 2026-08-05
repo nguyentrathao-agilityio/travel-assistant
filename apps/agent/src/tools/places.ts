@@ -2,21 +2,13 @@ import { tool } from '@langchain/core/tools';
 
 import { getPlaces } from '../services/places';
 import { PlacesInputSchema } from '../schemas/places';
-import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
+import { executeReadTool } from '../utils/tool-contract';
 
 export const placesTool = tool(
-  async (input) => {
-    try {
-      const result = await getPlaces(input);
-      return contentAndArtifact(result);
-    } catch (error) {
-      return contentAndArtifact({
-        error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.PLACES,
-      });
-    }
-  },
+  async (input) => executeReadTool(getPlaces(input), 'travel-api', TOOL_ERROR_MESSAGES.PLACES),
   {
-    name: 'placesTool',
+    name: TOOL_NAMES.PLACES,
     description: `Search places of interest in a city — attractions, restaurants, cafes, activities, nightlife, and shopping.
     Required: city.
     Optional:

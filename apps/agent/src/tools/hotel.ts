@@ -2,21 +2,13 @@ import { tool } from '@langchain/core/tools';
 
 import { searchHotels } from '../services/hotel';
 import { HotelInputSchema } from '../schemas/hotel';
-import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
+import { executeReadTool } from '../utils/tool-contract';
 
 export const hotelTool = tool(
-  async (input) => {
-    try {
-      const result = await searchHotels(input);
-      return contentAndArtifact(result);
-    } catch (error) {
-      return contentAndArtifact({
-        error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.HOTELS,
-      });
-    }
-  },
+  async (input) => executeReadTool(searchHotels(input), 'travel-api', TOOL_ERROR_MESSAGES.HOTELS),
   {
-    name: 'hotelTool',
+    name: TOOL_NAMES.HOTEL,
     description: `Search available hotels for a destination with flexible filters.
     Required:
       - city

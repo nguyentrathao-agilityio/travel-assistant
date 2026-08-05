@@ -50,7 +50,7 @@ describe('tripSummaryTool', () => {
 
     const result = artifactOf(await tripSummaryTool.invoke(toolCall(tripSummaryTool.name, input)));
 
-    expect(result).toEqual({ error: 'no flights found' });
+    expect(result).toEqual(expect.objectContaining({ error: 'no flights found' }));
   });
 
   it('falls back to the generic trip summary error message for a non-Error throw', async () => {
@@ -58,8 +58,10 @@ describe('tripSummaryTool', () => {
 
     const result = artifactOf(await tripSummaryTool.invoke(toolCall(tripSummaryTool.name, input)));
 
-    expect(result).toEqual({
-      error: 'Trip summary failed. Try asking me to search flights and hotels separately.',
-    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: 'Trip summary failed. Try asking me to search flights and hotels separately.',
+      })
+    );
   });
 });

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '../infrastructure/llm';
-import { daysBetween, todayIso } from '../utils';
+import { daysBetween, todayIso } from '../utils/date';
 import { searchFlights } from './flights';
 import { searchHotels } from './hotel';
 import { getRoute } from './route';

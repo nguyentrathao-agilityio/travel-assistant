@@ -17,7 +17,8 @@ export const TipsInputSchema = z.object({
   city: z.string().optional().describe('City name to get tips for, e.g. "Da Nang"'),
   country: z
     .string()
-    .optional()
+    .trim()
+    .min(2)
     .describe('Country name — used when no city is specified, e.g. "Vietnam"'),
   category: TipCategorySchema.optional().describe(
     'Filter tips by category: transport, money, safety, culture, food, connectivity, health, etiquette, best_time, language'

@@ -53,7 +53,7 @@ describe('tipsTool', () => {
 
     const result = artifactOf(await tipsTool.invoke(toolCall(tipsTool.name, input)));
 
-    expect(result).toEqual({ error: 'provider unavailable' });
+    expect(result).toEqual(expect.objectContaining({ error: 'provider unavailable' }));
   });
 
   it('falls back to the generic local tips error message for a non-Error throw', async () => {
@@ -61,8 +61,10 @@ describe('tipsTool', () => {
 
     const result = artifactOf(await tipsTool.invoke(toolCall(tipsTool.name, input)));
 
-    expect(result).toEqual({
-      error: 'Local tips are unavailable right now. Please try again.',
-    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: 'Local tips are unavailable right now. Please try again.',
+      })
+    );
   });
 });

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
 
 import { TOOL_READY_OUTPUT } from '../../constants';
-import { richUiModelMiddleware } from '../rich-ui-middleware';
+import { buildRichUiToolSummary, richUiModelMiddleware } from '../rich-ui-middleware';
 
 const invokeMiddleware = async (messages: unknown[]) => {
   let captured: { messages: unknown[] } | undefined;
@@ -24,7 +24,9 @@ describe('richUiModelMiddleware', () => {
 
     const [result] = await invokeMiddleware([original]);
 
-    expect(result.content).toBe(TOOL_READY_OUTPUT);
+    expect(result.content).toBe(
+      `Weather conditions and forecast are available. ${TOOL_READY_OUTPUT}`
+    );
     expect(result.artifact).toEqual({ location: { name: 'Tokyo' } });
     expect(result.tool_call_id).toBe('call_1');
   });
@@ -42,6 +44,27 @@ describe('richUiModelMiddleware', () => {
     expect(result).toBe(original);
     expect(result.content).toContain('Flight not found');
     expect(result.content).not.toBe(TOOL_READY_OUTPUT);
+  });
+
+  it('replaces structured provider details with a user-safe model instruction', async () => {
+    const artifact = {
+      error: 'GET https://internal.example failed with stack details',
+      message: 'GET https://internal.example failed with stack details',
+      code: 'PROVIDER_UNAVAILABLE',
+      retryable: true,
+      provider: 'travel-api',
+    };
+    const original = new ToolMessage({
+      content: JSON.stringify(artifact),
+      artifact,
+      name: 'hotelTool',
+      tool_call_id: 'call_safe_error',
+    });
+    const [result] = await invokeMiddleware([original]);
+
+    expect(result.content).toContain('PROVIDER_UNAVAILABLE');
+    expect(result.content).toContain('can try again');
+    expect(result.content).not.toContain('internal.example');
   });
 
   it('leaves non-ToolMessage and artifact-less messages untouched', async () => {
@@ -95,7 +118,18 @@ describe('richUiModelMiddleware', () => {
 
     const [resultFirst, resultSecond] = await invokeMiddleware([first, second]);
 
-    expect((resultFirst as ToolMessage).content).toBe(TOOL_READY_OUTPUT);
-    expect((resultSecond as ToolMessage).content).toBe(TOOL_READY_OUTPUT);
+    expect((resultFirst as ToolMessage).content).toContain('Weather conditions and forecast');
+    expect((resultSecond as ToolMessage).content).toContain('0 place(s) are available');
+  });
+
+  it('provides counts without exposing item details back to the model', () => {
+    const summary = buildRichUiToolSummary('hotelTool', {
+      total: 5,
+      results: [{ name: 'Hotel A', price: 100 }],
+    });
+
+    expect(summary).toContain('5 hotel option(s)');
+    expect(summary).not.toContain('Hotel A');
+    expect(summary).not.toContain('100');
   });
 });

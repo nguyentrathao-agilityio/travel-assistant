@@ -64,9 +64,11 @@ pnpm build               # production build (tsc + tsc-alias)
 ## Tests
 
 ```sh
-pnpm test         # run all unit tests (Vitest)
-pnpm test:watch   # watch mode
-pnpm test:evals   # run model-backed evaluations (requires OPENAI_API_KEY)
+pnpm test              # unit and provider-free integration tests (Vitest)
+pnpm test:integration  # compiled LangGraph/checkpointer/HITL integration tests
+pnpm test:evals        # deterministic evaluation dataset checks; safe for CI
+pnpm test:evals:live   # model-backed trajectory evaluations; requires OPENAI_API_KEY
+pnpm test:watch        # watch mode
 ```
 
 An HTML report is written to `test-report/index.html` after every run:
@@ -77,5 +79,6 @@ npx http-server .
 # Opens http://localhost:8080
 ```
 
-Unit tests live alongside their source under `src/**/__tests__/`. Model-backed evaluations live in
-`src/evals/` and are excluded from the normal unit-test command.
+Tests live alongside their source under `src/**/__tests__/`. Provider-free graph integration tests
+use `MemorySaver`; production checkpoint setup continues to use Postgres. Model-backed evaluations
+live in `src/evals/`, are excluded from normal tests, and run only through `test:evals:live`.

@@ -11,6 +11,7 @@ import { memoryStore } from '../infrastructure/persistence';
 import { saveMemory } from '../services/memory';
 import { MemoryExtractionSchema } from '../schemas/memory';
 import type { GraphStateType } from '../state';
+import { takeRecentMessages } from '../utils';
 
 const extractionModel = createChatModel({ apiKey: OPENAI_API_KEY! }).withStructuredOutput(
   MemoryExtractionSchema
@@ -23,7 +24,7 @@ const isBookingToolMessage = (message: GraphStateType['messages'][number]): bool
 // here must never surface to the user — it only affects what gets remembered next time.
 export const saveMemoryNode = async (state: GraphStateType): Promise<Partial<GraphStateType>> => {
   try {
-    const recentMessages = state.messages.slice(-MAX_EXTRACT_MEMORY_MESSAGES);
+    const recentMessages = takeRecentMessages(state.messages, MAX_EXTRACT_MEMORY_MESSAGES);
     // Booking tool messages carry the customer's name/email/phone — skip extraction entirely
     // rather than risk the model pulling that PII into long-term memory.
     if (recentMessages.some(isBookingToolMessage)) return {};

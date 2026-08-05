@@ -2,21 +2,18 @@ import { tool } from '@langchain/core/tools';
 
 import { getDestinationExplorer } from '../services/destination-explorer';
 import { DestinationExplorerInputSchema } from '../schemas/destination-explorer';
-import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
+import { executeReadTool } from '../utils/tool-contract';
 
 export const destinationExplorerTool = tool(
-  async (input) => {
-    try {
-      const result = await getDestinationExplorer(input);
-      return contentAndArtifact(result);
-    } catch (error) {
-      return contentAndArtifact({
-        error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.DESTINATION_EXPLORER,
-      });
-    }
-  },
+  async (input) =>
+    executeReadTool(
+      getDestinationExplorer(input),
+      'travel-api',
+      TOOL_ERROR_MESSAGES.DESTINATION_EXPLORER
+    ),
   {
-    name: 'destinationExplorerTool',
+    name: TOOL_NAMES.DESTINATION_EXPLORER,
     description: `Explore a destination in one shot — top places, local tips, and weather forecast all in one unified card.
     Rules:
       - Use ONLY when the user asks for a destination overview / "tell me about X" / "explore X" / "what's X like".

@@ -6,6 +6,10 @@ import { createSpecializedAgent } from '../../utils';
 
 export const CANCEL_BOOKING_AGENT_TOOLS: StructuredToolInterface[] = [cancelBookingTool];
 
-export const cancelBookingAgent = createSpecializedAgent(CANCEL_BOOKING_AGENT_TOOLS, {
-  toolsSection: CANCEL_BOOKING_AGENT_TOOLS_PROMPT,
-});
+export const cancelBookingAgent = createSpecializedAgent(
+  CANCEL_BOOKING_AGENT_TOOLS,
+  {
+    toolsSection: CANCEL_BOOKING_AGENT_TOOLS_PROMPT,
+  },
+  'cancelBooking'
+);

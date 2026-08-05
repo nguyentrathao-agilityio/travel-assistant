@@ -17,7 +17,7 @@ export const TOOL_ERROR_MESSAGES = {
 } as const;
 
 export const TOOL_READY_OUTPUT =
-  'The result is ready. Ask one brief, natural next-step question without repeating any result details.';
+  'A structured UI card displays the result details. Give one concise summary sentence and, when useful, one brief next-step question. Do not repeat item names, prices, addresses, schedules, amenities, or other card details.';
 
 export const contentAndArtifact = <T>(artifact: T): [string, T] => [
   JSON.stringify(artifact),

@@ -6,6 +6,7 @@ const {
   dynamicSystemPromptMiddlewareMock,
   createCopilotkitMiddlewareMock,
   createChatModelMock,
+  createDomainStateMiddlewareMock,
 } = vi.hoisted(() => ({
   createAgentMock: vi.fn(),
   dynamicSystemPromptMiddlewareMock: vi.fn((fn: unknown) => ({
@@ -14,6 +15,9 @@ const {
   })),
   createCopilotkitMiddlewareMock: vi.fn(() => 'copilotkit-middleware'),
   createChatModelMock: vi.fn(() => 'fake-model'),
+  createDomainStateMiddlewareMock: vi.fn(
+    (taskName: string) => `domain-state-middleware:${taskName}`
+  ),
 }));
 
 vi.mock('langchain', () => ({
@@ -47,6 +51,10 @@ vi.mock('../rich-ui-middleware', () => ({
   richUiModelMiddleware: 'rich-ui-middleware',
 }));
 
+vi.mock('../domain-state-middleware', () => ({
+  createDomainStateMiddleware: createDomainStateMiddlewareMock,
+}));
+
 vi.mock('../../constants', () => ({
   OPENAI_API_KEY: 'test-api-key',
 }));
@@ -71,7 +79,7 @@ afterEach(() => {
 
 describe('createSpecializedAgent', () => {
   it('wires the model, tools, state schema, and middleware stack into createAgent', () => {
-    const graph = createSpecializedAgent(tools, sections);
+    const graph = createSpecializedAgent(tools, sections, 'general');
 
     expect(graph).toBe(FAKE_GRAPH);
     expect(createAgentMock).toHaveBeenCalledTimes(1);
@@ -83,6 +91,7 @@ describe('createSpecializedAgent', () => {
     expect(call.middleware).toEqual([
       'copilotkit-middleware',
       'rich-ui-middleware',
+      'domain-state-middleware:general',
       { __type: 'dynamicSystemPromptMiddleware', fn: expect.any(Function) },
     ]);
   });
@@ -90,8 +99,8 @@ describe('createSpecializedAgent', () => {
   it('includes remembered preferences in the system prompt when includeMemoryContext is set', async () => {
     searchMemoriesMock.mockResolvedValueOnce(['likes window seats']);
 
-    createSpecializedAgent(tools, { ...sections, includeMemoryContext: true });
-    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[2].fn;
+    createSpecializedAgent(tools, { ...sections, includeMemoryContext: true }, 'plan');
+    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[3].fn;
 
     const fakeState = { messages: [] };
     await dynamicPromptFn(fakeState);
@@ -105,8 +114,8 @@ describe('createSpecializedAgent', () => {
   });
 
   it('skips memory lookup and passes an empty memories list when includeMemoryContext is not set', async () => {
-    createSpecializedAgent(tools, sections);
-    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[2].fn;
+    createSpecializedAgent(tools, sections, 'general');
+    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[3].fn;
 
     const fakeState = { messages: [] };
     await dynamicPromptFn(fakeState);

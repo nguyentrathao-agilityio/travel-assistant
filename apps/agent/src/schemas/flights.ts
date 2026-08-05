@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import { isValidIsoDate, todayIso, stripNulls } from '../utils';
+import { isValidIsoDate, todayIso } from '../utils/date';
+import { stripNulls } from '../utils/schema';
 
 export const FlightSortSchema = z.enum([
   'departure_asc',
@@ -15,8 +16,18 @@ export const FlightInputSchema = z.preprocess(
   stripNulls,
   z
     .object({
-      origin: z.string().describe('IATA 3-letter departure airport code, e.g. DAD'),
-      destination: z.string().describe('IATA 3-letter arrival airport code, e.g. SGN'),
+      origin: z
+        .string()
+        .trim()
+        .regex(/^[A-Za-z]{3}$/, 'Must be a 3-letter IATA code')
+        .transform((v) => v.toUpperCase())
+        .describe('IATA 3-letter departure airport code, e.g. DAD'),
+      destination: z
+        .string()
+        .trim()
+        .regex(/^[A-Za-z]{3}$/, 'Must be a 3-letter IATA code')
+        .transform((v) => v.toUpperCase())
+        .describe('IATA 3-letter arrival airport code, e.g. SGN'),
       departure_date: z
         .string()
         .refine(isValidIsoDate, 'Must be a valid YYYY-MM-DD date')

@@ -54,7 +54,7 @@ describe('destinationExplorerTool', () => {
       await destinationExplorerTool.invoke(toolCall(destinationExplorerTool.name, input))
     );
 
-    expect(result).toEqual({ error: 'provider unavailable' });
+    expect(result).toEqual(expect.objectContaining({ error: 'provider unavailable' }));
   });
 
   it('falls back to the generic destination explorer error message for a non-Error throw', async () => {
@@ -64,8 +64,10 @@ describe('destinationExplorerTool', () => {
       await destinationExplorerTool.invoke(toolCall(destinationExplorerTool.name, input))
     );
 
-    expect(result).toEqual({
-      error: 'Destination explorer failed. Try searching places, tips, or weather separately.',
-    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: 'Destination explorer failed. Try searching places, tips, or weather separately.',
+      })
+    );
   });
 });

@@ -21,10 +21,7 @@ const DailyRatesSchema = z.object({
 
 const FALLBACK_RATES: DailyRates = { food: 35, activities: 40, transport: 12 };
 
-/**
- * Uses OpenAI structured output to estimate typical daily food/activities/transport
- * costs for a destination, falling back to fixed rates on any failure.
- */
+/** Estimates daily trip costs, falling back to fixed rates on failure. */
 const estimateDailyCosts = async (destination: string): Promise<DailyRates> => {
   try {
     const response = await getOpenAIClient().responses.create({
@@ -58,11 +55,7 @@ const estimateDailyCosts = async (destination: string): Promise<DailyRates> => {
 
 type TripSummaryToolOutput = z.infer<typeof TripSummaryResultSchema>;
 
-/**
- * Builds a unified trip summary — cheapest flight, highest-rated hotel, a landmark
- * route, and a full cost estimate — by fanning out to the existing flights/hotel/route
- * services in parallel and reducing their results.
- */
+/** Builds a trip summary from parallel flight, hotel, route, and cost lookups. */
 export const getTripSummary = async (
   input: z.infer<typeof TripSummaryInputSchema>
 ): Promise<TripSummaryToolOutput> => {

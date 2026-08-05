@@ -50,7 +50,7 @@ export type TipsInput = z.infer<typeof TipsInputSchema>;
 export type ApiTip = z.infer<typeof ApiTipSchema>;
 export type ApiTipsResponse = z.infer<typeof ApiTipsResponseSchema>;
 
-// Tool output — was reused from @repo/schemas, now inlined for full independence
+// Camel-case tool output.
 export const TipItemSchema = z.object({
   id: z.string(),
   category: TipCategorySchema,

@@ -1,7 +1,7 @@
 import type { StructuredToolInterface } from '@langchain/core/tools';
 
-import { GENERAL_AGENT_PROMPT_SUFFIX } from '../constants';
-import { createSpecializedAgent } from './shared/create-agent';
+import { GENERAL_AGENT_PROMPT_SUFFIX } from '../prompts';
+import { createSpecializedAgent } from '../utils';
 
 export const GENERAL_AGENT_TOOLS: StructuredToolInterface[] = [];
 

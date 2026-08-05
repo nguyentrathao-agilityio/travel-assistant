@@ -1,11 +1,7 @@
 import type { GraphStateType } from '../../state';
-import { todayIso } from '../date';
+import { todayIso } from '../../utils/date';
 
-/**
- * Renders the client's local date/timezone for the system prompt, falling back to the server's
- * UTC date if the frontend hasn't sent one — so the model always has a "today" to anchor
- * relative dates to.
- */
+/** Renders client time context, falling back to the server's UTC date. */
 export const buildClientContext = (state: GraphStateType): string => {
   const today = state.clientDate ?? todayIso();
 

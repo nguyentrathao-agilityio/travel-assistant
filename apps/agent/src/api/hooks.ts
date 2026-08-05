@@ -10,14 +10,7 @@ const REQUEST_START_HEADER_NAME = 'x-cpk-request-start';
 const HTTP_STATUS_BAD_REQUEST = 400;
 const UNREGISTERED_AGENT_ERROR_CODE = 'invalid_request';
 
-/**
- * Builds CopilotKit lifecycle hooks: request/response logging with duration,
- * rejection of unregistered agentIds, and centralized error logging.
- *
- * @param registeredAgentIds - Agent ids registered on the CopilotRuntime; agent/run,
- *   agent/connect, and agent/stop requests for any other id are rejected with a 400
- *   before reaching the handler.
- */
+/** Creates logging hooks and rejects requests for unknown agents. */
 export const createCopilotKitHooks = (
   registeredAgentIds: readonly string[]
 ): CopilotRuntimeHooks => ({
@@ -27,7 +20,7 @@ export const createCopilotKitHooks = (
   onError: logError,
 });
 
-/** Logs request arrival and stamps a start-time header so later hooks can compute duration. */
+/** Stamps the request start time for duration logging. */
 const stampRequestStart = ({ request, path }: HookContext): Request => {
   console.log(`[copilotkit] -> ${request.method} ${path}`);
   const headers = new Headers(request.headers);
@@ -36,7 +29,7 @@ const stampRequestStart = ({ request, path }: HookContext): Request => {
   return new Request(request, { headers });
 };
 
-/** Rejects agent/run, agent/connect, agent/stop requests targeting an unknown agentId. */
+/** Rejects agent operations targeting an unknown ID. */
 const rejectUnregisteredAgent = (
   { route }: HandlerHookContext,
   registeredAgentIds: readonly string[]
@@ -56,14 +49,14 @@ const rejectUnregisteredAgent = (
   );
 };
 
-/** Logs method, path, resolved route, response status, and duration for every request. */
+/** Logs response status and duration. */
 const logResponse = ({ request, response, route }: ResponseHookContext): void => {
   console.log(
     `[copilotkit] <- ${request.method} ${new URL(request.url).pathname} (${route.method}) -> ${response.status} ${elapsedMs(request)}ms`
   );
 };
 
-/** Logs context for any error the runtime couldn't handle before the default 500 response fires. */
+/** Logs unhandled runtime errors. */
 const logError = ({ request, error, path, route }: ErrorHookContext): void => {
   console.error(
     `[copilotkit] x ${request.method} ${path} (${route?.method ?? 'unresolved'}) failed after ${elapsedMs(request)}ms`,
@@ -71,7 +64,6 @@ const logError = ({ request, error, path, route }: ErrorHookContext): void => {
   );
 };
 
-/** Reads the start-of-request timestamp stamped by `stampRequestStart`. */
 const elapsedMs = (request: Request): number => {
   const startedAt = Number(request.headers.get(REQUEST_START_HEADER_NAME));
 

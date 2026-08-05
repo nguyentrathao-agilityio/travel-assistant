@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const searchKnowledgeMock = vi.fn();
 
-vi.mock('../../services/knowledge', () => ({
+vi.mock('../../knowledge', () => ({
   searchKnowledge: (...args: unknown[]) => searchKnowledgeMock(...args),
 }));
 

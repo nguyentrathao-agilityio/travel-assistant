@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  CLASSIFY_SYSTEM_PROMPT,
-  EXPLORE_AGENT_TOOLS_PROMPT,
-  PLANNING_AGENT_TOOLS_PROMPT,
-} from '../../constants';
+import { CLASSIFY_SYSTEM_PROMPT } from '../../constants';
+import { EXPLORE_AGENT_TOOLS_PROMPT, PLANNING_AGENT_TOOLS_PROMPT } from '../../prompts';
 import { knowledgeSearchTool } from '../../tools/knowledge';
 import { tipsTool } from '../../tools/tips';
 

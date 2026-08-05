@@ -1,10 +1,7 @@
-// Excluded from the prompt: a remembered destination conflicting with the current message's
-// city reliably makes the model decline unrelated single-city tool calls (e.g. weatherTool).
+// Exclude remembered destinations that conflict with the current request.
 const LOCATION_FACT_KEY_HINTS = ['city', 'destination', 'location', 'airport'];
 
-// Origin facts describe the traveler, not a tool-call target — they never conflict with
-// whatever destination the current message names, so they're always safe to keep (this is
-// what lets "Find flights to Bangkok" auto-fill a remembered departure city).
+// Keep origin facts so tools can reuse the traveler's departure location.
 const ORIGIN_FACT_KEY_HINTS = ['home', 'departure'];
 
 const keyOf = (memory: string): string | null => {

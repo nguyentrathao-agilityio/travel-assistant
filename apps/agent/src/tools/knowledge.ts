@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools';
 
 import { KnowledgeSearchInputSchema } from '../schemas/knowledge';
-import { searchKnowledge } from '../services/knowledge';
+import { searchKnowledge } from '../knowledge';
 import { TOOL_ERROR_MESSAGES } from '../constants';
 
 export const knowledgeSearchTool = tool(

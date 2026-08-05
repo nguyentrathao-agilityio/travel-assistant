@@ -4,13 +4,7 @@ import { PostgresStore } from '@langchain/langgraph-checkpoint-postgres/store';
 import { POSTGRES_URL } from '../constants';
 import { knowledgeStore } from '../infrastructure/persistence';
 
-/**
- * One-time migration: creates/updates the checkpoint and long-term-memory
- * store tables in Postgres. Run via `pnpm db:setup` after provisioning a new
- * database, or after upgrading `@langchain/langgraph-checkpoint-postgres` to
- * a version with new migrations. Not called from the request path (see
- * `agent.ts` / `agents/shared/create-agent.ts`).
- */
+/** Runs checkpoint and memory-store migrations outside the request path. */
 const setupCheckpointer = async (): Promise<void> => {
   const checkpointer = PostgresSaver.fromConnString(POSTGRES_URL!);
   await checkpointer.setup();

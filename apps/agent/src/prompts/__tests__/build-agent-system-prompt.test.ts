@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { GraphStateType } from '../../state';
-import { buildAgentSystemPrompt } from '../build-system-prompt';
+import { buildAgentSystemPrompt } from '../build-agent-system-prompt';
 
 const baseState = {
   clientDate: '2026-07-23',

@@ -1,6 +1,6 @@
 import type { StructuredToolInterface } from '@langchain/core/tools';
 
-import { PLANNING_AGENT_TOOLS_PROMPT } from '../constants';
+import { PLANNING_AGENT_TOOLS_PROMPT } from '../prompts';
 import {
   flightsTool,
   hotelTool,
@@ -12,7 +12,7 @@ import {
   tripSummaryTool,
   weatherTool,
 } from '../tools';
-import { createSpecializedAgent } from './shared/create-agent';
+import { createSpecializedAgent } from '../utils';
 
 export const PLANNING_AGENT_TOOLS: StructuredToolInterface[] = [
   flightsTool,

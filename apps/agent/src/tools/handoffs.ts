@@ -6,10 +6,7 @@ import { Command } from '@langchain/langgraph';
 import { FlightBookingInputSchema, HotelBookingInputSchema } from '../schemas';
 import type { GraphStateType } from '../state';
 
-// Per LangChain's multi-agent handoffs guide: pass only the AIMessage that made this call plus a
-// ToolMessage acknowledging it — never the full subgraph history — to avoid confusing the
-// receiving branch or bloating its context. The receiving branch has no other way to see the
-// booking details than this ToolMessage's content, so it restates them directly.
+// Pass only the handoff call and booking details to keep the next agent's context focused.
 const buildHandoffMessages = (
   runtime: ToolRuntime<GraphStateType>,
   instruction: string

@@ -46,7 +46,7 @@ export type Place = z.infer<typeof PlaceSchema>;
 export type RouteLegApi = z.infer<typeof RouteLegApiSchema>;
 export type RouteInput = z.infer<typeof RouteInputSchema>;
 
-// Tool output — was reused from @repo/schemas, now inlined for full independence
+// Camel-case tool output.
 export const LandmarkStopSchema = z.object({
   name: z.string(),
   city: z.string(),

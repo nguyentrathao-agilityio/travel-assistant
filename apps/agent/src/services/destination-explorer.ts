@@ -10,10 +10,7 @@ import {
 
 type DestinationExplorerToolOutput = z.infer<typeof DestinationExplorerResultSchema>;
 
-/**
- * Builds a unified destination overview — weather, local tips, and top places —
- * chained sequentially since tips resolves its country from the weather lookup.
- */
+/** Builds a destination overview, using weather to resolve the country for local tips. */
 export const getDestinationExplorer = async (
   input: z.infer<typeof DestinationExplorerInputSchema>
 ): Promise<DestinationExplorerToolOutput> => {
@@ -21,7 +18,7 @@ export const getDestinationExplorer = async (
 
   const weather = await getWeather({ city, days: forecastDays });
 
-  // Weather API always resolves the country — use it as fallback
+  // Use the weather result as the country fallback.
   const resolvedCountry = country ?? weather.location.country;
 
   const tips = await getLocalTips({ city, country: resolvedCountry });

@@ -74,7 +74,7 @@ export type PlacesInput = z.infer<typeof PlacesInputSchema>;
 export type ApiPlace = z.infer<typeof ApiPlaceSchema>;
 export type ApiPlacesSearchResponse = z.infer<typeof ApiPlacesSearchResponseSchema>;
 
-// Tool output — was reused from @repo/schemas, now inlined for full independence
+// Camel-case tool output.
 export const PlaceResultItemSchema = z.object({
   id: z.string(),
   shortCode: z.string(),

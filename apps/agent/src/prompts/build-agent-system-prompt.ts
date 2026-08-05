@@ -1,9 +1,9 @@
 import type { GraphStateType } from '../state';
-import { BASE_SYSTEM_PROMPT } from '../constants';
-import { BOOKING_RULES_SECTION } from './system-prompt/booking-rules';
-import { buildBookingContext } from './system-prompt/booking-context';
-import { buildClientContext } from './system-prompt/client-context';
-import { buildMemoryContext } from './system-prompt/memory-context';
+import { BOOKING_RULES_SECTION } from './sections/booking-rules';
+import { buildBookingContext } from './sections/booking-context';
+import { buildClientContext } from './sections/client-context';
+import { buildMemoryContext } from './sections/memory-context';
+import { BASE_SYSTEM_PROMPT } from './templates';
 
 export interface AgentPromptSections {
   toolsSection: string;

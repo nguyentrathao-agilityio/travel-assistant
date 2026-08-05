@@ -1,5 +1,5 @@
 import { KNOWLEDGE_NAMESPACE } from '../constants';
-import { loadKnowledgeSource, splitKnowledgeSource } from '../knowledge';
+import { loadKnowledgeSource, splitKnowledgeSource } from './loader';
 import type { KnowledgeSource } from '../schemas/knowledge';
 import { knowledgeStore } from '../infrastructure/persistence';
 
@@ -12,12 +12,7 @@ export type KnowledgeIngestionResult = {
   deletedStaleChunks: number;
 };
 
-/**
- * Loads and chunks a knowledge source, then upserts its chunks into the store. Re-ingesting a
- * source that has shrunk or been restructured can produce fewer/different chunk ids than a
- * previous run, so any chunk id from the old run that the new run didn't reproduce is deleted —
- * otherwise stale chunks would linger in the store indefinitely.
- */
+/** Upserts source chunks and removes stale chunks left by previous ingestions. */
 export const ingestKnowledgeSource = async (
   source: KnowledgeSource,
   store: KnowledgeIngestionStore = knowledgeStore,

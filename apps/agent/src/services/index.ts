@@ -8,5 +8,3 @@ export * from './trip-summary';
 export * from './destination-explorer';
 export * from './booking';
 export * from './memory';
-export * from './knowledge';
-export * from './knowledge-ingestion';

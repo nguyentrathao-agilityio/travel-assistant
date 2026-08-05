@@ -13,8 +13,7 @@ const classifyModel = createChatModel({ apiKey: OPENAI_API_KEY! }).withStructure
 
 type ClassifyCommand = Command<never, Partial<GraphStateType>, BranchName>;
 
-// Routes from inside the node (via Command.goto) rather than a separate addConditionalEdges
-// router, so the classify → branch decision stays traceable in one place.
+// Keep classification and branch selection traceable in one node.
 export const classifyNode = async (state: GraphStateType): Promise<ClassifyCommand> => {
   const recentMessages = state.messages.slice(-MAX_CLASSIFY_MESSAGES);
   const result = await classifyModel.invoke(

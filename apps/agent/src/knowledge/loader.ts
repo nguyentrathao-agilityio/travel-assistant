@@ -14,10 +14,7 @@ const decodeHtmlEntities = (value: string): string =>
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>');
 
-/**
- * Strips scripts/styles/comments and (for HTML) tags from a fetched source page, collapsing it
- * to plain text suitable for chunking and embedding.
- */
+/** Sanitizes fetched content into plain text for chunking and embedding. */
 export const sanitizeSourceContent = (rawContent: string, contentType = ''): string => {
   const withoutExecutableContent = rawContent
     .replace(/<(script|style|noscript|svg)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
@@ -36,12 +33,7 @@ export const sanitizeSourceContent = (rawContent: string, contentType = ''): str
     .trim();
 };
 
-/**
- * Fetches and sanitizes a single knowledge source's page content.
- * @param source - The source to load (see `KNOWLEDGE_SOURCES`); `fetcher` defaults to global `fetch`.
- * @throws If the request fails, times out, or the sanitized content is under 100 chars (likely
- *   an empty/error page rather than real content).
- */
+/** Fetches and sanitizes a source, rejecting failed or suspiciously short responses. */
 export const loadKnowledgeSource = async (
   source: KnowledgeSource,
   fetcher: Fetcher = fetch

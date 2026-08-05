@@ -84,9 +84,7 @@ describe('requestBookingApproval', () => {
   });
 
   it('throws when a plain, non-JSON string response is missing the required approvalId', () => {
-    // parseApprovalResponse falls back to { decision: 'reject' } for a non-JSON string, which
-    // fails BookingApprovalResponseSchema validation (approvalId is required) regardless of
-    // the decision value.
+    // Non-JSON input lacks the required approval ID and fails validation.
     interruptMock.mockReturnValueOnce('reject');
 
     expect(() => requestBookingApproval(request)).toThrow();

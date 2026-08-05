@@ -1,9 +1,6 @@
 import type { KnowledgeSource } from '../schemas/knowledge';
 
-/**
- * Allow-listed official sources. The ingestion command fetches and chunks these pages; adding a
- * source here does not make it available to retrieval until db:seed-knowledge is run.
- */
+/** Official sources made searchable by running `db:seed-knowledge`. */
 export const KNOWLEDGE_SOURCES: KnowledgeSource[] = [
   {
     id: 'vn-evisa-official',

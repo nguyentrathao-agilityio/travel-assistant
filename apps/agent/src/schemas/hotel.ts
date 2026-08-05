@@ -105,7 +105,7 @@ export const HotelSearchResponseSchema = z.object({
 export type HotelAvailabilityResponse = z.infer<typeof HotelAvailabilityResponseSchema>;
 export type HotelSearchResponse = z.infer<typeof HotelSearchResponseSchema>;
 
-// Tool output — camelCase (was reused from @repo/schemas, now inlined for full independence)
+// Camel-case tool output.
 export const HotelAvailabilitySchema = z.object({
   id: z.string(),
   shortCode: z.string(),

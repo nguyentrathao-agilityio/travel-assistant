@@ -47,9 +47,7 @@ const parseBookingResponse = async (response: Response): Promise<Booking> => {
   return booking.data;
 };
 
-// Deterministic hash of the request payload, not a random UUID, so an identical retry (e.g. the
-// agent re-invoking the tool after a network blip) reuses the same key and the API can dedupe it
-// instead of creating a duplicate booking.
+// Reuse a payload hash so the API can deduplicate identical booking retries.
 const createIdempotencyKey = (action: string, payload: object): string =>
   createHash('sha256')
     .update(`${action}:${JSON.stringify(payload)}`)
@@ -76,10 +74,7 @@ export const getFlight = async (flightId: string) => {
   return flight.data;
 };
 
-/**
- * Re-checks live availability for a previously selected hotel immediately before booking.
- * Throws if the hotel is no longer available or doesn't have enough rooms left.
- */
+/** Revalidates hotel availability and room count before booking. */
 export const revalidateHotel = async (input: HotelBookingInput) => {
   const validated = HotelBookingInputSchema.parse(input);
   const params = new URLSearchParams({
@@ -162,14 +157,13 @@ export const submitHotelBooking = async (input: HotelBookingInput): Promise<Book
   return parseBookingResponse(response);
 };
 
-/** Fetches a booking by id. Throws if not found or the response shape is invalid. */
+/** Fetches and validates a booking by ID. */
 export const getBooking = async (bookingId: string): Promise<Booking> => {
   const response = await request(`${ENDPOINTS.BOOKINGS}/${encodeURIComponent(bookingId)}`);
   return parseBookingResponse(response);
 };
 
-/** Cancels a booking by id. Fetches it first purely to validate it exists, so an invalid id
- *  surfaces getBooking's error rather than an opaque failure from the cancel endpoint. */
+/** Validates that a booking exists, then cancels it. */
 export const cancelBooking = async (input: CancelBookingInput): Promise<Booking> => {
   await getBooking(input.bookingId);
   const response = await request(

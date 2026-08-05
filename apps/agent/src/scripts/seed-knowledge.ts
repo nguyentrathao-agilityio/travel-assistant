@@ -1,12 +1,7 @@
-import { KNOWLEDGE_SOURCES } from '../knowledge';
-import { ingestKnowledgeSource } from '../services/knowledge-ingestion';
+import { ingestKnowledgeSource, KNOWLEDGE_SOURCES } from '../knowledge';
 import { knowledgeStore } from '../infrastructure/persistence';
 
-/**
- * Ingests `KNOWLEDGE_SOURCES` into the knowledge store. Run via `pnpm db:seed-knowledge`; set
- * `KNOWLEDGE_SOURCE_ID` to re-ingest a single source instead of all of them. Not called from the
- * request path.
- */
+/** Seeds all knowledge sources, or one selected by `KNOWLEDGE_SOURCE_ID`. */
 const seedKnowledge = async (): Promise<void> => {
   const failures: string[] = [];
   const requestedSourceId = process.env.KNOWLEDGE_SOURCE_ID;

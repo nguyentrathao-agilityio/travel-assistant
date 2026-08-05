@@ -12,10 +12,7 @@ const keyOf = (memory: string): string | null => {
   return separatorIndex === -1 ? null : normalize(memory.slice(0, separatorIndex));
 };
 
-/**
- * Reads every fact stored in the dev long-term-memory namespace, dropping
- * any entry that no longer matches the expected shape.
- */
+/** Reads valid facts from the development memory namespace. */
 export const searchMemories = async (store: BaseStore): Promise<string[]> => {
   const items = await store.search(MEMORY_NAMESPACE, { limit: 100 });
   return items
@@ -24,10 +21,7 @@ export const searchMemories = async (store: BaseStore): Promise<string[]> => {
     .map((parsed) => parsed.data.memory);
 };
 
-/**
- * Stores a durable fact, skipping exact duplicates and superseding any existing fact with the
- * same "key:" prefix (e.g. a new "Departure city: …" replaces the old one).
- */
+/** Stores a fact, skipping duplicates and replacing values with the same key prefix. */
 export const saveMemory = async (store: BaseStore, memory: string): Promise<void> => {
   const items = await store.search(MEMORY_NAMESPACE, { limit: 100 });
   const existing = items

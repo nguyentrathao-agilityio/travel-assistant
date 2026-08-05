@@ -48,7 +48,7 @@ export const WeatherResponseSchema = z.object({
 
 export type WeatherResponse = z.infer<typeof WeatherResponseSchema>;
 
-// Tool output — was reused from @repo/schemas, now inlined for full independence
+// Camel-case tool output.
 export const WeatherResultSchema = z.object({
   location: z.object({
     name: z.string(),

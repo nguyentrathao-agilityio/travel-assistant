@@ -34,12 +34,14 @@ Live prices, availability, schedules, weather, and routes continue to use dedica
 ```text
 src/
 ├── agent.ts          # root StateGraph composition and checkpointer
-├── agents/           # specialized agents and shared agent middleware/factory
+├── agents/           # specialized agent definitions and their tool assignments
 ├── nodes/            # root workflow nodes (classification, routing, memory extraction)
 ├── tools/            # LangChain tool adapters; side-effecting booking tools are isolated
 ├── services/         # domain operations and external travel API access
 ├── infrastructure/   # OpenAI clients plus PostgreSQL-backed memory/knowledge stores
-├── knowledge/        # source loading and chunking
+├── knowledge/        # trusted-source loading, chunking, ingestion, and retrieval
+├── prompts/          # agent prompt templates, contextual sections, and composition
+├── utils/            # shared factories, middleware, and stateless helpers
 ├── evals/            # model-backed agent behavior evaluations
 ├── api/              # Hono and CopilotKit transport boundary
 └── scripts/          # database setup and knowledge ingestion commands

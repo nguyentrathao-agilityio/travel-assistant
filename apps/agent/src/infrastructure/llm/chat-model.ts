@@ -7,7 +7,7 @@ export type CreateChatModelParams = {
   model?: string;
 };
 
-/** Builds a ChatOpenAI instance pinned to temperature 0 for deterministic tool selection and structured output. */
+/** Builds a deterministic ChatOpenAI model. */
 export const createChatModel = ({
   apiKey,
   model = DEFAULT_MODEL,

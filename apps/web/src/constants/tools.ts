@@ -9,21 +9,10 @@ import {
   UtensilsCrossed,
   Zap,
 } from 'lucide-react';
+import { TOOL_NAMES } from '@repo/constants';
 import type { SuggestionItem } from './chat';
 
-export const TOOL_NAMES = {
-  WEATHER: 'weatherTool',
-  FLIGHTS: 'flightsTool',
-  HOTEL: 'hotelTool',
-  LOCAL_TIPS: 'localTipsTool',
-  PLACES: 'placesTool',
-  ROUTE: 'routeTool',
-  TRIP_SUMMARY: 'tripSummaryTool',
-  DESTINATION_EXPLORER: 'destinationExplorerTool',
-  BOOK_FLIGHT: 'bookFlightTool',
-  BOOK_HOTEL: 'bookHotelTool',
-  CANCEL_BOOKING: 'cancelBookingTool',
-} as const;
+export { TOOL_NAMES };
 
 export const TOOL_SUGGESTION_ITEMS: Readonly<Partial<Record<string, readonly SuggestionItem[]>>> = {
   [TOOL_NAMES.FLIGHTS]: [

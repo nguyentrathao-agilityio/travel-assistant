@@ -12,6 +12,8 @@ jest.mock('@/components', () => ({
   LoadingCard: () => null,
   SetLastTool: () => null,
   ToolLoading: () => null,
+  ToolEmptyCard: () => null,
+  ToolErrorCard: () => null,
 }));
 jest.mock('@/utils', () => ({
   ...jest.requireActual('@/utils/toolResult'),
@@ -53,12 +55,12 @@ describe('usePlacesAction', () => {
     expect(result.type).toBe(React.Fragment);
   });
 
-  it('render returns empty fragment when total is 0', () => {
+  it('render returns an explicit empty state when total is 0', () => {
     mockSafeParse.mockReturnValue({ success: true, data: { total: 0, results: [] } });
     renderHook(() => usePlacesAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: { total: 0, results: [] } });
-    expect(result.type).toBe(React.Fragment);
+    expect(result.type).not.toBe(React.Fragment);
   });
 
   it('render returns PlacesCard when parse succeeds with results', () => {

@@ -12,5 +12,6 @@ export * from './StarRating';
 export * from './StepBadge';
 export * from './TipRow';
 export * from './Typography';
+export * from './ToolResultFeedback';
 export * from './SetLastTool';
 export * from './ToolLoading';

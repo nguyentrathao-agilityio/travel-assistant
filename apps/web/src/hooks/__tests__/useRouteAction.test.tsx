@@ -12,6 +12,8 @@ jest.mock('@/components', () => ({
   LoadingCard: () => null,
   SetLastTool: () => null,
   ToolLoading: () => null,
+  ToolEmptyCard: () => null,
+  ToolErrorCard: () => null,
 }));
 jest.mock('@/utils', () => ({
   ...jest.requireActual('@/utils/toolResult'),
@@ -53,7 +55,7 @@ describe('useRouteAction', () => {
     expect(result.type).toBe(React.Fragment);
   });
 
-  it('render returns empty fragment when stops array is empty', () => {
+  it('render returns an explicit empty state when stops array is empty', () => {
     mockSafeParse.mockReturnValue({
       success: true,
       data: { city: 'Da Nang', stops: [], legs: [], totalDurationMin: 0 },
@@ -61,7 +63,7 @@ describe('useRouteAction', () => {
     renderHook(() => useRouteAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: { stops: [] } });
-    expect(result.type).toBe(React.Fragment);
+    expect(result.type).not.toBe(React.Fragment);
   });
 
   it('render returns RouteCard when parse succeeds with stops', () => {

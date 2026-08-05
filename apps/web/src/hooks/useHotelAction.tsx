@@ -5,10 +5,10 @@ import { useCopilotChatInternal, useRenderToolCall } from '@copilotkit/react-cor
 import { TOOL_NAMES, TOOL_STATUS } from '@/constants';
 
 // Components
-import { HotelCard, SetLastTool, ToolLoading } from '@/components';
+import { HotelCard, SetLastTool, ToolEmptyCard, ToolErrorCard, ToolLoading } from '@/components';
 
 // Utils
-import { isToolPending, safeParseToolResult } from '@/utils';
+import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 
 // Hooks
 import { useTripState } from '@/hooks';
@@ -64,10 +64,13 @@ export const useHotelAction = () => {
           <ToolLoading target={`hotels in ${args.city} from ${args.checkIn} to ${args.checkOut}`} />
         );
 
+      if (getToolError(result)) return <ToolErrorCard result={result} />;
+
       if (status === TOOL_STATUS.COMPLETE && result) {
         const parsed = safeParseToolResult(HotelSearchResultSchema, result);
         if (!parsed.success) return <></>;
-        if (parsed.data.results.length === 0) return <></>;
+        if (parsed.data.results.length === 0)
+          return <ToolEmptyCard message="No hotels matched these dates and filters." />;
 
         const selectedHotel =
           parsed.data.results.find((hotel: HotelAvailability) => hotel.id === state.hotel?.id) ??

@@ -4,13 +4,13 @@ import { useRenderToolCall } from '@copilotkit/react-core';
 import { RouteResultSchema } from '@repo/schemas';
 
 // Components
-import { RouteCard, SetLastTool, ToolLoading } from '@/components';
+import { RouteCard, SetLastTool, ToolEmptyCard, ToolErrorCard, ToolLoading } from '@/components';
 
 // Constants
 import { TOOL_NAMES } from '@/constants';
 
 // Utils
-import { isToolPending, safeParseToolResult } from '@/utils';
+import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 
 export const useRouteAction = () => {
   useRenderToolCall({
@@ -23,9 +23,12 @@ export const useRouteAction = () => {
     render: ({ status, result, args }) => {
       if (isToolPending(status)) return <ToolLoading target={`a route in ${args.city}`} />;
 
+      if (getToolError(result)) return <ToolErrorCard result={result} />;
+
       const parsed = safeParseToolResult(RouteResultSchema, result);
       if (!parsed.success) return <></>;
-      if (parsed.data.stops.length === 0) return <></>;
+      if (parsed.data.stops.length === 0)
+        return <ToolEmptyCard message="No route stops were available for this destination." />;
 
       return (
         <>

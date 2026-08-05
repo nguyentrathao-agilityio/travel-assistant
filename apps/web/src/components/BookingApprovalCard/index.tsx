@@ -28,8 +28,8 @@ const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCardProps) 
 
   const handleReject = useCallback(() => {
     setSubmitted(true);
-    onDecision('reject');
-  }, [onDecision]);
+    onDecision(isCancellation ? 'reject' : 'edit');
+  }, [isCancellation, onDecision]);
 
   return (
     <section className="border-border-tertiary bg-background-primary flex w-full max-w-2xl flex-col gap-3 rounded-lg border p-4">

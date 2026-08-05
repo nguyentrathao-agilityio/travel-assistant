@@ -3,7 +3,7 @@ import { CustomUserMessage } from '@/components/chat/CustomUserMessage';
 import type { InputProps } from '@copilotkit/react-ui';
 import { CopilotChat } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
-import { useEffect, useLayoutEffect } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { useState } from 'react';
 import { History } from 'lucide-react';
 import { useShallow } from 'zustand/shallow';
@@ -40,11 +40,19 @@ import { Button } from '../common';
 
 const ConversationInput = (props: InputProps) => {
   const setSendMessage = useConversationRendererStore((state) => state.setSendMessage);
+  const onSendRef = useRef(props.onSend);
+  onSendRef.current = props.onSend;
+
+  // CopilotChat creates a new onSend function during some internal renders.
+  // Publishing that changing identity to Zustand would re-render the custom
+  // renderers, create another onSend, and loop. Publish one stable bridge and
+  // keep only its implementation current via the ref above.
+  const sendMessage = useCallback((text: string) => onSendRef.current(text), []);
 
   useEffect(() => {
-    setSendMessage(props.onSend);
+    setSendMessage(sendMessage);
     return () => setSendMessage(null);
-  }, [props.onSend, setSendMessage]);
+  }, [sendMessage, setSendMessage]);
 
   return <ChatInputBar {...props} />;
 };

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useCopilotChatInternal } from '@copilotkit/react-core';
+import { useAgent } from '@copilotkit/react-core/v2';
 import { ChatInputBar } from '../index';
 
 const mockMessages: { role: string; toolCalls?: unknown[] }[] = [];
@@ -13,15 +13,21 @@ const makeProps = (overrides = {}) => ({
 
 beforeEach(() => {
   mockMessages.length = 0;
+  jest.mocked(useAgent).mockClear();
   jest
-    .mocked(useCopilotChatInternal)
-    .mockReturnValue({ messages: mockMessages } as unknown as ReturnType<
-      typeof useCopilotChatInternal
+    .mocked(useAgent)
+    .mockReturnValue({ agent: { messages: mockMessages } } as unknown as ReturnType<
+      typeof useAgent
     >);
 });
 
 describe('ChatInputBar', () => {
   describe('rendering', () => {
+    it('subscribes to the configured travel agent instead of the default agent', () => {
+      render(<ChatInputBar {...makeProps()} />);
+      expect(useAgent).toHaveBeenCalledWith(expect.objectContaining({ agentId: 'travelAgent' }));
+    });
+
     it('renders the textarea', () => {
       render(<ChatInputBar {...makeProps()} />);
       expect(screen.getByLabelText('Chat message')).toBeInTheDocument();

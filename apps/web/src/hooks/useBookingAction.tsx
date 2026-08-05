@@ -1,8 +1,4 @@
-import {
-  useCopilotChatInternal,
-  useLangGraphInterrupt,
-  useRenderToolCall,
-} from '@copilotkit/react-core';
+import { useLangGraphInterrupt, useRenderToolCall } from '@copilotkit/react-core';
 import { z } from 'zod';
 
 // Components
@@ -22,6 +18,7 @@ import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
 
 // Utils
 import { parseToolResult } from '@/utils';
+import { useInterruptElement } from './useInterruptElement';
 
 const bookingResultSchema = z.object({
   id: z.string(),
@@ -124,7 +121,7 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
 };
 
 export const useBookingAction = () => {
-  const { interrupt } = useCopilotChatInternal();
+  const interrupt = useInterruptElement();
 
   useLangGraphInterrupt<BookingApprovalRequest>({
     enabled: ({ eventValue }) => bookingApprovalRequestSchema.safeParse(eventValue).success,

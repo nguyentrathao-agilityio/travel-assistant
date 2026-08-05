@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { useCopilotChatHeadless_c } from '@copilotkit/react-core';
+import { useAgent } from '@copilotkit/react-core/v2';
 
+import { AGENT_NAME } from '@/constants';
 // Stores
 import { useThreadStore } from '@/stores';
 
@@ -10,7 +11,9 @@ import { extractCopilotText, isUserMessage } from '@/utils';
 const TITLE_MAX_LENGTH = 50;
 
 export const useTitleSync = () => {
-  const { messages } = useCopilotChatHeadless_c();
+  const activeThreadId = useThreadStore((state) => state.activeThreadId);
+  const { agent } = useAgent({ agentId: AGENT_NAME, threadId: activeThreadId });
+  const messages = agent.messages;
   const threads = useThreadStore((state) => state.threads);
 
   useEffect(() => {

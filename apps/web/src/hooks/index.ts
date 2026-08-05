@@ -17,3 +17,4 @@ export * from './useWeatherAction';
 export * from './useDestinationExplorerAction';
 export * from './useThemeAction';
 export * from './useBookingAction';
+export * from './useInterruptElement';

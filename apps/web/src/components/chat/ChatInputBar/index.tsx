@@ -2,10 +2,10 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import type { KeyboardEvent, ChangeEvent } from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { InputProps } from '@copilotkit/react-ui';
-import { useCopilotChatInternal } from '@copilotkit/react-core';
+import { useAgent } from '@copilotkit/react-core/v2';
 
 // Stores
-import { useSuggestionStore } from '@/stores';
+import { useSuggestionStore, useThreadStore } from '@/stores';
 
 // Utils
 import { cn } from '@/utils';
@@ -14,14 +14,16 @@ import { cn } from '@/utils';
 import { Button } from '@/components';
 
 // Constants
-import { CHAT_ROLE } from '@/constants';
+import { AGENT_NAME, CHAT_ROLE } from '@/constants';
 
 const MAX_TEXTAREA_HEIGHT = 160;
 
 const ChatInputBar = ({ onSend, inProgress }: InputProps) => {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { messages } = useCopilotChatInternal();
+  const activeThreadId = useThreadStore((state) => state.activeThreadId);
+  const { agent } = useAgent({ agentId: AGENT_NAME, threadId: activeThreadId });
+  const messages = agent.messages;
 
   const setOnSend = useSuggestionStore((s) => s.setOnSend);
   const setLastTool = useSuggestionStore((s) => s.setLastTool);

@@ -10,8 +10,14 @@ const mockUpdateThread = jest.fn((threadId: string, updates: { title?: string | 
   Object.assign(thread, updates);
 });
 
-jest.mock('@copilotkit/react-core', () => ({
-  useCopilotChatHeadless_c: () => ({ messages: mockMessages() }),
+jest.mock('@copilotkit/react-core/v2', () => ({
+  useAgent: () => ({
+    agent: {
+      get messages() {
+        return mockMessages();
+      },
+    },
+  }),
 }));
 
 jest.mock('@/stores', () => {

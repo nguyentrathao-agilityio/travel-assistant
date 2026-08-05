@@ -24,5 +24,6 @@ export const useConversationRendererStore = create<ConversationRendererState>((s
   sendMessage: null,
   setThreadHistory: (threadId, persistedMessages, isHistoryLoading) =>
     set({ threadId, persistedMessages, isHistoryLoading }),
-  setSendMessage: (sendMessage) => set({ sendMessage }),
+  setSendMessage: (sendMessage) =>
+    set((state) => (state.sendMessage === sendMessage ? state : { sendMessage })),
 }));

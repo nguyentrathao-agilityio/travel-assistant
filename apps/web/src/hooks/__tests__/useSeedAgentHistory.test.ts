@@ -5,8 +5,15 @@ import type { AgUiMessage } from '@/types';
 const mockSetMessages = jest.fn();
 const mockMessages = jest.fn(() => [] as AgUiMessage[]);
 
-jest.mock('@copilotkit/react-core', () => ({
-  useCopilotChatHeadless_c: () => ({ messages: mockMessages(), setMessages: mockSetMessages }),
+jest.mock('@copilotkit/react-core/v2', () => ({
+  useAgent: () => ({
+    agent: {
+      get messages() {
+        return mockMessages();
+      },
+      setMessages: mockSetMessages,
+    },
+  }),
 }));
 
 const persisted: AgUiMessage[] = [

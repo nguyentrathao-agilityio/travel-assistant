@@ -21,6 +21,18 @@ jest.mock('@copilotkit/react-core', () => ({
   CopilotKit: jest.fn(({ children }: { children: React.ReactNode }) => children),
 }));
 
+jest.mock('@copilotkit/react-core/v2', () => ({
+  useAgent: jest.fn(() => ({
+    agent: { messages: [], setMessages: jest.fn() },
+  })),
+  useCopilotKit: jest.fn(() => ({
+    copilotkit: {
+      interruptElement: null,
+      subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+    },
+  })),
+}));
+
 jest.mock('@/lib/langgraphClient', () => ({
   langgraphClient: {
     threads: {

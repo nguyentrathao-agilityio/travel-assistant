@@ -1,22 +1,8 @@
-import type { StructuredToolInterface } from '@langchain/core/tools';
-
-// Prompts
-import { HOTEL_BOOKING_AGENT_TOOLS_PROMPT } from '@/prompts';
-
-// Tools
-import { bookHotelTool } from '@/tools';
-
 // Utils
 import { createSpecializedAgent } from '@/utils';
 
-export const HOTEL_BOOKING_AGENT_TOOLS: StructuredToolInterface[] = [bookHotelTool];
+import { AGENT_CONFIGS } from '../config';
 
-export const hotelBookingAgent = createSpecializedAgent(
-  HOTEL_BOOKING_AGENT_TOOLS,
-  {
-    toolsSection: HOTEL_BOOKING_AGENT_TOOLS_PROMPT,
-    includeBookingRules: true,
-    includeBookingContext: true,
-  },
-  'bookHotel'
-);
+export const HOTEL_BOOKING_AGENT_TOOLS = AGENT_CONFIGS.bookHotel.tools;
+
+export const hotelBookingAgent = createSpecializedAgent(AGENT_CONFIGS.bookHotel);

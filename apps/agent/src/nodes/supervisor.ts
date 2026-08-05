@@ -5,23 +5,27 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import { ToolErrorSchema } from '@/schemas';
 
 // Constants
-import { MAX_RETRIES_PER_NODE, TOOL_NAMES } from '@/constants';
+import {
+  DOMAIN_AGENT_NODE_NAMES,
+  FINALIZATION_NODE_NAME,
+  MAX_RETRIES_PER_NODE,
+  TOOL_NAMES,
+  type DomainAgentNodeName,
+} from '@/constants';
+
+// Utils
+import { latestTurnToolMessages as latestTurnToolMessagesFromList } from '@/utils/domain-state/tool-messages';
 
 // State
 import type { GraphError, GraphStateType, GraphStateUpdate, SupervisorState } from '@/state';
 
 export type SupervisorRoute = NonNullable<SupervisorState['nextNode']>;
 export const SUPERVISOR_ROUTES: SupervisorRoute[] = [
-  'explore',
-  'plan',
-  'bookFlight',
-  'bookHotel',
-  'cancelBooking',
-  'general',
-  'saveMemory',
+  ...DOMAIN_AGENT_NODE_NAMES,
+  FINALIZATION_NODE_NAME,
 ];
 
-type DomainNode = Exclude<SupervisorRoute, 'saveMemory'>;
+type DomainNode = DomainAgentNodeName;
 type ValidationResult = {
   status: SupervisorState['status'];
   reason: string;
@@ -34,13 +38,8 @@ type ValidationResult = {
 const isErrorArtifact = (artifact: unknown): boolean =>
   typeof artifact === 'object' && artifact !== null && 'error' in artifact;
 
-const latestTurnToolMessages = (state: GraphStateType): ToolMessage[] => {
-  let cutoff = state.messages.length - 1;
-  while (cutoff >= 0 && state.messages[cutoff].getType() !== 'human') cutoff -= 1;
-  return state.messages
-    .slice(cutoff + 1)
-    .filter((message): message is ToolMessage => message instanceof ToolMessage);
-};
+const latestTurnToolMessages = (state: GraphStateType): ToolMessage[] =>
+  latestTurnToolMessagesFromList(state.messages);
 
 const latestResultPerTool = (state: GraphStateType): ToolMessage[] => {
   const seen = new Set<string>();

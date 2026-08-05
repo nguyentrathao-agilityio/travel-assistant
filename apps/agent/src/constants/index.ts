@@ -8,3 +8,4 @@ export * from './retry';
 export * from './memory';
 export * from './knowledge';
 export * from './tools';
+export * from './agents';

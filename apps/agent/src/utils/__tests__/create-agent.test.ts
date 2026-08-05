@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StructuredToolInterface } from '@langchain/core/tools';
+import type { SpecializedAgentConfig } from '@/agents/config';
 
 const {
   createAgentMock,
@@ -68,6 +69,12 @@ import { createSpecializedAgent } from '@/utils/create-agent';
 const FAKE_GRAPH = { id: 'compiled-graph' };
 const tools = ['tool-a', 'tool-b'] as unknown as StructuredToolInterface[];
 const sections = { toolsSection: 'Tools available: none.' };
+const config = (overrides: Partial<SpecializedAgentConfig> = {}): SpecializedAgentConfig => ({
+  name: 'general',
+  tools,
+  prompt: sections,
+  ...overrides,
+});
 
 beforeEach(() => {
   createAgentMock.mockReturnValue({ graph: FAKE_GRAPH });
@@ -79,7 +86,7 @@ afterEach(() => {
 
 describe('createSpecializedAgent', () => {
   it('wires the model, tools, state schema, and middleware stack into createAgent', () => {
-    const graph = createSpecializedAgent(tools, sections, 'general');
+    const graph = createSpecializedAgent(config());
 
     expect(graph).toBe(FAKE_GRAPH);
     expect(createAgentMock).toHaveBeenCalledTimes(1);
@@ -99,7 +106,9 @@ describe('createSpecializedAgent', () => {
   it('includes remembered preferences in the system prompt when includeMemoryContext is set', async () => {
     searchMemoriesMock.mockResolvedValueOnce(['likes window seats']);
 
-    createSpecializedAgent(tools, { ...sections, includeMemoryContext: true }, 'plan');
+    createSpecializedAgent(
+      config({ name: 'plan', prompt: { ...sections, includeMemoryContext: true } })
+    );
     const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[3].fn;
 
     const fakeState = { messages: [] };
@@ -114,7 +123,7 @@ describe('createSpecializedAgent', () => {
   });
 
   it('skips memory lookup and passes an empty memories list when includeMemoryContext is not set', async () => {
-    createSpecializedAgent(tools, sections, 'general');
+    createSpecializedAgent(config());
     const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[3].fn;
 
     const fakeState = { messages: [] };

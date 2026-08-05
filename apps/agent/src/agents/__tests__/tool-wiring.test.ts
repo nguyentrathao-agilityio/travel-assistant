@@ -8,10 +8,21 @@ import {
   HOTEL_BOOKING_AGENT_TOOLS,
   PLANNING_AGENT_TOOLS,
 } from '..';
+import { AGENT_CONFIGS } from '../config';
 
 const nameOf = (tools: { name: string }[]) => tools.map((tool) => tool.name).sort();
 
 describe('specialized agent tool wiring', () => {
+  it('keeps every domain agent in one typed configuration registry', () => {
+    expect(Object.keys(AGENT_CONFIGS).sort()).toEqual(
+      ['explore', 'plan', 'bookFlight', 'bookHotel', 'cancelBooking', 'general'].sort()
+    );
+    for (const [name, config] of Object.entries(AGENT_CONFIGS)) {
+      expect(config.name).toBe(name);
+      expect(config.prompt.toolsSection).toBeTruthy();
+    }
+  });
+
   it('binds discovery tools to explore and multi-domain search tools to planning', () => {
     expect(nameOf(EXPLORE_AGENT_TOOLS)).toEqual(
       ['destinationExplorerTool', 'knowledgeSearchTool', 'localTipsTool', 'placesTool'].sort()

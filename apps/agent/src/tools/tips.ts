@@ -2,21 +2,14 @@ import { tool } from '@langchain/core/tools';
 
 import { getLocalTips } from '../services/tips';
 import { TipsInputSchema } from '../schemas/tips';
-import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
+import { executeReadTool } from '../utils/tool-contract';
 
 export const tipsTool = tool(
-  async (input) => {
-    try {
-      const result = await getLocalTips(input);
-      return contentAndArtifact(result);
-    } catch (error) {
-      return contentAndArtifact({
-        error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.LOCAL_TIPS,
-      });
-    }
-  },
+  async (input) =>
+    executeReadTool(getLocalTips(input), 'travel-api', TOOL_ERROR_MESSAGES.LOCAL_TIPS),
   {
-    name: 'localTipsTool',
+    name: TOOL_NAMES.LOCAL_TIPS,
     description: `Get informal, practical local tips for a city or country — covering transport, money, street safety, culture, food, connectivity, health, etiquette, best time to visit, and language.
     Do NOT use for visa/entry/immigration, required documents, official sources, knowledge-base
     questions, or general safety/planning principles; use knowledgeSearchTool for those.

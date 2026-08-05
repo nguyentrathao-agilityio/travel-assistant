@@ -2,21 +2,14 @@ import { tool } from '@langchain/core/tools';
 
 import { getTripSummary } from '../services/trip-summary';
 import { TripSummaryInputSchema } from '../schemas/trip-summary';
-import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
+import { executeReadTool } from '../utils/tool-contract';
 
 export const tripSummaryTool = tool(
-  async (input) => {
-    try {
-      const result = await getTripSummary(input);
-      return contentAndArtifact(result);
-    } catch (error) {
-      return contentAndArtifact({
-        error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.TRIP_SUMMARY,
-      });
-    }
-  },
+  async (input) =>
+    executeReadTool(getTripSummary(input), 'travel-api', TOOL_ERROR_MESSAGES.TRIP_SUMMARY),
   {
-    name: 'tripSummaryTool',
+    name: TOOL_NAMES.TRIP_SUMMARY,
     description: `Generate a full trip summary — cheapest flight + highest-rated hotel + landmark route + cost estimate in one unified result.
     Rules:
       - Use this as the SINGLE entry point for any full trip / itinerary / travel schedule request.

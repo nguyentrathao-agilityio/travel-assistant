@@ -26,9 +26,13 @@ export const PLANNING_AGENT_TOOLS: StructuredToolInterface[] = [
   transferToBookHotelTool,
 ];
 
-export const planningAgent = createSpecializedAgent(PLANNING_AGENT_TOOLS, {
-  toolsSection: PLANNING_AGENT_TOOLS_PROMPT,
-  includeBookingRules: true,
-  includeBookingContext: true,
-  includeMemoryContext: true,
-});
+export const planningAgent = createSpecializedAgent(
+  PLANNING_AGENT_TOOLS,
+  {
+    toolsSection: PLANNING_AGENT_TOOLS_PROMPT,
+    includeBookingRules: true,
+    includeBookingContext: true,
+    includeMemoryContext: true,
+  },
+  'plan'
+);

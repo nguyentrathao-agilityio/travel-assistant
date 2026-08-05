@@ -13,6 +13,13 @@ describe('RAG routing instructions', () => {
     expect(CLASSIFY_SYSTEM_PROMPT).toContain('"knowledge base"');
   });
 
+  it('routes a destination-less weather/search request to plan instead of general', () => {
+    expect(CLASSIFY_SYSTEM_PROMPT).toContain('is still plan even when it');
+    expect(CLASSIFY_SYSTEM_PROMPT).toContain(
+      'do not fall back to general just because a field is missing'
+    );
+  });
+
   it('requires retrieval and refuses to invent details missing from the corpus', () => {
     expect(EXPLORE_AGENT_TOOLS_PROMPT).toContain('MUST call knowledgeSearchTool');
     expect(EXPLORE_AGENT_TOOLS_PROMPT).toContain('knowledge base is insufficient');
@@ -40,9 +47,11 @@ describe('RAG routing instructions', () => {
   });
 
   it('forbids batching knowledgeSearchTool with a returnDirect tool in the same turn', () => {
-    expect(EXPLORE_AGENT_TOOLS_PROMPT).toContain('Never call knowledgeSearchTool in the same turn');
+    expect(EXPLORE_AGENT_TOOLS_PROMPT).toContain(
+      'Never call knowledgeSearchTool in the same model step'
+    );
     expect(PLANNING_AGENT_TOOLS_PROMPT).toContain(
-      'Never call knowledgeSearchTool in the same turn'
+      'Never call knowledgeSearchTool in the same model step'
     );
   });
 });

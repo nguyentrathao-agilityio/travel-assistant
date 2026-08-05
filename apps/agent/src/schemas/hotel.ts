@@ -1,12 +1,13 @@
 import { z } from 'zod';
 
-import { isValidIsoDate, todayIso, stripNulls } from '../utils';
+import { isValidIsoDate, todayIso } from '../utils/date';
+import { stripNulls } from '../utils/schema';
 
 export const HotelInputSchema = z.preprocess(
   stripNulls,
   z
     .object({
-      city: z.string().describe('City name to search, e.g. "Da Nang" or "Bangkok"'),
+      city: z.string().trim().min(1).describe('City name to search, e.g. "Da Nang" or "Bangkok"'),
       checkIn: z
         .string()
         .refine(isValidIsoDate, 'Must be a valid YYYY-MM-DD date')
@@ -23,7 +24,7 @@ export const HotelInputSchema = z.preprocess(
         .optional()
         .default(1)
         .describe('Number of rooms needed'),
-      adults: z.number().int().min(1).max(20).optional().default(0).describe('Number of adults'),
+      adults: z.number().int().min(1).max(20).optional().default(2).describe('Number of adults'),
       children: z.number().int().min(0).optional().default(0).describe('Number of children'),
       availableOnly: z.boolean().optional().default(true).describe('Only return available hotels'),
       minStars: z.number().int().min(1).max(5).optional().describe('Minimum star rating (1-5)'),

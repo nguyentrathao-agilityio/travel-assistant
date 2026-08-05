@@ -54,7 +54,14 @@ describe('weatherTool', () => {
 
     const result = artifactOf(await weatherTool.invoke(toolCall(weatherTool.name, input)));
 
-    expect(result).toEqual({ error: 'provider timeout' });
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: 'provider timeout',
+        code: 'TIMEOUT',
+        retryable: true,
+        provider: 'weather-api',
+      })
+    );
   });
 
   it('falls back to the generic weather error message for a non-Error throw', async () => {
@@ -62,9 +69,11 @@ describe('weatherTool', () => {
 
     const result = artifactOf(await weatherTool.invoke(toolCall(weatherTool.name, input)));
 
-    expect(result).toEqual({
-      error:
-        "Weather data isn't available for that location right now. Please try again in a moment.",
-    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        error:
+          "Weather data isn't available for that location right now. Please try again in a moment.",
+      })
+    );
   });
 });

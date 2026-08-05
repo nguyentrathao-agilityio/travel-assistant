@@ -34,7 +34,7 @@ export const getPlaces = async (
     Object.entries({
       city: input.city,
       category: input.category,
-      min_rating: input.min_rating,
+      min_rating: input.min_rating?.toString(),
       price_level: input.price_level?.toString(),
       recommended: input.recommended ? 'true' : undefined,
       sort: input.sort ?? 'rating_desc',

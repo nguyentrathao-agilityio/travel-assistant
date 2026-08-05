@@ -2,21 +2,13 @@ import { tool } from '@langchain/core/tools';
 
 import { searchFlights } from '../services/flights';
 import { FlightInputSchema } from '../schemas/flights';
-import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
+import { executeReadTool } from '../utils/tool-contract';
 
 export const flightsTool = tool(
-  async (input) => {
-    try {
-      const result = await searchFlights(input);
-      return contentAndArtifact(result);
-    } catch (error) {
-      return contentAndArtifact({
-        error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.FLIGHTS,
-      });
-    }
-  },
+  async (input) => executeReadTool(searchFlights(input), 'travel-api', TOOL_ERROR_MESSAGES.FLIGHTS),
   {
-    name: 'flightsTool',
+    name: TOOL_NAMES.FLIGHTS,
     description: `Search available flights between two airports on a given date.
     Required:
       - origin (IATA 3-letter code)

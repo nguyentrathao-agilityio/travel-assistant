@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const WeatherInputSchema = z.object({
-  city: z.string().describe('City name to look up, e.g. "Da Nang" or "Bangkok"'),
+  city: z.string().trim().min(1).describe('City name to look up, e.g. "Da Nang" or "Bangkok"'),
   days: z
     .number()
     .int()

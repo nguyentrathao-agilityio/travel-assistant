@@ -53,7 +53,14 @@ describe('placesTool', () => {
 
     const result = artifactOf(await placesTool.invoke(toolCall(placesTool.name, input)));
 
-    expect(result).toEqual({ error: 'provider unavailable' });
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: 'provider unavailable',
+        code: 'PROVIDER_UNAVAILABLE',
+        retryable: true,
+        provider: 'travel-api',
+      })
+    );
   });
 
   it('falls back to the generic places error message for a non-Error throw', async () => {
@@ -61,8 +68,10 @@ describe('placesTool', () => {
 
     const result = artifactOf(await placesTool.invoke(toolCall(placesTool.name, input)));
 
-    expect(result).toEqual({
-      error: "Couldn't load places for that destination. Please try again.",
-    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: "Couldn't load places for that destination. Please try again.",
+      })
+    );
   });
 });

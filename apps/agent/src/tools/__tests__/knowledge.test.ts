@@ -57,7 +57,13 @@ describe('knowledgeSearchTool', () => {
 
     const result = JSON.parse(await knowledgeSearchTool.invoke(input));
 
-    expect(result).toEqual({ error: 'embedding provider unavailable' });
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: 'embedding provider unavailable',
+        code: 'PROVIDER_UNAVAILABLE',
+        provider: 'knowledge-store',
+      })
+    );
   });
 
   it('falls back to the generic knowledge error message for a non-Error throw', async () => {
@@ -65,8 +71,10 @@ describe('knowledgeSearchTool', () => {
 
     const result = JSON.parse(await knowledgeSearchTool.invoke(input));
 
-    expect(result).toEqual({
-      error: "Couldn't search the knowledge base right now. Please try again.",
-    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: "Couldn't search the knowledge base right now. Please try again.",
+      })
+    );
   });
 });

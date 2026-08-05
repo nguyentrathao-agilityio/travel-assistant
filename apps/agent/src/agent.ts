@@ -10,7 +10,14 @@ import {
   hotelBookingAgent,
   planningAgent,
 } from './agents';
-import { BRANCH_NAMES, classifyNode, routeAfterPlanning, saveMemoryNode } from './nodes';
+import {
+  BRANCH_NAMES,
+  SUPERVISOR_ROUTES,
+  classifyNode,
+  routeAfterSupervisor,
+  saveMemoryNode,
+  supervisorNode,
+} from './nodes';
 import { GraphState } from './state';
 
 export const buildGraph = () =>
@@ -27,14 +34,16 @@ export const buildGraph = () =>
     .addNode('bookHotel', hotelBookingAgent)
     .addNode('cancelBooking', cancelBookingAgent)
     .addNode('general', generalAgent)
+    .addNode('supervise', supervisorNode)
     .addNode('saveMemory', saveMemoryNode)
     .addEdge(START, 'classify')
-    .addEdge('explore', 'saveMemory')
-    .addConditionalEdges('plan', routeAfterPlanning, ['bookFlight', 'bookHotel', 'saveMemory'])
-    .addEdge('bookFlight', 'saveMemory')
-    .addEdge('bookHotel', 'saveMemory')
-    .addEdge('cancelBooking', 'saveMemory')
-    .addEdge('general', 'saveMemory')
+    .addEdge('explore', 'supervise')
+    .addEdge('plan', 'supervise')
+    .addEdge('bookFlight', 'supervise')
+    .addEdge('bookHotel', 'supervise')
+    .addEdge('cancelBooking', 'supervise')
+    .addEdge('general', 'supervise')
+    .addConditionalEdges('supervise', routeAfterSupervisor, SUPERVISOR_ROUTES)
     .addEdge('saveMemory', END);
 
 export const graph = buildGraph().compile({

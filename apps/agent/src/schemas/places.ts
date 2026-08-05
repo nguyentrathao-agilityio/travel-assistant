@@ -19,11 +19,16 @@ export const PlacesSortSchema = z.enum([
 ]);
 
 export const PlacesInputSchema = z.object({
-  city: z.string().optional().describe('City name, e.g. "Da Nang" or "Hanoi"'),
+  city: z.string().trim().min(1).describe('City name, e.g. "Da Nang" or "Hanoi"'),
   category: PlacesCategorySchema.optional().describe(
     'Filter by place category: attraction, restaurant, cafe, activity, nightlife, shopping'
   ),
-  min_rating: z.string().optional().describe('Minimum rating 0-5; omit for no filter'),
+  min_rating: z.coerce
+    .number()
+    .min(0)
+    .max(5)
+    .optional()
+    .describe('Minimum rating 0-5; omit for no filter'),
   price_level: z
     .number()
     .int()
@@ -33,8 +38,8 @@ export const PlacesInputSchema = z.object({
     .describe('Price level filter: 1=free/cheap … 4=luxury'),
   recommended: z.boolean().optional().describe('Return only editor-recommended places'),
   sort: PlacesSortSchema.optional().describe('Sort order'),
-  limit: z.number().int().optional(),
-  offset: z.number().int().optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+  offset: z.number().int().min(0).optional(),
 });
 
 export const ApiPlaceSchema = z.object({

@@ -10,8 +10,10 @@
     "dev": "tsc && tsc-alias && langgraphjs dev --port 8123 --no-browser",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:integration": "vitest run src/__tests__/graph-integration.test.ts",
     "test:watch": "vitest",
-    "test:evals": "dotenv -e .env -- vitest run -c vitest.config.evals.ts"
+    "test:evals": "vitest run src/evals/__tests__/regression-cases.test.ts",
+    "test:evals:live": "dotenv -e .env -- vitest run -c vitest.config.evals.ts"
   },
   "dependencies": {
     "@ag-ui/client": "^0.0.53",
@@ -33,7 +35,6 @@
   },
   "devDependencies": {
     "@langchain/langgraph-cli": "^1.4.3",
-    "@repo/constants": "workspace:*",
     "@repo/schemas": "workspace:*",
     "@repo/types": "workspace:*",
     "@repo/typescript-config": "workspace:*",

@@ -11,6 +11,10 @@ export const EXPLORE_AGENT_TOOLS: StructuredToolInterface[] = [
   knowledgeSearchTool,
 ];
 
-export const exploreAgent = createSpecializedAgent(EXPLORE_AGENT_TOOLS, {
-  toolsSection: EXPLORE_AGENT_TOOLS_PROMPT,
-});
+export const exploreAgent = createSpecializedAgent(
+  EXPLORE_AGENT_TOOLS,
+  {
+    toolsSection: EXPLORE_AGENT_TOOLS_PROMPT,
+  },
+  'explore'
+);

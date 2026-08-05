@@ -48,7 +48,7 @@ describe('routeTool', () => {
 
     const result = artifactOf(await routeTool.invoke(toolCall(routeTool.name, input)));
 
-    expect(result).toEqual({ error: 'no landmarks found' });
+    expect(result).toEqual(expect.objectContaining({ error: 'no landmarks found' }));
   });
 
   it('falls back to the generic route error message for a non-Error throw', async () => {
@@ -56,8 +56,10 @@ describe('routeTool', () => {
 
     const result = artifactOf(await routeTool.invoke(toolCall(routeTool.name, input)));
 
-    expect(result).toEqual({
-      error: "Couldn't build a route for that city. Please try again.",
-    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: "Couldn't build a route for that city. Please try again.",
+      })
+    );
   });
 });

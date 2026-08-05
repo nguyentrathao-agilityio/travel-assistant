@@ -2,21 +2,14 @@ import { tool } from '@langchain/core/tools';
 
 import { getWeather } from '../services/weather';
 import { WeatherInputSchema } from '../schemas/weather';
-import { contentAndArtifact, TOOL_ERROR_MESSAGES } from '../constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
+import { executeReadTool } from '../utils/tool-contract';
 
 export const weatherTool = tool(
-  async ({ city, days }) => {
-    try {
-      const result = await getWeather({ city, days });
-      return contentAndArtifact(result);
-    } catch (error) {
-      return contentAndArtifact({
-        error: error instanceof Error ? error.message : TOOL_ERROR_MESSAGES.WEATHER,
-      });
-    }
-  },
+  async ({ city, days }) =>
+    executeReadTool(getWeather({ city, days }), 'weather-api', TOOL_ERROR_MESSAGES.WEATHER),
   {
-    name: 'weatherTool',
+    name: TOOL_NAMES.WEATHER,
     description: `Get current weather conditions and forecast for a destination.
     Required: city.
     Optional: days (1-16, defaults to 5).

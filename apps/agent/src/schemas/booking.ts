@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import { isValidIsoDate, stripNulls } from '../utils';
+import { isValidIsoDate } from '../utils/date';
+import { stripNulls } from '../utils/schema';
 
 const ContactSchema = z.object({
   customerName: z.string().trim().min(1),
@@ -70,8 +71,9 @@ export const BookingSchema = z.object({
 });
 
 export const BookingApprovalResponseSchema = z.object({
-  decision: z.enum(['approve', 'reject']),
+  decision: z.enum(['approve', 'edit', 'reject']),
   approvalId: z.string().min(1),
+  edits: z.record(z.union([z.string(), z.number()])).optional(),
 });
 
 export type FlightBookingInput = z.infer<typeof FlightBookingInputSchema>;

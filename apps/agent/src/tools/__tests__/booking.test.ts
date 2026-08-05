@@ -136,6 +136,25 @@ describe('bookFlightTool', () => {
     expect(result).toEqual({ id: 'booking-1' });
   });
 
+  it('does not retry an uncertain provider timeout after the write request', async () => {
+    getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(baseFlight);
+    interruptMock.mockImplementationOnce(approvalResponse('approve'));
+    submitFlightBookingMock.mockRejectedValueOnce(new Error('Provider timeout'));
+
+    const result = artifactOf<{ error: string }>(
+      await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: 'Provider timeout',
+        code: 'TIMEOUT',
+        retryable: false,
+      })
+    );
+    expect(submitFlightBookingMock).toHaveBeenCalledTimes(1);
+  });
+
   it('asks for approval again when the price changed after the first approval', async () => {
     const changedFlight = { ...baseFlight, price: 150 };
     getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(changedFlight);
@@ -175,6 +194,22 @@ describe('bookFlightTool', () => {
     );
 
     expect(result).toEqual({ status: 'rejected', type: 'flight' });
+    expect(submitFlightBookingMock).not.toHaveBeenCalled();
+  });
+
+  it('returns requested edits without executing a booking write', async () => {
+    getFlightMock.mockResolvedValueOnce(baseFlight);
+    interruptMock.mockImplementationOnce((request: { approvalId: string }) => ({
+      decision: 'edit',
+      approvalId: request.approvalId,
+      edits: { adults: 2 },
+    }));
+
+    const result = artifactOf<{ status: string; edits: { adults: number } }>(
+      await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
+    );
+
+    expect(result).toEqual({ status: 'edit_requested', type: 'flight', edits: { adults: 2 } });
     expect(submitFlightBookingMock).not.toHaveBeenCalled();
   });
 

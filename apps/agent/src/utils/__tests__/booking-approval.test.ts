@@ -13,7 +13,7 @@ import {
   withApprovalId,
 } from '../booking-approval';
 
-const baseRequest: Omit<BookingApprovalRequest, 'approvalId'> = {
+const baseRequest: Omit<BookingApprovalRequest, 'approvalId' | 'draftId'> = {
   type: 'booking_approval',
   action: 'create_flight_booking',
   title: 'Confirm flight booking',
@@ -43,7 +43,11 @@ describe('withApprovalId', () => {
   it('preserves all original request fields alongside the derived approvalId', () => {
     const withId = withApprovalId(baseRequest);
 
-    expect(withId).toEqual({ ...baseRequest, approvalId: withId.approvalId });
+    expect(withId).toEqual({
+      ...baseRequest,
+      approvalId: withId.approvalId,
+      draftId: withId.approvalId,
+    });
     expect(withId.approvalId.length).toBeGreaterThan(0);
   });
 });
@@ -54,7 +58,7 @@ describe('requestBookingApproval', () => {
   it('returns true when the response approves the current approvalId', () => {
     interruptMock.mockReturnValueOnce({ decision: 'approve', approvalId: request.approvalId });
 
-    expect(requestBookingApproval(request)).toBe(true);
+    expect(requestBookingApproval(request).decision).toBe('approve');
     expect(interruptMock).toHaveBeenCalledTimes(1);
     expect(interruptMock).toHaveBeenCalledWith(request);
   });
@@ -62,7 +66,7 @@ describe('requestBookingApproval', () => {
   it('returns false when the response rejects', () => {
     interruptMock.mockReturnValueOnce({ decision: 'reject', approvalId: request.approvalId });
 
-    expect(requestBookingApproval(request)).toBe(false);
+    expect(requestBookingApproval(request).decision).toBe('reject');
   });
 
   it('re-requests approval when the first response references a stale approvalId, then approves', () => {
@@ -70,7 +74,7 @@ describe('requestBookingApproval', () => {
       .mockReturnValueOnce({ decision: 'approve', approvalId: 'stale-quote' })
       .mockReturnValueOnce({ decision: 'approve', approvalId: request.approvalId });
 
-    expect(requestBookingApproval(request)).toBe(true);
+    expect(requestBookingApproval(request).decision).toBe('approve');
     expect(interruptMock).toHaveBeenCalledTimes(2);
   });
 
@@ -79,7 +83,7 @@ describe('requestBookingApproval', () => {
       .mockReturnValueOnce({ decision: 'approve', approvalId: 'stale-quote' })
       .mockReturnValueOnce({ decision: 'reject', approvalId: 'stale-quote' });
 
-    expect(requestBookingApproval(request)).toBe(false);
+    expect(requestBookingApproval(request).decision).toBe('reject');
     expect(interruptMock).toHaveBeenCalledTimes(2);
   });
 
@@ -95,19 +99,38 @@ describe('requestBookingApproval', () => {
       JSON.stringify({ decision: 'approve', approvalId: request.approvalId })
     );
 
-    expect(requestBookingApproval(request)).toBe(true);
+    expect(requestBookingApproval(request).decision).toBe('approve');
+  });
+
+  it('validates and returns an edit resume command without approving the write', () => {
+    interruptMock.mockReturnValueOnce({
+      decision: 'edit',
+      approvalId: request.approvalId,
+      edits: { adults: 2 },
+    });
+
+    expect(requestBookingApproval(request)).toEqual({
+      decision: 'edit',
+      approvalId: request.approvalId,
+      edits: { adults: 2 },
+    });
   });
 });
 
 describe('bookingToolError', () => {
   it('uses the Error message when the caught value is an Error', () => {
-    expect(bookingToolError(new Error('seats no longer available'), 'fallback')).toEqual({
-      error: 'seats no longer available',
-    });
+    expect(bookingToolError(new Error('seats no longer available'), 'fallback')).toEqual(
+      expect.objectContaining({
+        error: 'seats no longer available',
+        retryable: false,
+      })
+    );
   });
 
   it('falls back to the provided message for a non-Error throw', () => {
-    expect(bookingToolError('boom', 'fallback message')).toEqual({ error: 'fallback message' });
+    expect(bookingToolError('boom', 'fallback message')).toEqual(
+      expect.objectContaining({ error: 'fallback message' })
+    );
   });
 });
 

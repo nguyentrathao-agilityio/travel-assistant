@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools';
 import type { BookingApprovalRequest } from '@repo/types';
 
-import { TOOL_ERROR_MESSAGES } from '../../constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../../constants';
 import { HotelBookingInputSchema } from '../../schemas';
 import { revalidateHotel, submitHotelBooking } from '../../services';
 import {
@@ -10,6 +10,7 @@ import {
   requestBookingApproval,
   withApprovalId,
 } from '../../utils/booking-approval';
+import { withToolTimeout } from '../../utils/tool-contract';
 
 type Hotel = Awaited<ReturnType<typeof revalidateHotel>>;
 
@@ -41,7 +42,7 @@ const buildHotelApprovalRequest = (
     },
     totalPrice: hotel.total_price,
     currency: hotel.currency,
-    allowedDecisions: ['approve', 'reject'],
+    allowedDecisions: ['approve', 'edit', 'reject'],
   });
 
 const hotelChanged = (a: Hotel, b: Hotel): boolean =>
@@ -53,31 +54,36 @@ export const bookHotelTool = tool(
   async (input) => {
     let hotel: Hotel;
     try {
-      hotel = await revalidateHotel(input);
+      hotel = await withToolTimeout(revalidateHotel(input));
     } catch (error) {
       return formatBookingToolResult(bookingToolError(error, TOOL_ERROR_MESSAGES.HOTEL_BOOKING));
     }
 
-    if (!requestBookingApproval(buildHotelApprovalRequest(hotel, input))) {
-      return formatBookingToolResult({ status: 'rejected', type: 'hotel' });
+    const approval = requestBookingApproval(buildHotelApprovalRequest(hotel, input));
+    if (approval.decision !== 'approve') {
+      return formatBookingToolResult({
+        status: approval.decision === 'edit' ? 'edit_requested' : 'rejected',
+        type: 'hotel',
+        ...(approval.edits && { edits: approval.edits }),
+      });
     }
 
     try {
-      const fresh = await revalidateHotel(input);
+      const fresh = await withToolTimeout(revalidateHotel(input));
       if (
         hotelChanged(fresh, hotel) &&
-        !requestBookingApproval(buildHotelApprovalRequest(fresh, input))
+        requestBookingApproval(buildHotelApprovalRequest(fresh, input)).decision !== 'approve'
       ) {
         return formatBookingToolResult({ status: 'rejected', type: 'hotel' });
       }
 
-      return formatBookingToolResult(await submitHotelBooking(input));
+      return formatBookingToolResult(await withToolTimeout(submitHotelBooking(input)));
     } catch (error) {
       return formatBookingToolResult(bookingToolError(error, TOOL_ERROR_MESSAGES.HOTEL_BOOKING));
     }
   },
   {
-    name: 'bookHotelTool',
+    name: TOOL_NAMES.BOOK_HOTEL,
     description: `Create a real booking in the configured travel API for the user's selected hotel.
     Only call after the user selected a hotel and supplied stay dates, party size, guest name, email,
     and phone. This tool revalidates availability, always pauses for explicit human approval, and

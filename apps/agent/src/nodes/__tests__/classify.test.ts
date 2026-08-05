@@ -2,19 +2,19 @@ import { describe, expect, it, vi } from 'vitest';
 
 const { invokeMock } = vi.hoisted(() => ({ invokeMock: vi.fn() }));
 
-vi.mock('../../infrastructure/llm', () => ({
+vi.mock('@/infrastructure/llm', () => ({
   createChatModel: () => ({
     withStructuredOutput: () => ({ invoke: invokeMock }),
   }),
 }));
 
-import { classifyNode } from '../classify';
+import { classifyNode } from '@/nodes/classify';
 import {
   mergeRequest,
   type GraphStateType,
   type GraphStateUpdate,
   type TravelRequest,
-} from '../../state';
+} from '@/state';
 
 const state = (overrides: Partial<GraphStateType> = {}): GraphStateType =>
   ({ messages: [], ...overrides }) as GraphStateType;

@@ -6,7 +6,7 @@ import type {
   ResponseHookContext,
 } from '@copilotkit/runtime/v2';
 
-import { createCopilotKitHooks } from '../hooks';
+import { createCopilotKitHooks } from '@/api/hooks';
 
 const REQUEST_START_HEADER_NAME = 'x-cpk-request-start';
 

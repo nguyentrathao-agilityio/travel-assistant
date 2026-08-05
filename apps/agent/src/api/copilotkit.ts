@@ -7,7 +7,10 @@ import {
 import { LangGraphAgent } from '@copilotkit/runtime/langgraph';
 import type { Assistant } from '@langchain/langgraph-sdk';
 
-import { LANGGRAPH_DEPLOYMENT_URL } from '../constants';
+// Constants
+import { LANGGRAPH_DEPLOYMENT_URL } from '@/constants';
+
+// API
 import { createCopilotKitHooks } from './hooks';
 
 // Resolve assistants by graph ID, then fall back to the default lookup.

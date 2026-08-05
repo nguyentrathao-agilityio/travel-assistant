@@ -1,9 +1,16 @@
 import { tool } from '@langchain/core/tools';
 
-import { KnowledgeSearchInputSchema } from '../schemas/knowledge';
-import { searchKnowledge } from '../knowledge';
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
-import { mapToolError, withToolTimeout } from '../utils/tool-contract';
+// Schemas
+import { KnowledgeSearchInputSchema } from '@/schemas/knowledge';
+
+// Constants
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+
+// Knowledge
+import { searchKnowledge } from '@/knowledge';
+
+// Utils
+import { mapToolError, withToolTimeout } from '@/utils/tool-contract';
 
 export const knowledgeSearchTool = tool(
   async (input) => {

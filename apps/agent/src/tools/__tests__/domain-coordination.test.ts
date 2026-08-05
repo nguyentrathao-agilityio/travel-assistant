@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { flightsTool } from '../flights';
-import { hotelTool } from '../hotel';
-import { placesTool } from '../places';
-import { weatherTool } from '../weather';
-import { routeTool } from '../route';
-import { tipsTool } from '../tips';
-import { tripSummaryTool } from '../trip-summary';
-import { destinationExplorerTool } from '../destination-explorer';
-import { bookFlightTool, bookHotelTool, cancelBookingTool } from '../booking';
+import { flightsTool } from '@/tools/flights';
+import { hotelTool } from '@/tools/hotel';
+import { placesTool } from '@/tools/places';
+import { weatherTool } from '@/tools/weather';
+import { routeTool } from '@/tools/route';
+import { tipsTool } from '@/tools/tips';
+import { tripSummaryTool } from '@/tools/trip-summary';
+import { destinationExplorerTool } from '@/tools/destination-explorer';
+import { bookFlightTool, bookHotelTool, cancelBookingTool } from '@/tools/booking';
 
 describe('multi-domain search coordination', () => {
   it.each([

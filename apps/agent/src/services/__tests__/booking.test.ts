@@ -5,7 +5,7 @@ import {
   revalidateHotel,
   submitFlightBooking,
   submitHotelBooking,
-} from '../booking';
+} from '@/services/booking';
 
 const flight = {
   id: 'FL_DAD_SGN_20260730_01',

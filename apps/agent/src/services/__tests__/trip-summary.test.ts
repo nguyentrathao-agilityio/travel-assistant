@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const createMock = vi.fn();
-vi.mock('../../infrastructure/llm', () => ({
+vi.mock('@/infrastructure/llm', () => ({
   getOpenAIClient: () => ({ responses: { create: createMock } }),
   OPENAI_CLIENT_MODEL: 'gpt-4o-mini',
 }));
@@ -9,13 +9,15 @@ vi.mock('../../infrastructure/llm', () => ({
 const searchFlightsMock = vi.fn();
 const searchHotelsMock = vi.fn();
 const getRouteMock = vi.fn();
-vi.mock('../flights', () => ({
+vi.mock('@/services/flights', () => ({
   searchFlights: (...args: unknown[]) => searchFlightsMock(...args),
 }));
-vi.mock('../hotel', () => ({ searchHotels: (...args: unknown[]) => searchHotelsMock(...args) }));
-vi.mock('../route', () => ({ getRoute: (...args: unknown[]) => getRouteMock(...args) }));
+vi.mock('@/services/hotel', () => ({
+  searchHotels: (...args: unknown[]) => searchHotelsMock(...args),
+}));
+vi.mock('@/services/route', () => ({ getRoute: (...args: unknown[]) => getRouteMock(...args) }));
 
-import { getTripSummary } from '../trip-summary';
+import { getTripSummary } from '@/services/trip-summary';
 
 const flight = {
   id: 'FL1',

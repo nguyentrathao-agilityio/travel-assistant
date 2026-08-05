@@ -1,9 +1,16 @@
 import { tool } from '@langchain/core/tools';
 
-import { getDestinationExplorer } from '../services/destination-explorer';
-import { DestinationExplorerInputSchema } from '../schemas/destination-explorer';
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
-import { executeReadTool } from '../utils/tool-contract';
+// Schemas
+import { DestinationExplorerInputSchema } from '@/schemas/destination-explorer';
+
+// Constants
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+
+// Services
+import { getDestinationExplorer } from '@/services/destination-explorer';
+
+// Utils
+import { executeReadTool } from '@/utils/tool-contract';
 
 export const destinationExplorerTool = tool(
   async (input) =>

@@ -1,3 +1,4 @@
+// State
 import type { GraphStateType } from './graph-state';
 
 /** Fills fields absent from checkpoints created before explicit business state was introduced. */

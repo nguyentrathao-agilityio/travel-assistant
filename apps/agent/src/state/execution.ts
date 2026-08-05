@@ -1,5 +1,7 @@
 import { z } from 'zod';
-import { PlanningOperationSchema } from '../schemas/intent';
+
+// Schemas
+import { PlanningOperationSchema } from '@/schemas/intent';
 
 export const GraphErrorCodeSchema = z.enum([
   'VALIDATION_ERROR',

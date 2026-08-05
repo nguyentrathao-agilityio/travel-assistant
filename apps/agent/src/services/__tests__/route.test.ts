@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { getRoute } from '../route';
+import { getRoute } from '@/services/route';
 
 const place = (id: string, name: string) => ({
   id,

@@ -1,15 +1,22 @@
 import { z } from 'zod';
 
-import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '../infrastructure/llm';
-import { daysBetween, todayIso } from '../utils/date';
-import { searchFlights } from './flights';
-import { searchHotels } from './hotel';
-import { getRoute } from './route';
+// Schemas
 import {
   TripCostEstimateSchema,
   TripSummaryInputSchema,
   TripSummaryResultSchema,
-} from '../schemas/trip-summary';
+} from '@/schemas/trip-summary';
+
+// Services
+import { searchFlights } from './flights';
+import { searchHotels } from './hotel';
+import { getRoute } from './route';
+
+// Infrastructure
+import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
+
+// Utils
+import { daysBetween, todayIso } from '@/utils/date';
 
 type DailyRates = { food: number; activities: number; transport: number };
 

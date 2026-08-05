@@ -2,11 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const getRouteMock = vi.fn();
 
-vi.mock('../../services/route', () => ({
+vi.mock('@/services/route', () => ({
   getRoute: (...args: unknown[]) => getRouteMock(...args),
 }));
 
-import { routeTool } from '../route';
+import { routeTool } from '@/tools/route';
 
 const toolCall = (name: string, args: object) => ({
   name,

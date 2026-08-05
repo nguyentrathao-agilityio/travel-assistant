@@ -1,9 +1,16 @@
 import { tool } from '@langchain/core/tools';
 
-import { getLocalTips } from '../services/tips';
-import { TipsInputSchema } from '../schemas/tips';
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
-import { executeReadTool } from '../utils/tool-contract';
+// Schemas
+import { TipsInputSchema } from '@/schemas/tips';
+
+// Constants
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+
+// Services
+import { getLocalTips } from '@/services/tips';
+
+// Utils
+import { executeReadTool } from '@/utils/tool-contract';
 
 export const tipsTool = tool(
   async (input) =>

@@ -1,9 +1,16 @@
 import { tool } from '@langchain/core/tools';
 
-import { getRoute } from '../services/route';
-import { RouteInputSchema } from '../schemas/route';
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
-import { executeReadTool } from '../utils/tool-contract';
+// Schemas
+import { RouteInputSchema } from '@/schemas/route';
+
+// Constants
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+
+// Services
+import { getRoute } from '@/services/route';
+
+// Utils
+import { executeReadTool } from '@/utils/tool-contract';
 
 export const routeTool = tool(
   async (input) => executeReadTool(getRoute(input), 'travel-api', TOOL_ERROR_MESSAGES.ROUTE),

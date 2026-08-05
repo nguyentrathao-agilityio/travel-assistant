@@ -1,9 +1,16 @@
 import { tool } from '@langchain/core/tools';
 
-import { getTripSummary } from '../services/trip-summary';
-import { TripSummaryInputSchema } from '../schemas/trip-summary';
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
-import { executeReadTool } from '../utils/tool-contract';
+// Schemas
+import { TripSummaryInputSchema } from '@/schemas/trip-summary';
+
+// Constants
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+
+// Services
+import { getTripSummary } from '@/services/trip-summary';
+
+// Utils
+import { executeReadTool } from '@/utils/tool-contract';
 
 export const tripSummaryTool = tool(
   async (input) =>

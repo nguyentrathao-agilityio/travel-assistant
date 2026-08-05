@@ -1,4 +1,5 @@
-import type { Intent } from '../schemas/intent';
+// Schemas
+import type { Intent } from '@/schemas/intent';
 
 export const CLASSIFY_SYSTEM_PROMPT = `Analyze the user's latest message. Return a structured intent classification and only reusable travel fields supported by the schema.
 

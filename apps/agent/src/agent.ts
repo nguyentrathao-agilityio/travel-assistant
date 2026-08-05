@@ -1,7 +1,10 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 
+// Constants
 import { EXTERNAL_API_RETRY_POLICY, POSTGRES_URL } from './constants';
+
+// Agents
 import {
   cancelBookingAgent,
   exploreAgent,
@@ -10,6 +13,8 @@ import {
   hotelBookingAgent,
   planningAgent,
 } from './agents';
+
+// Nodes
 import {
   BRANCH_NAMES,
   SUPERVISOR_ROUTES,
@@ -18,6 +23,8 @@ import {
   saveMemoryNode,
   supervisorNode,
 } from './nodes';
+
+// State
 import { GraphState } from './state';
 
 export const buildGraph = () =>

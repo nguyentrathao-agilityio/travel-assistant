@@ -2,7 +2,7 @@ import { HumanMessage } from '@langchain/core/messages';
 import { Command, END, MemorySaver, START, StateGraph, interrupt } from '@langchain/langgraph';
 import { describe, expect, it, vi } from 'vitest';
 
-import { GraphState, normalizeGraphState, type GraphStateType } from '../state';
+import { GraphState, normalizeGraphState, type GraphStateType } from '@/state';
 
 const config = (threadId: string) => ({ configurable: { thread_id: threadId } });
 

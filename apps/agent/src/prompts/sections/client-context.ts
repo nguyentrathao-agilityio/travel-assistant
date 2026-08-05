@@ -1,5 +1,8 @@
-import type { GraphStateType } from '../../state';
-import { todayIso } from '../../utils/date';
+// State
+import type { GraphStateType } from '@/state';
+
+// Utils
+import { todayIso } from '@/utils/date';
 
 /** Renders client time context, falling back to the server's UTC date. */
 export const buildClientContext = (state: GraphStateType): string => {

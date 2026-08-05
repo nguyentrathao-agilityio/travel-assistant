@@ -29,41 +29,41 @@ vi.mock('@copilotkit/sdk-js/langgraph', () => ({
   createCopilotkitMiddleware: createCopilotkitMiddlewareMock,
 }));
 
-vi.mock('../../infrastructure/llm', () => ({
+vi.mock('@/infrastructure/llm', () => ({
   createChatModel: createChatModelMock,
 }));
 
-vi.mock('../../infrastructure/persistence', () => ({
+vi.mock('@/infrastructure/persistence', () => ({
   memoryStore: 'fake-memory-store',
 }));
 
 const searchMemoriesMock = vi.fn();
-vi.mock('../../services/memory', () => ({
+vi.mock('@/services/memory', () => ({
   searchMemories: (...args: unknown[]) => searchMemoriesMock(...args),
 }));
 
 const buildAgentSystemPromptMock = vi.fn((..._args: unknown[]) => 'system prompt text');
-vi.mock('../../prompts', () => ({
+vi.mock('@/prompts', () => ({
   buildAgentSystemPrompt: (...args: unknown[]) => buildAgentSystemPromptMock(...args),
 }));
 
-vi.mock('../rich-ui-middleware', () => ({
+vi.mock('@/utils/rich-ui-middleware', () => ({
   richUiModelMiddleware: 'rich-ui-middleware',
 }));
 
-vi.mock('../domain-state-middleware', () => ({
+vi.mock('@/utils/domain-state-middleware', () => ({
   createDomainStateMiddleware: createDomainStateMiddlewareMock,
 }));
 
-vi.mock('../../constants', () => ({
+vi.mock('@/constants', () => ({
   OPENAI_API_KEY: 'test-api-key',
 }));
 
-vi.mock('../../state', () => ({
+vi.mock('@/state', () => ({
   GraphState: 'fake-graph-state',
 }));
 
-import { createSpecializedAgent } from '../create-agent';
+import { createSpecializedAgent } from '@/utils/create-agent';
 
 const FAKE_GRAPH = { id: 'compiled-graph' };
 const tools = ['tool-a', 'tool-b'] as unknown as StructuredToolInterface[];

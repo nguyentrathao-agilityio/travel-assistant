@@ -2,8 +2,13 @@ import { createHash } from 'node:crypto';
 import { interrupt } from '@langchain/langgraph';
 import type { BookingApprovalRequest, BookingApprovalResponse } from '@repo/types';
 
-import { BookingApprovalResponseSchema } from '../schemas/booking';
-import { contentAndArtifact } from '../constants';
+// Schemas
+import { BookingApprovalResponseSchema } from '@/schemas/booking';
+
+// Constants
+import { contentAndArtifact } from '@/constants';
+
+// Utils
 import { mapToolError } from './tool-contract';
 
 export const formatBookingToolResult = (result: unknown): [string, unknown] =>

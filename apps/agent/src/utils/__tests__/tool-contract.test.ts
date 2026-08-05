@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { mapToolError, withToolTimeout } from '../tool-contract';
+import { mapToolError, withToolTimeout } from '@/utils/tool-contract';
 
 describe('mapToolError', () => {
   it.each([

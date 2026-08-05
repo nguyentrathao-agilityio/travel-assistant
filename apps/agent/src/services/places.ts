@@ -1,8 +1,11 @@
 import { z } from 'zod';
 
-import { API_URL, ENDPOINTS } from '../constants';
-import { PlacesInputSchema, ApiPlacesSearchResponseSchema } from '../schemas/places';
-import type { PlacesSearchResult, PlaceResultItem, ApiPlace } from '../schemas/places';
+// Schemas
+import { PlacesInputSchema, ApiPlacesSearchResponseSchema } from '@/schemas/places';
+import type { PlacesSearchResult, PlaceResultItem, ApiPlace } from '@/schemas/places';
+
+// Constants
+import { API_URL, ENDPOINTS } from '@/constants';
 
 const mapPlace = (place: ApiPlace): PlaceResultItem => ({
   id: place.id,

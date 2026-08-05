@@ -33,11 +33,11 @@ vi.mock('@copilotkit/runtime/langgraph', () => ({
 }));
 
 const createCopilotKitHooksMock = vi.fn((..._args: unknown[]) => 'hooks-object');
-vi.mock('../hooks', () => ({
+vi.mock('@/api/hooks', () => ({
   createCopilotKitHooks: (...args: unknown[]) => createCopilotKitHooksMock(...args),
 }));
 
-import { registerCopilotKit } from '../copilotkit';
+import { registerCopilotKit } from '@/api/copilotkit';
 
 type FakeTravelAgent = { graphId: string; getAssistant: () => Promise<unknown> };
 

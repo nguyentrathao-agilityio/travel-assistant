@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-import { isValidIsoDate } from '../utils/date';
-import { stripNulls } from '../utils/schema';
+// Utils
+import { isValidIsoDate } from '@/utils/date';
+import { stripNulls } from '@/utils/schema';
 
 const ContactSchema = z.object({
   customerName: z.string().trim().min(1),

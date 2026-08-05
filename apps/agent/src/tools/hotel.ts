@@ -1,9 +1,16 @@
 import { tool } from '@langchain/core/tools';
 
-import { searchHotels } from '../services/hotel';
-import { HotelInputSchema } from '../schemas/hotel';
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
-import { executeReadTool } from '../utils/tool-contract';
+// Schemas
+import { HotelInputSchema } from '@/schemas/hotel';
+
+// Constants
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+
+// Services
+import { searchHotels } from '@/services/hotel';
+
+// Utils
+import { executeReadTool } from '@/utils/tool-contract';
 
 export const hotelTool = tool(
   async (input) => executeReadTool(searchHotels(input), 'travel-api', TOOL_ERROR_MESSAGES.HOTELS),

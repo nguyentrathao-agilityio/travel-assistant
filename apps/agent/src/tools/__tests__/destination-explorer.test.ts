@@ -2,11 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const getDestinationExplorerMock = vi.fn();
 
-vi.mock('../../services/destination-explorer', () => ({
+vi.mock('@/services/destination-explorer', () => ({
   getDestinationExplorer: (...args: unknown[]) => getDestinationExplorerMock(...args),
 }));
 
-import { destinationExplorerTool } from '../destination-explorer';
+import { destinationExplorerTool } from '@/tools/destination-explorer';
 
 const toolCall = (name: string, args: object) => ({
   name,

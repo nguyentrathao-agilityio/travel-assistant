@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { searchFlights } from '../flights';
+import { searchFlights } from '@/services/flights';
 
 const apiFlight = {
   id: 'FL1',

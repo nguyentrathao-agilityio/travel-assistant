@@ -1,9 +1,14 @@
 import { ToolMessage } from '@langchain/core/messages';
 import type { RunnableConfig } from '@langchain/core/runnables';
 
-import { MAX_RETRIES_PER_NODE, TOOL_NAMES } from '../constants';
-import { ToolErrorSchema } from '../schemas';
-import type { GraphError, GraphStateType, GraphStateUpdate, SupervisorState } from '../state';
+// Schemas
+import { ToolErrorSchema } from '@/schemas';
+
+// Constants
+import { MAX_RETRIES_PER_NODE, TOOL_NAMES } from '@/constants';
+
+// State
+import type { GraphError, GraphStateType, GraphStateUpdate, SupervisorState } from '@/state';
 
 export type SupervisorRoute = NonNullable<SupervisorState['nextNode']>;
 export const SUPERVISOR_ROUTES: SupervisorRoute[] = [

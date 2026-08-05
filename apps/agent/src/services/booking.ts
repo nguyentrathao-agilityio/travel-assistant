@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
 
-import { API_URL, ENDPOINTS, ERROR_MESSAGES } from '../constants';
+// Schemas
 import {
   ApiBookingSchema,
   ApiFlightSchema,
@@ -10,13 +10,11 @@ import {
   FlightBookingInputSchema,
   HotelBookingInputSchema,
   HotelSearchResponseSchema,
-} from '../schemas';
-import type {
-  Booking,
-  CancelBookingInput,
-  FlightBookingInput,
-  HotelBookingInput,
-} from '../schemas';
+} from '@/schemas';
+import type { Booking, CancelBookingInput, FlightBookingInput, HotelBookingInput } from '@/schemas';
+
+// Constants
+import { API_URL, ENDPOINTS, ERROR_MESSAGES } from '@/constants';
 
 type ApiBooking = z.infer<typeof ApiBookingSchema>;
 

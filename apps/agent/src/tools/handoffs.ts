@@ -3,8 +3,11 @@ import type { ToolRuntime } from '@langchain/core/tools';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
 
-import { FlightBookingInputSchema, HotelBookingInputSchema } from '../schemas';
-import type { GraphStateType } from '../state';
+// Schemas
+import { FlightBookingInputSchema, HotelBookingInputSchema } from '@/schemas';
+
+// State
+import type { GraphStateType } from '@/state';
 
 // Pass only the handoff call and booking details to keep the next agent's context focused.
 const buildHandoffMessages = (

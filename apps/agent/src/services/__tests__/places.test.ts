@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { getPlaces } from '../places';
+import { getPlaces } from '@/services/places';
 
 const apiPlace = {
   id: 'p1',

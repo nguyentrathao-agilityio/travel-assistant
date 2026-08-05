@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import { isValidIsoDate } from '../utils/date';
+// Utils
+import { isValidIsoDate } from '@/utils/date';
 
 export const IntentSchema = z.enum([
   'explore',
@@ -25,8 +26,6 @@ export const IntentClassificationSchema = z.object({
   intent: IntentSchema,
   confidence: z.number().min(0).max(1),
   requiredOperations: z.array(PlanningOperationSchema),
-  // OpenAI Structured Outputs requires every object property to be required. A null value means
-  // that the latest user message did not supply or change that field.
   extractedFields: z.object({
     origin: z.string().trim().min(1).nullable(),
     destination: z.string().trim().min(1).nullable(),

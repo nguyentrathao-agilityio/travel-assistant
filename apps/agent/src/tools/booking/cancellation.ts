@@ -1,15 +1,22 @@
 import { tool } from '@langchain/core/tools';
 
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../../constants';
-import { CancelBookingInputSchema } from '../../schemas';
-import { cancelBooking, getBooking } from '../../services';
+// Schemas
+import { CancelBookingInputSchema } from '@/schemas';
+
+// Constants
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+
+// Services
+import { cancelBooking, getBooking } from '@/services';
+
+// Utils
 import {
   bookingToolError,
   formatBookingToolResult,
   requestBookingApproval,
   withApprovalId,
-} from '../../utils/booking-approval';
-import { withToolTimeout } from '../../utils/tool-contract';
+} from '@/utils/booking-approval';
+import { withToolTimeout } from '@/utils/tool-contract';
 
 export const cancelBookingTool = tool(
   async (input) => {

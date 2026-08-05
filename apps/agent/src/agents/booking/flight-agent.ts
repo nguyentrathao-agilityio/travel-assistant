@@ -1,8 +1,13 @@
 import type { StructuredToolInterface } from '@langchain/core/tools';
 
-import { FLIGHT_BOOKING_AGENT_TOOLS_PROMPT } from '../../prompts';
-import { bookFlightTool } from '../../tools';
-import { createSpecializedAgent } from '../../utils';
+// Prompts
+import { FLIGHT_BOOKING_AGENT_TOOLS_PROMPT } from '@/prompts';
+
+// Tools
+import { bookFlightTool } from '@/tools';
+
+// Utils
+import { createSpecializedAgent } from '@/utils';
 
 export const FLIGHT_BOOKING_AGENT_TOOLS: StructuredToolInterface[] = [bookFlightTool];
 

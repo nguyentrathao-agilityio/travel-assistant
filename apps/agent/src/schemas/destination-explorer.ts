@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+// Schemas
 import { PlacesSearchResultSchema } from './places';
 import { TipsResultSchema } from './tips';
 import { WeatherResultSchema } from './weather';

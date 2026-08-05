@@ -1,9 +1,16 @@
 import { tool } from '@langchain/core/tools';
 
-import { searchFlights } from '../services/flights';
-import { FlightInputSchema } from '../schemas/flights';
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
-import { executeReadTool } from '../utils/tool-contract';
+// Schemas
+import { FlightInputSchema } from '@/schemas/flights';
+
+// Constants
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+
+// Services
+import { searchFlights } from '@/services/flights';
+
+// Utils
+import { executeReadTool } from '@/utils/tool-contract';
 
 export const flightsTool = tool(
   async (input) => executeReadTool(searchFlights(input), 'travel-api', TOOL_ERROR_MESSAGES.FLIGHTS),

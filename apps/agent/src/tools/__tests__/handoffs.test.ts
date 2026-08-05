@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
 
-import { transferToBookFlightTool, transferToBookHotelTool } from '../handoffs';
+import { transferToBookFlightTool, transferToBookHotelTool } from '@/tools/handoffs';
 
 const runtimeConfig = (toolCallId: string, messages: unknown[] = []) =>
   ({

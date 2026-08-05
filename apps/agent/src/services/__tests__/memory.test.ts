@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { BaseStore } from '@langchain/langgraph-checkpoint';
 
-import { saveMemory, searchMemories } from '../memory';
+import { saveMemory, searchMemories } from '@/services/memory';
 
 const makeStore = (items: { key: string; value: Record<string, unknown> }[] = []) =>
   ({

@@ -3,16 +3,27 @@ import { SystemMessage } from '@langchain/core/messages';
 import { OutputParserException } from '@langchain/core/output_parsers';
 import { z } from 'zod';
 
+// Schemas
+import { IntentClassificationSchema, type IntentClassification } from '@/schemas/intent';
+
+// Constants
 import {
   CLASSIFY_SYSTEM_PROMPT,
   FALLBACK_INTENT,
   MAX_CLASSIFY_MESSAGES,
   OPENAI_API_KEY,
-} from '../constants';
-import { createChatModel } from '../infrastructure/llm';
-import { IntentClassificationSchema, type IntentClassification } from '../schemas/intent';
-import type { GraphStateType, GraphStateUpdate, TravelRequest } from '../state';
-import { takeRecentMessages } from '../utils';
+} from '@/constants';
+
+// Infrastructure
+import { createChatModel } from '@/infrastructure/llm';
+
+// State
+import type { GraphStateType, GraphStateUpdate, TravelRequest } from '@/state';
+
+// Utils
+import { takeRecentMessages } from '@/utils';
+
+// Nodes
 import { routeByIntent, type BranchName } from './routing';
 
 const classifyModel = createChatModel({ apiKey: OPENAI_API_KEY! }).withStructuredOutput(

@@ -1,5 +1,8 @@
-import type { Intent } from '../schemas/intent';
-import type { GraphStateType } from '../state';
+// Schemas
+import type { Intent } from '@/schemas/intent';
+
+// State
+import type { GraphStateType } from '@/state';
 
 export type BranchName =
   | 'explore'

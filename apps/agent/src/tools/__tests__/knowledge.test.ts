@@ -2,11 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const searchKnowledgeMock = vi.fn();
 
-vi.mock('../../knowledge', () => ({
+vi.mock('@/knowledge', () => ({
   searchKnowledge: (...args: unknown[]) => searchKnowledgeMock(...args),
 }));
 
-import { knowledgeSearchTool } from '../knowledge';
+import { knowledgeSearchTool } from '@/tools/knowledge';
 
 const input = {
   query: 'What are the visa entry requirements?',

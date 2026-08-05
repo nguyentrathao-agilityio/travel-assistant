@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-import { isValidIsoDate, todayIso } from '../utils/date';
-import { stripNulls } from '../utils/schema';
+// Utils
+import { isValidIsoDate, todayIso } from '@/utils/date';
+import { stripNulls } from '@/utils/schema';
 
 export const FlightSortSchema = z.enum([
   'departure_asc',

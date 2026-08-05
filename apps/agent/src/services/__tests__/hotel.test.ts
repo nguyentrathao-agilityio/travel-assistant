@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { searchHotels } from '../hotel';
+import { searchHotels } from '@/services/hotel';
 
 const apiHotel = {
   id: 'hotel-1',

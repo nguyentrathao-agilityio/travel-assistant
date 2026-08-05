@@ -1,4 +1,5 @@
-import type { KnowledgeSource } from '../schemas/knowledge';
+// Schemas
+import type { KnowledgeSource } from '@/schemas/knowledge';
 
 /** Official sources made searchable by running `db:seed-knowledge`. */
 export const KNOWLEDGE_SOURCES: KnowledgeSource[] = [

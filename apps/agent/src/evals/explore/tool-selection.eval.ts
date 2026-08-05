@@ -1,13 +1,13 @@
 import { createTrajectoryMatchEvaluator } from 'agentevals';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { expectedToolCalls, runAgent } from '../helpers/trajectory';
+import { expectedToolCalls, runAgent } from '@/evals/helpers/trajectory';
 
 describe.skipIf(!process.env.OPENAI_API_KEY)('explore agent tool selection', () => {
-  let exploreAgent: Awaited<typeof import('../../agents/explore-agent')>['exploreAgent'];
+  let exploreAgent: Awaited<typeof import('@/agents/explore-agent')>['exploreAgent'];
 
   beforeAll(async () => {
-    ({ exploreAgent } = await import('../../agents/explore-agent'));
+    ({ exploreAgent } = await import('@/agents/explore-agent'));
   });
 
   const evaluator = createTrajectoryMatchEvaluator({

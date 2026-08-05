@@ -1,9 +1,16 @@
 import { tool } from '@langchain/core/tools';
 
-import { getPlaces } from '../services/places';
-import { PlacesInputSchema } from '../schemas/places';
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
-import { executeReadTool } from '../utils/tool-contract';
+// Schemas
+import { PlacesInputSchema } from '@/schemas/places';
+
+// Constants
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+
+// Services
+import { getPlaces } from '@/services/places';
+
+// Utils
+import { executeReadTool } from '@/utils/tool-contract';
 
 export const placesTool = tool(
   async (input) => executeReadTool(getPlaces(input), 'travel-api', TOOL_ERROR_MESSAGES.PLACES),

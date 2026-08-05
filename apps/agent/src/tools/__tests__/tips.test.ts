@@ -2,11 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const getLocalTipsMock = vi.fn();
 
-vi.mock('../../services/tips', () => ({
+vi.mock('@/services/tips', () => ({
   getLocalTips: (...args: unknown[]) => getLocalTipsMock(...args),
 }));
 
-import { tipsTool } from '../tips';
+import { tipsTool } from '@/tools/tips';
 
 const toolCall = (name: string, args: object) => ({
   name,

@@ -3,6 +3,7 @@ import { createMiddleware } from 'langchain';
 import { StateSchema } from '@langchain/langgraph';
 import { z } from 'zod';
 
+// Schemas
 import {
   DestinationExplorerResultSchema,
   FlightSearchResultSchema,
@@ -13,10 +14,14 @@ import {
   TripSummaryResultSchema,
   WeatherResultSchema,
   ToolErrorSchema,
-} from '../schemas';
-import { TOOL_NAMES } from '../constants';
-import { BookingSchema } from '../schemas/booking';
-import { GraphState, type GraphError, type SearchResults } from '../state';
+} from '@/schemas';
+import { BookingSchema } from '@/schemas/booking';
+
+// Constants
+import { TOOL_NAMES } from '@/constants';
+
+// State
+import { GraphState, type GraphError, type SearchResults } from '@/state';
 
 export type DomainTaskName =
   | 'general'

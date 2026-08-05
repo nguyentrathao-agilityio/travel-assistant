@@ -1,9 +1,16 @@
 import { tool } from '@langchain/core/tools';
 
-import { getWeather } from '../services/weather';
-import { WeatherInputSchema } from '../schemas/weather';
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../constants';
-import { executeReadTool } from '../utils/tool-contract';
+// Schemas
+import { WeatherInputSchema } from '@/schemas/weather';
+
+// Constants
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+
+// Services
+import { getWeather } from '@/services/weather';
+
+// Utils
+import { executeReadTool } from '@/utils/tool-contract';
 
 export const weatherTool = tool(
   async ({ city, days }) =>

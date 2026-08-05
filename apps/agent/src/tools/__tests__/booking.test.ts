@@ -12,7 +12,7 @@ const submitHotelBookingMock = vi.fn();
 const getBookingMock = vi.fn();
 const cancelBookingMock = vi.fn();
 
-vi.mock('../../services', () => ({
+vi.mock('@/services', () => ({
   getFlight: (...args: unknown[]) => getFlightMock(...args),
   submitFlightBooking: (...args: unknown[]) => submitFlightBookingMock(...args),
   revalidateHotel: (...args: unknown[]) => revalidateHotelMock(...args),
@@ -21,7 +21,7 @@ vi.mock('../../services', () => ({
   cancelBooking: (...args: unknown[]) => cancelBookingMock(...args),
 }));
 
-import { bookFlightTool, bookHotelTool, cancelBookingTool } from '../booking';
+import { bookFlightTool, bookHotelTool, cancelBookingTool } from '@/tools/booking';
 
 const toolCall = (name: string, args: object) => ({
   name,

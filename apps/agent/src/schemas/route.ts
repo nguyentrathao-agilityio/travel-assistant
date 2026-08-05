@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import { DEFAULT_STOPS } from '../constants';
+// Constants
+import { DEFAULT_STOPS } from '@/constants';
 
 export const PlaceSchema = z.object({
   id: z.string(),

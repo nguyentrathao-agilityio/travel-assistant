@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { CLASSIFY_SYSTEM_PROMPT } from '../../constants';
-import { PLANNING_AGENT_TOOLS_PROMPT } from '../../prompts';
+import { CLASSIFY_SYSTEM_PROMPT } from '@/constants';
+import { PLANNING_AGENT_TOOLS_PROMPT } from '@/prompts';
 
 describe('multi-domain coordination instructions', () => {
   it('routes compound search requests to the planning coordinator', () => {

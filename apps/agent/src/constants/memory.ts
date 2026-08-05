@@ -3,6 +3,7 @@ export const MEMORY_NAMESPACE = ['dev', 'memories'];
 
 export const MAX_MEMORY_LENGTH = 150;
 
+// Constants
 import { TOOL_NAMES } from './tools';
 
 export const BOOKING_TOOL_NAMES: readonly string[] = [

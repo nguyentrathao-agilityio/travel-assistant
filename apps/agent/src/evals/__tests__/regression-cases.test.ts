@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { TRAVEL_REGRESSION_CASES } from '../regression-cases';
+import { TRAVEL_REGRESSION_CASES } from '@/evals/regression-cases';
 
 describe('provider-free travel evaluation dataset', () => {
   it('has unique scenario names and non-empty prompts', () => {

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { CLASSIFY_SYSTEM_PROMPT } from '../../constants';
-import { EXPLORE_AGENT_TOOLS_PROMPT, PLANNING_AGENT_TOOLS_PROMPT } from '../../prompts';
-import { knowledgeSearchTool } from '../../tools/knowledge';
-import { tipsTool } from '../../tools/tips';
+import { CLASSIFY_SYSTEM_PROMPT } from '@/constants';
+import { EXPLORE_AGENT_TOOLS_PROMPT, PLANNING_AGENT_TOOLS_PROMPT } from '@/prompts';
+import { knowledgeSearchTool } from '@/tools/knowledge';
+import { tipsTool } from '@/tools/tips';
 
 describe('RAG routing instructions', () => {
   it('routes standalone entry, document, safety, and knowledge-base questions to explore', () => {

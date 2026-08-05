@@ -1,5 +1,5 @@
-import { ingestKnowledgeSource, KNOWLEDGE_SOURCES } from '../knowledge';
-import { knowledgeStore } from '../infrastructure/persistence';
+import { ingestKnowledgeSource, KNOWLEDGE_SOURCES } from '@/knowledge';
+import { knowledgeStore } from '@/infrastructure/persistence';
 
 /** Seeds all knowledge sources, or one selected by `KNOWLEDGE_SOURCE_ID`. */
 const seedKnowledge = async (): Promise<void> => {

@@ -2,11 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const getWeatherMock = vi.fn();
 
-vi.mock('../../services/weather', () => ({
+vi.mock('@/services/weather', () => ({
   getWeather: (...args: unknown[]) => getWeatherMock(...args),
 }));
 
-import { weatherTool } from '../weather';
+import { weatherTool } from '@/tools/weather';
 
 const toolCall = (name: string, args: object) => ({
   name,

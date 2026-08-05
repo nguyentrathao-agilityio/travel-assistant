@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { IntentClassificationSchema, IntentSchema } from '../intent';
+import { IntentClassificationSchema, IntentSchema } from '@/schemas/intent';
 
 describe('IntentSchema', () => {
   it('accepts every known intent value', () => {

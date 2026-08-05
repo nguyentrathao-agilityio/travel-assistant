@@ -1,16 +1,23 @@
 import { tool } from '@langchain/core/tools';
 import type { BookingApprovalRequest } from '@repo/types';
 
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../../constants';
-import { FlightBookingInputSchema } from '../../schemas';
-import { getFlight, submitFlightBooking } from '../../services';
+// Schemas
+import { FlightBookingInputSchema } from '@/schemas';
+
+// Constants
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+
+// Services
+import { getFlight, submitFlightBooking } from '@/services';
+
+// Utils
 import {
   bookingToolError,
   formatBookingToolResult,
   requestBookingApproval,
   withApprovalId,
-} from '../../utils/booking-approval';
-import { withToolTimeout } from '../../utils/tool-contract';
+} from '@/utils/booking-approval';
+import { withToolTimeout } from '@/utils/tool-contract';
 
 type Flight = Awaited<ReturnType<typeof getFlight>>;
 

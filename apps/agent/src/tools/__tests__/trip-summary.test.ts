@@ -2,11 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const getTripSummaryMock = vi.fn();
 
-vi.mock('../../services/trip-summary', () => ({
+vi.mock('@/services/trip-summary', () => ({
   getTripSummary: (...args: unknown[]) => getTripSummaryMock(...args),
 }));
 
-import { tripSummaryTool } from '../trip-summary';
+import { tripSummaryTool } from '@/tools/trip-summary';
 
 const toolCall = (name: string, args: object) => ({
   name,

@@ -1,16 +1,23 @@
 import { tool } from '@langchain/core/tools';
 import type { BookingApprovalRequest } from '@repo/types';
 
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '../../constants';
-import { HotelBookingInputSchema } from '../../schemas';
-import { revalidateHotel, submitHotelBooking } from '../../services';
+// Schemas
+import { HotelBookingInputSchema } from '@/schemas';
+
+// Constants
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+
+// Services
+import { revalidateHotel, submitHotelBooking } from '@/services';
+
+// Utils
 import {
   bookingToolError,
   formatBookingToolResult,
   requestBookingApproval,
   withApprovalId,
-} from '../../utils/booking-approval';
-import { withToolTimeout } from '../../utils/tool-contract';
+} from '@/utils/booking-approval';
+import { withToolTimeout } from '@/utils/tool-contract';
 
 type Hotel = Awaited<ReturnType<typeof revalidateHotel>>;
 

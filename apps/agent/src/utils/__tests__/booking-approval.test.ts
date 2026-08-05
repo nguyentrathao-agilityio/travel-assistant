@@ -11,7 +11,7 @@ import {
   formatBookingToolResult,
   requestBookingApproval,
   withApprovalId,
-} from '../booking-approval';
+} from '@/utils/booking-approval';
 
 const baseRequest: Omit<BookingApprovalRequest, 'approvalId' | 'draftId'> = {
   type: 'booking_approval',

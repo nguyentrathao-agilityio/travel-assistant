@@ -1,7 +1,10 @@
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
-import { KNOWLEDGE_CHUNK_OVERLAP, KNOWLEDGE_CHUNK_SIZE } from '../constants';
-import type { KnowledgeDocument, KnowledgeSource } from '../schemas/knowledge';
+// Schemas
+import type { KnowledgeDocument, KnowledgeSource } from '@/schemas/knowledge';
+
+// Constants
+import { KNOWLEDGE_CHUNK_OVERLAP, KNOWLEDGE_CHUNK_SIZE } from '@/constants';
 
 type Fetcher = typeof fetch;
 

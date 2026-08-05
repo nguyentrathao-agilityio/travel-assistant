@@ -1,3 +1,14 @@
+// Schemas
+import { PlacesResultSchema, RouteLegApiSchema } from '@/schemas/route';
+import type {
+  RouteResult,
+  LandmarkStop,
+  TourLeg,
+  TransportMode,
+  RouteLegApi,
+} from '@/schemas/route';
+
+// Constants
 import {
   API_URL,
   ENDPOINTS,
@@ -5,15 +16,7 @@ import {
   DEFAULT_STOPS,
   MAX_STOPS_LIMIT,
   ROUTE_MODE_MAP,
-} from '../constants';
-import { PlacesResultSchema, RouteLegApiSchema } from '../schemas/route';
-import type {
-  RouteResult,
-  LandmarkStop,
-  TourLeg,
-  TransportMode,
-  RouteLegApi,
-} from '../schemas/route';
+} from '@/constants';
 
 const mapRouteMode = (mode: string): TransportMode =>
   (ROUTE_MODE_MAP[mode] as TransportMode) ?? 'taxi';

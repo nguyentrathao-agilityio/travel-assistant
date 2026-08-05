@@ -1,17 +1,22 @@
+// Schemas
+import { KnowledgeDocumentSchema } from '@/schemas/knowledge';
+import type {
+  KnowledgeDocument,
+  KnowledgeSearchInput,
+  KnowledgeSearchResult,
+} from '@/schemas/knowledge';
+
+// Constants
 import {
   KNOWLEDGE_CANDIDATE_MULTIPLIER,
   KNOWLEDGE_MIN_CANDIDATES,
   KNOWLEDGE_MIN_SCORE,
   KNOWLEDGE_NAMESPACE,
   KNOWLEDGE_VECTOR_WEIGHT,
-} from '../constants';
-import { KnowledgeDocumentSchema } from '../schemas/knowledge';
-import type {
-  KnowledgeDocument,
-  KnowledgeSearchInput,
-  KnowledgeSearchResult,
-} from '../schemas/knowledge';
-import { knowledgeStore } from '../infrastructure/persistence';
+} from '@/constants';
+
+// Infrastructure
+import { knowledgeStore } from '@/infrastructure/persistence';
 
 type KnowledgeStoreLike = Pick<typeof knowledgeStore, 'search'>;
 

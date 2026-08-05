@@ -1,6 +1,9 @@
-import { ToolErrorSchema } from '../schemas/tool-error';
-import type { ToolError } from '../schemas/tool-error';
-import { contentAndArtifact } from '../constants';
+// Schemas
+import { ToolErrorSchema } from '@/schemas/tool-error';
+import type { ToolError } from '@/schemas/tool-error';
+
+// Constants
+import { contentAndArtifact } from '@/constants';
 
 export const TOOL_TIMEOUT_MS = 15_000;
 

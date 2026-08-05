@@ -1,8 +1,8 @@
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 import { PostgresStore } from '@langchain/langgraph-checkpoint-postgres/store';
 
-import { POSTGRES_URL } from '../constants';
-import { knowledgeStore } from '../infrastructure/persistence';
+import { POSTGRES_URL } from '@/constants';
+import { knowledgeStore } from '@/infrastructure/persistence';
 
 /** Runs checkpoint and memory-store migrations outside the request path. */
 const setupCheckpointer = async (): Promise<void> => {

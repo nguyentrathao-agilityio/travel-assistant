@@ -1,4 +1,5 @@
-import type { GraphStateType } from '../../state';
+// State
+import type { GraphStateType } from '@/state';
 
 const yamlValue = (value: string | number | undefined): string =>
   value === undefined || value === '' ? 'null' : String(value);

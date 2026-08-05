@@ -2,9 +2,12 @@ import { ReducedValue, StateSchema } from '@langchain/langgraph';
 import { CopilotKitStateSchema, zodState } from '@copilotkit/sdk-js/langgraph';
 import { z } from 'zod';
 
-import { FlightSchema } from '../schemas/flights';
-import { HotelAvailabilitySchema } from '../schemas/hotel';
-import { IntentSchema } from '../schemas/intent';
+// Schemas
+import { FlightSchema } from '@/schemas/flights';
+import { HotelAvailabilitySchema } from '@/schemas/hotel';
+import { IntentSchema } from '@/schemas/intent';
+
+// State
 import { ExecutionStateSchema, ExecutionUpdateSchema, mergeExecutionState } from './execution';
 import { mergeRequest, TravelRequestSchema, TravelRequestUpdateSchema } from './request';
 import {

@@ -8,7 +8,7 @@ import {
   mergeSearchResults,
   normalizeGraphState,
   type ExecutionState,
-} from '../state';
+} from '@/state';
 
 const execution = (): ExecutionState => ({
   completedTasks: [],

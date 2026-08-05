@@ -4,22 +4,22 @@ import { ToolMessage } from '@langchain/core/messages';
 const { invokeMock } = vi.hoisted(() => ({ invokeMock: vi.fn() }));
 const saveMemoryMock = vi.fn();
 
-vi.mock('../../infrastructure/llm', () => ({
+vi.mock('@/infrastructure/llm', () => ({
   createChatModel: () => ({
     withStructuredOutput: () => ({ invoke: invokeMock }),
   }),
 }));
 
-vi.mock('../../infrastructure/persistence/memory-store', () => ({
+vi.mock('@/infrastructure/persistence/memory-store', () => ({
   memoryStore: { fake: 'store' },
 }));
 
-vi.mock('../../services/memory', () => ({
+vi.mock('@/services/memory', () => ({
   saveMemory: (...args: unknown[]) => saveMemoryMock(...args),
 }));
 
-import { saveMemoryNode } from '../memory';
-import type { GraphStateType } from '../../state';
+import { saveMemoryNode } from '@/nodes/memory';
+import type { GraphStateType } from '@/state';
 
 afterEach(() => {
   vi.clearAllMocks();

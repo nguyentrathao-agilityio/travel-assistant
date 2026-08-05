@@ -1,13 +1,13 @@
 import { createTrajectoryMatchEvaluator } from 'agentevals';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { expectedToolCalls, runAgent } from '../helpers/trajectory';
+import { expectedToolCalls, runAgent } from '@/evals/helpers/trajectory';
 
 describe.skipIf(!process.env.OPENAI_API_KEY)('planning agent tool selection', () => {
-  let planningAgent: Awaited<typeof import('../../agents/planning-agent')>['planningAgent'];
+  let planningAgent: Awaited<typeof import('@/agents/planning-agent')>['planningAgent'];
 
   beforeAll(async () => {
-    ({ planningAgent } = await import('../../agents/planning-agent'));
+    ({ planningAgent } = await import('@/agents/planning-agent'));
   });
 
   const evaluator = createTrajectoryMatchEvaluator({

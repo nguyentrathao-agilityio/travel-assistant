@@ -1,7 +1,7 @@
 import { HumanMessage, ToolMessage } from '@langchain/core/messages';
 import { describe, expect, it } from 'vitest';
 
-import { buildDomainStateUpdate } from '../domain-state-middleware';
+import { buildDomainStateUpdate } from '@/utils/domain-state-middleware';
 
 const toolResult = (name: string, artifact: unknown) =>
   new ToolMessage({

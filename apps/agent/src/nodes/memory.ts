@@ -1,17 +1,28 @@
 import { SystemMessage, ToolMessage } from '@langchain/core/messages';
 
+// Schemas
+import { MemoryExtractionSchema } from '@/schemas/memory';
+
+// Constants
 import {
   BOOKING_TOOL_NAMES,
   EXTRACT_MEMORY_SYSTEM_PROMPT,
   MAX_EXTRACT_MEMORY_MESSAGES,
   OPENAI_API_KEY,
-} from '../constants';
-import { createChatModel } from '../infrastructure/llm';
-import { memoryStore } from '../infrastructure/persistence';
-import { saveMemory } from '../services/memory';
-import { MemoryExtractionSchema } from '../schemas/memory';
-import type { GraphStateType } from '../state';
-import { takeRecentMessages } from '../utils';
+} from '@/constants';
+
+// Services
+import { saveMemory } from '@/services/memory';
+
+// Infrastructure
+import { createChatModel } from '@/infrastructure/llm';
+import { memoryStore } from '@/infrastructure/persistence';
+
+// State
+import type { GraphStateType } from '@/state';
+
+// Utils
+import { takeRecentMessages } from '@/utils';
 
 const extractionModel = createChatModel({ apiKey: OPENAI_API_KEY! }).withStructuredOutput(
   MemoryExtractionSchema

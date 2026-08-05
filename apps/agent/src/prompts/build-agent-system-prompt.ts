@@ -1,4 +1,7 @@
-import type { GraphStateType } from '../state';
+// State
+import type { GraphStateType } from '@/state';
+
+// Prompts
 import { BOOKING_RULES_SECTION } from './sections/booking-rules';
 import { buildBookingContext } from './sections/booking-context';
 import { buildClientContext } from './sections/client-context';

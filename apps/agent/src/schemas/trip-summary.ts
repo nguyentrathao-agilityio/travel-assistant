@@ -1,9 +1,12 @@
 import { z } from 'zod';
 
-import { isValidIsoDate } from '../utils/date';
+// Schemas
 import { FlightSchema } from './flights';
 import { HotelAvailabilitySchema } from './hotel';
 import { RouteResultSchema } from './route';
+
+// Utils
+import { isValidIsoDate } from '@/utils/date';
 
 export const TripSummaryInputSchema = z
   .object({

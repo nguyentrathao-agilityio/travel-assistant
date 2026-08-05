@@ -1,8 +1,11 @@
 import { ToolMessage } from 'langchain';
 import { createMiddleware } from 'langchain';
 
-import { TOOL_NAMES, TOOL_READY_OUTPUT, WRITE_TOOL_NAMES } from '../constants';
-import { ToolErrorSchema } from '../schemas';
+// Schemas
+import { ToolErrorSchema } from '@/schemas';
+
+// Constants
+import { TOOL_NAMES, TOOL_READY_OUTPUT, WRITE_TOOL_NAMES } from '@/constants';
 
 const isErrorArtifact = (artifact: unknown): boolean =>
   typeof artifact === 'object' && artifact !== null && 'error' in artifact;

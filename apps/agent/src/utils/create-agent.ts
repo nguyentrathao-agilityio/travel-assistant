@@ -2,12 +2,23 @@ import { createAgent, dynamicSystemPromptMiddleware } from 'langchain';
 import { createCopilotkitMiddleware } from '@copilotkit/sdk-js/langgraph';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 
-import { OPENAI_API_KEY } from '../constants';
-import { memoryStore } from '../infrastructure/persistence';
-import { createChatModel } from '../infrastructure/llm';
-import { searchMemories } from '../services/memory';
-import { GraphState, type GraphStateType } from '../state';
-import { buildAgentSystemPrompt, type AgentPromptSections } from '../prompts';
+// Constants
+import { OPENAI_API_KEY } from '@/constants';
+
+// Services
+import { searchMemories } from '@/services/memory';
+
+// Infrastructure
+import { memoryStore } from '@/infrastructure/persistence';
+import { createChatModel } from '@/infrastructure/llm';
+
+// Prompts
+import { buildAgentSystemPrompt, type AgentPromptSections } from '@/prompts';
+
+// State
+import { GraphState, type GraphStateType } from '@/state';
+
+// Utils
 import { richUiModelMiddleware } from './rich-ui-middleware';
 import { createDomainStateMiddleware, type DomainTaskName } from './domain-state-middleware';
 

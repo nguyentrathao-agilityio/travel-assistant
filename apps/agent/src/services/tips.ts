@@ -1,9 +1,14 @@
 import { z } from 'zod';
 
-import { API_URL, ENDPOINTS } from '../constants';
-import { TipCategorySchema, TipsInputSchema, ApiTipsResponseSchema } from '../schemas/tips';
-import type { TipsResult, TipItem, ApiTip } from '../schemas/tips';
-import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '../infrastructure/llm';
+// Schemas
+import { TipCategorySchema, TipsInputSchema, ApiTipsResponseSchema } from '@/schemas/tips';
+import type { TipsResult, TipItem, ApiTip } from '@/schemas/tips';
+
+// Constants
+import { API_URL, ENDPOINTS } from '@/constants';
+
+// Infrastructure
+import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
 
 const VALID_CATEGORIES = TipCategorySchema.options;
 const LLM_TIPS_COUNT = 6;

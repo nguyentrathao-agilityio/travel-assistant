@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { FlightInputSchema } from '../flights';
-import { HotelInputSchema } from '../hotel';
-import { PlacesInputSchema } from '../places';
-import { TipsInputSchema } from '../tips';
+import { FlightInputSchema } from '@/schemas/flights';
+import { HotelInputSchema } from '@/schemas/hotel';
+import { PlacesInputSchema } from '@/schemas/places';
+import { TipsInputSchema } from '@/schemas/tips';
 
 describe('standardized tool inputs', () => {
   it('normalizes valid IATA codes and rejects arbitrary locations', () => {

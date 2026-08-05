@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { routeAfterPlanning, routeByIntent } from '../routing';
-import type { GraphStateType } from '../../state';
+import { routeAfterPlanning, routeByIntent } from '@/nodes/routing';
+import type { GraphStateType } from '@/state';
 
 describe('routeByIntent', () => {
   it.each([

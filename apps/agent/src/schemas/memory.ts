@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import { MAX_MEMORY_LENGTH } from '../constants/memory';
+// Constants
+import { MAX_MEMORY_LENGTH } from '@/constants/memory';
 
 export const StoredMemorySchema = z.object({
   memory: z.string(),

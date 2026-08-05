@@ -1,15 +1,18 @@
 import { z } from 'zod';
 
-import { API_URL, ENDPOINTS, ERROR_MESSAGES } from '../constants';
-
-const FLIGHTS_DEFAULT_ADULTS = 1;
+// Schemas
 import {
   ApiFlightSchema,
   ApiFlightSearchResponseSchema,
   FlightInputSchema,
   FlightSchema,
   FlightSearchResultSchema,
-} from '../schemas/flights';
+} from '@/schemas/flights';
+
+// Constants
+import { API_URL, ENDPOINTS, ERROR_MESSAGES } from '@/constants';
+
+const FLIGHTS_DEFAULT_ADULTS = 1;
 
 const mapFlight = (flight: z.infer<typeof ApiFlightSchema>): z.infer<typeof FlightSchema> => ({
   id: flight.id,

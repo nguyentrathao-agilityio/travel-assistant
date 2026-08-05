@@ -1,6 +1,7 @@
 import { ChatOpenAI } from '@langchain/openai';
 
-import { DEFAULT_MODEL } from '../../constants';
+// Constants
+import { DEFAULT_MODEL } from '@/constants';
 
 export type CreateChatModelParams = {
   apiKey: string;

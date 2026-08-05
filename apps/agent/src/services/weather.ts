@@ -1,8 +1,13 @@
 import { z } from 'zod';
 
-import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '../infrastructure/llm';
-import { WeatherResponse, WeatherResponseSchema, WeatherResultSchema } from '../schemas/weather';
-import { API_URL, ENDPOINTS } from '../constants';
+// Schemas
+import { WeatherResponse, WeatherResponseSchema, WeatherResultSchema } from '@/schemas/weather';
+
+// Constants
+import { API_URL, ENDPOINTS } from '@/constants';
+
+// Infrastructure
+import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
 
 type WeatherToolOutput = z.infer<typeof WeatherResultSchema>;
 

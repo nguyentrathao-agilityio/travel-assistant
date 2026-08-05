@@ -1,3 +1,4 @@
+import { TOOL_NAMES } from '@repo/constants';
 import { CHAT_ROLE } from '@/constants';
 import type { AgUiAssistantMessage, AgUiMessage } from '@/types';
 
@@ -27,14 +28,14 @@ export type LangGraphRawMessage = {
 export type LangGraphThreadValues = { messages?: LangGraphRawMessage[] };
 
 const LEGACY_TOOL_NAMES: Readonly<Record<string, string>> = {
-  searchFlights: 'flightsTool',
-  search_flights: 'flightsTool',
-  searchHotels: 'hotelTool',
-  search_hotels: 'hotelTool',
-  searchPlaces: 'placesTool',
-  search_places: 'placesTool',
-  getWeather: 'weatherTool',
-  get_weather: 'weatherTool',
+  searchFlights: TOOL_NAMES.FLIGHTS,
+  search_flights: TOOL_NAMES.FLIGHTS,
+  searchHotels: TOOL_NAMES.HOTEL,
+  search_hotels: TOOL_NAMES.HOTEL,
+  searchPlaces: TOOL_NAMES.PLACES,
+  search_places: TOOL_NAMES.PLACES,
+  getWeather: TOOL_NAMES.WEATHER,
+  get_weather: TOOL_NAMES.WEATHER,
 };
 
 const normalizeToolName = (name: string): string => LEGACY_TOOL_NAMES[name] ?? name;

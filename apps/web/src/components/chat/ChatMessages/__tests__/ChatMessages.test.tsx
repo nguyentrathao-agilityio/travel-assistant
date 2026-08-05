@@ -15,7 +15,11 @@ type CKMessage = MessagesProps['messages'][number];
 const makeMessage = (id: string, role = 'user'): CKMessage =>
   ({ id, role, content: '' }) as unknown as CKMessage;
 
-const makeBookingMessage = (id: string, toolCallId: string): CKMessage =>
+const makeBookingMessage = (
+  id: string,
+  toolCallId: string,
+  args = '{"hotelId":"hotel-1"}'
+): CKMessage =>
   ({
     id,
     role: 'assistant',
@@ -25,7 +29,7 @@ const makeBookingMessage = (id: string, toolCallId: string): CKMessage =>
         type: 'function',
         function: {
           name: 'bookHotelTool',
-          arguments: '{"hotelId":"hotel-1"}',
+          arguments: args,
         },
       },
     ],
@@ -167,6 +171,19 @@ describe('ChatMessages', () => {
       );
 
       expect(screen.getAllByTestId('message')).toHaveLength(3);
+    });
+
+    it('deduplicates replayed booking calls when JSON argument key order changes', () => {
+      const messages = [
+        makeBookingMessage('assistant-1', 'tool-1', '{"hotelId":"hotel-1","rooms":1}'),
+        makeBookingMessage('assistant-2', 'tool-2', '{"rooms":1,"hotelId":"hotel-1"}'),
+      ];
+
+      render(
+        <ChatMessages {...defaultProps} messages={reconcileConversationMessages([], messages)} />
+      );
+
+      expect(screen.getAllByTestId('message')).toHaveLength(1);
     });
 
     it('renders children inside the message list', () => {

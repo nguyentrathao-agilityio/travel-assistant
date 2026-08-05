@@ -12,8 +12,26 @@ const BOOKING_TOOL_NAMES = new Set<string>([
   TOOL_NAMES.CANCEL_BOOKING,
 ]);
 
+const canonicalize = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (typeof value !== 'object' || value === null) return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, child]) => [key, canonicalize(child)])
+  );
+};
+
+const canonicalToolArguments = (toolArguments: string): string => {
+  try {
+    return JSON.stringify(canonicalize(JSON.parse(toolArguments) as unknown));
+  } catch {
+    return toolArguments;
+  }
+};
+
 const bookingToolCallSignature = (toolName: string, toolArguments: string): string =>
-  `${toolName}:${toolArguments}`;
+  `${toolName}:${canonicalToolArguments(toolArguments)}`;
 
 /**
  * Reconciles the persisted LangGraph snapshot with CopilotKit's live messages.

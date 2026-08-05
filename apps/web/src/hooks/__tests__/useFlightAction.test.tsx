@@ -18,6 +18,8 @@ jest.mock('@/components', () => ({
   LoadingCard: () => null,
   SetLastTool: () => null,
   ToolLoading: () => null,
+  ToolEmptyCard: () => null,
+  ToolErrorCard: () => null,
 }));
 
 jest.mock('@/utils', () => ({
@@ -47,11 +49,11 @@ describe('useFlightAction', () => {
     expect(result).not.toBeNull();
   });
 
-  it('render returns empty fragment when result has no results', () => {
+  it('render returns an explicit empty state when result has no results', () => {
     renderHook(() => useFlightAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', result: { results: [] }, args: {} });
-    expect(result.type).toBe(React.Fragment);
+    expect(result.type).not.toBe(React.Fragment);
   });
 
   it('render returns empty fragment when result is null', () => {

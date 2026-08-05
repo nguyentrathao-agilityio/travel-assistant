@@ -8,6 +8,7 @@ jest.mock('@/components', () => ({
   WeatherCard: () => null,
   LoadingCard: () => null,
   ToolLoading: () => null,
+  ToolErrorCard: () => null,
   SetLastTool: () => null,
 }));
 jest.mock('@/utils', () => ({

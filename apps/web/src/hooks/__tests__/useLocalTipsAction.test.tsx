@@ -4,7 +4,13 @@ import { useRenderToolCall } from '@copilotkit/react-core';
 import { useLocalTipsAction } from '@/hooks/useLocalTipsAction';
 
 jest.mock('@/constants', () => ({ TOOL_NAMES: { LOCAL_TIPS: 'localTipsTool' } }));
-jest.mock('@/components', () => ({ LocalTipsCard: () => null }));
+jest.mock('@/components', () => ({
+  LocalTipsCard: () => null,
+  ToolEmptyCard: () => null,
+  ToolErrorCard: () => null,
+  ToolLoading: () => null,
+  SetLastTool: () => null,
+}));
 jest.mock('@/utils', () => ({
   ...jest.requireActual('@/utils/toolResult'),
   isToolPending: (s: string) => s === 'inProgress',
@@ -45,7 +51,7 @@ describe('useLocalTipsAction', () => {
     expect(result.type).toBe(React.Fragment);
   });
 
-  it('render returns empty fragment when count is 0', () => {
+  it('render returns an explicit empty state when count is 0', () => {
     mockSafeParse.mockReturnValue({
       success: true,
       data: { count: 0, tips: [], country: 'Vietnam', summary: '' },
@@ -53,7 +59,7 @@ describe('useLocalTipsAction', () => {
     renderHook(() => useLocalTipsAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: { count: 0 } });
-    expect(result.type).toBe(React.Fragment);
+    expect(result.type).not.toBe(React.Fragment);
   });
 
   it('render returns LocalTipsCard with data when parse succeeds and count > 0', () => {

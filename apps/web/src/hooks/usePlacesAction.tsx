@@ -4,13 +4,13 @@ import { useRenderToolCall } from '@copilotkit/react-core';
 import { PlacesSearchResultSchema } from '@repo/schemas';
 
 // Components
-import { PlacesCard, SetLastTool, ToolLoading } from '@/components';
+import { PlacesCard, SetLastTool, ToolEmptyCard, ToolErrorCard, ToolLoading } from '@/components';
 
 // Constants
 import { TOOL_NAMES } from '@/constants';
 
 // Utils
-import { isToolPending, safeParseToolResult } from '@/utils';
+import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 
 export const usePlacesAction = () => {
   useRenderToolCall({
@@ -24,10 +24,13 @@ export const usePlacesAction = () => {
     render: ({ status, result, args }) => {
       if (isToolPending(status)) return <ToolLoading target={`places in ${args.city}`} />;
 
+      if (getToolError(result)) return <ToolErrorCard result={result} />;
+
       const parsed = safeParseToolResult(PlacesSearchResultSchema, result);
 
       if (!parsed.success) return <></>;
-      if (parsed.data.total === 0) return <></>;
+      if (parsed.data.total === 0)
+        return <ToolEmptyCard message="No places matched this search." />;
 
       return (
         <>

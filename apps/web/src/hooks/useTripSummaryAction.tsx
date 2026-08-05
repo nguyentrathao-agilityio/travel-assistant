@@ -8,10 +8,10 @@ import { TripSummaryResultSchema } from '@repo/schemas';
 import { useTripState } from './useTripState';
 
 // Components
-import { SetLastTool, ToolLoading, TripSummaryCard } from '@/components';
+import { SetLastTool, ToolErrorCard, ToolLoading, TripSummaryCard } from '@/components';
 
 // Utils
-import { isToolPending, safeParseToolResult } from '@/utils';
+import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 
 export const useTripSummaryAction = () => {
   const { state } = useTripState();
@@ -53,6 +53,8 @@ export const useTripSummaryAction = () => {
         return (
           <ToolLoading action="Generating" target={`trip plan summary in ${args.destination}`} />
         );
+
+      if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsed = safeParseToolResult(TripSummaryResultSchema, result);
       if (!parsed.success) return <></>;

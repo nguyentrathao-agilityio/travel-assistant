@@ -4,13 +4,19 @@ import { useRenderToolCall } from '@copilotkit/react-core';
 import { TipsResultSchema } from '@repo/schemas';
 
 // Components
-import { LocalTipsCard, SetLastTool, ToolLoading } from '@/components';
+import {
+  LocalTipsCard,
+  SetLastTool,
+  ToolEmptyCard,
+  ToolErrorCard,
+  ToolLoading,
+} from '@/components';
 
 // Constants
 import { TOOL_NAMES } from '@/constants';
 
 // Utils
-import { isToolPending, safeParseToolResult } from '@/utils';
+import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 
 export const useLocalTipsAction = () => {
   useRenderToolCall({
@@ -31,9 +37,12 @@ export const useLocalTipsAction = () => {
       if (isToolPending(status))
         return <ToolLoading target={`local tips in ${args.city || args.country}`} />;
 
+      if (getToolError(result)) return <ToolErrorCard result={result} />;
+
       const parsed = safeParseToolResult(TipsResultSchema, result);
       if (!parsed.success) return <></>;
-      if (parsed.data.count === 0) return <></>;
+      if (parsed.data.count === 0)
+        return <ToolEmptyCard message="No local tips were available for this destination." />;
 
       return (
         <>

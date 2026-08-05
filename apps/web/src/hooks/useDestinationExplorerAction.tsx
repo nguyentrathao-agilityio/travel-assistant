@@ -4,13 +4,13 @@ import { useRenderToolCall } from '@copilotkit/react-core';
 import { DestinationExplorerResultSchema } from '@repo/schemas';
 
 // Components
-import { DestinationExplorerCard, SetLastTool, ToolLoading } from '@/components';
+import { DestinationExplorerCard, SetLastTool, ToolErrorCard, ToolLoading } from '@/components';
 
 // Constants
 import { TOOL_NAMES } from '@/constants';
 
 // Utils
-import { isToolPending, safeParseToolResult } from '@/utils';
+import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 
 export const useDestinationExplorerAction = () => {
   useRenderToolCall({
@@ -29,6 +29,8 @@ export const useDestinationExplorerAction = () => {
     render: ({ status, result, args }) => {
       if (isToolPending(status))
         return <ToolLoading action="Exploring" target={args.city || 'destination'} />;
+
+      if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsed = safeParseToolResult(DestinationExplorerResultSchema, result);
       if (!parsed.success) return <></>;

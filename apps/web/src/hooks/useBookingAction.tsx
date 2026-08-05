@@ -41,6 +41,7 @@ const bookingResultSchema = z.object({
 const bookingApprovalRequestSchema = z.object({
   type: z.literal('booking_approval'),
   approvalId: z.string(),
+  draftId: z.string().optional(),
   action: z.enum(['create_flight_booking', 'create_hotel_booking', 'cancel_booking']),
   title: z.string(),
   description: z.string(),
@@ -48,11 +49,11 @@ const bookingApprovalRequestSchema = z.object({
   details: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])),
   totalPrice: z.number().optional(),
   currency: z.string().optional(),
-  allowedDecisions: z.array(z.enum(['approve', 'reject'])),
+  allowedDecisions: z.array(z.enum(['approve', 'edit', 'reject'])),
 });
 
 const rejectedBookingActionSchema = z.object({
-  status: z.literal('rejected'),
+  status: z.enum(['rejected', 'edit_requested']),
   type: z.enum(['flight', 'hotel', 'cancellation']),
 });
 

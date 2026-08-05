@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import type { MessagesProps } from '@copilotkit/react-ui';
-import { useCopilotChatInternal } from '@copilotkit/react-core';
+import { useCopilotKit } from '@copilotkit/react-core/v2';
 import { ChatMessages } from '../index';
 import { reconcileConversationMessages } from '@/hooks/useConversationMessages';
 
@@ -57,10 +57,12 @@ const defaultProps = {
 
 describe('ChatMessages', () => {
   beforeEach(() => {
-    jest.mocked(useCopilotChatInternal).mockReturnValue({
-      messages: [],
-      interrupt: null,
-    } as unknown as ReturnType<typeof useCopilotChatInternal>);
+    jest.mocked(useCopilotKit).mockReturnValue({
+      copilotkit: {
+        interruptElement: null,
+        subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+      },
+    } as unknown as ReturnType<typeof useCopilotKit>);
   });
 
   describe('empty state', () => {
@@ -196,10 +198,12 @@ describe('ChatMessages', () => {
     });
 
     it('renders the active LangGraph interrupt', () => {
-      jest.mocked(useCopilotChatInternal).mockReturnValue({
-        messages: [],
-        interrupt: <div data-testid="booking-approval">Confirm booking</div>,
-      } as unknown as ReturnType<typeof useCopilotChatInternal>);
+      jest.mocked(useCopilotKit).mockReturnValue({
+        copilotkit: {
+          interruptElement: <div data-testid="booking-approval">Confirm booking</div>,
+          subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+        },
+      } as unknown as ReturnType<typeof useCopilotKit>);
 
       render(<ChatMessages {...defaultProps} messages={[makeMessage('m1')]} />);
 
@@ -207,10 +211,12 @@ describe('ChatMessages', () => {
     });
 
     it('gives the LangGraph interrupt the same avatar as an assistant message', () => {
-      jest.mocked(useCopilotChatInternal).mockReturnValue({
-        messages: [],
-        interrupt: <div data-testid="booking-approval">Confirm booking</div>,
-      } as unknown as ReturnType<typeof useCopilotChatInternal>);
+      jest.mocked(useCopilotKit).mockReturnValue({
+        copilotkit: {
+          interruptElement: <div data-testid="booking-approval">Confirm booking</div>,
+          subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+        },
+      } as unknown as ReturnType<typeof useCopilotKit>);
 
       const { container } = render(
         <ChatMessages {...defaultProps} messages={[makeMessage('m1')]} />

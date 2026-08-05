@@ -1,12 +1,11 @@
 import { useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { MessagesProps } from '@copilotkit/react-ui';
-import { useCopilotChatInternal } from '@copilotkit/react-core';
 import { Bot } from 'lucide-react';
 import { ChatEmptyState } from '../ChatEmptyState';
 import { ChatHistoryLoading } from '../ChatHistoryLoading';
 import { TypingIndicator } from '../TypingIndicator';
-import { useScrollToBottom } from '@/hooks';
+import { useInterruptElement, useScrollToBottom } from '@/hooks';
 import { SECONDARY_SUGGESTIONS, TOOL_SUGGESTION_ITEMS } from '@/constants';
 import { Button } from '@/components';
 import { useSuggestionStore } from '@/stores';
@@ -58,9 +57,7 @@ const ChatMessages = ({
     inProgress && (!latestConversationMessage || latestConversationMessage.role === 'user');
 
   const { scrollContainerRef } = useScrollToBottom(messages.length);
-  const { interrupt } = useCopilotChatInternal();
-  // Excludes CopilotKit's synthetic "coagent-state-render" placeholder so a thread with
-  // only that entry still shows the empty state instead of the message list.
+  const interrupt = useInterruptElement();
   const hasRealMessages = messages.some(isRealConversationMessage);
   const lastTool = useSuggestionStore((s) => s.lastTool);
   const activeSuggestions =

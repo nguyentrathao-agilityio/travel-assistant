@@ -5,6 +5,7 @@
     "dockerfilePath": "apps/agent/Dockerfile"
   },
   "deploy": {
-    "restartPolicyType": "ON_FAILURE"
+    "restartPolicyType": "ON_FAILURE",
+    "preDeployCommand": "pnpm --filter agent db:seed-knowledge:deploy"
   }
 }

@@ -6,6 +6,7 @@
   "scripts": {
     "db:setup": "dotenv -e .env -- tsx src/scripts/setup-checkpointer.ts",
     "db:seed-knowledge": "dotenv -e .env -- tsx src/scripts/seed-knowledge.ts",
+    "db:seed-knowledge:deploy": "tsx src/scripts/seed-knowledge.ts || true",
     "build": "tsc && tsc-alias",
     "dev": "tsc && tsc-alias && langgraphjs dev --port 8123 --no-browser",
     "lint": "eslint .",

@@ -8,72 +8,85 @@ The practice focuses primarily on building the agent logic and orchestration lay
 
 ## Architecture
 
-The current agent is a custom LangGraph workflow composed of a router and specialized agent
-subgraphs:
+The current agent is a custom LangGraph workflow: a classifier routes to one of six specialized
+agent branches, and every branch's result is checked by a shared `supervise` node before the
+graph decides whether to retry, hand off, or finalize:
 
 ```mermaid
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 32, "rankSpacing": 55}}}%%
 flowchart LR
-    START((START)) --> CLASSIFY["Classify intent"]
+    START(("▶️<br/>START")) --> CLASSIFY{{"🧭 Classify intent"}}
 
-    subgraph ROUTES["Specialized agent branches"]
+    subgraph ROUTES[" 🧩 Specialized agent branches "]
         direction TB
-        EXPLORE["Explore<br/>Destinations · Places · Tips · RAG"]
-        PLAN["Plan<br/>Flights · Hotels · Routes · Weather"]
-        BOOK_FLIGHT["Book flight<br/>Revalidate · Approve · Submit"]
-        BOOK_HOTEL["Book hotel<br/>Revalidate · Approve · Submit"]
-        CANCEL["Cancel booking<br/>Retrieve · Approve · Cancel"]
-        GENERAL["General<br/>Travel conversation"]
+        EXPLORE("🗺️ <b>Explore</b><br/>Destinations · Places · Tips · RAG")
+        PLAN("🧳 <b>Plan</b><br/>Flights · Hotels · Routes · Weather")
+        BOOK_FLIGHT("✈️ <b>Book flight</b><br/>Revalidate · Approve · Submit")
+        BOOK_HOTEL("🏨 <b>Book hotel</b><br/>Revalidate · Approve · Submit")
+        CANCEL("🚫 <b>Cancel booking</b><br/>Retrieve · Approve · Cancel")
+        GENERAL("💬 <b>General</b><br/>Travel conversation")
     end
 
-    CLASSIFY -->|"explore"| EXPLORE
-    CLASSIFY -->|"plan"| PLAN
-    CLASSIFY -->|"book_flight"| BOOK_FLIGHT
-    CLASSIFY -->|"book_hotel"| BOOK_HOTEL
-    CLASSIFY -->|"cancel_booking"| CANCEL
+    CLASSIFY -->|explore| EXPLORE
+    CLASSIFY -->|plan| PLAN
+    CLASSIFY -->|book_flight| BOOK_FLIGHT
+    CLASSIFY -->|book_hotel| BOOK_HOTEL
+    CLASSIFY -->|cancel_booking| CANCEL
     CLASSIFY -->|"general / fallback"| GENERAL
 
-    PLAN -. "handoff" .-> BOOK_FLIGHT
-    PLAN -. "handoff" .-> BOOK_HOTEL
+    EXPLORE --> SUPERVISE{{"🛡️ Supervise<br/>validate · retry · route"}}
+    PLAN --> SUPERVISE
+    BOOK_FLIGHT --> SUPERVISE
+    BOOK_HOTEL --> SUPERVISE
+    CANCEL --> SUPERVISE
+    GENERAL --> SUPERVISE
 
-    EXPLORE --> MEMORY["Save memory<br/>best effort"]
-    PLAN --> MEMORY
-    BOOK_FLIGHT --> MEMORY
-    BOOK_HOTEL --> MEMORY
-    CANCEL --> MEMORY
-    GENERAL --> MEMORY
-    MEMORY --> END((END))
+    SUPERVISE -. "🔁 retry ≤2 (explore/plan)" .-> EXPLORE
+    SUPERVISE -. "🔁 retry ≤2 (explore/plan)" .-> PLAN
+    SUPERVISE -. "↪️ handoff" .-> BOOK_FLIGHT
+    SUPERVISE -. "↪️ handoff" .-> BOOK_HOTEL
 
-    classDef terminal fill:#172554,color:#ffffff,stroke:#60a5fa,stroke-width:2px;
-    classDef router fill:#fef3c7,color:#78350f,stroke:#f59e0b,stroke-width:2px;
-    classDef readAgent fill:#ecfeff,color:#164e63,stroke:#06b6d4;
-    classDef actionAgent fill:#fff1f2,color:#881337,stroke:#f43f5e;
-    classDef memory fill:#f0fdf4,color:#14532d,stroke:#22c55e,stroke-width:2px;
+    SUPERVISE --> MEMORY("🧠 <b>Save memory</b><br/>best effort")
+    MEMORY --> END((("⏹️<br/>END")))
+
+    classDef terminal fill:#1e293b,color:#f8fafc,stroke:#38bdf8,stroke-width:2.5px;
+    classDef router fill:#fef9c3,color:#713f12,stroke:#eab308,stroke-width:2.5px;
+    classDef readAgent fill:#e0f2fe,color:#075985,stroke:#0284c7,stroke-width:1.5px;
+    classDef actionAgent fill:#ffe4e6,color:#9f1239,stroke:#e11d48,stroke-width:1.5px;
+    classDef memory fill:#dcfce7,color:#14532d,stroke:#16a34a,stroke-width:2.5px;
+    classDef routesBox fill:transparent,stroke:#94a3b8,stroke-width:1.5px,stroke-dasharray:4 3,color:#475569;
 
     class START,END terminal;
-    class CLASSIFY router;
+    class CLASSIFY,SUPERVISE router;
     class EXPLORE,PLAN,GENERAL readAgent;
     class BOOK_FLIGHT,BOOK_HOTEL,CANCEL actionAgent;
     class MEMORY memory;
+    class ROUTES routesBox;
+
+    linkStyle default stroke:#94a3b8,stroke-width:1.5px;
 ```
 
 - `classify` uses structured output to identify the user's intent and routes with
   `Command.goto`.
 - Each business branch is a LangChain agent graph with a domain-specific prompt and restricted
   tool set.
-- `plan` can hand control to the flight or hotel booking branch through transfer tools.
+- Every branch feeds into a single `supervise` node ([`apps/agent/src/nodes/supervisor.ts`](apps/agent/src/nodes/supervisor.ts)), which validates the branch's result (tool failures, missing required fields, missing operations) and decides the next hop via `routeAfterSupervisor`.
+- `explore` and `plan` get automatic retries (up to `MAX_RETRIES_PER_NODE`, currently 2) when the supervisor judges the result retryable; other branches don't retry.
+- `plan` requests a booking handoff by setting `handoffTarget` in state — the supervisor reads it and routes straight to `bookFlight` or `bookHotel` instead of falling through to `saveMemory`.
 - Booking and cancellation tools pause with a LangGraph interrupt and require explicit human
   approval before producing a side effect.
 - `PostgresSaver` persists per-thread checkpoints so conversations and interrupted runs can
   resume.
 - `saveMemory` extracts durable travel preferences into a PostgreSQL-backed store after the
-  business branch responds.
+  supervisor finalizes the turn.
 - CopilotKit and AG-UI stream tool artifacts to the React frontend, where domain hooks render
   interactive cards.
 
 The main implementation entry points are:
 
 - [`apps/agent/src/agent.ts`](apps/agent/src/agent.ts) — parent graph
-- [`apps/agent/src/nodes/`](apps/agent/src/nodes) — classification, branches, routing, and memory
+- [`apps/agent/src/nodes/`](apps/agent/src/nodes) — classification, supervision/routing, and memory
+- [`apps/agent/src/agents/`](apps/agent/src/agents) — the specialized agent branches (`explore`, `plan`, booking, `general`)
 - [`apps/agent/src/tools/`](apps/agent/src/tools) — agent-facing tool contracts
 - [`apps/agent/src/services/`](apps/agent/src/services) — domain and external API logic
 - [`apps/web/src/hooks/`](apps/web/src/hooks) — CopilotKit tool renderers, state sync, and approval UI

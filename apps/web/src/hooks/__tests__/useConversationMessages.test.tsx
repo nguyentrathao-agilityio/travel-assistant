@@ -5,7 +5,7 @@ import { useConversationMessages } from '@/hooks/useConversationMessages';
 
 describe('useConversationMessages', () => {
   it('attaches generativeUI to a persisted assistant message with tool calls', () => {
-    const rendered = <div>weather-card</div>;
+    const rendered = <div key="call-1">weather-card</div>;
     const lazyRenderer = jest.fn(() => rendered);
     jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => lazyRenderer));
 
@@ -30,7 +30,10 @@ describe('useConversationMessages', () => {
       (message): message is typeof message & { role: 'assistant' } =>
         message.id === 'a1' && message.role === 'assistant'
     );
-    expect(assistantMessage?.generativeUI?.()).toBe(rendered);
+    const genUi = assistantMessage?.generativeUI?.();
+    const { container } = render(genUi as React.ReactElement);
+    expect(container.firstElementChild?.className).toContain('flex-col');
+    expect(container.textContent).toBe('weather-card');
   });
 
   it('leaves a message untouched when there is no matching renderer', () => {

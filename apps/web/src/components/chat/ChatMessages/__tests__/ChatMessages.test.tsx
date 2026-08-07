@@ -148,6 +148,97 @@ describe('ChatMessages', () => {
       expect(screen.queryByRole('status', { name: 'AI is thinking' })).not.toBeInTheDocument();
     });
 
+    it('does not bring the typing indicator back, and shows suggestions, once the current turn already has a real answer — even if inProgress stays true and a trailing tool/system message re-appears after it', () => {
+      const assistantAnswer = {
+        ...makeMessage('assistant-1', 'assistant'),
+        content: 'To enter Vietnam as a tourist, you will need a valid passport and an e-visa.',
+      } as CKMessage;
+      const trailingSystemMessage = {
+        id: 'system-replay-1',
+        role: 'system',
+        content: 'dynamic system prompt replay',
+      } as unknown as CKMessage;
+      const trailingToolMessage = {
+        id: 'tool-replay-1',
+        role: 'tool',
+        toolCallId: 'call-1',
+        content: '{"results":[]}',
+      } as unknown as CKMessage;
+
+      render(
+        <ChatMessages
+          {...defaultProps}
+          messages={[
+            makeMessage('user-1'),
+            assistantAnswer,
+            trailingSystemMessage,
+            trailingToolMessage,
+          ]}
+          inProgress
+        />
+      );
+
+      expect(screen.queryByRole('status', { name: 'AI is thinking' })).not.toBeInTheDocument();
+      expect(screen.getByText('Find places')).toBeInTheDocument();
+    });
+
+    it('keeps the typing indicator up while a tool-result message is the latest and the assistant has not replied yet', () => {
+      const toolResultMessage = {
+        id: 'tool-1',
+        role: 'tool',
+        toolCallId: 'call-1',
+        content: '{"results":[]}',
+      } as unknown as CKMessage;
+
+      render(
+        <ChatMessages
+          {...defaultProps}
+          messages={[
+            makeMessage('user-1'),
+            {
+              ...makeMessage('assistant-1', 'assistant'),
+              content: '',
+              toolCalls: [
+                {
+                  id: 'call-1',
+                  type: 'function',
+                  function: { name: 'searchKnowledge', arguments: '{}' },
+                },
+              ],
+            } as CKMessage,
+            toolResultMessage,
+          ]}
+          inProgress
+        />
+      );
+
+      expect(screen.getByRole('status', { name: 'AI is thinking' })).toBeInTheDocument();
+    });
+
+    it('keeps the typing indicator up while a tool call has no content or card yet (e.g. a knowledge search with no render action)', () => {
+      const pendingToolCallMessage = {
+        ...makeMessage('assistant-1', 'assistant'),
+        content: '',
+        toolCalls: [
+          {
+            id: 'tool-1',
+            type: 'function',
+            function: { name: 'searchKnowledge', arguments: '{}' },
+          },
+        ],
+      } as CKMessage;
+
+      render(
+        <ChatMessages
+          {...defaultProps}
+          messages={[makeMessage('user-1'), pendingToolCallMessage]}
+          inProgress
+        />
+      );
+
+      expect(screen.getByRole('status', { name: 'AI is thinking' })).toBeInTheDocument();
+    });
+
     it('renders one booking tool call when resume replays it with new message IDs', () => {
       const messages = [
         makeBookingMessage('assistant-1', 'tool-1'),

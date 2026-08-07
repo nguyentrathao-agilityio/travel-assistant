@@ -6,7 +6,8 @@ import { ChatEmptyState } from '../ChatEmptyState';
 import { ChatHistoryLoading } from '../ChatHistoryLoading';
 import { TypingIndicator } from '../TypingIndicator';
 import { useInterruptElement, useScrollToBottom } from '@/hooks';
-import { SECONDARY_SUGGESTIONS, TOOL_SUGGESTION_ITEMS } from '@/constants';
+import type { ConversationChatMessage } from '@/hooks';
+import { CHAT_ROLE, SECONDARY_SUGGESTIONS, TOOL_SUGGESTION_ITEMS } from '@/constants';
 import { Button } from '@/components';
 import { useSuggestionStore } from '@/stores';
 import type { SendMessage } from '@/stores';
@@ -50,11 +51,21 @@ const ChatMessages = ({
   RenderMessage,
   ...restProps
 }: ChatMessagesProps) => {
-  const latestConversationMessage = [...messages].reverse().find(isRealConversationMessage);
-  // Only show the typing placeholder while waiting on a reply to the user's own message —
-  // once the assistant's streamed message appears, its own bubble takes over.
-  const showPendingAssistant =
-    inProgress && (!latestConversationMessage || latestConversationMessage.role === 'user');
+  const lastUserMessageIndex = messages.reduce(
+    (latestIndex, message, index) => (message.role === CHAT_ROLE.USER ? index : latestIndex),
+    -1
+  );
+  const currentTurnHasVisibleAssistantOutput =
+    lastUserMessageIndex !== -1 &&
+    messages.slice(lastUserMessageIndex + 1).some((message) => {
+      const candidate = message as ConversationChatMessage;
+      return (
+        candidate.role === CHAT_ROLE.ASSISTANT &&
+        (!!candidate.content || !!candidate.hasResolvedToolCard)
+      );
+    });
+  const isTurnPending =
+    inProgress && (lastUserMessageIndex === -1 || !currentTurnHasVisibleAssistantOutput);
 
   const { scrollContainerRef } = useScrollToBottom(messages.length);
   const interrupt = useInterruptElement();
@@ -93,11 +104,11 @@ const ChatMessages = ({
                 {...restProps}
               />
             ))}
-            {showPendingAssistant && <PendingAssistantMessage />}
+            {isTurnPending && <PendingAssistantMessage />}
             {interrupt && <InterruptMessage>{interrupt}</InterruptMessage>}
           </div>
           {children}
-          {!inProgress && (
+          {!isTurnPending && !interrupt && (
             <div className="flex flex-wrap gap-2 pl-[52px]">
               {activeSuggestions.map((s) => {
                 const Icon = s.icon;

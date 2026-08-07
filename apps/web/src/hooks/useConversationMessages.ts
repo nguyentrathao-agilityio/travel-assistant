@@ -6,6 +6,8 @@ import { CHAT_ROLE, TOOL_NAMES } from '@/constants';
 
 type ChatMessage = MessagesProps['messages'][number];
 
+export type ConversationChatMessage = ChatMessage & { hasResolvedToolCard?: boolean };
+
 const BOOKING_TOOL_NAMES = new Set<string>([
   TOOL_NAMES.BOOK_FLIGHT,
   TOOL_NAMES.BOOK_HOTEL,
@@ -102,29 +104,20 @@ const attachGenerativeUi = (
     if (message.role !== CHAT_ROLE.ASSISTANT) return message;
 
     const toolCalls = message.toolCalls ?? [];
-    if (toolCalls.length > 1) {
-      const renderedNodes = toolCalls
-        .map((toolCall) => lazyToolRendered({ ...message, toolCalls: [toolCall] }, messages)?.())
-        .filter((node) => node !== null && node !== undefined);
+    if (toolCalls.length === 0) return message;
 
-      if (renderedNodes.length === 0) return message;
+    const renderedNodes = toolCalls
+      .map((toolCall) => lazyToolRendered({ ...message, toolCalls: [toolCall] }, messages)?.())
+      .filter((node) => node !== null && node !== undefined);
 
-      return {
-        ...message,
-        generativeUI: () =>
-          createElement('div', { className: 'flex flex-col gap-3' }, renderedNodes),
-      };
-    }
+    if (renderedNodes.length === 0) return message;
 
-    if (message.generativeUI) return message;
-
-    const lazyRendered = lazyToolRendered(message, messages);
-    if (!lazyRendered) return message;
-
-    const renderedGenUi = lazyRendered();
-    if (!renderedGenUi) return message;
-
-    return { ...message, generativeUI: () => renderedGenUi };
+    const resolved: ConversationChatMessage = {
+      ...message,
+      generativeUI: () => createElement('div', { className: 'flex flex-col gap-3' }, renderedNodes),
+      hasResolvedToolCard: true,
+    };
+    return resolved;
   });
 
 export const useConversationMessages = (

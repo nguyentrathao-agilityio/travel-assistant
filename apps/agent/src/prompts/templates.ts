@@ -48,7 +48,9 @@ knowledge-base lookup and another tool, call knowledgeSearchTool by itself first
 continue the remaining operations in the next model step of the same invocation.`;
 
 export const PLANNING_AGENT_TOOLS_PROMPT = `## Available Tools
-- weatherTool — current conditions or forecast for a city.
+- weatherTool — current conditions or forecast for a city. Takes a day-count, not calendar dates.
+  For a relative reference ("next week", "in 3 days", "this weekend"), compute a days value
+  yourself from the client's current date — never ask the user for exact dates to call this tool.
 - flightsTool — flights between two airports (needs IATA codes; convert city names yourself).
 - hotelTool — hotels for a city and date range.
 - placesTool — attractions, restaurants, cafes, activities, nightlife, or shopping in a city.

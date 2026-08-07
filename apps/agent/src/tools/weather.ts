@@ -21,10 +21,11 @@ export const weatherTool = tool(
     Required: city.
     Optional: days (1-16, defaults to 5).
 
-    This tool takes a day-count, not specific calendar dates. For a relative time reference
-    (e.g. "next week", "in 3 days", "this weekend"), use the client's current date already given
-    in context to compute a days value that covers the requested period — do not ask the user for
-    exact dates just to satisfy this tool.
+    This tool takes a day-count, not specific calendar dates. Never ask the user for exact dates
+    just to satisfy this tool — compute days yourself from the client's current date already given
+    in context: "this weekend" -> days through the coming Sat/Sun, "next week" -> 7, "in N days" ->
+    N, "the next two weeks" -> 14 (capped at 16). If no timeframe is mentioned, omit days and let
+    it default to 5.
 
     Only call this tool when city is available.`,
     schema: WeatherInputSchema,

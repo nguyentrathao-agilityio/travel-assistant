@@ -88,6 +88,9 @@ importers:
       langchain:
         specifier: ^1.4.0
         version: 1.4.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1))(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(ws@8.20.1)(zod-to-json-schema@3.25.2(zod@3.25.76))
+      langsmith:
+        specifier: ^0.8.3
+        version: 0.8.3(@opentelemetry/api@1.9.1)(openai@6.38.0(ws@8.20.1)(zod@3.25.76))(ws@8.20.1)
       openai:
         specifier: ^6.38.0
         version: 6.38.0(ws@8.20.1)(zod@3.25.76)

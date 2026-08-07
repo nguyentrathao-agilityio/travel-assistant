@@ -17,6 +17,7 @@ export default defineConfig({
     exclude: ['**/node_modules/**', '**/dist/**'],
     fileParallelism: false,
     testTimeout: 60_000,
+    reporters: ['default', 'langsmith/vitest/reporter'],
     env: {
       API_URL: 'http://localhost:4020',
     },

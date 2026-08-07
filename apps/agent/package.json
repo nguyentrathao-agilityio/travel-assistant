@@ -31,6 +31,7 @@
     "agentevals": "^0.0.7",
     "hono": "^4.12.30",
     "langchain": "^1.4.0",
+    "langsmith": "^0.8.3",
     "openai": "^6.38.0",
     "zod": "^3.23.8"
   },

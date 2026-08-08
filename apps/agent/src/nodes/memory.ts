@@ -31,8 +31,11 @@ const extractionModel = createChatModel({ apiKey: OPENAI_API_KEY! }).withStructu
 const isBookingToolMessage = (message: GraphStateType['messages'][number]): boolean =>
   message instanceof ToolMessage && BOOKING_TOOL_NAMES.includes(message.name ?? '');
 
-// Best-effort: extraction runs after the branch has already produced its response, so a failure
-// here must never surface to the user — it only affects what gets remembered next time.
+/**
+ * Extracts durable facts from the latest turn and persists them to long-term memory.
+ * Best-effort: runs after the branch has already produced its response, so a failure
+ * here must never surface to the user — it only affects what gets remembered next time.
+ */
 export const saveMemoryNode = async (state: GraphStateType): Promise<Partial<GraphStateType>> => {
   try {
     const recentMessages = takeRecentMessages(state.messages, MAX_EXTRACT_MEMORY_MESSAGES);

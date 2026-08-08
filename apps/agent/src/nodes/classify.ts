@@ -115,6 +115,7 @@ const buildClassificationContext = (state: GraphStateType): string =>
 
 const toCommand = (state: GraphStateType, result: IntentClassification): ClassifyCommand => {
   const fields = compactExtractedFields(result.extractedFields);
+
   return new Command({
     update: {
       ...requestContextUpdate(state, fields),
@@ -143,7 +144,11 @@ const fallbackCommand = (state: GraphStateType): ClassifyCommand =>
     extractedFields: emptyExtractedFields(),
   });
 
-// Keep classification and branch selection traceable in one node.
+/**
+ * Classifies user intent from recent messages and routes to the matching branch.
+ * Keeps classification and branch selection in one node so both stay traceable
+ * to a single LLM call; falls back to `FALLBACK_INTENT` on parse/schema failure.
+ */
 export const classifyNode = async (state: GraphStateType): Promise<ClassifyCommand> => {
   const recentMessages = takeRecentMessages(state.messages, MAX_CLASSIFY_MESSAGES);
   const contextMessage = new SystemMessage({
@@ -156,11 +161,13 @@ export const classifyNode = async (state: GraphStateType): Promise<ClassifyComma
       { metadata: { 'copilotkit:emit-messages': false } }
     );
     const result = IntentClassificationSchema.safeParse(rawResult);
+
     return result.success ? toCommand(state, result.data) : fallbackCommand(state);
   } catch (error) {
     if (error instanceof OutputParserException || error instanceof z.ZodError) {
       return fallbackCommand(state);
     }
+
     throw error;
   }
 };

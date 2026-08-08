@@ -144,6 +144,7 @@ const missingOperationsResult = (
     : { status: 'incomplete', reason, missingFields: missingOperations };
 };
 
+/** Checks the explore agent's turn for tool failures, missing required data, or a usable result. */
 export const validateExploreResult = (state: GraphStateType): ValidationResult => {
   const failure = failureValidation(state, 'Explore tool execution');
   if (failure) return failure;
@@ -180,6 +181,10 @@ export const validateExploreResult = (state: GraphStateType): ValidationResult =
       };
 };
 
+/**
+ * Checks the planning agent's turn for a booking handoff request, tool failures, missing
+ * required data, or a usable result.
+ */
 export const validatePlanningResult = (state: GraphStateType): ValidationResult => {
   if (state.handoffTarget) {
     return {
@@ -278,12 +283,15 @@ const validateBookingResult = (
   };
 };
 
+/** Checks whether the flight booking is confirmed, still a draft, or missing a selected option. */
 export const validateFlightResult = (state: GraphStateType): ValidationResult =>
   validateBookingResult(state, 'flight');
 
+/** Checks whether the hotel booking is confirmed, still a draft, or missing a selected option. */
 export const validateHotelResult = (state: GraphStateType): ValidationResult =>
   validateBookingResult(state, 'hotel');
 
+/** Checks the cancellation agent's turn for tool failures or a completed interaction. */
 export const validateCancellationResult = (state: GraphStateType): ValidationResult => {
   const failure = failureValidation(state, 'Cancellation');
   return failure
@@ -338,6 +346,10 @@ const traceRecovery = (
   });
 };
 
+/**
+ * Validates the domain agent's output for the current node and decides the next branch:
+ * retry the same node, hand off to a booking node, or finalize via `saveMemory`.
+ */
 export const supervisorNode = (
   state: GraphStateType,
   config?: RunnableConfig
@@ -426,6 +438,7 @@ export const supervisorNode = (
   };
 };
 
+/** Reads the supervisor's decision off state, defaulting to `saveMemory` if unset/invalid. */
 export const routeAfterSupervisor = (state: GraphStateType): SupervisorRoute => {
   const route = state.supervisor.nextNode;
   return route && SUPERVISOR_ROUTES.includes(route) ? route : 'saveMemory';

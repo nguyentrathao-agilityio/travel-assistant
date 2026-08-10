@@ -8,7 +8,7 @@ import {
   HOTEL_BOOKING_AGENT_TOOLS,
   PLANNING_AGENT_TOOLS,
 } from '..';
-import { AGENT_CONFIGS } from '../config';
+import { AGENT_CONFIGS } from '@/constants/agent-config';
 
 const nameOf = (tools: { name: string }[]) => tools.map((tool) => tool.name).sort();
 

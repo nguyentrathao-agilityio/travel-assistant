@@ -35,10 +35,10 @@ const scenarios: Array<{ name: string; humanText: string; expectedTools: string[
 (process.env.OPENAI_API_KEY ? ls.describe : ls.describe.skip)(
   'explore agent tool selection',
   () => {
-    let exploreAgent: Awaited<typeof import('@/agents/explore-agent')>['exploreAgent'];
+    let exploreAgent: Awaited<typeof import('@/nodes/explore')>['exploreAgent'];
 
     beforeAll(async () => {
-      ({ exploreAgent } = await import('@/agents/explore-agent'));
+      ({ exploreAgent } = await import('@/nodes/explore'));
     });
 
     ls.test.each(

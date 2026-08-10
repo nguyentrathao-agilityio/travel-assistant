@@ -441,5 +441,6 @@ export const supervisorNode = (
 /** Reads the supervisor's decision off state, defaulting to `saveMemory` if unset/invalid. */
 export const routeAfterSupervisor = (state: GraphStateType): SupervisorRoute => {
   const route = state.supervisor.nextNode;
+
   return route && SUPERVISOR_ROUTES.includes(route) ? route : 'saveMemory';
 };

@@ -15,34 +15,39 @@ const recordOf = (artifact: unknown): Record<string, unknown> | undefined =>
     ? (artifact as Record<string, unknown>)
     : undefined;
 
+const buildFact = (
+  name: string | undefined,
+  value: Record<string, unknown> | undefined,
+  count: number | undefined,
+  total: number | undefined
+): string => {
+  if (name === TOOL_NAMES.ROUTE && Array.isArray(value?.stops)) {
+    return `A route with ${value.stops.length} stop(s) is available.`;
+  }
+
+  const factByToolName: Partial<Record<string, string>> = {
+    [TOOL_NAMES.FLIGHTS]: `${count ?? 0} flight option(s) are available.`,
+    [TOOL_NAMES.HOTEL]: `${total ?? 0} hotel option(s) are available.`,
+    [TOOL_NAMES.PLACES]: `${total ?? 0} place(s) are available.`,
+    [TOOL_NAMES.LOCAL_TIPS]: `${count ?? 0} local tip(s) are available.`,
+    [TOOL_NAMES.WEATHER]: 'Weather conditions and forecast are available.',
+    [TOOL_NAMES.DESTINATION_EXPLORER]: 'A destination overview is available.',
+    [TOOL_NAMES.TRIP_SUMMARY]: 'A structured trip summary is available.',
+  };
+
+  if (name && factByToolName[name]) return factByToolName[name];
+  return name && WRITE_TOOL_NAMES.has(name)
+    ? 'The booking action result is available.'
+    : 'The result is available.';
+};
+
 export const buildRichUiToolSummary = (name: string | undefined, artifact: unknown): string => {
   const value = recordOf(artifact);
   const results = Array.isArray(value?.results) ? value.results.length : undefined;
   const count = typeof value?.count === 'number' ? value.count : results;
   const total = typeof value?.total === 'number' ? value.total : results;
 
-  const fact =
-    name === TOOL_NAMES.FLIGHTS
-      ? `${count ?? 0} flight option(s) are available.`
-      : name === TOOL_NAMES.HOTEL
-        ? `${total ?? 0} hotel option(s) are available.`
-        : name === TOOL_NAMES.PLACES
-          ? `${total ?? 0} place(s) are available.`
-          : name === TOOL_NAMES.LOCAL_TIPS
-            ? `${count ?? 0} local tip(s) are available.`
-            : name === TOOL_NAMES.ROUTE && Array.isArray(value?.stops)
-              ? `A route with ${value.stops.length} stop(s) is available.`
-              : name === TOOL_NAMES.WEATHER
-                ? 'Weather conditions and forecast are available.'
-                : name === TOOL_NAMES.DESTINATION_EXPLORER
-                  ? 'A destination overview is available.'
-                  : name === TOOL_NAMES.TRIP_SUMMARY
-                    ? 'A structured trip summary is available.'
-                    : name && WRITE_TOOL_NAMES.has(name)
-                      ? 'The booking action result is available.'
-                      : 'The result is available.';
-
-  return `${fact} ${TOOL_READY_OUTPUT}`;
+  return `${buildFact(name, value, count, total)} ${TOOL_READY_OUTPUT}`;
 };
 
 const freshToolMessageCutoff = (messages: readonly unknown[]): number => {

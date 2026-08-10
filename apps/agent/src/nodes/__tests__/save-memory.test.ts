@@ -18,7 +18,7 @@ vi.mock('@/services/memory', () => ({
   saveMemory: (...args: unknown[]) => saveMemoryMock(...args),
 }));
 
-import { saveMemoryNode } from '@/nodes/memory';
+import { saveMemoryNode } from '@/nodes/save-memory';
 import type { GraphStateType } from '@/state';
 
 afterEach(() => {

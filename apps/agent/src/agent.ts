@@ -4,21 +4,17 @@ import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 // Constants
 import { EXTERNAL_API_RETRY_POLICY, POSTGRES_URL } from './constants';
 
-// Agents
+// Nodes
 import {
+  BRANCH_NAMES,
+  SUPERVISOR_ROUTES,
   cancelBookingAgent,
+  classifyNode,
   exploreAgent,
   flightBookingAgent,
   generalAgent,
   hotelBookingAgent,
   planningAgent,
-} from './agents';
-
-// Nodes
-import {
-  BRANCH_NAMES,
-  SUPERVISOR_ROUTES,
-  classifyNode,
   routeAfterSupervisor,
   saveMemoryNode,
   supervisorNode,

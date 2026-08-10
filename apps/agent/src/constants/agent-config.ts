@@ -1,7 +1,7 @@
 import type { StructuredToolInterface } from '@langchain/core/tools';
 
 // Constants
-import type { DomainAgentNodeName } from '@/constants';
+import type { DomainAgentNodeName } from './agents';
 
 // Prompts
 import {

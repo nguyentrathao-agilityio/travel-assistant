@@ -2,15 +2,6 @@ import { describe, expect, it, vi } from 'vitest';
 
 const { node } = vi.hoisted(() => ({ node: () => ({}) }));
 
-vi.mock('@/agents', () => ({
-  cancelBookingAgent: node,
-  exploreAgent: node,
-  flightBookingAgent: node,
-  generalAgent: node,
-  hotelBookingAgent: node,
-  planningAgent: node,
-}));
-
 vi.mock('@/nodes', () => ({
   BRANCH_NAMES: ['explore', 'plan', 'bookFlight', 'bookHotel', 'cancelBooking', 'general'],
   SUPERVISOR_ROUTES: [
@@ -22,7 +13,13 @@ vi.mock('@/nodes', () => ({
     'general',
     'saveMemory',
   ],
+  cancelBookingAgent: node,
   classifyNode: node,
+  exploreAgent: node,
+  flightBookingAgent: node,
+  generalAgent: node,
+  hotelBookingAgent: node,
+  planningAgent: node,
   routeAfterSupervisor: () => 'saveMemory',
   saveMemoryNode: node,
   supervisorNode: node,

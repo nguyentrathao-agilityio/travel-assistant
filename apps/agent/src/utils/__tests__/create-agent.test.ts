@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StructuredToolInterface } from '@langchain/core/tools';
-import type { SpecializedAgentConfig } from '@/agents/config';
+import type { SpecializedAgentConfig } from '@/constants/agent-config';
 
 const {
   createAgentMock,

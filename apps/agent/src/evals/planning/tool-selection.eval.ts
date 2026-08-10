@@ -51,10 +51,10 @@ const scenarios: Array<{
 (process.env.OPENAI_API_KEY ? ls.describe : ls.describe.skip)(
   'planning agent tool selection',
   () => {
-    let planningAgent: Awaited<typeof import('@/agents/planning-agent')>['planningAgent'];
+    let planningAgent: Awaited<typeof import('@/nodes/plan')>['planningAgent'];
 
     beforeAll(async () => {
-      ({ planningAgent } = await import('@/agents/planning-agent'));
+      ({ planningAgent } = await import('@/nodes/plan'));
     });
 
     ls.test.each(

@@ -20,6 +20,7 @@ const graphErrorCode = (
   if (code === 'VALIDATION_ERROR') return 'VALIDATION_ERROR';
   if (code === 'TIMEOUT') return 'TIMEOUT';
   if (code === 'RATE_LIMITED') return 'RATE_LIMIT';
+
   return 'PROVIDER_ERROR';
 };
 

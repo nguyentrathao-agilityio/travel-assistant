@@ -3,6 +3,7 @@ import { createCopilotkitMiddleware } from '@copilotkit/sdk-js/langgraph';
 
 // Constants
 import { OPENAI_API_KEY } from '@/constants';
+import type { SpecializedAgentConfig } from '@/constants/agent-config';
 
 // Services
 import { searchMemories } from '@/services/memory';
@@ -13,9 +14,6 @@ import { createChatModel } from '@/infrastructure/llm';
 
 // Prompts
 import { buildAgentSystemPrompt } from '@/prompts';
-
-// Agents
-import type { SpecializedAgentConfig } from '@/agents/config';
 
 // State
 import { GraphState, type GraphStateType } from '@/state';

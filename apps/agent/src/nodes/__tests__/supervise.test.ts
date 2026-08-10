@@ -9,7 +9,7 @@ import {
   validateExploreResult,
   validateFlightResult,
   validatePlanningResult,
-} from '@/nodes/supervisor';
+} from '@/nodes/supervise';
 
 const state = (overrides: Partial<GraphStateType> = {}): GraphStateType =>
   ({

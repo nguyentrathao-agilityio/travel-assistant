@@ -70,7 +70,7 @@ flowchart LR
   `Command.goto`.
 - Each business branch is a LangChain agent graph with a domain-specific prompt and restricted
   tool set.
-- Every branch feeds into a single `supervise` node ([`apps/agent/src/nodes/supervisor.ts`](apps/agent/src/nodes/supervisor.ts)), which validates the branch's result (tool failures, missing required fields, missing operations) and decides the next hop via `routeAfterSupervisor`.
+- Every branch feeds into a single `supervise` node ([`apps/agent/src/nodes/supervise.ts`](apps/agent/src/nodes/supervise.ts)), which validates the branch's result (tool failures, missing required fields, missing operations) and decides the next hop via `routeAfterSupervisor`.
 - `explore` and `plan` get automatic retries (up to `MAX_RETRIES_PER_NODE`, currently 2) when the supervisor judges the result retryable; other branches don't retry.
 - `plan` requests a booking handoff by setting `handoffTarget` in state — the supervisor reads it and routes straight to `bookFlight` or `bookHotel` instead of falling through to `saveMemory`.
 - Booking and cancellation tools pause with a LangGraph interrupt and require explicit human
@@ -85,8 +85,7 @@ flowchart LR
 The main implementation entry points are:
 
 - [`apps/agent/src/agent.ts`](apps/agent/src/agent.ts) — parent graph
-- [`apps/agent/src/nodes/`](apps/agent/src/nodes) — classification, supervision/routing, and memory
-- [`apps/agent/src/agents/`](apps/agent/src/agents) — the specialized agent branches (`explore`, `plan`, booking, `general`)
+- [`apps/agent/src/nodes/`](apps/agent/src/nodes) — every graph node: classification, supervision/routing, memory, and the specialized agent branches (`explore`, `plan`, booking, `general`)
 - [`apps/agent/src/tools/`](apps/agent/src/tools) — agent-facing tool contracts
 - [`apps/agent/src/services/`](apps/agent/src/services) — domain and external API logic
 - [`apps/web/src/hooks/`](apps/web/src/hooks) — CopilotKit tool renderers, state sync, and approval UI

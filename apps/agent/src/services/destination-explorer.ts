@@ -1,10 +1,7 @@
 import { z } from 'zod';
 
 // Schemas
-import {
-  DestinationExplorerInputSchema,
-  DestinationExplorerResultSchema,
-} from '@/schemas/destination-explorer';
+import { DestinationExplorerInputSchema, DestinationExplorerResultSchema } from '@/schemas';
 
 // Services
 import { getWeather } from './weather';

@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools';
 
 // Schemas
-import { DestinationExplorerInputSchema } from '@/schemas/destination-explorer';
+import { DestinationExplorerInputSchema } from '@/schemas';
 
 // Constants
 import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';

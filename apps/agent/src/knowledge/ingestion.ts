@@ -1,5 +1,5 @@
 // Schemas
-import type { KnowledgeSource } from '@/schemas/knowledge';
+import type { KnowledgeSource } from '@/schemas';
 
 // Constants
 import { KNOWLEDGE_NAMESPACE } from '@/constants';

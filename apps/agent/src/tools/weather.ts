@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools';
 
 // Schemas
-import { WeatherInputSchema } from '@/schemas/weather';
+import { WeatherInputSchema } from '@/schemas';
 
 // Constants
 import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';

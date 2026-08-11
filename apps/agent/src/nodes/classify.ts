@@ -4,7 +4,7 @@ import { OutputParserException } from '@langchain/core/output_parsers';
 import { z } from 'zod';
 
 // Schemas
-import { IntentClassificationSchema, type IntentClassification } from '@/schemas/intent';
+import { IntentClassificationSchema, type IntentClassification } from '@/schemas';
 
 // Constants
 import { FALLBACK_INTENT, MAX_CLASSIFY_MESSAGES, OPENAI_API_KEY } from '@/constants';

@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 // Schemas
-import { PlanningOperationSchema } from '@/schemas/intent';
-import { TOOL_ERROR_CODES, type ToolError } from '@/schemas/tool-error';
+import { PlanningOperationSchema, TOOL_ERROR_CODES, type ToolError } from '@/schemas';
 
 export const GraphErrorCodeSchema = z.enum([
   'VALIDATION_ERROR',

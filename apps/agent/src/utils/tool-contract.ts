@@ -1,6 +1,5 @@
 // Schemas
-import { ToolErrorSchema } from '@/schemas/tool-error';
-import type { ToolError } from '@/schemas/tool-error';
+import { ToolErrorSchema, type ToolError } from '@/schemas';
 
 // Constants
 import { contentAndArtifact } from '@/constants';

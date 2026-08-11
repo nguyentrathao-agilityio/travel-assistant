@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools';
 
 // Schemas
-import { TripSummaryInputSchema } from '@/schemas/trip-summary';
+import { TripSummaryInputSchema } from '@/schemas';
 
 // Constants
 import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';

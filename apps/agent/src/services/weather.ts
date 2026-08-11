@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Schemas
-import { WeatherResponse, WeatherResponseSchema, WeatherResultSchema } from '@/schemas/weather';
+import { WeatherResponse, WeatherResponseSchema, WeatherResultSchema } from '@/schemas';
 
 // Constants
 import { API_URL, ENDPOINTS } from '@/constants';

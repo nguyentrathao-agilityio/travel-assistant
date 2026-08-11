@@ -1,12 +1,14 @@
 import { z } from 'zod';
 
 // Schemas
-import { FlightSearchResultSchema } from '@/schemas/flights';
-import { HotelSearchResultSchema } from '@/schemas/hotel';
-import { PlacesSearchResultSchema } from '@/schemas/places';
-import { RouteResultSchema } from '@/schemas/route';
-import { TipsResultSchema } from '@/schemas/tips';
-import { WeatherResultSchema } from '@/schemas/weather';
+import {
+  FlightSearchResultSchema,
+  HotelSearchResultSchema,
+  PlacesSearchResultSchema,
+  RouteResultSchema,
+  TipsResultSchema,
+  WeatherResultSchema,
+} from '@/schemas';
 
 export const SearchResultsSchema = z.object({
   weather: WeatherResultSchema.optional(),

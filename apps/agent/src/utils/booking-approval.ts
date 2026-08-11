@@ -3,7 +3,7 @@ import { interrupt } from '@langchain/langgraph';
 import type { BookingApprovalRequest, BookingApprovalResponse } from '@repo/types';
 
 // Schemas
-import { BookingApprovalResponseSchema } from '@/schemas/booking';
+import { BookingApprovalResponseSchema } from '@/schemas';
 
 // Constants
 import { contentAndArtifact } from '@/constants';

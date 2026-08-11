@@ -7,7 +7,7 @@ import {
   FlightInputSchema,
   FlightSchema,
   FlightSearchResultSchema,
-} from '@/schemas/flights';
+} from '@/schemas';
 
 // Constants
 import { API_URL, ENDPOINTS, ERROR_MESSAGES } from '@/constants';

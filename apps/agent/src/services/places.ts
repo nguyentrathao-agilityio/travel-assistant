@@ -1,8 +1,13 @@
 import { z } from 'zod';
 
 // Schemas
-import { PlacesInputSchema, ApiPlacesSearchResponseSchema } from '@/schemas/places';
-import type { PlacesSearchResult, PlaceResultItem, ApiPlace } from '@/schemas/places';
+import {
+  PlacesInputSchema,
+  ApiPlacesSearchResponseSchema,
+  type PlacesSearchResult,
+  type PlaceResultItem,
+  type ApiPlace,
+} from '@/schemas';
 
 // Constants
 import { API_URL, ENDPOINTS } from '@/constants';

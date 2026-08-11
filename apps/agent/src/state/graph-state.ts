@@ -3,9 +3,7 @@ import { CopilotKitStateSchema, zodState } from '@copilotkit/sdk-js/langgraph';
 import { z } from 'zod';
 
 // Schemas
-import { FlightSchema } from '@/schemas/flights';
-import { HotelAvailabilitySchema } from '@/schemas/hotel';
-import { IntentSchema } from '@/schemas/intent';
+import { FlightSchema, HotelAvailabilitySchema, IntentSchema } from '@/schemas';
 
 // State
 import { ExecutionStateSchema, ExecutionUpdateSchema, mergeExecutionState } from './execution';

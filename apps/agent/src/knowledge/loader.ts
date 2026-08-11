@@ -1,7 +1,7 @@
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
 // Schemas
-import type { KnowledgeDocument, KnowledgeSource } from '@/schemas/knowledge';
+import type { KnowledgeDocument, KnowledgeSource } from '@/schemas';
 
 // Constants
 import { KNOWLEDGE_CHUNK_OVERLAP, KNOWLEDGE_CHUNK_SIZE } from '@/constants';

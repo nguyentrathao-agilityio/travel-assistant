@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Schemas
-import { IntentSchema } from '@/schemas/intent';
+import { IntentSchema } from '@/schemas';
 
 export const TravelRequestSchema = z.object({
   intent: IntentSchema.optional(),

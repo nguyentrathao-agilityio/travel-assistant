@@ -1,7 +1,7 @@
 import { SystemMessage, ToolMessage } from '@langchain/core/messages';
 
 // Schemas
-import { MemoryExtractionSchema } from '@/schemas/memory';
+import { MemoryExtractionSchema } from '@/schemas';
 
 // Constants
 import { BOOKING_TOOL_NAMES, MAX_EXTRACT_MEMORY_MESSAGES, OPENAI_API_KEY } from '@/constants';

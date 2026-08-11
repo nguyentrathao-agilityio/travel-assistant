@@ -1,12 +1,13 @@
 // Schemas
-import { PlacesResultSchema, RouteLegApiSchema } from '@/schemas/route';
-import type {
-  RouteResult,
-  LandmarkStop,
-  TourLeg,
-  TransportMode,
-  RouteLegApi,
-} from '@/schemas/route';
+import {
+  PlacesResultSchema,
+  RouteLegApiSchema,
+  type RouteResult,
+  type LandmarkStop,
+  type TourLeg,
+  type TransportMode,
+  type RouteLegApi,
+} from '@/schemas';
 
 // Constants
 import {

@@ -1,5 +1,5 @@
 // Schemas
-import type { Intent } from '@/schemas/intent';
+import type { Intent } from '@/schemas';
 
 export const FALLBACK_INTENT: Intent = 'general';
 

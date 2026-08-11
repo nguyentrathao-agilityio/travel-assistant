@@ -1,11 +1,7 @@
 import { z } from 'zod';
 
 // Schemas
-import {
-  TripCostEstimateSchema,
-  TripSummaryInputSchema,
-  TripSummaryResultSchema,
-} from '@/schemas/trip-summary';
+import { TripCostEstimateSchema, TripSummaryInputSchema, TripSummaryResultSchema } from '@/schemas';
 
 // Services
 import { searchFlights } from './flights';

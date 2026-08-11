@@ -1,10 +1,10 @@
 // Schemas
-import { KnowledgeDocumentSchema } from '@/schemas/knowledge';
-import type {
-  KnowledgeDocument,
-  KnowledgeSearchInput,
-  KnowledgeSearchResult,
-} from '@/schemas/knowledge';
+import {
+  KnowledgeDocumentSchema,
+  type KnowledgeDocument,
+  type KnowledgeSearchInput,
+  type KnowledgeSearchResult,
+} from '@/schemas';
 
 // Constants
 import {

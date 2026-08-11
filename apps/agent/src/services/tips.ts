@@ -1,8 +1,14 @@
 import { z } from 'zod';
 
 // Schemas
-import { TipCategorySchema, TipsInputSchema, ApiTipsResponseSchema } from '@/schemas/tips';
-import type { TipsResult, TipItem, ApiTip } from '@/schemas/tips';
+import {
+  TipCategorySchema,
+  TipsInputSchema,
+  ApiTipsResponseSchema,
+  type TipsResult,
+  type TipItem,
+  type ApiTip,
+} from '@/schemas';
 
 // Constants
 import { API_URL, ENDPOINTS } from '@/constants';

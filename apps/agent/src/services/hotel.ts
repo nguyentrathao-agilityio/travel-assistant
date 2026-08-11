@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Schemas
-import { HotelSearchResponseSchema, HotelSearchResultSchema } from '@/schemas/hotel';
+import { HotelSearchResponseSchema, HotelSearchResultSchema } from '@/schemas';
 
 // Constants
 import { API_URL, ENDPOINTS } from '@/constants';

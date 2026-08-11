@@ -7,15 +7,13 @@ import { z } from 'zod';
 import { IntentClassificationSchema, type IntentClassification } from '@/schemas/intent';
 
 // Constants
-import {
-  CLASSIFY_SYSTEM_PROMPT,
-  FALLBACK_INTENT,
-  MAX_CLASSIFY_MESSAGES,
-  OPENAI_API_KEY,
-} from '@/constants';
+import { FALLBACK_INTENT, MAX_CLASSIFY_MESSAGES, OPENAI_API_KEY } from '@/constants';
 
 // Infrastructure
 import { createChatModel } from '@/infrastructure/llm';
+
+// Prompts
+import { CLASSIFY_SYSTEM_PROMPT } from '@/prompts';
 
 // State
 import type { GraphStateType, GraphStateUpdate, TravelRequest } from '@/state';

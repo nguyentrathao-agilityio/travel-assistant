@@ -4,12 +4,7 @@ import { SystemMessage, ToolMessage } from '@langchain/core/messages';
 import { MemoryExtractionSchema } from '@/schemas/memory';
 
 // Constants
-import {
-  BOOKING_TOOL_NAMES,
-  EXTRACT_MEMORY_SYSTEM_PROMPT,
-  MAX_EXTRACT_MEMORY_MESSAGES,
-  OPENAI_API_KEY,
-} from '@/constants';
+import { BOOKING_TOOL_NAMES, MAX_EXTRACT_MEMORY_MESSAGES, OPENAI_API_KEY } from '@/constants';
 
 // Services
 import { saveMemory } from '@/services/memory';
@@ -17,6 +12,9 @@ import { saveMemory } from '@/services/memory';
 // Infrastructure
 import { createChatModel } from '@/infrastructure/llm';
 import { memoryStore } from '@/infrastructure/persistence';
+
+// Prompts
+import { EXTRACT_MEMORY_SYSTEM_PROMPT } from '@/prompts';
 
 // State
 import type { GraphStateType } from '@/state';

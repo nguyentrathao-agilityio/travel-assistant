@@ -1,158 +1,65 @@
-import { ToolMessage } from '@langchain/core/messages';
 import type { RunnableConfig } from '@langchain/core/runnables';
-
-// Schemas
-import { ToolErrorSchema } from '@/schemas';
 
 // Constants
 import {
-  DOMAIN_AGENT_NODE_NAMES,
+  BOOKING_TYPES,
+  DOMAIN_NODE_NAME,
   FINALIZATION_NODE_NAME,
   MAX_RETRIES_PER_NODE,
+  RETRYABLE_DOMAIN_NODE_NAMES,
   TOOL_NAMES,
+  type BookingType,
   type DomainAgentNodeName,
 } from '@/constants';
 
 // Utils
+import { failureValidation, writeFailureResult } from '@/utils/domain-state/tool-failures';
 import { latestTurnToolMessages as latestTurnToolMessagesFromList } from '@/utils/domain-state/tool-messages';
+import {
+  missingOperationsResult,
+  missingRequiredOperations,
+} from '@/utils/domain-state/required-operations';
 
 // State
-import type { GraphError, GraphStateType, GraphStateUpdate, SupervisorState } from '@/state';
+import {
+  GRAPH_ERROR_CODES,
+  SELECTION_STATUSES,
+  SUPERVISOR_NEXT_NODE_NAMES,
+  type GraphError,
+  type GraphStateType,
+  type GraphStateUpdate,
+  type SupervisorRoute,
+  type ValidationResult,
+} from '@/state';
 
-export type SupervisorRoute = NonNullable<SupervisorState['nextNode']>;
-export const SUPERVISOR_ROUTES: SupervisorRoute[] = [
-  ...DOMAIN_AGENT_NODE_NAMES,
-  FINALIZATION_NODE_NAME,
-];
+export type { SupervisorRoute };
+export const SUPERVISOR_ROUTES: SupervisorRoute[] = [...SUPERVISOR_NEXT_NODE_NAMES];
 
 type DomainNode = DomainAgentNodeName;
-type ValidationResult = {
-  status: SupervisorState['status'];
-  reason: string;
-  missingFields?: string[];
-  retryable?: boolean;
-  nextNode?: SupervisorRoute;
-  error?: GraphError;
-};
 
-const isErrorArtifact = (artifact: unknown): boolean =>
-  typeof artifact === 'object' && artifact !== null && 'error' in artifact;
-
-const latestTurnToolMessages = (state: GraphStateType): ToolMessage[] =>
+/** Tool messages produced since the user's latest message. */
+const latestTurnToolMessages = (state: GraphStateType) =>
   latestTurnToolMessagesFromList(state.messages);
 
-const latestResultPerTool = (state: GraphStateType): ToolMessage[] => {
-  const seen = new Set<string>();
-  const latest: ToolMessage[] = [];
-  const messages = latestTurnToolMessages(state);
-  for (let index = messages.length - 1; index >= 0; index -= 1) {
-    const message = messages[index];
-    const name = message.name ?? 'unknownTool';
-    if (seen.has(name)) continue;
-    seen.add(name);
-    latest.push(message);
-  }
-  return latest;
-};
-
-type ToolFailure = { name: string; error: GraphError };
-
-const toolFailures = (state: GraphStateType): ToolFailure[] =>
-  latestResultPerTool(state).flatMap((message): ToolFailure[] => {
-    if (message.status !== 'error' && !isErrorArtifact(message.artifact)) return [];
-    const name = message.name ?? 'unknownTool';
-    const parsed = ToolErrorSchema.safeParse(message.artifact);
-    if (!parsed.success) {
-      const retryable =
-        state.execution.currentNode === 'explore' || state.execution.currentNode === 'plan';
-      return [
-        {
-          name,
-          error: {
-            node: state.execution.currentNode,
-            operation: name,
-            code: 'PROVIDER_ERROR',
-            message: 'The provider operation failed.',
-            retryable,
-          },
-        },
-      ];
-    }
-    const code: GraphError['code'] =
-      parsed.data.code === 'TIMEOUT'
-        ? 'TIMEOUT'
-        : parsed.data.code === 'RATE_LIMITED'
-          ? 'RATE_LIMIT'
-          : parsed.data.code === 'VALIDATION_ERROR'
-            ? 'VALIDATION_ERROR'
-            : 'PROVIDER_ERROR';
-    return [
-      {
-        name,
-        error: {
-          node: state.execution.currentNode,
-          operation: name,
-          provider: parsed.data.provider,
-          code,
-          message: parsed.data.message,
-          retryable: parsed.data.retryable,
-        },
-      },
-    ];
-  });
-
-const failureValidation = (state: GraphStateType, label: string): ValidationResult | undefined => {
-  const failures = toolFailures(state);
-  if (failures.length === 0) return undefined;
-  const retryable = failures.every(({ error }) => error.retryable);
-  return {
-    status: 'failed',
-    reason: `${label} failed: ${failures.map(({ name }) => name).join(', ')}`,
-    retryable,
-    error: failures[0].error,
-  };
-};
-
+/** The destination for this request, from client input or already-resolved trip state. */
 const requestDestination = (state: GraphStateType): string | undefined =>
   state.request.destination ?? state.destination;
 
-const missingRequiredOperations = (state: GraphStateType): string[] => {
-  const results = state.searchResults;
-  const toolNames = new Set(latestTurnToolMessages(state).map(({ name }) => name));
-  return (state.execution.requiredOperations ?? []).filter((operation) => {
-    if (operation === 'weather') return results.weather === undefined;
-    if (operation === 'flights') return results.flights === undefined;
-    if (operation === 'hotels') return results.hotels === undefined;
-    if (operation === 'places') return results.places === undefined;
-    if (operation === 'route') return results.route === undefined;
-    if (operation === 'tripSummary') return !toolNames.has(TOOL_NAMES.TRIP_SUMMARY);
-    return !toolNames.has(TOOL_NAMES.KNOWLEDGE_SEARCH);
-  });
-};
-
-// Retryable only with partial progress; zero fulfilled means the agent asked the user instead of
-// calling a tool, and retrying would just repeat the same question.
-const missingOperationsResult = (
+/**
+ * Shared precondition checks for the explore/plan validators: tool failures, then a missing
+ * destination, then missing required operations. Returns `undefined` when the turn may proceed.
+ */
+const searchPreconditionFailure = (
   state: GraphStateType,
-  missingOperations: string[],
-  reason: string
-): ValidationResult => {
-  const requiredOperations = state.execution.requiredOperations ?? [];
-  const madeProgress = missingOperations.length < requiredOperations.length;
-  return madeProgress
-    ? { status: 'incomplete', reason, retryable: true }
-    : { status: 'incomplete', reason, missingFields: missingOperations };
-};
-
-/** Checks the explore agent's turn for tool failures, missing required data, or a usable result. */
-export const validateExploreResult = (state: GraphStateType): ValidationResult => {
-  const failure = failureValidation(state, 'Explore tool execution');
+  labels: { failureLabel: string; destinationReason: string; operationsLabel: string }
+): ValidationResult | undefined => {
+  const failure = failureValidation(state, labels.failureLabel);
   if (failure) return failure;
 
   if (!requestDestination(state) && latestTurnToolMessages(state).length === 0) {
     return {
       status: 'incomplete',
-      reason: 'A destination is required before destination exploration can continue.',
+      reason: labels.destinationReason,
       missingFields: ['destination'],
     };
   }
@@ -162,9 +69,21 @@ export const validateExploreResult = (state: GraphStateType): ValidationResult =
     return missingOperationsResult(
       state,
       missingOperations,
-      `Exploration still needs: ${missingOperations.join(', ')}.`
+      `${labels.operationsLabel} still needs: ${missingOperations.join(', ')}.`
     );
   }
+
+  return undefined;
+};
+
+/** Checks the explore agent's turn for tool failures, missing required data, or a usable result. */
+export const validateExploreResult = (state: GraphStateType): ValidationResult => {
+  const precondition = searchPreconditionFailure(state, {
+    failureLabel: 'Explore tool execution',
+    destinationReason: 'A destination is required before destination exploration can continue.',
+    operationsLabel: 'Exploration',
+  });
+  if (precondition) return precondition;
 
   const hasResult = Boolean(
     state.searchResults.weather ||
@@ -194,25 +113,12 @@ export const validatePlanningResult = (state: GraphStateType): ValidationResult 
     };
   }
 
-  const failure = failureValidation(state, 'Planning tool execution');
-  if (failure) return failure;
-
-  if (!requestDestination(state) && latestTurnToolMessages(state).length === 0) {
-    return {
-      status: 'incomplete',
-      reason: 'A destination is required before planning can continue.',
-      missingFields: ['destination'],
-    };
-  }
-
-  const missingOperations = missingRequiredOperations(state);
-  if (missingOperations.length > 0) {
-    return missingOperationsResult(
-      state,
-      missingOperations,
-      `Planning still needs: ${missingOperations.join(', ')}.`
-    );
-  }
+  const precondition = searchPreconditionFailure(state, {
+    failureLabel: 'Planning tool execution',
+    destinationReason: 'A destination is required before planning can continue.',
+    operationsLabel: 'Planning',
+  });
+  if (precondition) return precondition;
 
   const results = state.searchResults;
   const latestToolNames = new Set(latestTurnToolMessages(state).map(({ name }) => name));
@@ -241,36 +147,36 @@ export const validatePlanningResult = (state: GraphStateType): ValidationResult 
       };
 };
 
-const validateBookingResult = (
-  state: GraphStateType,
-  type: 'flight' | 'hotel'
-): ValidationResult => {
-  const failure = failureValidation(state, `${type} booking`);
-  if (failure) {
-    return {
-      status: 'failed',
-      reason:
-        failure.error?.code === 'TIMEOUT'
-          ? `The ${type} booking status is unknown and must be verified before retrying.`
-          : failure.reason,
-      error:
-        failure.error?.code === 'TIMEOUT'
-          ? { ...failure.error, code: 'WRITE_STATUS_UNKNOWN', retryable: false }
-          : { ...failure.error!, retryable: false },
-    };
+/** Per-booking-type reads of confirmation/draft state, keyed by `BOOKING_TYPES`. */
+const BOOKING_STATE_ACCESSORS: Record<
+  BookingType,
+  {
+    isBooked: (state: GraphStateType) => boolean;
+    hasDraft: (state: GraphStateType) => boolean;
+    missingField: string;
   }
+> = {
+  [BOOKING_TYPES.FLIGHT]: {
+    isBooked: (state) => state.flightSelectionStatus === SELECTION_STATUSES.BOOKED,
+    hasDraft: (state) => Boolean(state.selectedOptions.flightId || state.flights?.departure?.id),
+    missingField: 'flightId',
+  },
+  [BOOKING_TYPES.HOTEL]: {
+    isBooked: (state) => state.hotelSelectionStatus === SELECTION_STATUSES.BOOKED,
+    hasDraft: (state) => Boolean(state.selectedOptions.hotelId || state.hotel?.id),
+    missingField: 'hotelId',
+  },
+};
 
-  const isBooked =
-    type === 'flight'
-      ? state.flightSelectionStatus === 'booked'
-      : state.hotelSelectionStatus === 'booked';
-  const hasDraft =
-    type === 'flight'
-      ? Boolean(state.selectedOptions.flightId || state.flights?.departure?.id)
-      : Boolean(state.selectedOptions.hotelId || state.hotel?.id);
+/** Checks a flight/hotel booking's turn for write failures, confirmation, or a draft selection. */
+const validateBookingResult = (state: GraphStateType, type: BookingType): ValidationResult => {
+  const failure = failureValidation(state, `${type} booking`);
+  if (failure) return writeFailureResult(failure, `${type} booking`);
 
-  if (isBooked) return { status: 'complete', reason: `${type} booking is confirmed.` };
-  if (hasDraft) {
+  const { isBooked, hasDraft, missingField } = BOOKING_STATE_ACCESSORS[type];
+
+  if (isBooked(state)) return { status: 'complete', reason: `${type} booking is confirmed.` };
+  if (hasDraft(state)) {
     return {
       status: 'incomplete',
       reason: `${type} booking remains a draft or requires user input/approval.`,
@@ -279,56 +185,53 @@ const validateBookingResult = (
   return {
     status: 'incomplete',
     reason: `${type} booking requires an exact selected option.`,
-    missingFields: [type === 'flight' ? 'flightId' : 'hotelId'],
+    missingFields: [missingField],
   };
 };
 
 /** Checks whether the flight booking is confirmed, still a draft, or missing a selected option. */
 export const validateFlightResult = (state: GraphStateType): ValidationResult =>
-  validateBookingResult(state, 'flight');
+  validateBookingResult(state, BOOKING_TYPES.FLIGHT);
 
 /** Checks whether the hotel booking is confirmed, still a draft, or missing a selected option. */
 export const validateHotelResult = (state: GraphStateType): ValidationResult =>
-  validateBookingResult(state, 'hotel');
+  validateBookingResult(state, BOOKING_TYPES.HOTEL);
 
 /** Checks the cancellation agent's turn for tool failures or a completed interaction. */
 export const validateCancellationResult = (state: GraphStateType): ValidationResult => {
   const failure = failureValidation(state, 'Cancellation');
-  return failure
-    ? {
-        status: 'failed',
-        reason:
-          failure.error?.code === 'TIMEOUT'
-            ? 'The cancellation status is unknown and must be verified before retrying.'
-            : failure.reason,
-        error:
-          failure.error?.code === 'TIMEOUT'
-            ? { ...failure.error, code: 'WRITE_STATUS_UNKNOWN', retryable: false }
-            : { ...failure.error!, retryable: false },
-      }
-    : {
-        status: latestTurnToolMessages(state).length > 0 ? 'complete' : 'incomplete',
-        reason:
-          latestTurnToolMessages(state).length > 0
-            ? 'Cancellation interaction completed.'
-            : 'Cancellation requires a booking identifier or user confirmation.',
-      };
+  if (failure) return writeFailureResult(failure, 'cancellation');
+
+  const hasInteraction = latestTurnToolMessages(state).length > 0;
+  return {
+    status: hasInteraction ? 'complete' : 'incomplete',
+    reason: hasInteraction
+      ? 'Cancellation interaction completed.'
+      : 'Cancellation requires a booking identifier or user confirmation.',
+  };
 };
 
-const validatorFor = (node: DomainNode, state: GraphStateType): ValidationResult => {
-  if (node === 'explore') return validateExploreResult(state);
-  if (node === 'plan') return validatePlanningResult(state);
-  if (node === 'bookFlight') return validateFlightResult(state);
-  if (node === 'bookHotel') return validateHotelResult(state);
-  if (node === 'cancelBooking') return validateCancellationResult(state);
-  return { status: 'complete', reason: 'General response completed.' };
+/** Dispatch table from domain node to its validator. */
+const VALIDATOR_BY_NODE: Record<DomainNode, (state: GraphStateType) => ValidationResult> = {
+  [DOMAIN_NODE_NAME.EXPLORE]: validateExploreResult,
+  [DOMAIN_NODE_NAME.PLAN]: validatePlanningResult,
+  [DOMAIN_NODE_NAME.BOOK_FLIGHT]: validateFlightResult,
+  [DOMAIN_NODE_NAME.BOOK_HOTEL]: validateHotelResult,
+  [DOMAIN_NODE_NAME.CANCEL_BOOKING]: validateCancellationResult,
+  [DOMAIN_NODE_NAME.GENERAL]: () => ({ status: 'complete', reason: 'General response completed.' }),
 };
 
+/** Runs the validator registered for the given domain node. */
+const validatorFor = (node: DomainNode, state: GraphStateType): ValidationResult =>
+  VALIDATOR_BY_NODE[node](state);
+
+/** Narrows the supervised node to a known domain node (excludes the `saveMemory` finalization node). */
 const isDomainNode = (value: string | undefined): value is DomainNode =>
   value !== undefined &&
   SUPERVISOR_ROUTES.includes(value as SupervisorRoute) &&
-  value !== 'saveMemory';
+  value !== FINALIZATION_NODE_NAME;
 
+/** Logs a recoverable graph error for observability. */
 const traceRecovery = (
   config: RunnableConfig | undefined,
   node: string,
@@ -367,7 +270,7 @@ export const supervisorNode = (
         errors: [
           {
             node: 'supervisor',
-            code: 'PROVIDER_ERROR',
+            code: GRAPH_ERROR_CODES.PROVIDER_ERROR,
             message: 'Unknown supervisor source node.',
             retryable: false,
           },
@@ -386,7 +289,7 @@ export const supervisorNode = (
 
   const retries = state.execution.retryCount[node] ?? 0;
   if (validation.error) traceRecovery(config, node, validation.error, retries);
-  if (validation.retryable && (node === 'explore' || node === 'plan')) {
+  if (validation.retryable && RETRYABLE_DOMAIN_NODE_NAMES.has(node)) {
     if (retries < MAX_RETRIES_PER_NODE) {
       return {
         supervisor: {
@@ -410,7 +313,12 @@ export const supervisorNode = (
       execution: {
         missingFields: validation.missingFields ?? [],
         errors: [
-          { node, code: 'MAX_RETRY_EXCEEDED', message: validation.reason, retryable: false },
+          {
+            node,
+            code: GRAPH_ERROR_CODES.MAX_RETRY_EXCEEDED,
+            message: validation.reason,
+            retryable: false,
+          },
         ],
       },
     };
@@ -425,7 +333,7 @@ export const supervisorNode = (
             {
               node,
               operation: 'collect_input',
-              code: 'MISSING_INPUT',
+              code: GRAPH_ERROR_CODES.MISSING_INPUT,
               message: validation.reason,
               retryable: false,
             },

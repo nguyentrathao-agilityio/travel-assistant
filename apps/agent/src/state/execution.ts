@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 // Schemas
 import { PlanningOperationSchema } from '@/schemas/intent';
+import { TOOL_ERROR_CODES, type ToolError } from '@/schemas/tool-error';
 
 export const GraphErrorCodeSchema = z.enum([
   'VALIDATION_ERROR',
@@ -24,6 +25,26 @@ export const GraphErrorSchema = z.object({
   occurredAt: z.string().optional(),
 });
 export type GraphError = z.infer<typeof GraphErrorSchema>;
+
+export const GRAPH_ERROR_CODES = {
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  MISSING_INPUT: 'MISSING_INPUT',
+  NOT_FOUND: 'NOT_FOUND',
+  TIMEOUT: 'TIMEOUT',
+  RATE_LIMIT: 'RATE_LIMIT',
+  PROVIDER_ERROR: 'PROVIDER_ERROR',
+  MAX_RETRY_EXCEEDED: 'MAX_RETRY_EXCEEDED',
+  WRITE_STATUS_UNKNOWN: 'WRITE_STATUS_UNKNOWN',
+} as const satisfies Record<string, GraphError['code']>;
+
+/** Translates a validated provider/tool error code into the graph's own recovery code. */
+export const GRAPH_ERROR_CODE_BY_TOOL_ERROR_CODE: Partial<
+  Record<ToolError['code'], GraphError['code']>
+> = {
+  [TOOL_ERROR_CODES.TIMEOUT]: GRAPH_ERROR_CODES.TIMEOUT,
+  [TOOL_ERROR_CODES.RATE_LIMITED]: GRAPH_ERROR_CODES.RATE_LIMIT,
+  [TOOL_ERROR_CODES.VALIDATION_ERROR]: GRAPH_ERROR_CODES.VALIDATION_ERROR,
+};
 
 export const ExecutionStateObjectSchema = z.object({
   currentNode: z.string().optional(),

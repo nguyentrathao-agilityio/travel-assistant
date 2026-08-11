@@ -1,0 +1,50 @@
+// Constants
+import { TOOL_NAMES } from '@/constants';
+
+// Schemas
+import { PLANNING_OPERATIONS, type PlanningOperation } from '@/schemas';
+
+// State
+import type { GraphStateType, ValidationResult } from '@/state';
+
+// Utils
+import { latestTurnToolMessages } from './tool-messages';
+
+type OperationMissingCheck = (
+  results: GraphStateType['searchResults'],
+  toolNames: ReadonlySet<string | undefined>
+) => boolean;
+
+const IS_OPERATION_MISSING: Record<PlanningOperation, OperationMissingCheck> = {
+  [PLANNING_OPERATIONS.WEATHER]: (results) => results.weather === undefined,
+  [PLANNING_OPERATIONS.FLIGHTS]: (results) => results.flights === undefined,
+  [PLANNING_OPERATIONS.HOTELS]: (results) => results.hotels === undefined,
+  [PLANNING_OPERATIONS.PLACES]: (results) => results.places === undefined,
+  [PLANNING_OPERATIONS.ROUTE]: (results) => results.route === undefined,
+  [PLANNING_OPERATIONS.TRIP_SUMMARY]: (_results, toolNames) =>
+    !toolNames.has(TOOL_NAMES.TRIP_SUMMARY),
+  [PLANNING_OPERATIONS.KNOWLEDGE]: (_results, toolNames) =>
+    !toolNames.has(TOOL_NAMES.KNOWLEDGE_SEARCH),
+};
+
+/** Returns the required planning operations that don't yet have a usable result this turn. */
+export const missingRequiredOperations = (state: GraphStateType): string[] => {
+  const results = state.searchResults;
+  const toolNames = new Set(latestTurnToolMessages(state.messages).map(({ name }) => name));
+  return (state.execution.requiredOperations ?? []).filter((operation) =>
+    IS_OPERATION_MISSING[operation](results, toolNames)
+  );
+};
+
+/** Builds the incomplete-status result for a turn that's still missing required operations. */
+export const missingOperationsResult = (
+  state: GraphStateType,
+  missingOperations: string[],
+  reason: string
+): ValidationResult => {
+  const requiredOperations = state.execution.requiredOperations ?? [];
+  const madeProgress = missingOperations.length < requiredOperations.length;
+  return madeProgress
+    ? { status: 'incomplete', reason, retryable: true }
+    : { status: 'incomplete', reason, missingFields: missingOperations };
+};

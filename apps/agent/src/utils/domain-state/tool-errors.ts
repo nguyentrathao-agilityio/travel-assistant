@@ -5,10 +5,10 @@ import type { z } from 'zod';
 import { WRITE_AGENT_NODE_NAMES, type DomainAgentNodeName } from '@/constants';
 
 // Schemas
-import { ToolErrorSchema } from '@/schemas';
+import { TOOL_ERROR_CODES, ToolErrorSchema } from '@/schemas';
 
 // State
-import type { GraphError } from '@/state';
+import { GRAPH_ERROR_CODE_BY_TOOL_ERROR_CODE, GRAPH_ERROR_CODES, type GraphError } from '@/state';
 
 const WRITE_TASKS = new Set<DomainAgentNodeName>(WRITE_AGENT_NODE_NAMES);
 
@@ -16,12 +16,10 @@ const graphErrorCode = (
   taskName: DomainAgentNodeName,
   code: z.infer<typeof ToolErrorSchema>['code']
 ): GraphError['code'] => {
-  if (WRITE_TASKS.has(taskName) && code === 'TIMEOUT') return 'WRITE_STATUS_UNKNOWN';
-  if (code === 'VALIDATION_ERROR') return 'VALIDATION_ERROR';
-  if (code === 'TIMEOUT') return 'TIMEOUT';
-  if (code === 'RATE_LIMITED') return 'RATE_LIMIT';
-
-  return 'PROVIDER_ERROR';
+  if (WRITE_TASKS.has(taskName) && code === TOOL_ERROR_CODES.TIMEOUT) {
+    return GRAPH_ERROR_CODES.WRITE_STATUS_UNKNOWN;
+  }
+  return GRAPH_ERROR_CODE_BY_TOOL_ERROR_CODE[code] ?? GRAPH_ERROR_CODES.PROVIDER_ERROR;
 };
 
 /** Maps a validated provider/tool error into the graph-owned recovery model. */
@@ -39,7 +37,7 @@ export const graphErrorFromTool = (
     provider: parsed.data.provider,
     code: graphErrorCode(taskName, parsed.data.code),
     message:
-      isWrite && parsed.data.code === 'TIMEOUT'
+      isWrite && parsed.data.code === TOOL_ERROR_CODES.TIMEOUT
         ? 'The provider may have received the write request. Verify the booking status before trying again.'
         : parsed.data.message,
     retryable: isWrite ? false : parsed.data.retryable,

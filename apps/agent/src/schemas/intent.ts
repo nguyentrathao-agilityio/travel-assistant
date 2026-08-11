@@ -39,3 +39,13 @@ export const IntentClassificationSchema = z.object({
 export type Intent = z.infer<typeof IntentSchema>;
 export type PlanningOperation = z.infer<typeof PlanningOperationSchema>;
 export type IntentClassification = z.infer<typeof IntentClassificationSchema>;
+
+export const PLANNING_OPERATIONS = {
+  WEATHER: 'weather',
+  FLIGHTS: 'flights',
+  HOTELS: 'hotels',
+  PLACES: 'places',
+  ROUTE: 'route',
+  TRIP_SUMMARY: 'tripSummary',
+  KNOWLEDGE: 'knowledge',
+} as const satisfies Record<string, PlanningOperation>;

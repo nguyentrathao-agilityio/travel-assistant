@@ -26,7 +26,14 @@ const SelectedFlightSchema = z.object({
   departure: FlightSchema.optional(),
   return: FlightSchema.optional(),
 });
-const SelectionStatusSchema = z.enum(['selected', 'confirmed', 'booked']);
+export const SelectionStatusSchema = z.enum(['selected', 'confirmed', 'booked']);
+export type SelectionStatus = z.infer<typeof SelectionStatusSchema>;
+
+export const SELECTION_STATUSES = {
+  SELECTED: 'selected',
+  CONFIRMED: 'confirmed',
+  BOOKED: 'booked',
+} as const satisfies Record<string, SelectionStatus>;
 
 export const GraphState = new StateSchema({
   ...CopilotKitStateSchema.fields,

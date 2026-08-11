@@ -59,7 +59,7 @@ export const cancelBookingTool = tool(
   {
     name: TOOL_NAMES.CANCEL_BOOKING,
     description: `Cancel an existing flight or hotel booking by booking ID or confirmation code.
-Always pauses for explicit human approval before cancellation.`,
+    Always pauses for explicit human approval before cancellation.`,
     schema: CancelBookingInputSchema,
     responseFormat: 'content_and_artifact',
   }

@@ -42,9 +42,9 @@ export const transferToBookFlightTool = tool(
   {
     name: 'transferToBookFlightTool',
     description: `Hand off to the flight booking agent. Call this instead of trying to book
-yourself as soon as, within this same message, the user has both picked one exact flight from
-search results and given passenger name, email, and phone. Do not use this just to search or
-compare flights — flightsTool already covers that.`,
+    yourself as soon as, within this same message, the user has both picked one exact flight from
+    search results and given passenger name, email, and phone. Do not use this just to search or
+    compare flights — flightsTool already covers that.`,
     schema: FlightBookingInputSchema,
   }
 );

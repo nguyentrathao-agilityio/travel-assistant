@@ -13,6 +13,7 @@ const isLocationFact = (memory: string): boolean => {
   const key = keyOf(memory);
   if (key === null) return false;
   if (ORIGIN_FACT_KEY_HINTS.some((hint) => key.includes(hint))) return false;
+
   return LOCATION_FACT_KEY_HINTS.some((hint) => key.includes(hint));
 };
 

@@ -12,4 +12,5 @@ export const SupervisorStateSchema = z
     reason: z.string().optional(),
   })
   .default(() => ({ status: 'pending' as const }));
+
 export type SupervisorState = z.infer<typeof SupervisorStateSchema>;

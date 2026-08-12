@@ -1,9 +1,14 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useCallback, useMemo } from 'react';
 import { CopilotKit } from '@copilotkit/react-core';
-import { Toaster } from 'sonner';
+import { Toaster, toast } from 'sonner';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
-import { AGENT_NAME, COPILOTKIT_PUBLIC_LICENSE_KEY, RUNTIME_URL } from '@/constants';
+import {
+  AGENT_NAME,
+  COPILOTKIT_PUBLIC_LICENSE_KEY,
+  ERROR_MESSAGES,
+  RUNTIME_URL,
+} from '@/constants';
 import { useThreadStore } from '@/stores/threadStore';
 import { useApiKeyStore } from '@/stores/apiKeyStore';
 import { todayClientIso, clientTimezone } from '@/utils';
@@ -26,6 +31,10 @@ export const Providers = ({ children }: ProvidersProps) => {
     [apiKey, sessionId]
   );
 
+  const handleError = useCallback((errorEvent: { error?: Error }) => {
+    toast.error(errorEvent.error?.message || ERROR_MESSAGES.STREAM);
+  }, []);
+
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <CopilotKit
@@ -35,6 +44,7 @@ export const Providers = ({ children }: ProvidersProps) => {
         agent={AGENT_NAME}
         threadId={sessionId}
         headers={headers}
+        onError={handleError}
       >
         {children}
         <Toaster richColors position="bottom-center" offset="80px" />

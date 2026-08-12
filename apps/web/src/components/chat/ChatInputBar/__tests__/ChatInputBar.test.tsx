@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useAgent } from '@copilotkit/react-core/v2';
+import { useAgent, useCopilotKit } from '@copilotkit/react-core/v2';
 import { ChatInputBar } from '../index';
 
 const mockMessages: { role: string; toolCalls?: unknown[] }[] = [];
@@ -19,6 +19,9 @@ beforeEach(() => {
     .mockReturnValue({ agent: { messages: mockMessages } } as unknown as ReturnType<
       typeof useAgent
     >);
+  jest.mocked(useCopilotKit).mockReturnValue({
+    copilotkit: { interruptElement: null, subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })) },
+  } as unknown as ReturnType<typeof useCopilotKit>);
 });
 
 describe('ChatInputBar', () => {
@@ -61,6 +64,18 @@ describe('ChatInputBar', () => {
       render(<ChatInputBar {...makeProps()} />);
       await userEvent.setup().type(screen.getByLabelText('Chat message'), 'Hello');
       expect(screen.getByLabelText('Send message')).toBeEnabled();
+    });
+
+    it('send button is disabled while a booking approval interrupt is pending', async () => {
+      jest.mocked(useCopilotKit).mockReturnValue({
+        copilotkit: {
+          interruptElement: {},
+          subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+        },
+      } as unknown as ReturnType<typeof useCopilotKit>);
+      render(<ChatInputBar {...makeProps()} />);
+      await userEvent.setup().type(screen.getByLabelText('Chat message'), 'Hi');
+      expect(screen.getByLabelText('Send message')).toBeDisabled();
     });
   });
 

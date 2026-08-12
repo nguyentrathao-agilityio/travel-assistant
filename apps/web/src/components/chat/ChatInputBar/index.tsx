@@ -7,6 +7,9 @@ import { useAgent } from '@copilotkit/react-core/v2';
 // Stores
 import { useSuggestionStore, useThreadStore } from '@/stores';
 
+// Hooks
+import { useInterruptElement } from '@/hooks';
+
 // Utils
 import { cn } from '@/utils';
 
@@ -24,6 +27,7 @@ const ChatInputBar = ({ onSend, inProgress }: InputProps) => {
   const activeThreadId = useThreadStore((state) => state.activeThreadId);
   const { agent } = useAgent({ agentId: AGENT_NAME, threadId: activeThreadId });
   const messages = agent.messages;
+  const isAwaitingApproval = useInterruptElement() !== null;
 
   const setOnSend = useSuggestionStore((s) => s.setOnSend);
   const setLastTool = useSuggestionStore((s) => s.setLastTool);
@@ -43,7 +47,7 @@ const ChatInputBar = ({ onSend, inProgress }: InputProps) => {
     .some((msg) => msg.role === CHAT_ROLE.TOOL);
   const isToolCallPending = Boolean(lastAssistantMsg?.toolCalls?.length) && !hasToolResultAfter;
 
-  const submitDisabled = inProgress || isToolCallPending;
+  const submitDisabled = inProgress || isToolCallPending || isAwaitingApproval;
 
   const handleSubmit = useCallback(async () => {
     const trimmed = value.trim();

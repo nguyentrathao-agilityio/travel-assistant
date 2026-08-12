@@ -3,7 +3,15 @@ import { describe, expect, it, vi } from 'vitest';
 const { node } = vi.hoisted(() => ({ node: () => ({}) }));
 
 vi.mock('@/nodes', () => ({
-  BRANCH_NAMES: ['explore', 'plan', 'bookFlight', 'bookHotel', 'cancelBooking', 'general'],
+  BRANCH_NAMES: [
+    'explore',
+    'plan',
+    'bookFlight',
+    'bookHotel',
+    'cancelBooking',
+    'general',
+    'refusal',
+  ],
   SUPERVISOR_ROUTES: [
     'explore',
     'plan',
@@ -20,6 +28,7 @@ vi.mock('@/nodes', () => ({
   generalAgent: node,
   hotelBookingAgent: node,
   planningAgent: node,
+  refusalNode: node,
   routeAfterSupervisor: () => 'saveMemory',
   saveMemoryNode: node,
   supervisorNode: node,
@@ -38,7 +47,7 @@ vi.mock('@langchain/langgraph-checkpoint-postgres', () => ({
 import { buildGraph } from '@/agent';
 
 describe('graph construction', () => {
-  it('compiles with every domain node returning through the supervisor', () => {
+  it('compiles with domain nodes supervised and refusal terminating directly', () => {
     expect(() => buildGraph().compile()).not.toThrow();
   });
 });

@@ -48,6 +48,7 @@ export const GraphState = new StateSchema({
   clientDate: zodState(z.string().optional()),
   clientTimezone: zodState(z.string().optional()),
   intent: zodState(IntentSchema.optional()),
+  refusalMessage: zodState(z.string().optional()),
   handoffTarget: zodState(z.enum(['bookFlight', 'bookHotel']).optional()),
 
   // Explicit, serializable business state for node-to-node coordination.

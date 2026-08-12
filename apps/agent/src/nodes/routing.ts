@@ -11,9 +11,9 @@ import {
 // State
 import type { GraphStateType } from '@/state';
 
-export type BranchName = DomainAgentNodeName;
+export type BranchName = DomainAgentNodeName | 'refusal';
 
-export const BRANCH_NAMES: BranchName[] = [...DOMAIN_AGENT_NODE_NAMES];
+export const BRANCH_NAMES: BranchName[] = [...DOMAIN_AGENT_NODE_NAMES, 'refusal'];
 
 const INTENT_TO_BRANCH: Record<Intent, BranchName> = {
   explore: 'explore',
@@ -22,6 +22,7 @@ const INTENT_TO_BRANCH: Record<Intent, BranchName> = {
   book_hotel: 'bookHotel',
   cancel_booking: 'cancelBooking',
   general: 'general',
+  out_of_scope: 'refusal',
 };
 
 /** Maps intent to a graph branch, defaulting to `general`. */

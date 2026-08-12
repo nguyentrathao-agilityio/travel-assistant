@@ -15,6 +15,7 @@ import {
   generalAgent,
   hotelBookingAgent,
   planningAgent,
+  refusalNode,
   routeAfterSupervisor,
   saveMemoryNode,
   supervisorNode,
@@ -37,6 +38,7 @@ export const buildGraph = () =>
     .addNode('bookHotel', hotelBookingAgent)
     .addNode('cancelBooking', cancelBookingAgent)
     .addNode('general', generalAgent)
+    .addNode('refusal', refusalNode)
     .addNode('supervise', supervisorNode)
     .addNode('saveMemory', saveMemoryNode)
     .addEdge(START, 'classify')
@@ -46,6 +48,7 @@ export const buildGraph = () =>
     .addEdge('bookHotel', 'supervise')
     .addEdge('cancelBooking', 'supervise')
     .addEdge('general', 'supervise')
+    .addEdge('refusal', END)
     .addConditionalEdges('supervise', routeAfterSupervisor, SUPERVISOR_ROUTES)
     .addEdge('saveMemory', END);
 

@@ -9,8 +9,9 @@ The practice focuses primarily on building the agent logic and orchestration lay
 ## Architecture
 
 The current agent is a custom LangGraph workflow: a classifier routes to one of six specialized
-agent branches, and every branch's result is checked by a shared `supervise` node before the
-graph decides whether to retry, hand off, or finalize:
+agent branches or, for clearly off-topic requests, straight to a deterministic `refusal` node.
+Every agent branch's result is checked by a shared `supervise` node before the graph decides
+whether to retry, hand off, or finalize:
 
 ```mermaid
 %%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 32, "rankSpacing": 55}}}%%
@@ -33,6 +34,7 @@ flowchart LR
     CLASSIFY -->|book_hotel| BOOK_HOTEL
     CLASSIFY -->|cancel_booking| CANCEL
     CLASSIFY -->|"general / fallback"| GENERAL
+    CLASSIFY -->|out_of_scope| REFUSAL("🙅 <b>Refusal</b><br/>Deterministic decline, no model call")
 
     EXPLORE --> SUPERVISE{{"🛡️ Supervise<br/>validate · retry · route"}}
     PLAN --> SUPERVISE
@@ -48,12 +50,14 @@ flowchart LR
 
     SUPERVISE --> MEMORY("🧠 <b>Save memory</b><br/>best effort")
     MEMORY --> END((("⏹️<br/>END")))
+    REFUSAL --> END
 
     classDef terminal fill:#1e293b,color:#f8fafc,stroke:#38bdf8,stroke-width:2.5px;
     classDef router fill:#fef9c3,color:#713f12,stroke:#eab308,stroke-width:2.5px;
     classDef readAgent fill:#e0f2fe,color:#075985,stroke:#0284c7,stroke-width:1.5px;
     classDef actionAgent fill:#ffe4e6,color:#9f1239,stroke:#e11d48,stroke-width:1.5px;
     classDef memory fill:#dcfce7,color:#14532d,stroke:#16a34a,stroke-width:2.5px;
+    classDef refusal fill:#f1f5f9,color:#334155,stroke:#64748b,stroke-width:1.5px,stroke-dasharray:3 2;
     classDef routesBox fill:transparent,stroke:#94a3b8,stroke-width:1.5px,stroke-dasharray:4 3,color:#475569;
 
     class START,END terminal;
@@ -61,6 +65,7 @@ flowchart LR
     class EXPLORE,PLAN,GENERAL readAgent;
     class BOOK_FLIGHT,BOOK_HOTEL,CANCEL actionAgent;
     class MEMORY memory;
+    class REFUSAL refusal;
     class ROUTES routesBox;
 
     linkStyle default stroke:#94a3b8,stroke-width:1.5px;
@@ -68,6 +73,7 @@ flowchart LR
 
 - `classify` uses structured output to identify the user's intent and routes with
   `Command.goto`.
+- An `out_of_scope` intent routes straight to `refusal` ([`apps/agent/src/nodes/refusal.ts`](apps/agent/src/nodes/refusal.ts)) — a plain node with no model, tool, or supervisor call, which replies with the language-matched `refusalMessage` `classify` already produced in the same call and ends the turn immediately.
 - Each business branch is a LangChain agent graph with a domain-specific prompt and restricted
   tool set.
 - Every branch feeds into a single `supervise` node ([`apps/agent/src/nodes/supervise.ts`](apps/agent/src/nodes/supervise.ts)), which validates the branch's result (tool failures, missing required fields, missing operations) and decides the next hop via `routeAfterSupervisor`.

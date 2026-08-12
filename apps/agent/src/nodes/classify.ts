@@ -118,6 +118,7 @@ const toCommand = (state: GraphStateType, result: IntentClassification): Classif
     update: {
       ...requestContextUpdate(state, fields),
       intent: result.intent,
+      refusalMessage: result.refusalMessage ?? undefined,
       request: {
         intent: result.intent,
         confidence: result.confidence,
@@ -139,6 +140,7 @@ const fallbackCommand = (state: GraphStateType): ClassifyCommand =>
     intent: FALLBACK_INTENT,
     confidence: 0,
     requiredOperations: [],
+    refusalMessage: null,
     extractedFields: emptyExtractedFields(),
   });
 

@@ -20,16 +20,25 @@ const state = (overrides: Partial<GraphStateType> = {}): GraphStateType =>
   ({ messages: [], ...overrides }) as GraphStateType;
 
 const classification = (
-  intent: 'general' | 'explore' | 'plan' | 'book_flight' | 'book_hotel' | 'cancel_booking',
+  intent:
+    | 'general'
+    | 'explore'
+    | 'plan'
+    | 'book_flight'
+    | 'book_hotel'
+    | 'cancel_booking'
+    | 'out_of_scope',
   extractedFields: Record<string, unknown> = {},
   confidence = 0.9,
   requiredOperations: Array<
     'weather' | 'flights' | 'hotels' | 'places' | 'route' | 'tripSummary' | 'knowledge'
-  > = []
+  > = [],
+  refusalMessage: string | null = null
 ) => ({
   intent,
   confidence,
   requiredOperations,
+  refusalMessage,
   extractedFields: {
     origin: null,
     destination: null,
@@ -52,6 +61,7 @@ describe('classifyNode', () => {
     ['book_flight', 'bookFlight'],
     ['book_hotel', 'bookHotel'],
     ['cancel_booking', 'cancelBooking'],
+    ['out_of_scope', 'refusal'],
   ] as const)('stores and routes the %s intent to %s', async (intent, branch) => {
     invokeMock.mockResolvedValueOnce(classification(intent));
 
@@ -64,6 +74,16 @@ describe('classifyNode', () => {
       handoffTarget: undefined,
     });
     expect(result.goto).toEqual([branch]);
+  });
+
+  it('stores the language-matched refusal message classifyNode produced for out_of_scope', async () => {
+    invokeMock.mockResolvedValueOnce(
+      classification('out_of_scope', {}, 0.9, [], 'Tôi chỉ có thể hỗ trợ về du lịch.')
+    );
+
+    const result = await classifyNode(state());
+
+    expect(updateOf(result).refusalMessage).toBe('Tôi chỉ có thể hỗ trợ về du lịch.');
   });
 
   it('stores only fields extracted from the latest request', async () => {

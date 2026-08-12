@@ -4,7 +4,15 @@ import { IntentClassificationSchema, IntentSchema } from '@/schemas/intent';
 
 describe('IntentSchema', () => {
   it('accepts every known intent value', () => {
-    const values = ['explore', 'plan', 'book_flight', 'book_hotel', 'cancel_booking', 'general'];
+    const values = [
+      'explore',
+      'plan',
+      'book_flight',
+      'book_hotel',
+      'cancel_booking',
+      'general',
+      'out_of_scope',
+    ];
 
     for (const value of values) {
       expect(IntentSchema.safeParse(value).success).toBe(true);
@@ -32,6 +40,7 @@ describe('IntentClassificationSchema', () => {
         intent: 'plan',
         confidence: 0.9,
         requiredOperations: ['hotels'],
+        refusalMessage: null,
         extractedFields: {
           ...emptyFields,
           destination: 'Da Nang',
@@ -67,6 +76,7 @@ describe('IntentClassificationSchema', () => {
         intent: 'general',
         confidence: 0.5,
         requiredOperations: [],
+        refusalMessage: null,
         extractedFields: emptyFields,
       }).success
     ).toBe(true);
@@ -75,9 +85,33 @@ describe('IntentClassificationSchema', () => {
         intent: 'general',
         confidence: 0.5,
         requiredOperations: [],
+        refusalMessage: null,
         extractedFields: { origin: null },
       }).success
     ).toBe(false);
+  });
+
+  it('requires refusalMessage, accepting either null or a non-empty string', () => {
+    const base = {
+      intent: 'out_of_scope' as const,
+      confidence: 0.9,
+      requiredOperations: [],
+      extractedFields: emptyFields,
+    };
+
+    expect(IntentClassificationSchema.safeParse(base).success).toBe(false);
+    expect(IntentClassificationSchema.safeParse({ ...base, refusalMessage: null }).success).toBe(
+      true
+    );
+    expect(
+      IntentClassificationSchema.safeParse({
+        ...base,
+        refusalMessage: 'I can only help with travel planning.',
+      }).success
+    ).toBe(true);
+    expect(IntentClassificationSchema.safeParse({ ...base, refusalMessage: '' }).success).toBe(
+      false
+    );
   });
 
   it('rejects unknown required operations', () => {

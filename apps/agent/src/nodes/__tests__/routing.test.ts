@@ -11,6 +11,7 @@ describe('routeByIntent', () => {
     ['book_hotel', 'bookHotel'],
     ['cancel_booking', 'cancelBooking'],
     ['general', 'general'],
+    ['out_of_scope', 'refusal'],
   ] as const)('routes intent "%s" to branch "%s"', (intent, branch) => {
     expect(routeByIntent(intent)).toBe(branch);
   });

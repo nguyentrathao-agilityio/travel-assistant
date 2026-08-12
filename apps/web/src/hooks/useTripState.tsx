@@ -14,11 +14,13 @@ import { useShallow } from 'zustand/shallow';
 // Utils
 import { todayClientIso, clientTimezone as getClientTimezone } from '@/utils';
 
+const EMPTY_TRIP_STATE: TripState = {};
+
 export const useTripState = () => {
   const sessionId = useThreadStore((s) => s.activeThreadId);
   const { savedState, setTripState, clearTripState } = useTripStateStore(
     useShallow((state) => ({
-      savedState: state.tripStates[sessionId] ?? {},
+      savedState: state.tripStates[sessionId] ?? EMPTY_TRIP_STATE,
       setTripState: state.setTripState,
       clearTripState: state.clearTripState,
     }))

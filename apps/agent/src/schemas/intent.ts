@@ -10,6 +10,7 @@ export const IntentSchema = z.enum([
   'book_hotel',
   'cancel_booking',
   'general',
+  'out_of_scope',
 ]);
 
 export const PlanningOperationSchema = z.enum([
@@ -26,6 +27,7 @@ export const IntentClassificationSchema = z.object({
   intent: IntentSchema,
   confidence: z.number().min(0).max(1),
   requiredOperations: z.array(PlanningOperationSchema),
+  refusalMessage: z.string().trim().min(1).nullable(),
   extractedFields: z.object({
     origin: z.string().trim().min(1).nullable(),
     destination: z.string().trim().min(1).nullable(),

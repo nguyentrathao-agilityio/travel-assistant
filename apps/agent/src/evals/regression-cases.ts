@@ -1,7 +1,14 @@
 export type TravelEvaluationCase = {
   name: string;
   input: string;
-  expectedIntent: 'general' | 'explore' | 'plan' | 'book_flight' | 'book_hotel' | 'cancel_booking';
+  expectedIntent:
+    | 'general'
+    | 'explore'
+    | 'plan'
+    | 'book_flight'
+    | 'book_hotel'
+    | 'cancel_booking'
+    | 'out_of_scope';
   requiredFields?: string[];
   expectedTools?: string[];
   requiresApproval?: boolean;
@@ -65,5 +72,25 @@ export const TRAVEL_REGRESSION_CASES: TravelEvaluationCase[] = [
     requiredFields: ['destination'],
     expectedTools: ['hotelTool'],
     criteria: ['grounded_results', 'no_duplicate_ui_content'],
+  },
+  {
+    name: 'off-topic request',
+    input: 'Can you write me a Python function to sort a list?',
+    expectedIntent: 'out_of_scope',
+    criteria: ['intent_accuracy'],
+  },
+  {
+    name: 'travel request with an unrelated aside',
+    input: "Quick unrelated question: what's 15% of 200? Also, what's the weather in Hanoi today?",
+    expectedIntent: 'plan',
+    requiredFields: ['destination'],
+    expectedTools: ['weatherTool'],
+    criteria: ['intent_accuracy', 'tool_selection'],
+  },
+  {
+    name: 'travel-relevant personal advice',
+    input: 'What should I pack for Sapa in winter?',
+    expectedIntent: 'explore',
+    criteria: ['intent_accuracy'],
   },
 ];

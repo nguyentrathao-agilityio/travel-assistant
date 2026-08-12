@@ -25,7 +25,16 @@ For a multi-part request include every requested operation; do not mark booking 
   an exact hotel ID, or by clear reference to one already shown earlier in this conversation.
 - cancel_booking: the user wants to cancel or change an existing confirmed booking. Changing
   search criteria, dates, destination, or an unbooked selection is plan instead.
-- general: greetings, small talk, or anything that doesn't fit the categories above.
+- general: greetings and travel-related small talk that does not require a tool.
+- out_of_scope: requests with no travel relevance at all — general knowledge, coding, math,
+  writing, or personal advice unrelated to a trip. Use this instead of general so the graph can
+  return a deterministic refusal without invoking another model or any tool. Never use out_of_scope
+  for a travel-relevant personal-context question (packing, local safety, tap water, customs,
+  trip budgeting, and similar) — classify those as explore instead. When intent is out_of_scope,
+  also return refusalMessage: exactly one short, friendly sentence, in the same language as the
+  user's latest message, declining and inviting a travel question instead — for example (in
+  English) "I can only help with travel planning. Is there a trip I can help you with?". Return
+  refusalMessage as null for every other intent.
 
 ## Rules
 - Classify only. Do not answer the user, call tools, search, plan, book, or cancel anything.
@@ -38,4 +47,9 @@ For a multi-part request include every requested operation; do not mark booking 
   resolved reliably, return null rather than inventing it.
 - A reference to an exact or previously selected flight/hotel can be a booking intent. An ambiguous
   booking reference with no matching state must route to plan or general, never destructive booking.
-- Use general with low confidence when no category is reliable.`;
+- Use general with low confidence when the request may still be travel-related but no category is
+  reliable. Use out_of_scope only when the request is clearly unrelated to travel.
+- If a message mixes a travel-relevant part with an unrelated aside (for example "quick unrelated
+  question: what's 15% of 200? Also, what's the weather in Hanoi today?"), classify and extract
+  fields/operations for the travel-relevant part only (explore/plan/general as appropriate) and
+  ignore the aside — never let an unrelated aside cause the whole message to be out_of_scope.`;

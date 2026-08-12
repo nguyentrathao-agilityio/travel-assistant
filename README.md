@@ -14,62 +14,21 @@ Every agent branch's result is checked by a shared `supervise` node before the g
 whether to retry, hand off, or finalize:
 
 ```mermaid
-%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 32, "rankSpacing": 55}}}%%
-flowchart LR
-    START(("▶️<br/>START")) --> CLASSIFY{{"🧭 Classify intent"}}
-
-    subgraph ROUTES[" 🧩 Specialized agent branches "]
-        direction TB
-        EXPLORE("🗺️ <b>Explore</b><br/>Destinations · Places · Tips · RAG")
-        PLAN("🧳 <b>Plan</b><br/>Flights · Hotels · Routes · Weather")
-        BOOK_FLIGHT("✈️ <b>Book flight</b><br/>Revalidate · Approve · Submit")
-        BOOK_HOTEL("🏨 <b>Book hotel</b><br/>Revalidate · Approve · Submit")
-        CANCEL("🚫 <b>Cancel booking</b><br/>Retrieve · Approve · Cancel")
-        GENERAL("💬 <b>General</b><br/>Travel conversation")
-    end
-
-    CLASSIFY -->|explore| EXPLORE
-    CLASSIFY -->|plan| PLAN
-    CLASSIFY -->|book_flight| BOOK_FLIGHT
-    CLASSIFY -->|book_hotel| BOOK_HOTEL
-    CLASSIFY -->|cancel_booking| CANCEL
-    CLASSIFY -->|"general / fallback"| GENERAL
-    CLASSIFY -->|out_of_scope| REFUSAL("🙅 <b>Refusal</b><br/>Deterministic decline, no model call")
-
-    EXPLORE --> SUPERVISE{{"🛡️ Supervise<br/>validate · retry · route"}}
-    PLAN --> SUPERVISE
-    BOOK_FLIGHT --> SUPERVISE
-    BOOK_HOTEL --> SUPERVISE
-    CANCEL --> SUPERVISE
-    GENERAL --> SUPERVISE
-
-    SUPERVISE -. "🔁 retry ≤2 (explore/plan)" .-> EXPLORE
-    SUPERVISE -. "🔁 retry ≤2 (explore/plan)" .-> PLAN
-    SUPERVISE -. "↪️ handoff" .-> BOOK_FLIGHT
-    SUPERVISE -. "↪️ handoff" .-> BOOK_HOTEL
-
-    SUPERVISE --> MEMORY("🧠 <b>Save memory</b><br/>best effort")
-    MEMORY --> END((("⏹️<br/>END")))
-    REFUSAL --> END
-
-    classDef terminal fill:#1e293b,color:#f8fafc,stroke:#38bdf8,stroke-width:2.5px;
-    classDef router fill:#fef9c3,color:#713f12,stroke:#eab308,stroke-width:2.5px;
-    classDef readAgent fill:#e0f2fe,color:#075985,stroke:#0284c7,stroke-width:1.5px;
-    classDef actionAgent fill:#ffe4e6,color:#9f1239,stroke:#e11d48,stroke-width:1.5px;
-    classDef memory fill:#dcfce7,color:#14532d,stroke:#16a34a,stroke-width:2.5px;
-    classDef refusal fill:#f1f5f9,color:#334155,stroke:#64748b,stroke-width:1.5px,stroke-dasharray:3 2;
-    classDef routesBox fill:transparent,stroke:#94a3b8,stroke-width:1.5px,stroke-dasharray:4 3,color:#475569;
-
-    class START,END terminal;
-    class CLASSIFY,SUPERVISE router;
-    class EXPLORE,PLAN,GENERAL readAgent;
-    class BOOK_FLIGHT,BOOK_HOTEL,CANCEL actionAgent;
-    class MEMORY memory;
-    class REFUSAL refusal;
-    class ROUTES routesBox;
-
-    linkStyle default stroke:#94a3b8,stroke-width:1.5px;
+flowchart TD
+    START((START)) --> classify
+    classify --> explore & plan & bookFlight & bookHotel & cancelBooking & general
+    classify --> refusal
+    explore & plan & bookFlight & bookHotel & cancelBooking & general --> supervise
+    supervise --> saveMemory --> END((END))
+    refusal --> END
 ```
+
+- **Entry** — `classify` routes on intent via `Command.goto`
+- **Branches** — explore, plan, bookFlight, bookHotel, cancelBooking, general
+- **Refusal** — `out_of_scope` routes straight to `refusal`, skipping supervise and saveMemory entirely
+- **Retry** — explore & plan only, max 2 attempts
+- **Handoff** — plan → booking branch
+- **Exit** — supervise → saveMemory (best effort) → end; refusal → end directly
 
 - `classify` uses structured output to identify the user's intent and routes with
   `Command.goto`.

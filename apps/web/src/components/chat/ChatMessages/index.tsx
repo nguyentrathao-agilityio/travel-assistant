@@ -108,7 +108,7 @@ const ChatMessages = ({
             {interrupt && <InterruptMessage>{interrupt}</InterruptMessage>}
           </div>
           {children}
-          {!isTurnPending && !interrupt && (
+          {!inProgress && !interrupt && (
             <div className="flex flex-wrap gap-2 pl-[52px]">
               {activeSuggestions.map((s) => {
                 const Icon = s.icon;

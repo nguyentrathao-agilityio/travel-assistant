@@ -148,7 +148,7 @@ describe('ChatMessages', () => {
       expect(screen.queryByRole('status', { name: 'AI is thinking' })).not.toBeInTheDocument();
     });
 
-    it('does not bring the typing indicator back, and shows suggestions, once the current turn already has a real answer — even if inProgress stays true and a trailing tool/system message re-appears after it', () => {
+    it('does not bring the typing indicator back once the current turn already has a real answer — even if inProgress stays true and a trailing tool/system message re-appears after it', () => {
       const assistantAnswer = {
         ...makeMessage('assistant-1', 'assistant'),
         content: 'To enter Vietnam as a tourist, you will need a valid passport and an e-visa.',
@@ -179,6 +179,35 @@ describe('ChatMessages', () => {
       );
 
       expect(screen.queryByRole('status', { name: 'AI is thinking' })).not.toBeInTheDocument();
+    });
+
+    it('keeps suggestions hidden while a response is still streaming, even after real content has appeared', () => {
+      const assistantAnswer = {
+        ...makeMessage('assistant-1', 'assistant'),
+        content: 'To enter Vietnam as a tourist, you will need a valid passport and an e-visa.',
+      } as CKMessage;
+
+      render(
+        <ChatMessages
+          {...defaultProps}
+          messages={[makeMessage('user-1'), assistantAnswer]}
+          inProgress
+        />
+      );
+
+      expect(screen.queryByText('Find places')).not.toBeInTheDocument();
+    });
+
+    it('shows suggestions once streaming finishes', () => {
+      const assistantAnswer = {
+        ...makeMessage('assistant-1', 'assistant'),
+        content: 'To enter Vietnam as a tourist, you will need a valid passport and an e-visa.',
+      } as CKMessage;
+
+      render(
+        <ChatMessages {...defaultProps} messages={[makeMessage('user-1'), assistantAnswer]} />
+      );
+
       expect(screen.getByText('Find places')).toBeInTheDocument();
     });
 

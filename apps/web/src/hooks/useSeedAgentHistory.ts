@@ -13,7 +13,7 @@ export const useSeedAgentHistory = (
   persistedMessages: AgUiMessage[],
   isHistoryLoading: boolean
 ): void => {
-  const { agent } = useAgent({ agentId: AGENT_NAME, threadId });
+  const { agent } = useAgent({ agentId: AGENT_NAME });
   const messages = agent.messages;
   const seededThreadRef = useRef<string | null>(null);
   const hasRealLiveMessages = messages.some(isRealConversationMessage);

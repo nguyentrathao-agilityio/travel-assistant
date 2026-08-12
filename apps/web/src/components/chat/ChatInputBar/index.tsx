@@ -1,11 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { KeyboardEvent, ChangeEvent } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Square } from 'lucide-react';
 import type { InputProps } from '@copilotkit/react-ui';
 import { useAgent } from '@copilotkit/react-core/v2';
 
 // Stores
-import { useSuggestionStore, useThreadStore } from '@/stores';
+import { useSuggestionStore } from '@/stores';
 
 // Hooks
 import { useInterruptElement } from '@/hooks';
@@ -21,11 +21,10 @@ import { AGENT_NAME, CHAT_ROLE } from '@/constants';
 
 const MAX_TEXTAREA_HEIGHT = 160;
 
-const ChatInputBar = ({ onSend, inProgress }: InputProps) => {
+const ChatInputBar = ({ onSend, onStop, inProgress, hideStopButton = false }: InputProps) => {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const activeThreadId = useThreadStore((state) => state.activeThreadId);
-  const { agent } = useAgent({ agentId: AGENT_NAME, threadId: activeThreadId });
+  const { agent } = useAgent({ agentId: AGENT_NAME });
   const messages = agent.messages;
   const isAwaitingApproval = useInterruptElement() !== null;
 
@@ -89,16 +88,25 @@ const ChatInputBar = ({ onSend, inProgress }: InputProps) => {
           aria-label="Chat message"
           className="text-body font-regular text-text-primary placeholder:text-text-tertiary flex-1 resize-none bg-transparent outline-none"
         />
-        <Button
-          onClick={handleSubmit}
-          disabled={submitDisabled}
-          aria-label="Send message"
-          className={cn(
-            'bg-brand-500 mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-opacity',
-            submitDisabled && 'opacity-40'
-          )}
-          rightIcon={<ArrowRight size={16} className="text-white" />}
-        />
+        {inProgress && !hideStopButton ? (
+          <Button
+            onClick={onStop}
+            aria-label="Stop generating"
+            className="bg-brand-500 mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-opacity"
+            rightIcon={<Square size={14} className="fill-current text-white" />}
+          />
+        ) : (
+          <Button
+            onClick={handleSubmit}
+            disabled={submitDisabled}
+            aria-label="Send message"
+            className={cn(
+              'bg-brand-500 mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-opacity',
+              submitDisabled && 'opacity-40'
+            )}
+            rightIcon={<ArrowRight size={16} className="text-white" />}
+          />
+        )}
       </div>
 
       <div className="flex justify-center">

@@ -131,13 +131,13 @@ describe('ChatMessages', () => {
       expect(screen.getByRole('status', { name: 'AI is thinking' })).toBeInTheDocument();
     });
 
-    it('does not duplicate the typing indicator after an assistant message arrives', () => {
+    it('replaces the avatar typing indicator with the suggestions-loading pill once an assistant message arrives', () => {
       const assistantMessage = {
         ...makeMessage('assistant-1', 'assistant'),
         content: 'I can help with that.',
       } as CKMessage;
 
-      render(
+      const { container } = render(
         <ChatMessages
           {...defaultProps}
           messages={[makeMessage('user-1'), assistantMessage]}
@@ -145,10 +145,11 @@ describe('ChatMessages', () => {
         />
       );
 
-      expect(screen.queryByRole('status', { name: 'AI is thinking' })).not.toBeInTheDocument();
+      expect(container.querySelector('.bg-assistant-gradient')).not.toBeInTheDocument();
+      expect(screen.getAllByRole('status', { name: 'AI is thinking' })).toHaveLength(1);
     });
 
-    it('does not bring the typing indicator back once the current turn already has a real answer — even if inProgress stays true and a trailing tool/system message re-appears after it', () => {
+    it('does not bring the avatar typing indicator back once the current turn already has a real answer — even if inProgress stays true and a trailing tool/system message re-appears after it', () => {
       const assistantAnswer = {
         ...makeMessage('assistant-1', 'assistant'),
         content: 'To enter Vietnam as a tourist, you will need a valid passport and an e-visa.',
@@ -165,7 +166,7 @@ describe('ChatMessages', () => {
         content: '{"results":[]}',
       } as unknown as CKMessage;
 
-      render(
+      const { container } = render(
         <ChatMessages
           {...defaultProps}
           messages={[
@@ -178,10 +179,11 @@ describe('ChatMessages', () => {
         />
       );
 
-      expect(screen.queryByRole('status', { name: 'AI is thinking' })).not.toBeInTheDocument();
+      expect(container.querySelector('.bg-assistant-gradient')).not.toBeInTheDocument();
+      expect(screen.getAllByRole('status', { name: 'AI is thinking' })).toHaveLength(1);
     });
 
-    it('keeps suggestions hidden while a response is still streaming, even after real content has appeared', () => {
+    it('shows a loading placeholder instead of suggestions while a response is still streaming, even after real content has appeared', () => {
       const assistantAnswer = {
         ...makeMessage('assistant-1', 'assistant'),
         content: 'To enter Vietnam as a tourist, you will need a valid passport and an e-visa.',
@@ -196,6 +198,15 @@ describe('ChatMessages', () => {
       );
 
       expect(screen.queryByText('Find places')).not.toBeInTheDocument();
+      const indicator = screen.getByRole('status', { name: 'AI is thinking' });
+      expect(indicator.parentElement).toHaveClass(
+        'bg-background-secondary',
+        'text-text-primary',
+        'rounded-[28px]',
+        'px-4',
+        'py-2',
+        'shadow'
+      );
     });
 
     it('shows suggestions once streaming finishes', () => {
@@ -209,6 +220,16 @@ describe('ChatMessages', () => {
       );
 
       expect(screen.getByText('Find places')).toBeInTheDocument();
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    });
+
+    it('shows the avatar typing indicator (not the suggestions pill) before assistant text begins', () => {
+      const { container } = render(
+        <ChatMessages {...defaultProps} messages={[makeMessage('user-1')]} inProgress />
+      );
+
+      expect(screen.getAllByRole('status', { name: 'AI is thinking' })).toHaveLength(1);
+      expect(container.querySelector('.bg-assistant-gradient')).toBeInTheDocument();
     });
 
     it('keeps the typing indicator up while a tool-result message is the latest and the assistant has not replied yet', () => {
@@ -242,6 +263,38 @@ describe('ChatMessages', () => {
       );
 
       expect(screen.getByRole('status', { name: 'AI is thinking' })).toBeInTheDocument();
+    });
+
+    it('keeps the typing indicator visible after a tool card resolves and before assistant text begins', () => {
+      const resolvedToolCardMessage = {
+        ...makeMessage('assistant-tool-card', 'assistant'),
+        content: '',
+        hasResolvedToolCard: true,
+      } as unknown as CKMessage;
+
+      render(
+        <ChatMessages
+          {...defaultProps}
+          messages={[makeMessage('user-1'), resolvedToolCardMessage]}
+          inProgress
+        />
+      );
+
+      expect(screen.getByRole('status', { name: 'AI is thinking' })).toBeInTheDocument();
+    });
+
+    it('does not show the typing indicator while an interrupt is waiting for the user', () => {
+      jest.mocked(useCopilotKit).mockReturnValue({
+        copilotkit: {
+          interruptElement: <div>Approval required</div>,
+          subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+        },
+      } as unknown as ReturnType<typeof useCopilotKit>);
+
+      render(<ChatMessages {...defaultProps} messages={[makeMessage('user-1')]} inProgress />);
+
+      expect(screen.queryByRole('status', { name: 'AI is thinking' })).not.toBeInTheDocument();
+      expect(screen.getByText('Approval required')).toBeInTheDocument();
     });
 
     it('keeps the typing indicator up while a tool call has no content or card yet (e.g. a knowledge search with no render action)', () => {

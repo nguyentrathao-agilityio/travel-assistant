@@ -7,6 +7,7 @@ const mockMessages: { role: string; toolCalls?: unknown[] }[] = [];
 
 const makeProps = (overrides = {}) => ({
   onSend: jest.fn(),
+  onStop: jest.fn(),
   inProgress: false,
   ...overrides,
 });
@@ -48,9 +49,19 @@ describe('ChatInputBar', () => {
   });
 
   describe('submit state', () => {
-    it('send button is disabled when inProgress is true', () => {
+    it('shows an enabled stop button instead of the send button while a run is active', () => {
       render(<ChatInputBar {...makeProps({ inProgress: true })} />);
-      expect(screen.getByLabelText('Send message')).toBeDisabled();
+      expect(screen.getByLabelText('Stop generating')).toBeEnabled();
+      expect(screen.queryByLabelText('Send message')).not.toBeInTheDocument();
+    });
+
+    it('keeps the textarea editable while a run is active', async () => {
+      render(<ChatInputBar {...makeProps({ inProgress: true })} />);
+      const textarea = screen.getByLabelText('Chat message');
+
+      await userEvent.setup().type(textarea, 'Draft the next question');
+
+      expect(textarea).toHaveValue('Draft the next question');
     });
 
     it('send button is disabled when a tool call is pending', async () => {
@@ -80,6 +91,20 @@ describe('ChatInputBar', () => {
   });
 
   describe('submission', () => {
+    it('stops the active run without submitting the textarea draft', async () => {
+      const onSend = jest.fn();
+      const onStop = jest.fn();
+      const user = userEvent.setup();
+      render(<ChatInputBar {...makeProps({ inProgress: true, onSend, onStop })} />);
+      await user.type(screen.getByLabelText('Chat message'), 'Keep this draft');
+
+      await user.click(screen.getByLabelText('Stop generating'));
+
+      expect(onStop).toHaveBeenCalledTimes(1);
+      expect(onSend).not.toHaveBeenCalled();
+      expect(screen.getByLabelText('Chat message')).toHaveValue('Keep this draft');
+    });
+
     it('calls onSend with trimmed text when send button is clicked', async () => {
       const onSend = jest.fn().mockResolvedValue(undefined);
       const user = userEvent.setup();

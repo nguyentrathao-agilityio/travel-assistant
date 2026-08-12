@@ -11,8 +11,7 @@ import { extractCopilotText, isUserMessage } from '@/utils';
 const TITLE_MAX_LENGTH = 50;
 
 export const useTitleSync = () => {
-  const activeThreadId = useThreadStore((state) => state.activeThreadId);
-  const { agent } = useAgent({ agentId: AGENT_NAME, threadId: activeThreadId });
+  const { agent } = useAgent({ agentId: AGENT_NAME });
   const messages = agent.messages;
   const threads = useThreadStore((state) => state.threads);
 

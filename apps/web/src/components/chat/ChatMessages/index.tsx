@@ -38,6 +38,14 @@ const InterruptMessage = ({ children }: { children: ReactNode }) => (
   </div>
 );
 
+const PendingSuggestions = () => (
+  <div className="pl-[52px]">
+    <div className="bg-background-secondary text-text-primary inline-flex rounded-[28px] px-4 py-2 shadow">
+      <TypingIndicator className="p-0" />
+    </div>
+  </div>
+);
+
 /**
  * Custom messages area for CopilotKit's `Messages` prop.
  * Shows the empty state when there are no messages, otherwise renders the message list.
@@ -55,20 +63,18 @@ const ChatMessages = ({
     (latestIndex, message, index) => (message.role === CHAT_ROLE.USER ? index : latestIndex),
     -1
   );
-  const currentTurnHasVisibleAssistantOutput =
+  const currentTurnHasAssistantText =
     lastUserMessageIndex !== -1 &&
     messages.slice(lastUserMessageIndex + 1).some((message) => {
       const candidate = message as ConversationChatMessage;
-      return (
-        candidate.role === CHAT_ROLE.ASSISTANT &&
-        (!!candidate.content || !!candidate.hasResolvedToolCard)
-      );
+      return candidate.role === CHAT_ROLE.ASSISTANT && !!candidate.content;
     });
-  const isTurnPending =
-    inProgress && (lastUserMessageIndex === -1 || !currentTurnHasVisibleAssistantOutput);
 
   const { scrollContainerRef } = useScrollToBottom(messages.length);
   const interrupt = useInterruptElement();
+  const isTurnPending =
+    inProgress && !interrupt && (lastUserMessageIndex === -1 || !currentTurnHasAssistantText);
+  const areSuggestionsPending = inProgress && !interrupt && currentTurnHasAssistantText;
   const hasRealMessages = messages.some(isRealConversationMessage);
   const lastTool = useSuggestionStore((s) => s.lastTool);
   const activeSuggestions =
@@ -108,6 +114,7 @@ const ChatMessages = ({
             {interrupt && <InterruptMessage>{interrupt}</InterruptMessage>}
           </div>
           {children}
+          {areSuggestionsPending && <PendingSuggestions />}
           {!inProgress && !interrupt && (
             <div className="flex flex-wrap gap-2 pl-[52px]">
               {activeSuggestions.map((s) => {

@@ -39,37 +39,35 @@ const bookingToolCallSignature = (toolName: string, toolArguments: string): stri
  * Reconciles the persisted LangGraph snapshot with CopilotKit's live messages.
  * Live messages take precedence when both sources contain the same message ID.
  */
-export const reconcileConversationMessages = (
-  persistedMessages: ChatMessage[],
-  liveMessages: ChatMessage[]
-): ChatMessage[] => {
-  const combined = [...persistedMessages, ...liveMessages];
+export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMessage[] => {
   const seenMessageIds = new Set<string>();
   const seenToolCallIds = new Set<string>();
   const seenBookingToolCalls = new Set<string>();
   const result: ChatMessage[] = [];
 
-  for (let index = combined.length - 1; index >= 0; index -= 1) {
-    const message = combined[index];
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
 
-    if (message.id) {
-      if (seenMessageIds.has(message.id)) continue;
-      seenMessageIds.add(message.id);
-    }
+    if (message.id && seenMessageIds.has(message.id)) continue;
 
     if (message.role === CHAT_ROLE.USER) {
       seenBookingToolCalls.clear();
+      if (message.id) seenMessageIds.add(message.id);
       result.push(message);
       continue;
     }
 
     if (message.role !== CHAT_ROLE.ASSISTANT) {
+      if (message.id) seenMessageIds.add(message.id);
       result.push(message);
       continue;
     }
 
     if (!message.toolCalls?.length) {
-      if (message.content) result.push(message);
+      if (message.content) {
+        if (message.id) seenMessageIds.add(message.id);
+        result.push(message);
+      }
       continue;
     }
 
@@ -89,6 +87,7 @@ export const reconcileConversationMessages = (
     });
 
     if (toolCalls.length || message.content) {
+      if (message.id) seenMessageIds.add(message.id);
       result.push({ ...message, toolCalls });
     }
   }
@@ -120,14 +119,11 @@ const attachGenerativeUi = (
     return resolved;
   });
 
-export const useConversationMessages = (
-  persistedMessages: ChatMessage[],
-  liveMessages: ChatMessage[]
-): ChatMessage[] => {
+export const useConversationMessages = (messages: ChatMessage[]): ChatMessage[] => {
   const lazyToolRendered = useLazyToolRenderer();
 
   return useMemo(() => {
-    const reconciled = reconcileConversationMessages(persistedMessages, liveMessages);
-    return attachGenerativeUi(reconciled, lazyToolRendered);
-  }, [persistedMessages, liveMessages, lazyToolRendered]);
+    const normalized = normalizeConversationMessages(messages);
+    return attachGenerativeUi(normalized, lazyToolRendered);
+  }, [messages, lazyToolRendered]);
 };

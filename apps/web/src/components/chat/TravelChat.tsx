@@ -71,13 +71,13 @@ export const TravelChat = () => {
 
   const { messages: persistedMessages, isLoading: isHistoryLoading } =
     useThreadHistory(activeThreadId);
-  const setThreadHistory = useConversationRendererStore((state) => state.setThreadHistory);
+  const setHistoryStatus = useConversationRendererStore((state) => state.setHistoryStatus);
 
   useSeedAgentHistory(activeThreadId, persistedMessages, isHistoryLoading);
 
   useLayoutEffect(() => {
-    setThreadHistory(activeThreadId, persistedMessages, isHistoryLoading);
-  }, [activeThreadId, persistedMessages, isHistoryLoading, setThreadHistory]);
+    setHistoryStatus(activeThreadId, isHistoryLoading);
+  }, [activeThreadId, isHistoryLoading, setHistoryStatus]);
 
   useBookingInfo();
   useBookingAction();

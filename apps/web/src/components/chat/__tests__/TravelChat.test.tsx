@@ -2,16 +2,17 @@ import { render, screen } from '@testing-library/react';
 import { useCopilotChatInternal } from '@copilotkit/react-core';
 import { TravelChat } from '../TravelChat';
 
+const setHistoryStatus = jest.fn();
+
 jest.mock('@/stores', () => ({
   useThreadStore: jest.fn((selector: (s: object) => unknown) =>
     selector({ activeThreadId: 'thread-1', isResumed: false, threads: [] })
   ),
   useConversationRendererStore: jest.fn((selector: (s: object) => unknown) =>
     selector({
-      setThreadHistory: jest.fn(),
+      setHistoryStatus,
       setSendMessage: jest.fn(),
       threadId: 'thread-1',
-      persistedMessages: [],
       isHistoryLoading: false,
       sendMessage: null,
     })
@@ -32,7 +33,7 @@ jest.mock('@/hooks', () => ({
   useDestinationExplorerAction: jest.fn(),
   useThreadHistory: jest.fn().mockReturnValue({ messages: [], isLoading: false, error: null }),
   useSeedAgentHistory: jest.fn(),
-  useConversationMessages: jest.fn((_persisted, live) => live),
+  useConversationMessages: jest.fn((messages) => messages),
   useBookingInfo: jest.fn(),
   useBookingAction: jest.fn(),
   useBookedActions: jest.fn(),
@@ -62,6 +63,11 @@ describe('TravelChat', () => {
   describe('hooks', () => {
     it('mounts without errors when all action hooks are registered', () => {
       expect(() => render(<TravelChat />)).not.toThrow();
+    });
+
+    it('publishes only the active thread history loading status to the renderer store', () => {
+      render(<TravelChat />);
+      expect(setHistoryStatus).toHaveBeenCalledWith('thread-1', false);
     });
   });
 });

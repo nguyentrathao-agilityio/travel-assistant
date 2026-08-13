@@ -12,17 +12,15 @@ import { ChatMessages } from '../ChatMessages';
  */
 export const ConversationMessages = (props: MessagesProps) => {
   const activeThreadId = useThreadStore((state) => state.activeThreadId);
-  const { historyThreadId, persistedMessages, isHistoryLoading, sendMessage } =
-    useConversationRendererStore(
-      useShallow((state) => ({
-        historyThreadId: state.threadId,
-        persistedMessages: state.persistedMessages,
-        isHistoryLoading: state.isHistoryLoading,
-        sendMessage: state.sendMessage,
-      }))
-    );
+  const { historyThreadId, isHistoryLoading, sendMessage } = useConversationRendererStore(
+    useShallow((state) => ({
+      historyThreadId: state.threadId,
+      isHistoryLoading: state.isHistoryLoading,
+      sendMessage: state.sendMessage,
+    }))
+  );
   const isCurrentThread = historyThreadId === activeThreadId;
-  const messages = useConversationMessages(persistedMessages, props.messages);
+  const messages = useConversationMessages(props.messages);
 
   return (
     <ChatMessages

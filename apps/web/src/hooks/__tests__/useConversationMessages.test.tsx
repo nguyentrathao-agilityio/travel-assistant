@@ -24,7 +24,7 @@ describe('useConversationMessages', () => {
       { id: 't1', role: 'tool' as const, toolCallId: 'call-1', content: '{"temp":72}' },
     ];
 
-    const { result } = renderHook(() => useConversationMessages(persistedMessages, []));
+    const { result } = renderHook(() => useConversationMessages(persistedMessages));
 
     const assistantMessage = result.current.find(
       (message): message is typeof message & { role: 'assistant' } =>
@@ -41,7 +41,7 @@ describe('useConversationMessages', () => {
 
     const persistedMessages = [{ id: 'a1', role: 'assistant' as const, content: 'hello' }];
 
-    const { result } = renderHook(() => useConversationMessages(persistedMessages, []));
+    const { result } = renderHook(() => useConversationMessages(persistedMessages));
 
     const [message] = result.current;
     expect(message.role === 'assistant' && message.generativeUI).toBeFalsy();
@@ -56,7 +56,7 @@ describe('useConversationMessages', () => {
       { id: 'a1', role: 'assistant' as const, content: 'hi', generativeUI: liveRenderer },
     ];
 
-    const { result } = renderHook(() => useConversationMessages([], liveMessages));
+    const { result } = renderHook(() => useConversationMessages(liveMessages));
 
     const [message] = result.current;
     expect(message.role === 'assistant' && message.generativeUI).toBe(liveRenderer);
@@ -102,7 +102,7 @@ describe('useConversationMessages', () => {
       },
     ];
 
-    const { result } = renderHook(() => useConversationMessages([], liveMessages));
+    const { result } = renderHook(() => useConversationMessages(liveMessages));
 
     const [message] = result.current;
     const rendered = message.role === 'assistant' ? message.generativeUI?.() : undefined;

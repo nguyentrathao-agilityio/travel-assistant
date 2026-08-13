@@ -35,6 +35,7 @@ import {
 export interface SpecializedAgentConfig {
   name: DomainAgentNodeName;
   tools: StructuredToolInterface[];
+  approvalTools?: string[];
   prompt: AgentPromptSections;
 }
 
@@ -73,6 +74,7 @@ export const AGENT_CONFIGS = {
   bookFlight: {
     name: 'bookFlight',
     tools: [bookFlightTool],
+    approvalTools: ['bookFlightTool'],
     prompt: {
       toolsSection: FLIGHT_BOOKING_AGENT_TOOLS_PROMPT,
       includeBookingRules: true,
@@ -82,6 +84,7 @@ export const AGENT_CONFIGS = {
   bookHotel: {
     name: 'bookHotel',
     tools: [bookHotelTool],
+    approvalTools: ['bookHotelTool'],
     prompt: {
       toolsSection: HOTEL_BOOKING_AGENT_TOOLS_PROMPT,
       includeBookingRules: true,
@@ -91,6 +94,7 @@ export const AGENT_CONFIGS = {
   cancelBooking: {
     name: 'cancelBooking',
     tools: [cancelBookingTool],
+    approvalTools: ['cancelBookingTool'],
     prompt: { toolsSection: CANCEL_BOOKING_AGENT_TOOLS_PROMPT },
   },
 } satisfies Record<DomainAgentNodeName, SpecializedAgentConfig>;

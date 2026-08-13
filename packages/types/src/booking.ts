@@ -32,9 +32,3 @@ export interface BookingApprovalRequest {
   currency?: string;
   allowedDecisions: BookingDecision[];
 }
-
-export interface BookingApprovalResponse {
-  decision: BookingDecision;
-  approvalId: string;
-  edits?: Record<string, string | number>;
-}

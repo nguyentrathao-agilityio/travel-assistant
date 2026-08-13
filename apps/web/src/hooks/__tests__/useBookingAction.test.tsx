@@ -1,54 +1,67 @@
 import type { ReactElement } from 'react';
-import { render, renderHook, screen } from '@testing-library/react';
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { fireEvent, render, renderHook, screen } from '@testing-library/react';
+import { useLangGraphInterrupt } from '@copilotkit/react-core';
 
 import { TOOL_NAMES } from '@/constants';
 import { useBookingAction } from '../useBookingAction';
 
-type ToolRenderer = (props: { status: string; result?: unknown }) => ReactElement;
-
-const getToolRenderer = (toolName: string): ToolRenderer => {
-  const registration = jest
-    .mocked(useRenderToolCall)
-    .mock.calls.find(([options]) => options.name === toolName);
-
-  return registration?.[0].render as ToolRenderer;
-};
-
 describe('useBookingAction', () => {
   beforeEach(() => {
-    jest.mocked(useRenderToolCall).mockClear();
+    jest.mocked(useLangGraphInterrupt).mockClear();
   });
 
-  it.each([
-    [TOOL_NAMES.BOOK_FLIGHT, 'flight'],
-    [TOOL_NAMES.BOOK_HOTEL, 'hotel'],
-  ])('renders a visible message when %s is rejected', (toolName, bookingType) => {
+  it('renders LangChain HITL requests and resolves approval with a structured decision', () => {
     renderHook(() => useBookingAction());
+    const registration = jest.mocked(useLangGraphInterrupt).mock.calls[0][0];
+    const value = {
+      actionRequests: [
+        {
+          name: TOOL_NAMES.BOOK_FLIGHT,
+          args: {
+            flightId: 'FL1',
+            adults: 1,
+            customerName: 'Thao',
+            customerEmail: 'thao@example.com',
+            customerPhone: '0900000000',
+          },
+          description: 'Tool execution requires approval',
+        },
+      ],
+      reviewConfigs: [
+        { actionName: TOOL_NAMES.BOOK_FLIGHT, allowedDecisions: ['approve', 'reject'] },
+      ],
+    };
+    const resolve = jest.fn();
 
-    const renderToolResult = getToolRenderer(toolName);
-    render(
-      renderToolResult({
-        status: 'complete',
-        result: JSON.stringify({ status: 'rejected', type: bookingType }),
-      })
-    );
+    expect(registration.enabled?.({ eventValue: value } as never)).toBe(true);
+    render(registration.render?.({ event: { value }, resolve } as never) as ReactElement);
+    fireEvent.click(screen.getByRole('button', { name: /confirm booking/i }));
 
-    expect(screen.getByText('Booking not submitted')).toBeInTheDocument();
+    expect(resolve).toHaveBeenCalledWith({ decisions: [{ type: 'approve' }] });
   });
 
-  it('renders a visible message when cancellation is rejected', () => {
+  it('resolves edit as a rejected tool execution so the agent can refine', () => {
     renderHook(() => useBookingAction());
+    const registration = jest.mocked(useLangGraphInterrupt).mock.calls[0][0];
+    const value = {
+      actionRequests: [
+        {
+          name: TOOL_NAMES.BOOK_HOTEL,
+          args: { hotelId: 'H1', customerName: 'Thao' },
+          description: 'Tool execution requires approval',
+        },
+      ],
+      reviewConfigs: [
+        { actionName: TOOL_NAMES.BOOK_HOTEL, allowedDecisions: ['approve', 'reject'] },
+      ],
+    };
+    const resolve = jest.fn();
 
-    const renderToolResult = getToolRenderer(TOOL_NAMES.CANCEL_BOOKING);
-    render(
-      renderToolResult({
-        status: 'complete',
-        result: JSON.stringify({ status: 'rejected', type: 'cancellation' }),
-      })
-    );
+    render(registration.render?.({ event: { value }, resolve } as never) as ReactElement);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
 
-    expect(screen.getByText('Cancellation not submitted')).toBeInTheDocument();
-    expect(screen.getByText('Your booking remains active.')).toBeInTheDocument();
+    expect(resolve).toHaveBeenCalledWith({
+      decisions: [{ type: 'reject', message: 'User cancelled or requested changes.' }],
+    });
   });
 });

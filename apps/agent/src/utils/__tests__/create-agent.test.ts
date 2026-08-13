@@ -5,6 +5,7 @@ import type { SpecializedAgentConfig } from '@/constants/agent-config';
 const {
   createAgentMock,
   dynamicSystemPromptMiddlewareMock,
+  humanInTheLoopMiddlewareMock,
   createCopilotkitMiddlewareMock,
   createChatModelMock,
   createDomainStateMiddlewareMock,
@@ -14,6 +15,7 @@ const {
     __type: 'dynamicSystemPromptMiddleware',
     fn,
   })),
+  humanInTheLoopMiddlewareMock: vi.fn((options: unknown) => ({ __type: 'hitl', options })),
   createCopilotkitMiddlewareMock: vi.fn(() => 'copilotkit-middleware'),
   createChatModelMock: vi.fn(() => 'fake-model'),
   createDomainStateMiddlewareMock: vi.fn(
@@ -24,6 +26,7 @@ const {
 vi.mock('langchain', () => ({
   createAgent: createAgentMock,
   dynamicSystemPromptMiddleware: dynamicSystemPromptMiddlewareMock,
+  humanInTheLoopMiddleware: humanInTheLoopMiddlewareMock,
 }));
 
 vi.mock('@copilotkit/sdk-js/langgraph', () => ({
@@ -120,6 +123,24 @@ describe('createSpecializedAgent', () => {
       { ...sections, includeMemoryContext: true },
       ['likes window seats']
     );
+  });
+
+  it('adds HITL middleware before a configured write tool executes', () => {
+    createSpecializedAgent(config({ name: 'bookFlight', approvalTools: ['bookFlightTool'] }));
+
+    expect(humanInTheLoopMiddlewareMock).toHaveBeenCalledWith({
+      interruptOn: {
+        bookFlightTool: { allowedDecisions: ['approve', 'reject'] },
+      },
+    });
+    expect(createAgentMock.mock.calls[0][0].middleware).toContainEqual({
+      __type: 'hitl',
+      options: {
+        interruptOn: {
+          bookFlightTool: { allowedDecisions: ['approve', 'reject'] },
+        },
+      },
+    });
   });
 
   it('skips memory lookup and passes an empty memories list when includeMemoryContext is not set', async () => {

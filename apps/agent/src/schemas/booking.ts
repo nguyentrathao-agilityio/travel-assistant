@@ -71,12 +71,6 @@ export const BookingSchema = z.object({
   summary: z.string(),
 });
 
-export const BookingApprovalResponseSchema = z.object({
-  decision: z.enum(['approve', 'edit', 'reject']),
-  approvalId: z.string().min(1),
-  edits: z.record(z.union([z.string(), z.number()])).optional(),
-});
-
 export type FlightBookingInput = z.infer<typeof FlightBookingInputSchema>;
 export type HotelBookingInput = z.infer<typeof HotelBookingInputSchema>;
 export type CancelBookingInput = z.infer<typeof CancelBookingInputSchema>;

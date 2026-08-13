@@ -17,5 +17,4 @@ export * from './WeatherCard';
 export * from './DestinationExplorerCard';
 export * from './ThemeToggle';
 export * from './BookingApprovalCard';
-export * from './BookingDecisionCard';
 export * from './BookingResultCard';

@@ -1,4 +1,4 @@
-import { createAgent, dynamicSystemPromptMiddleware } from 'langchain';
+import { createAgent, dynamicSystemPromptMiddleware, humanInTheLoopMiddleware } from 'langchain';
 import { createCopilotkitMiddleware } from '@copilotkit/sdk-js/langgraph';
 
 // Constants
@@ -32,6 +32,18 @@ export const createSpecializedAgent = (config: SpecializedAgentConfig) =>
     stateSchema: GraphState,
     middleware: [
       createCopilotkitMiddleware({ exposeState: false }),
+      ...(config.approvalTools?.length
+        ? [
+            humanInTheLoopMiddleware({
+              interruptOn: Object.fromEntries(
+                config.approvalTools.map((toolName) => [
+                  toolName,
+                  { allowedDecisions: ['approve', 'reject'] as const },
+                ])
+              ),
+            }),
+          ]
+        : []),
       richUiModelMiddleware,
       createDomainStateMiddleware(config.name),
       dynamicSystemPromptMiddleware(async (state) => {

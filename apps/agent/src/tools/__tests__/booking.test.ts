@@ -1,10 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const { interruptMock } = vi.hoisted(() => ({ interruptMock: vi.fn() }));
-vi.mock('@langchain/langgraph', () => ({
-  interrupt: interruptMock,
-}));
-
 const getFlightMock = vi.fn();
 const submitFlightBookingMock = vi.fn();
 const revalidateHotelMock = vi.fn();
@@ -28,11 +23,6 @@ const toolCall = (name: string, args: object) => ({
   args,
   id: `call-${name}`,
   type: 'tool_call' as const,
-});
-
-const approvalResponse = (decision: 'approve' | 'reject') => (request: { approvalId: string }) => ({
-  decision,
-  approvalId: request.approvalId,
 });
 
 const artifactOf = <T>(result: unknown): T => {
@@ -106,39 +96,20 @@ afterEach(() => {
 });
 
 describe('bookFlightTool', () => {
-  it('requires fresh approval when a resumed response belongs to an older quote', async () => {
+  it('books when validation remains stable after middleware approval', async () => {
     getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(baseFlight);
-    interruptMock
-      .mockReturnValueOnce({ decision: 'approve', approvalId: 'stale-quote' })
-      .mockImplementationOnce(approvalResponse('approve'));
     submitFlightBookingMock.mockResolvedValueOnce({ id: 'booking-1' });
 
     const result = artifactOf<{ id: string }>(
       await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
     );
 
-    expect(interruptMock).toHaveBeenCalledTimes(2);
-    expect(submitFlightBookingMock).toHaveBeenCalledWith(flightInput, baseFlight);
-    expect(result).toEqual({ id: 'booking-1' });
-  });
-
-  it('books immediately when nothing changed between approval and re-verification', async () => {
-    getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(baseFlight);
-    interruptMock.mockImplementationOnce(approvalResponse('approve'));
-    submitFlightBookingMock.mockResolvedValueOnce({ id: 'booking-1' });
-
-    const result = artifactOf<{ id: string }>(
-      await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
-    );
-
-    expect(interruptMock).toHaveBeenCalledTimes(1);
     expect(submitFlightBookingMock).toHaveBeenCalledWith(flightInput, baseFlight);
     expect(result).toEqual({ id: 'booking-1' });
   });
 
   it('does not retry an uncertain provider timeout after the write request', async () => {
     getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(baseFlight);
-    interruptMock.mockImplementationOnce(approvalResponse('approve'));
     submitFlightBookingMock.mockRejectedValueOnce(new Error('Provider timeout'));
 
     const result = artifactOf<{ error: string }>(
@@ -155,27 +126,20 @@ describe('bookFlightTool', () => {
     expect(submitFlightBookingMock).toHaveBeenCalledTimes(1);
   });
 
-  it('asks for approval again when the price changed after the first approval', async () => {
+  it('stops without writing when the price changes after middleware approval', async () => {
     const changedFlight = { ...baseFlight, price: 150 };
     getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(changedFlight);
-    interruptMock
-      .mockImplementationOnce(approvalResponse('approve'))
-      .mockImplementationOnce(approvalResponse('approve'));
-    submitFlightBookingMock.mockResolvedValueOnce({ id: 'booking-1' });
-
-    const result = artifactOf<{ id: string }>(
+    const result = artifactOf<{ error: string }>(
       await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
     );
 
-    expect(interruptMock).toHaveBeenCalledTimes(2);
-    expect(submitFlightBookingMock).toHaveBeenCalledWith(flightInput, changedFlight);
-    expect(result).toEqual({ id: 'booking-1' });
+    expect(result.error).toContain('Flight details changed');
+    expect(submitFlightBookingMock).not.toHaveBeenCalled();
   });
 
   it('rejects without booking when seats are no longer sufficient after resuming', async () => {
     const soldOut = { ...baseFlight, seats_available: 0 };
     getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(soldOut);
-    interruptMock.mockImplementationOnce(approvalResponse('approve'));
 
     const result = artifactOf<{ error: string }>(
       await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
@@ -184,92 +148,29 @@ describe('bookFlightTool', () => {
     expect(result.error).toContain('Not enough seats are available');
     expect(submitFlightBookingMock).not.toHaveBeenCalled();
   });
-
-  it('rejects without booking when the user declines the first approval', async () => {
-    getFlightMock.mockResolvedValueOnce(baseFlight);
-    interruptMock.mockImplementationOnce(approvalResponse('reject'));
-
-    const result = artifactOf<{ status: string; type: string }>(
-      await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
-    );
-
-    expect(result).toEqual({ status: 'rejected', type: 'flight' });
-    expect(submitFlightBookingMock).not.toHaveBeenCalled();
-  });
-
-  it('returns requested edits without executing a booking write', async () => {
-    getFlightMock.mockResolvedValueOnce(baseFlight);
-    interruptMock.mockImplementationOnce((request: { approvalId: string }) => ({
-      decision: 'edit',
-      approvalId: request.approvalId,
-      edits: { adults: 2 },
-    }));
-
-    const result = artifactOf<{ status: string; edits: { adults: number } }>(
-      await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
-    );
-
-    expect(result).toEqual({ status: 'edit_requested', type: 'flight', edits: { adults: 2 } });
-    expect(submitFlightBookingMock).not.toHaveBeenCalled();
-  });
-
-  it('rejects without booking when the user declines the second approval', async () => {
-    const changedFlight = { ...baseFlight, price: 150 };
-    getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(changedFlight);
-    interruptMock
-      .mockImplementationOnce(approvalResponse('approve'))
-      .mockImplementationOnce(approvalResponse('reject'));
-
-    const result = artifactOf<{ status: string; type: string }>(
-      await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
-    );
-
-    expect(result).toEqual({ status: 'rejected', type: 'flight' });
-    expect(submitFlightBookingMock).not.toHaveBeenCalled();
-  });
 });
 
 describe('bookHotelTool', () => {
-  it('books immediately when nothing changed between approval and re-verification', async () => {
+  it('books when validation remains stable after middleware approval', async () => {
     revalidateHotelMock.mockResolvedValueOnce(baseHotel).mockResolvedValueOnce(baseHotel);
-    interruptMock.mockImplementationOnce(approvalResponse('approve'));
     submitHotelBookingMock.mockResolvedValueOnce({ id: 'booking-2' });
 
     const result = artifactOf<{ id: string }>(
       await bookHotelTool.invoke(toolCall(bookHotelTool.name, hotelInput))
     );
 
-    expect(interruptMock).toHaveBeenCalledTimes(1);
     expect(submitHotelBookingMock).toHaveBeenCalledWith(hotelInput);
     expect(result).toEqual({ id: 'booking-2' });
   });
 
-  it('asks for approval again when the total price changed after the first approval', async () => {
+  it('stops without writing when the total price changes after middleware approval', async () => {
     const changedHotel = { ...baseHotel, total_price: 200 };
     revalidateHotelMock.mockResolvedValueOnce(baseHotel).mockResolvedValueOnce(changedHotel);
-    interruptMock
-      .mockImplementationOnce(approvalResponse('approve'))
-      .mockImplementationOnce(approvalResponse('approve'));
-    submitHotelBookingMock.mockResolvedValueOnce({ id: 'booking-2' });
-
-    const result = artifactOf<{ id: string }>(
+    const result = artifactOf<{ error: string }>(
       await bookHotelTool.invoke(toolCall(bookHotelTool.name, hotelInput))
     );
 
-    expect(interruptMock).toHaveBeenCalledTimes(2);
-    expect(submitHotelBookingMock).toHaveBeenCalledWith(hotelInput);
-    expect(result).toEqual({ id: 'booking-2' });
-  });
-
-  it('rejects without booking when the user declines the first approval', async () => {
-    revalidateHotelMock.mockResolvedValueOnce(baseHotel);
-    interruptMock.mockImplementationOnce(approvalResponse('reject'));
-
-    const result = artifactOf<{ status: string; type: string }>(
-      await bookHotelTool.invoke(toolCall(bookHotelTool.name, hotelInput))
-    );
-
-    expect(result).toEqual({ status: 'rejected', type: 'hotel' });
+    expect(result.error).toContain('Hotel details changed');
     expect(submitHotelBookingMock).not.toHaveBeenCalled();
   });
 });
@@ -286,9 +187,8 @@ describe('cancelBookingTool', () => {
     summary: 'Vietnam Airlines VN101',
   };
 
-  it('returns the cancelled booking as an artifact after approval', async () => {
+  it('returns the cancelled booking as an artifact after middleware approval', async () => {
     getBookingMock.mockResolvedValueOnce(booking);
-    interruptMock.mockImplementationOnce(approvalResponse('approve'));
     cancelBookingMock.mockResolvedValueOnce({ ...booking, status: 'cancelled' });
 
     const result = artifactOf<{ status: string }>(
@@ -297,17 +197,5 @@ describe('cancelBookingTool', () => {
 
     expect(cancelBookingMock).toHaveBeenCalledWith({ bookingId: booking.id });
     expect(result.status).toBe('cancelled');
-  });
-
-  it('does not cancel when approval is rejected', async () => {
-    getBookingMock.mockResolvedValueOnce(booking);
-    interruptMock.mockImplementationOnce(approvalResponse('reject'));
-
-    const result = artifactOf<{ status: string; type: string }>(
-      await cancelBookingTool.invoke(toolCall(cancelBookingTool.name, { bookingId: booking.id }))
-    );
-
-    expect(result).toEqual({ status: 'rejected', type: 'cancellation' });
-    expect(cancelBookingMock).not.toHaveBeenCalled();
   });
 });

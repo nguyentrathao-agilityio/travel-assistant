@@ -2,13 +2,7 @@ import { useLangGraphInterrupt, useRenderToolCall } from '@copilotkit/react-core
 import { z } from 'zod';
 
 // Components
-import {
-  BookingApprovalCard,
-  BookingDecisionCard,
-  BookingResultCard,
-  ErrorCard,
-  ToolLoading,
-} from '@/components';
+import { BookingApprovalCard, BookingResultCard, ErrorCard, ToolLoading } from '@/components';
 
 // Constants
 import { TOOL_NAMES, TOOL_STATUS } from '@/constants';
@@ -35,24 +29,59 @@ const bookingResultSchema = z.object({
   summary: z.string(),
 });
 
-const bookingApprovalRequestSchema = z.object({
-  type: z.literal('booking_approval'),
-  approvalId: z.string(),
-  draftId: z.string().optional(),
-  action: z.enum(['create_flight_booking', 'create_hotel_booking', 'cancel_booking']),
-  title: z.string(),
-  description: z.string(),
-  referenceId: z.string(),
-  details: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])),
-  totalPrice: z.number().optional(),
-  currency: z.string().optional(),
-  allowedDecisions: z.array(z.enum(['approve', 'edit', 'reject'])),
+const hitlRequestSchema = z.object({
+  actionRequests: z.array(
+    z.object({
+      name: z.string(),
+      args: z.record(z.unknown()),
+      description: z.string(),
+    })
+  ),
+  reviewConfigs: z.array(
+    z.object({
+      actionName: z.string(),
+      allowedDecisions: z.array(z.enum(['approve', 'edit', 'reject'])),
+    })
+  ),
 });
 
-const rejectedBookingActionSchema = z.object({
-  status: z.enum(['rejected', 'edit_requested']),
-  type: z.enum(['flight', 'hotel', 'cancellation']),
-});
+const bookingApprovalRequest = (value: unknown): BookingApprovalRequest | null => {
+  const parsed = hitlRequestSchema.safeParse(value);
+  if (!parsed.success || parsed.data.actionRequests.length !== 1) return null;
+
+  const action = parsed.data.actionRequests[0];
+  const args = action.args;
+  const config = parsed.data.reviewConfigs.find((item) => item.actionName === action.name);
+  const actionByTool = {
+    [TOOL_NAMES.BOOK_FLIGHT]: 'create_flight_booking',
+    [TOOL_NAMES.BOOK_HOTEL]: 'create_hotel_booking',
+    [TOOL_NAMES.CANCEL_BOOKING]: 'cancel_booking',
+  } as const;
+  const approvalAction = actionByTool[action.name as keyof typeof actionByTool];
+  if (!approvalAction) return null;
+
+  const referenceId = String(args.flightId ?? args.hotelId ?? args.bookingId ?? '');
+  return {
+    type: 'booking_approval',
+    approvalId: `${action.name}:${referenceId}`,
+    draftId: `${action.name}:${referenceId}`,
+    action: approvalAction,
+    title:
+      approvalAction === 'create_flight_booking'
+        ? 'Confirm flight booking'
+        : approvalAction === 'create_hotel_booking'
+          ? 'Confirm hotel booking'
+          : 'Confirm booking cancellation',
+    description: action.description,
+    referenceId,
+    details: Object.fromEntries(
+      Object.entries(args).filter(
+        ([key, item]) => key !== 'customerPhone' && item !== undefined && item !== null
+      )
+    ) as Record<string, string | number | boolean | null>,
+    allowedDecisions: config?.allowedDecisions ?? ['approve', 'reject'],
+  };
+};
 
 type ToolParameterDefinition = {
   name: string;
@@ -107,11 +136,6 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
         return <BookingResultCard booking={bookingResult.data} />;
       }
 
-      const rejectedAction = rejectedBookingActionSchema.safeParse(parsedResult);
-      if (rejectedAction.success) {
-        return <BookingDecisionCard action={rejectedAction.data.type} />;
-      }
-
       const errorResult = z.object({ error: z.string() }).safeParse(parsedResult);
       if (errorResult.success) return <ErrorCard message={errorResult.data.error} />;
 
@@ -123,17 +147,24 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
 export const useBookingAction = () => {
   const interrupt = useInterruptElement();
 
-  useLangGraphInterrupt<BookingApprovalRequest>({
-    enabled: ({ eventValue }) => bookingApprovalRequestSchema.safeParse(eventValue).success,
+  useLangGraphInterrupt({
+    enabled: ({ eventValue }) => bookingApprovalRequest(eventValue) !== null,
     render: ({ event, resolve }) => {
-      const approvalRequest = bookingApprovalRequestSchema.safeParse(event.value);
-      if (!approvalRequest.success) return <></>;
+      const approvalRequest = bookingApprovalRequest(event.value);
+      if (!approvalRequest) return <></>;
 
       const handleDecision = (decision: BookingDecision) => {
-        resolve(JSON.stringify({ decision, approvalId: approvalRequest.data.approvalId }));
+        const hitlResponse = {
+          decisions: [
+            decision === 'approve'
+              ? { type: 'approve' }
+              : { type: 'reject', message: 'User cancelled or requested changes.' },
+          ],
+        };
+        (resolve as unknown as (value: typeof hitlResponse) => void)(hitlResponse);
       };
 
-      return <BookingApprovalCard request={approvalRequest.data} onDecision={handleDecision} />;
+      return <BookingApprovalCard request={approvalRequest} onDecision={handleDecision} />;
     },
   });
 

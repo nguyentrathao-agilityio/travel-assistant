@@ -5,9 +5,6 @@ import { AGENT_NAME } from '@/constants';
 import type { AgUiMessage } from '@/types';
 import { isRealConversationMessage } from '@/utils';
 
-/* CopilotKit's LangGraphAgent never implements connect(), so on mount its live
- * message array stays empty instead of auto-restoring from persisted history —
- * this hook seeds it manually, once per thread. */
 export const useSeedAgentHistory = (
   threadId: string,
   persistedMessages: AgUiMessage[],
@@ -20,7 +17,7 @@ export const useSeedAgentHistory = (
 
   useEffect(() => {
     if (isHistoryLoading || !threadId) return;
-    // Mark seeded before the early-return below so a thread with no history to seed isn't retried every render.
+
     if (seededThreadRef.current === threadId) return;
     seededThreadRef.current = threadId;
 

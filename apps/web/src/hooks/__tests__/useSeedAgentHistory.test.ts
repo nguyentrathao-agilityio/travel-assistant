@@ -88,4 +88,17 @@ describe('useSeedAgentHistory', () => {
     rerender({ threadId: 'thread-2' });
     expect(mockSetMessages).toHaveBeenCalledTimes(2);
   });
+
+  it('does not overwrite a running turn when live messages are temporarily empty mid-stream', () => {
+    mockMessages.mockReturnValue([{ id: 'live-1', role: 'user', content: 'hello' }]);
+    const { rerender } = renderHook(
+      ({ threadId }) => useSeedAgentHistory(threadId, persisted, false),
+      { initialProps: { threadId: 'thread-1' } }
+    );
+    expect(mockSetMessages).not.toHaveBeenCalled();
+
+    mockMessages.mockReturnValue([]);
+    rerender({ threadId: 'thread-1' });
+    expect(mockSetMessages).not.toHaveBeenCalled();
+  });
 });

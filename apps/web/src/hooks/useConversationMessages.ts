@@ -44,29 +44,50 @@ export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMess
   const seenToolCallIds = new Set<string>();
   const seenBookingToolCalls = new Set<string>();
   const result: ChatMessage[] = [];
+  const resultIndexByMessageId = new Map<string, number>();
 
   for (let index = messages.length - 1; index >= 0; index -= 1) {
     const message = messages[index];
 
-    if (message.id && seenMessageIds.has(message.id)) continue;
+    if (message.id && seenMessageIds.has(message.id)) {
+      const resultIndex = resultIndexByMessageId.get(message.id);
+      const latestMessage = resultIndex === undefined ? undefined : result[resultIndex];
+
+      if (
+        resultIndex !== undefined &&
+        latestMessage?.role === CHAT_ROLE.ASSISTANT &&
+        message.role === CHAT_ROLE.ASSISTANT &&
+        !latestMessage.content &&
+        typeof message.content === 'string' &&
+        message.content
+      ) {
+        result[resultIndex] = { ...latestMessage, content: message.content };
+      }
+      continue;
+    }
+
+    const pushMessage = (nextMessage: ChatMessage) => {
+      if (nextMessage.id) {
+        seenMessageIds.add(nextMessage.id);
+        resultIndexByMessageId.set(nextMessage.id, result.length);
+      }
+      result.push(nextMessage);
+    };
 
     if (message.role === CHAT_ROLE.USER) {
       seenBookingToolCalls.clear();
-      if (message.id) seenMessageIds.add(message.id);
-      result.push(message);
+      pushMessage(message);
       continue;
     }
 
     if (message.role !== CHAT_ROLE.ASSISTANT) {
-      if (message.id) seenMessageIds.add(message.id);
-      result.push(message);
+      pushMessage(message);
       continue;
     }
 
     if (!message.toolCalls?.length) {
       if (message.content) {
-        if (message.id) seenMessageIds.add(message.id);
-        result.push(message);
+        pushMessage(message);
       }
       continue;
     }
@@ -87,8 +108,7 @@ export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMess
     });
 
     if (toolCalls.length || message.content) {
-      if (message.id) seenMessageIds.add(message.id);
-      result.push({ ...message, toolCalls });
+      pushMessage({ ...message, toolCalls });
     }
   }
 

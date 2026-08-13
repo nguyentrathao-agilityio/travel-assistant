@@ -110,6 +110,33 @@ describe('ChatMessages', () => {
       expect(screen.getAllByTestId('message')).toHaveLength(1);
     });
 
+    it('keeps already streamed text when the same assistant message is replayed as a tool call', () => {
+      const streamedText = {
+        ...makeMessage('assistant-1', 'assistant'),
+        content: 'I found a flight for you.',
+      } as CKMessage;
+      const toolReplay = {
+        ...makeMessage('assistant-1', 'assistant'),
+        content: '',
+        toolCalls: [
+          {
+            id: 'tool-1',
+            type: 'function',
+            function: { name: 'searchFlights', arguments: '{}' },
+          },
+        ],
+      } as CKMessage;
+
+      const normalized = normalizeConversationMessages([streamedText, toolReplay]);
+
+      expect(normalized).toHaveLength(1);
+      expect(normalized[0]).toMatchObject({
+        id: 'assistant-1',
+        content: 'I found a flight for you.',
+        toolCalls: [{ id: 'tool-1' }],
+      });
+    });
+
     it('shows a typing indicator while waiting for the first assistant message', () => {
       render(<ChatMessages {...defaultProps} messages={[makeMessage('user-1')]} inProgress />);
 

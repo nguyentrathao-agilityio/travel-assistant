@@ -63,6 +63,129 @@ describe('useConversationMessages', () => {
     expect(lazyToolRendered).not.toHaveBeenCalled();
   });
 
+  it('preserves streamed assistant text when a later snapshot replaces it with an empty tool-call message', () => {
+    jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => null));
+
+    const streamedMessages = [
+      { id: 'a1', role: 'assistant' as const, content: 'I found a flight for you.' },
+    ];
+    const toolCallMessages = [
+      {
+        id: 'a1',
+        role: 'assistant' as const,
+        content: '',
+        toolCalls: [
+          {
+            id: 'call-1',
+            type: 'function' as const,
+            function: { name: 'flightsTool', arguments: '{}' },
+          },
+        ],
+      },
+    ];
+
+    const { result, rerender } = renderHook(
+      ({ messages }) => useConversationMessages(messages, 'thread-1'),
+      { initialProps: { messages: streamedMessages } }
+    );
+
+    expect(result.current[0]).toMatchObject({ content: 'I found a flight for you.' });
+
+    rerender({ messages: toolCallMessages });
+
+    expect(result.current[0]).toMatchObject({
+      id: 'a1',
+      content: 'I found a flight for you.',
+      toolCalls: [{ id: 'call-1' }],
+    });
+  });
+
+  it('does not reuse cached assistant text after switching conversations', () => {
+    jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => null));
+    const streamedMessages = [
+      { id: 'a1', role: 'assistant' as const, content: 'Text from the previous thread.' },
+    ];
+    const emptyToolCallMessages = [
+      {
+        id: 'a1',
+        role: 'assistant' as const,
+        content: '',
+        toolCalls: [
+          {
+            id: 'call-2',
+            type: 'function' as const,
+            function: { name: 'weatherTool', arguments: '{}' },
+          },
+        ],
+      },
+    ];
+
+    const { result, rerender } = renderHook(
+      ({ messages, threadId }) => useConversationMessages(messages, threadId),
+      { initialProps: { messages: streamedMessages, threadId: 'thread-1' } }
+    );
+
+    expect(result.current[0]).toMatchObject({ content: 'Text from the previous thread.' });
+
+    rerender({ messages: emptyToolCallMessages, threadId: 'thread-2' });
+
+    expect(result.current[0]).toMatchObject({ content: '' });
+  });
+
+  it('keeps a visible current-turn assistant message when an in-progress tool snapshot omits it', () => {
+    jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => null));
+    const streamedMessages = [
+      { id: 'u1', role: 'user' as const, content: 'Find a flight' },
+      { id: 'a-text', role: 'assistant' as const, content: 'I found an option for you.' },
+    ];
+    const toolSnapshot = [
+      { id: 'u1', role: 'user' as const, content: 'Find a flight' },
+      {
+        id: 'a-tool',
+        role: 'assistant' as const,
+        content: '',
+        toolCalls: [
+          {
+            id: 'call-1',
+            type: 'function' as const,
+            function: { name: 'flightsTool', arguments: '{}' },
+          },
+        ],
+      },
+    ];
+
+    const { result, rerender } = renderHook(
+      ({ messages, inProgress }) => useConversationMessages(messages, 'thread-1', inProgress),
+      { initialProps: { messages: streamedMessages, inProgress: true } }
+    );
+
+    rerender({ messages: toolSnapshot, inProgress: true });
+
+    expect(result.current.map(({ id }) => id)).toEqual(['u1', 'a-text', 'a-tool']);
+    expect(result.current[1]).toMatchObject({ content: 'I found an option for you.' });
+  });
+
+  it('returns to the completed snapshot once the run finishes', () => {
+    jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => null));
+    const streamedMessages = [
+      { id: 'u1', role: 'user' as const, content: 'Find a flight' },
+      { id: 'a-text', role: 'assistant' as const, content: 'I found an option for you.' },
+    ];
+    const finalMessages = [
+      { id: 'u1', role: 'user' as const, content: 'Find a flight' },
+      { id: 'a-final', role: 'assistant' as const, content: 'Here are the final details.' },
+    ];
+
+    const { result, rerender } = renderHook(
+      ({ messages, inProgress }) => useConversationMessages(messages, 'thread-1', inProgress),
+      { initialProps: { messages: streamedMessages, inProgress: true } }
+    );
+
+    rerender({ messages: finalMessages, inProgress: false });
+
+    expect(result.current.map(({ id }) => id)).toEqual(['u1', 'a-final']);
+  });
+
   it('renders every tool call in a multi-tool message, overriding CopilotKit single-tool-call generativeUI', () => {
     // CopilotKit's own useLazyToolRenderer only ever resolves toolCalls[0]; this
     // simulates that upstream behavior by rendering per single-toolCall message.

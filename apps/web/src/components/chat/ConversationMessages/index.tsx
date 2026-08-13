@@ -20,7 +20,7 @@ export const ConversationMessages = (props: MessagesProps) => {
     }))
   );
   const isCurrentThread = historyThreadId === activeThreadId;
-  const messages = useConversationMessages(props.messages);
+  const messages = useConversationMessages(props.messages, activeThreadId, props.inProgress);
 
   return (
     <ChatMessages

@@ -1,4 +1,4 @@
-import { createElement, useMemo } from 'react';
+import { createElement, useMemo, useRef } from 'react';
 import type { MessagesProps } from '@copilotkit/react-ui';
 import { useLazyToolRenderer } from '@copilotkit/react-core';
 
@@ -34,6 +34,13 @@ const canonicalToolArguments = (toolArguments: string): string => {
 
 const bookingToolCallSignature = (toolName: string, toolArguments: string): string =>
   `${toolName}:${canonicalToolArguments(toolArguments)}`;
+
+const findLastUserMessageIndex = (messages: ChatMessage[]): number => {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    if (messages[index].role === CHAT_ROLE.USER) return index;
+  }
+  return -1;
+};
 
 /**
  * Reconciles the persisted LangGraph snapshot with CopilotKit's live messages.
@@ -139,11 +146,69 @@ const attachGenerativeUi = (
     return resolved;
   });
 
-export const useConversationMessages = (messages: ChatMessage[]): ChatMessage[] => {
+export const useConversationMessages = (
+  messages: ChatMessage[],
+  conversationId?: string | null,
+  inProgress = false
+): ChatMessage[] => {
   const lazyToolRendered = useLazyToolRenderer();
+  const assistantContentByIdRef = useRef(new Map<string, string>());
+  const previousMessagesRef = useRef<ChatMessage[]>([]);
+  const conversationIdRef = useRef(conversationId);
+
+  if (conversationIdRef.current !== conversationId) {
+    conversationIdRef.current = conversationId;
+    assistantContentByIdRef.current.clear();
+    previousMessagesRef.current = [];
+  }
 
   return useMemo(() => {
     const normalized = normalizeConversationMessages(messages);
-    return attachGenerativeUi(normalized, lazyToolRendered);
-  }, [messages, lazyToolRendered]);
+    const contentReconciled = normalized.map((message) => {
+      if (message.role !== CHAT_ROLE.ASSISTANT || !message.id) return message;
+
+      if (typeof message.content === 'string' && message.content.trim()) {
+        assistantContentByIdRef.current.set(message.id, message.content);
+        return message;
+      }
+
+      const previousContent = assistantContentByIdRef.current.get(message.id);
+      if (!message.toolCalls?.length || !previousContent) return message;
+
+      return { ...message, content: previousContent };
+    });
+
+    let reconciled = contentReconciled;
+    if (inProgress) {
+      const currentUserIndex = findLastUserMessageIndex(contentReconciled);
+      const previousUserIndex = findLastUserMessageIndex(previousMessagesRef.current);
+      const currentUserId = contentReconciled[currentUserIndex]?.id;
+      const previousUserId = previousMessagesRef.current[previousUserIndex]?.id;
+
+      if (currentUserIndex !== -1 && currentUserId && currentUserId === previousUserId) {
+        const currentIds = new Set(contentReconciled.map((message) => message.id));
+        const missingVisibleAssistantMessages = previousMessagesRef.current
+          .slice(previousUserIndex + 1)
+          .filter(
+            (message) =>
+              message.role === CHAT_ROLE.ASSISTANT &&
+              typeof message.content === 'string' &&
+              message.content.trim() &&
+              !currentIds.has(message.id)
+          );
+
+        if (missingVisibleAssistantMessages.length) {
+          reconciled = [
+            ...contentReconciled.slice(0, currentUserIndex + 1),
+            ...missingVisibleAssistantMessages,
+            ...contentReconciled.slice(currentUserIndex + 1),
+          ];
+        }
+      }
+    }
+
+    previousMessagesRef.current = reconciled;
+
+    return attachGenerativeUi(reconciled, lazyToolRendered);
+  }, [conversationId, inProgress, messages, lazyToolRendered]);
 };

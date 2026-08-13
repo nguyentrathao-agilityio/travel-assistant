@@ -39,9 +39,6 @@ const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCardProps) 
           <Typography variant="card-title" weight="medium">
             {request.title}
           </Typography>
-          <Typography variant="meta" color="secondary" className="mt-1">
-            {request.description}
-          </Typography>
         </div>
       </div>
 

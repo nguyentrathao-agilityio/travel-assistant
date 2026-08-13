@@ -3,6 +3,31 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { BookingApprovalCard } from '../index';
 
 describe('BookingApprovalCard', () => {
+  it('does not expose the raw HITL tool description', () => {
+    const rawDescription =
+      'Tool execution requires approval Tool: bookHotelTool Args: { "customerName": "Huynh" }';
+
+    render(
+      <BookingApprovalCard
+        request={{
+          type: 'booking_approval',
+          approvalId: 'approval-raw',
+          draftId: 'approval-raw',
+          action: 'create_hotel_booking',
+          title: 'Confirm hotel booking',
+          description: rawDescription,
+          referenceId: 'hotel-1',
+          details: { city: 'Hoi An', rooms: 1 },
+          allowedDecisions: ['approve', 'edit', 'reject'],
+        }}
+        onDecision={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByText(rawDescription)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Tool execution requires approval/)).not.toBeInTheDocument();
+  });
+
   it('requires an explicit decision and prevents double submit', () => {
     const onDecision = jest.fn();
     render(

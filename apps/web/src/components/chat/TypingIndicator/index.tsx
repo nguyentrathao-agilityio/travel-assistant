@@ -22,7 +22,7 @@ const TypingIndicator = ({ label = 'AI is thinking', className }: TypingIndicato
         <span
           key={i}
           style={{ animationDelay: `${i * 0.15}s` }}
-          className="bg-text-tertiary h-1.5 w-1.5 animate-bounce rounded-full"
+          className="bg-text-tertiary h-1.5 w-1.5 animate-bounce rounded-full motion-reduce:animate-none"
         />
       ))}
     </div>

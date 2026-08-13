@@ -11,7 +11,9 @@ import { CHAT_ROLE, SECONDARY_SUGGESTIONS, TOOL_SUGGESTION_ITEMS } from '@/const
 import { Button } from '@/components';
 import { useSuggestionStore } from '@/stores';
 import type { SendMessage } from '@/stores';
-import { isRealConversationMessage } from '@/utils';
+import { cn, isRealConversationMessage } from '@/utils';
+
+const SUGGESTION_SKELETON_WIDTHS = ['w-28', 'w-24', 'w-32'];
 
 interface ChatMessagesProps extends MessagesProps {
   sendMessage: SendMessage | null;
@@ -38,11 +40,24 @@ const InterruptMessage = ({ children }: { children: ReactNode }) => (
   </div>
 );
 
+/**
+ * Skeleton preview of the suggestion chips row, shown while the turn is still
+ * in progress after real assistant text has already appeared.
+ */
 const PendingSuggestions = () => (
-  <div className="pl-[52px]">
-    <div className="bg-background-secondary text-text-primary inline-flex rounded-[28px] px-4 py-2 shadow">
-      <TypingIndicator className="p-0" />
-    </div>
+  <div
+    role="status"
+    aria-busy="true"
+    aria-label="Loading suggestions"
+    className="flex flex-wrap gap-2 pl-[52px]"
+  >
+    {SUGGESTION_SKELETON_WIDTHS.map((width, index) => (
+      <div
+        key={index}
+        aria-hidden="true"
+        className={cn('bg-border-tertiary rounded-pill h-7 animate-pulse', width)}
+      />
+    ))}
   </div>
 );
 

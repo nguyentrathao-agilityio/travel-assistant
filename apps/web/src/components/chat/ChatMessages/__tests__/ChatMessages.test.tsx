@@ -146,7 +146,8 @@ describe('ChatMessages', () => {
       );
 
       expect(container.querySelector('.bg-assistant-gradient')).not.toBeInTheDocument();
-      expect(screen.getAllByRole('status', { name: 'AI is thinking' })).toHaveLength(1);
+      expect(screen.getByRole('status', { name: 'Loading suggestions' })).toBeInTheDocument();
+      expect(screen.queryByRole('status', { name: 'AI is thinking' })).not.toBeInTheDocument();
     });
 
     it('does not bring the avatar typing indicator back once the current turn already has a real answer — even if inProgress stays true and a trailing tool/system message re-appears after it', () => {
@@ -180,16 +181,17 @@ describe('ChatMessages', () => {
       );
 
       expect(container.querySelector('.bg-assistant-gradient')).not.toBeInTheDocument();
-      expect(screen.getAllByRole('status', { name: 'AI is thinking' })).toHaveLength(1);
+      expect(screen.getByRole('status', { name: 'Loading suggestions' })).toBeInTheDocument();
+      expect(screen.queryByRole('status', { name: 'AI is thinking' })).not.toBeInTheDocument();
     });
 
-    it('shows a loading placeholder instead of suggestions while a response is still streaming, even after real content has appeared', () => {
+    it('shows a skeleton placeholder instead of suggestions while a response is still streaming, even after real content has appeared', () => {
       const assistantAnswer = {
         ...makeMessage('assistant-1', 'assistant'),
         content: 'To enter Vietnam as a tourist, you will need a valid passport and an e-visa.',
       } as CKMessage;
 
-      render(
+      const { container } = render(
         <ChatMessages
           {...defaultProps}
           messages={[makeMessage('user-1'), assistantAnswer]}
@@ -198,15 +200,9 @@ describe('ChatMessages', () => {
       );
 
       expect(screen.queryByText('Find places')).not.toBeInTheDocument();
-      const indicator = screen.getByRole('status', { name: 'AI is thinking' });
-      expect(indicator.parentElement).toHaveClass(
-        'bg-background-secondary',
-        'text-text-primary',
-        'rounded-[28px]',
-        'px-4',
-        'py-2',
-        'shadow'
-      );
+      const indicator = screen.getByRole('status', { name: 'Loading suggestions' });
+      expect(indicator).toHaveClass('pl-[52px]');
+      expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
     });
 
     it('shows suggestions once streaming finishes', () => {

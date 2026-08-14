@@ -165,6 +165,30 @@ describe('useConversationMessages', () => {
     expect(result.current[1]).toMatchObject({ content: 'I found an option for you.' });
   });
 
+  it('does not replay cached text when the current in-progress snapshot already has new assistant text', () => {
+    jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => null));
+    const firstSnapshot = [
+      { id: 'u1', role: 'user' as const, content: 'Find a flight' },
+      { id: 'a-first', role: 'assistant' as const, content: 'I found an option for you.' },
+    ];
+    const nextSnapshot = [
+      { id: 'u1', role: 'user' as const, content: 'Find a flight' },
+      { id: 'a-next', role: 'assistant' as const, content: 'Here are the booking details.' },
+    ];
+
+    const { result, rerender } = renderHook(
+      ({ messages }) => useConversationMessages(messages, 'thread-1', true),
+      { initialProps: { messages: firstSnapshot } }
+    );
+
+    rerender({ messages: nextSnapshot });
+
+    expect(result.current.map(({ id }) => id)).toEqual(['u1', 'a-next']);
+    expect(result.current).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 'a-first' })])
+    );
+  });
+
   it('returns to the completed snapshot once the run finishes', () => {
     jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => null));
     const streamedMessages = [

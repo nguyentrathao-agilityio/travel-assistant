@@ -107,7 +107,7 @@ const ChatMessages = ({
       ref={scrollContainerRef}
       className="scrollbar-thin bg-background-page flex-1 overflow-y-scroll px-4 py-4"
     >
-      {isHistoryLoading ? (
+      {isHistoryLoading && !hasRealMessages ? (
         <ChatHistoryLoading />
       ) : !hasRealMessages && !inProgress ? (
         <ChatEmptyState onSuggestionClick={handleSuggestionClick} />

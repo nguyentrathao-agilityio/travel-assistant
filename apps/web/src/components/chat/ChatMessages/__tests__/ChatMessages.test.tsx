@@ -102,6 +102,20 @@ describe('ChatMessages', () => {
       expect(screen.getByText('m2')).toBeInTheDocument();
     });
 
+    it('keeps existing messages visible while history is refreshing', () => {
+      render(
+        <ChatMessages
+          {...defaultProps}
+          messages={[makeMessage('m1'), makeMessage('m2')]}
+          isHistoryLoading
+        />
+      );
+
+      expect(screen.getAllByTestId('message')).toHaveLength(2);
+      expect(screen.getByText('m1')).toBeInTheDocument();
+      expect(screen.getByText('m2')).toBeInTheDocument();
+    });
+
     it('renders only the latest message when stream reconciliation repeats an ID', () => {
       const messages = [makeMessage('booking-result'), makeMessage('booking-result')];
 

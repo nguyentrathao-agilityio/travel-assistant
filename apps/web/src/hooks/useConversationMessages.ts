@@ -184,8 +184,21 @@ export const useConversationMessages = (
       const previousUserIndex = findLastUserMessageIndex(previousMessagesRef.current);
       const currentUserId = contentReconciled[currentUserIndex]?.id;
       const previousUserId = previousMessagesRef.current[previousUserIndex]?.id;
+      const currentTurnHasVisibleAssistantText = contentReconciled
+        .slice(currentUserIndex + 1)
+        .some(
+          (message) =>
+            message.role === CHAT_ROLE.ASSISTANT &&
+            typeof message.content === 'string' &&
+            message.content.trim()
+        );
 
-      if (currentUserIndex !== -1 && currentUserId && currentUserId === previousUserId) {
+      if (
+        currentUserIndex !== -1 &&
+        currentUserId &&
+        currentUserId === previousUserId &&
+        !currentTurnHasVisibleAssistantText
+      ) {
         const currentIds = new Set(contentReconciled.map((message) => message.id));
         const missingVisibleAssistantMessages = previousMessagesRef.current
           .slice(previousUserIndex + 1)

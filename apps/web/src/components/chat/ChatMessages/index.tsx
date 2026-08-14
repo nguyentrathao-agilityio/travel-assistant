@@ -105,7 +105,7 @@ const ChatMessages = ({
   return (
     <div
       ref={scrollContainerRef}
-      className="scrollbar-thin bg-background-page flex-1 overflow-y-scroll px-4 py-4"
+      className="conversation-typography scrollbar-thin bg-background-page flex-1 overflow-y-scroll px-4 py-4"
     >
       {isHistoryLoading && !hasRealMessages ? (
         <ChatHistoryLoading />
@@ -141,7 +141,7 @@ const ChatMessages = ({
                     variant="ghost"
                     size="sm"
                     onClick={() => handleSuggestionClick(s.message)}
-                    className="text-badge-primary-text font-regular inline-flex items-center gap-1.5 border px-2.5 py-1 shadow"
+                    className="conversation-action-suggestion text-badge-primary-text font-regular inline-flex items-center gap-1.5 border px-2.5 py-1 shadow"
                   >
                     <Icon size={13} aria-hidden="true" />
                     {s.title}

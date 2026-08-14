@@ -15,6 +15,19 @@ const BASE_MESSAGE = {
 };
 
 describe('CustomAssistantMessage', () => {
+  it('uses the compact body typography token for assistant responses', () => {
+    render(
+      <CustomAssistantMessage
+        message={{ ...BASE_MESSAGE, content: 'A compact response.' } as any}
+        isLoading={false}
+        isGenerating={false}
+        rawData={null}
+      />
+    );
+
+    expect(screen.getByText('A compact response.').closest('.text-body')).toBeInTheDocument();
+  });
+
   it('renders message content and action buttons', () => {
     render(
       <CustomAssistantMessage

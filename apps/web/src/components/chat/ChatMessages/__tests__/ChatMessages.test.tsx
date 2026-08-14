@@ -94,6 +94,14 @@ describe('ChatMessages', () => {
   });
 
   describe('message list', () => {
+    it('scopes compact typography to the conversation and rendered tool cards', () => {
+      const { container } = render(
+        <ChatMessages {...defaultProps} messages={[makeMessage('m1')]} />
+      );
+
+      expect(container.firstElementChild).toHaveClass('conversation-typography');
+    });
+
     it('renders a RenderMessage for each message', () => {
       const messages = [makeMessage('m1'), makeMessage('m2')];
       render(<ChatMessages {...defaultProps} messages={messages} />);
@@ -241,7 +249,9 @@ describe('ChatMessages', () => {
         <ChatMessages {...defaultProps} messages={[makeMessage('user-1'), assistantAnswer]} />
       );
 
-      expect(screen.getByText('Find places')).toBeInTheDocument();
+      expect(screen.getByText('Find places').closest('button')).toHaveClass(
+        'conversation-action-suggestion'
+      );
       expect(screen.queryByRole('status')).not.toBeInTheDocument();
     });
 

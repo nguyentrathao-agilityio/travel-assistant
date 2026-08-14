@@ -17,6 +17,18 @@
 }
 
 @layer utilities {
+  /* Compact type scale scoped to messages and tool cards inside the conversation. */
+  .conversation-typography {
+    --font-size-display: 1.5rem;
+    --font-size-heading: 1rem;
+    --font-size-card-title: 0.875rem;
+    --font-size-option-title: 0.875rem;
+    --font-size-body: 0.875rem;
+    --font-size-meta: 0.875rem;
+    --font-size-label: 0.875rem;
+    --font-size-badge: 0.875rem;
+  }
+
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
@@ -115,4 +127,25 @@
       var(--color-assistant-gradient-end)
     );
   }
+}
+
+/* CopilotKit's Markdown styles are unlayered, so these overrides must also be
+   unlayered to win the CSS cascade. Keep them scoped to the conversation. */
+.conversation-typography .copilotKitParagraph {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+.conversation-typography .copilotKitInlineCode {
+  font-size: var(--font-size-meta);
+}
+
+.conversation-typography .conversation-user-message {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+.conversation-typography .conversation-action-suggestion {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
 }

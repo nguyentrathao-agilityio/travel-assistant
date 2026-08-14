@@ -15,7 +15,7 @@ import { useConversationRendererStore, useThreadStore } from '@/stores';
 import {
   useBookedActions,
   useBookingAction,
-  useBookingInfo,
+  useBookingContext,
   useDestinationExplorerAction,
   useFlightAction,
   useThemeAction,
@@ -79,7 +79,7 @@ export const TravelChat = () => {
     setHistoryStatus(activeThreadId, isHistoryLoading);
   }, [activeThreadId, isHistoryLoading, setHistoryStatus]);
 
-  useBookingInfo();
+  useBookingContext();
   useBookingAction();
   useFlightAction();
   useHotelAction();

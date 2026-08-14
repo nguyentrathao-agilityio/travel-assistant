@@ -174,6 +174,4 @@ export const ACTIONS = {
   CONFIRM_TRIP_SUMMARY: 'confirmTripSummary',
   SHOW_BOOKED_FLIGHTS: 'show-booked-flights',
   SHOW_BOOKED_HOTEL: 'show-booked-hotel',
-  GET_FLIGHT_INFO: 'get-flight-info',
-  GET_HOTEL_INFO: 'get-hotel-info',
 } as const;

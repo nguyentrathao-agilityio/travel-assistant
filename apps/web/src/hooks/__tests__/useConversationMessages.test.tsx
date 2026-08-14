@@ -3,6 +3,8 @@ import { useLazyToolRenderer } from '@copilotkit/react-core';
 
 import { useConversationMessages } from '@/hooks/useConversationMessages';
 
+type TestMessages = Parameters<typeof useConversationMessages>[0];
+
 describe('useConversationMessages', () => {
   it('attaches generativeUI to a persisted assistant message with tool calls', () => {
     const rendered = <div key="call-1">weather-card</div>;
@@ -163,6 +165,96 @@ describe('useConversationMessages', () => {
 
     expect(result.current.map(({ id }) => id)).toEqual(['u1', 'a-text', 'a-tool']);
     expect(result.current[1]).toMatchObject({ content: 'I found an option for you.' });
+  });
+
+  it('keeps a rendered tool card visible when an in-progress text snapshot temporarily omits its tool call', () => {
+    const lazyToolRendered = jest.fn((message: { toolCalls?: { id: string }[] }) => {
+      const toolCall = message.toolCalls?.[0];
+      return toolCall ? () => <div key={toolCall.id}>{toolCall.id}-card</div> : null;
+    });
+    jest
+      .mocked(useLazyToolRenderer)
+      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useLazyToolRenderer>);
+
+    const cardSnapshot: TestMessages = [
+      { id: 'u1', role: 'user' as const, content: 'Check the weather' },
+      {
+        id: 'a-tool',
+        role: 'assistant' as const,
+        content: '',
+        toolCalls: [
+          {
+            id: 'call-weather',
+            type: 'function' as const,
+            function: { name: 'weatherTool', arguments: '{"city":"Da Nang"}' },
+          },
+        ],
+      },
+    ];
+    const textSnapshot: TestMessages = [
+      { id: 'u1', role: 'user' as const, content: 'Check the weather' },
+      { id: 'a-text', role: 'assistant' as const, content: 'Here is the current weather.' },
+    ];
+
+    const { result, rerender } = renderHook(
+      ({ messages }) => useConversationMessages(messages, 'thread-1', true),
+      { initialProps: { messages: cardSnapshot } }
+    );
+
+    expect(result.current.some((message) => message.id === 'a-tool')).toBe(true);
+
+    rerender({ messages: textSnapshot });
+
+    const retainedCardMessage = result.current.find((message) => message.id === 'a-tool');
+    const renderedCard =
+      retainedCardMessage?.role === 'assistant' ? retainedCardMessage.generativeUI?.() : undefined;
+    const { container } = render(renderedCard as React.ReactElement);
+
+    expect(result.current.map(({ id }) => id)).toEqual(['u1', 'a-tool', 'a-text']);
+    expect(container.textContent).toBe('call-weather-card');
+  });
+
+  it('merges a retained card into a replacement text snapshot with the same assistant message ID', () => {
+    const lazyToolRendered = jest.fn((message: { toolCalls?: { id: string }[] }) => {
+      const toolCall = message.toolCalls?.[0];
+      return toolCall ? () => <div key={toolCall.id}>{toolCall.id}-card</div> : null;
+    });
+    jest
+      .mocked(useLazyToolRenderer)
+      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useLazyToolRenderer>);
+
+    const cardSnapshot: TestMessages = [
+      { id: 'u1', role: 'user' as const, content: 'Find a hotel' },
+      {
+        id: 'a1',
+        role: 'assistant' as const,
+        content: '',
+        toolCalls: [
+          {
+            id: 'call-hotel',
+            type: 'function' as const,
+            function: { name: 'hotelTool', arguments: '{"city":"Hoi An"}' },
+          },
+        ],
+      },
+    ];
+    const textSnapshot: TestMessages = [
+      { id: 'u1', role: 'user' as const, content: 'Find a hotel' },
+      { id: 'a1', role: 'assistant' as const, content: 'Here are the available hotels.' },
+    ];
+
+    const { result, rerender } = renderHook(
+      ({ messages }) => useConversationMessages(messages, 'thread-1', true),
+      { initialProps: { messages: cardSnapshot } }
+    );
+
+    rerender({ messages: textSnapshot });
+
+    expect(result.current.map(({ id }) => id)).toEqual(['u1', 'a1']);
+    expect(result.current[1]).toMatchObject({
+      content: 'Here are the available hotels.',
+      toolCalls: [{ id: 'call-hotel' }],
+    });
   });
 
   it('does not replay cached text when the current in-progress snapshot already has new assistant text', () => {

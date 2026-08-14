@@ -5,8 +5,10 @@ import { useLazyToolRenderer } from '@copilotkit/react-core';
 import { CHAT_ROLE, TOOL_NAMES } from '@/constants';
 
 type ChatMessage = MessagesProps['messages'][number];
+type AssistantChatMessage = Extract<ChatMessage, { role: 'assistant' }>;
 
 export type ConversationChatMessage = ChatMessage & { hasResolvedToolCard?: boolean };
+type ResolvedToolCardMessage = AssistantChatMessage & { hasResolvedToolCard: true };
 
 const BOOKING_TOOL_NAMES = new Set<string>([
   TOOL_NAMES.BOOK_FLIGHT,
@@ -41,6 +43,13 @@ const findLastUserMessageIndex = (messages: ChatMessage[]): number => {
   }
   return -1;
 };
+
+const isResolvedToolCardMessage = (
+  message: ConversationChatMessage
+): message is ResolvedToolCardMessage =>
+  message.role === CHAT_ROLE.ASSISTANT &&
+  message.hasResolvedToolCard === true &&
+  Boolean(message.toolCalls?.length);
 
 /**
  * Reconciles the persisted LangGraph snapshot with CopilotKit's live messages.
@@ -153,7 +162,7 @@ export const useConversationMessages = (
 ): ChatMessage[] => {
   const lazyToolRendered = useLazyToolRenderer();
   const assistantContentByIdRef = useRef(new Map<string, string>());
-  const previousMessagesRef = useRef<ChatMessage[]>([]);
+  const previousMessagesRef = useRef<ConversationChatMessage[]>([]);
   const conversationIdRef = useRef(conversationId);
 
   if (conversationIdRef.current !== conversationId) {
@@ -218,10 +227,64 @@ export const useConversationMessages = (
           ];
         }
       }
+
+      if (currentUserIndex !== -1 && currentUserId && currentUserId === previousUserId) {
+        const currentToolCallIds = new Set(
+          reconciled.flatMap((message) =>
+            message.role === CHAT_ROLE.ASSISTANT
+              ? (message.toolCalls?.map(({ id }) => id) ?? [])
+              : []
+          )
+        );
+        const missingCardMessages = previousMessagesRef.current
+          .slice(previousUserIndex + 1)
+          .filter(isResolvedToolCardMessage)
+          .filter((message) => message.toolCalls?.some(({ id }) => !currentToolCallIds.has(id)))
+          .map((message) => ({
+            ...message,
+            content: '',
+            toolCalls: message.toolCalls?.filter(({ id }) => !currentToolCallIds.has(id)),
+          }));
+
+        const retainedCardMessages: ResolvedToolCardMessage[] = [];
+        for (const previousCardMessage of missingCardMessages) {
+          const matchingMessageIndex = reconciled.findIndex(
+            ({ id }) => id && id === previousCardMessage.id
+          );
+
+          if (matchingMessageIndex === -1) {
+            retainedCardMessages.push(previousCardMessage);
+            continue;
+          }
+
+          const matchingMessage = reconciled[matchingMessageIndex];
+          if (matchingMessage.role !== CHAT_ROLE.ASSISTANT) continue;
+          reconciled = reconciled.map((message, index) =>
+            index === matchingMessageIndex
+              ? {
+                  ...message,
+                  toolCalls: [
+                    ...(matchingMessage.toolCalls ?? []),
+                    ...(previousCardMessage.toolCalls ?? []),
+                  ],
+                }
+              : message
+          );
+        }
+
+        if (retainedCardMessages.length) {
+          reconciled = [
+            ...reconciled.slice(0, currentUserIndex + 1),
+            ...retainedCardMessages,
+            ...reconciled.slice(currentUserIndex + 1),
+          ];
+        }
+      }
     }
 
-    previousMessagesRef.current = reconciled;
+    const messagesWithGenerativeUi = attachGenerativeUi(reconciled, lazyToolRendered);
+    previousMessagesRef.current = messagesWithGenerativeUi;
 
-    return attachGenerativeUi(reconciled, lazyToolRendered);
+    return messagesWithGenerativeUi;
   }, [conversationId, inProgress, messages, lazyToolRendered]);
 };

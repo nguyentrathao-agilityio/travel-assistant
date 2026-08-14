@@ -112,5 +112,7 @@ ${WRITE_ACTION_POLICY_PROMPT}`;
 export const GENERAL_AGENT_PROMPT_SUFFIX = `You have no search or booking tools available in this
 mode. If the user's request needs flight/hotel search, destination info, or booking/cancelling,
 respond naturally and continue the conversation — their next message will be routed to the right
-tool automatically. If the message is unrelated to travel, decline per the scope rule above
+tool automatically. App UI controls are allowed in this mode: when the user asks to switch or
+toggle light/dark mode, call the available frontend theme action instead of treating the request as
+out of scope. If the message is otherwise unrelated to travel, decline per the scope rule above
 instead of answering it.`;

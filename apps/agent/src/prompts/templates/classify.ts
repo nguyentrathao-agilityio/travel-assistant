@@ -25,7 +25,8 @@ For a multi-part request include every requested operation; do not mark booking 
   an exact hotel ID, or by clear reference to one already shown earlier in this conversation.
 - cancel_booking: the user wants to cancel or change an existing confirmed booking. Changing
   search criteria, dates, destination, or an unbooked selection is plan instead.
-- general: greetings and travel-related small talk that does not require a tool.
+- general: greetings, travel-related small talk that does not require a backend tool, and app UI
+  controls such as switching or toggling light/dark mode. UI controls are handled by frontend tools.
 - out_of_scope: requests with no travel relevance at all — general knowledge, coding, math,
   writing, or personal advice unrelated to a trip. Use this instead of general so the graph can
   return a deterministic refusal without invoking another model or any tool. Never use out_of_scope

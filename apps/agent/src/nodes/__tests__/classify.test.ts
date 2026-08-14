@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { HumanMessage } from '@langchain/core/messages';
 
 const { invokeMock } = vi.hoisted(() => ({ invokeMock: vi.fn() }));
 
@@ -54,6 +55,23 @@ const updateOf = (result: Awaited<ReturnType<typeof classifyNode>>): GraphStateU
   result.update as GraphStateUpdate;
 
 describe('classifyNode', () => {
+  it.each(['switch to dark mode', 'change to light theme', 'toggle theme'])(
+    'routes the UI request "%s" to general without invoking the travel classifier',
+    async (message) => {
+      invokeMock.mockClear();
+
+      const result = await classifyNode(state({ messages: [new HumanMessage(message)] }));
+
+      expect(updateOf(result)).toMatchObject({
+        intent: 'general',
+        request: { intent: 'general', confidence: 1 },
+        execution: { currentNode: 'classify', completedTasks: ['classify'] },
+      });
+      expect(result.goto).toEqual(['general']);
+      expect(invokeMock).not.toHaveBeenCalled();
+    }
+  );
+
   it.each([
     ['general', 'general'],
     ['explore', 'explore'],

@@ -120,7 +120,7 @@ const CustomAssistantMessage = (props: AssistantMessageProps) => {
         {/* Message bubble */}
         {(hasMessage || (isLoading && !message?.toolCalls)) && (
           <div
-            className={`bg-background-secondary text-body text-text-primary rounded-[28px] px-4 py-2 shadow ${
+            className={`assistant-message-text bg-background-secondary text-body text-text-primary rounded-[28px] px-4 py-2 shadow ${
               isCurrentMessage ? 'ring-border-secondary ring-1' : ''
             }`}
           >

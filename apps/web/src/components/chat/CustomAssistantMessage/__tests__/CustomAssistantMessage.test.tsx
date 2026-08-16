@@ -25,7 +25,9 @@ describe('CustomAssistantMessage', () => {
       />
     );
 
-    expect(screen.getByText('A compact response.').closest('.text-body')).toBeInTheDocument();
+    const response = screen.getByText('A compact response.').closest('.text-body');
+    expect(response).toBeInTheDocument();
+    expect(response).toHaveClass('assistant-message-text');
   });
 
   it('renders message content and action buttons', () => {

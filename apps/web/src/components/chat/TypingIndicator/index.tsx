@@ -26,7 +26,7 @@ const TypingIndicator = ({ label = 'AI is thinking', className }: TypingIndicato
         />
       ))}
     </div>
-    <span className="text-meta font-regular text-text-tertiary">{label}</span>
+    <span className="font-regular text-text-tertiary text-sm">{label}</span>
   </div>
 );
 

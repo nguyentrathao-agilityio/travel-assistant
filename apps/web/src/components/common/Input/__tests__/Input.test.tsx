@@ -21,6 +21,11 @@ describe('Input', () => {
     expect(screen.getByText('Search')).toBeInTheDocument();
   });
 
+  it('renders field labels at 14px', () => {
+    render(<Input value="" onChange={jest.fn()} label="Full name" />);
+    expect(screen.getByText('Full name')).toHaveClass('text-sm');
+  });
+
   it('associates label with input via htmlFor', () => {
     render(<Input value="" onChange={jest.fn()} label="Destination" />);
     const label = screen.getByText('Destination');

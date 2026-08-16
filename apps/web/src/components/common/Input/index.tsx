@@ -61,7 +61,7 @@ const Input = memo(
         {label && (
           <label
             htmlFor={id}
-            className="text-label text-text-tertiary font-medium uppercase tracking-widest"
+            className="text-text-tertiary text-sm font-medium uppercase tracking-widest"
           >
             {label}
           </label>

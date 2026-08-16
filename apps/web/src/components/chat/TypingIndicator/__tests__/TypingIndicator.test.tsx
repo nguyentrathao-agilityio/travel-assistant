@@ -9,6 +9,11 @@ describe('TypingIndicator', () => {
       expect(screen.getByText('AI is thinking')).toBeInTheDocument();
     });
 
+    it('renders its label at 14px', () => {
+      render(<TypingIndicator />);
+      expect(screen.getByText('AI is thinking')).toHaveClass('text-sm');
+    });
+
     it('renders with custom label', () => {
       render(<TypingIndicator label="Planning your trip…" />);
       expect(screen.getByRole('status')).toHaveAttribute('aria-label', 'Planning your trip…');

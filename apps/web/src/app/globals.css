@@ -149,6 +149,15 @@
   line-height: var(--line-height-body);
 }
 
+/* CopilotKit applies 1rem directly to rendered Markdown paragraphs. Scope a
+ * stronger override to assistant bubbles so response copy stays at 14px. */
+.assistant-message-text,
+.assistant-message-text .copilotKitParagraph,
+.assistant-message-text li.copilotKitMarkdownElement {
+  font-size: 0.875rem;
+  line-height: var(--line-height-body);
+}
+
 .conversation-typography .copilotKitInlineCode {
   font-size: var(--font-size-meta);
 }

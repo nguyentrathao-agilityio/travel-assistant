@@ -1,4 +1,5 @@
-import { isToolPending, isUserMessage, extractCopilotText } from '@/utils/agent';
+import { isToolPending, isUserMessage, extractCopilotText, stableMessageKey } from '@/utils/agent';
+import type { ConversationChatMessage } from '@/hooks';
 
 jest.mock('@/constants', () => ({
   CHAT_ROLE: { USER: 'user', ASSISTANT: 'assistant', TOOL: 'tool' },
@@ -70,5 +71,77 @@ describe('extractCopilotText', () => {
 
   it('returns empty string for empty array', () => {
     expect(extractCopilotText([])).toBe('');
+  });
+});
+
+describe('stableMessageKey', () => {
+  it('returns the tool call id for an assistant message with exactly one tool call', () => {
+    const message = {
+      id: 'chatcmpl-abc',
+      role: 'assistant',
+      toolCalls: [
+        { id: 'call_123', type: 'function', function: { name: 'flightsTool', arguments: '{}' } },
+      ],
+    } as unknown as ConversationChatMessage;
+
+    expect(stableMessageKey(message, 0)).toBe('assistant:call_123');
+  });
+
+  it('returns a toolCallId-derived key for a tool response message', () => {
+    const message = {
+      id: 'run-1-tool-call_123',
+      role: 'tool',
+      toolCallId: 'call_123',
+      content: '{}',
+    } as unknown as ConversationChatMessage;
+
+    expect(stableMessageKey(message, 0)).toBe('tool:call_123');
+  });
+
+  it('keys an assistant tool call and its tool response differently even when they share a tool-call id', () => {
+    const assistantMessage = {
+      id: 'chatcmpl-abc',
+      role: 'assistant',
+      toolCalls: [
+        { id: 'call_123', type: 'function', function: { name: 'flightsTool', arguments: '{}' } },
+      ],
+    } as unknown as ConversationChatMessage;
+    const toolMessage = {
+      id: 'run-1-tool-call_123',
+      role: 'tool',
+      toolCallId: 'call_123',
+      content: '{}',
+    } as unknown as ConversationChatMessage;
+
+    expect(stableMessageKey(assistantMessage, 0)).not.toBe(stableMessageKey(toolMessage, 1));
+  });
+
+  it('falls back to message.id for a user message', () => {
+    const message = {
+      id: 'user-1',
+      role: 'user',
+      content: 'hello',
+    } as unknown as ConversationChatMessage;
+
+    expect(stableMessageKey(message, 0)).toBe('user-1');
+  });
+
+  it('falls back to message.id for an assistant message with more than one tool call', () => {
+    const message = {
+      id: 'chatcmpl-multi',
+      role: 'assistant',
+      toolCalls: [
+        { id: 'call_1', type: 'function', function: { name: 'flightsTool', arguments: '{}' } },
+        { id: 'call_2', type: 'function', function: { name: 'weatherTool', arguments: '{}' } },
+      ],
+    } as unknown as ConversationChatMessage;
+
+    expect(stableMessageKey(message, 0)).toBe('chatcmpl-multi');
+  });
+
+  it('falls back to the index when message.id is missing', () => {
+    const message = { role: 'user', content: 'hello' } as unknown as ConversationChatMessage;
+
+    expect(stableMessageKey(message, 3)).toBe('3');
   });
 });

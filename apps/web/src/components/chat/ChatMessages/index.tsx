@@ -2,16 +2,26 @@ import { useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { MessagesProps } from '@copilotkit/react-ui';
 import { Bot } from 'lucide-react';
+
+// Components
 import { ChatEmptyState } from '../ChatEmptyState';
 import { ChatHistoryLoading } from '../ChatHistoryLoading';
 import { TypingIndicator } from '../TypingIndicator';
+import { Button } from '@/components';
+
+// Hooks
 import { useInterruptElement, useScrollToBottom } from '@/hooks';
 import type { ConversationChatMessage } from '@/hooks';
+
+// Constants
 import { CHAT_ROLE, SECONDARY_SUGGESTIONS, TOOL_SUGGESTION_ITEMS } from '@/constants';
-import { Button } from '@/components';
+
+// Stores
 import { useSuggestionStore } from '@/stores';
 import type { SendMessage } from '@/stores';
-import { cn, isRealConversationMessage } from '@/utils';
+
+// Utils
+import { cn, isRealConversationMessage, stableMessageKey } from '@/utils';
 
 const SUGGESTION_SKELETON_WIDTHS = ['w-28', 'w-24', 'w-32'];
 
@@ -116,7 +126,7 @@ const ChatMessages = ({
           <div className="flex flex-col">
             {messages.map((message, index) => (
               <RenderMessage
-                key={message.id ?? index}
+                key={stableMessageKey(message, index)}
                 message={message}
                 messages={messages}
                 inProgress={inProgress}

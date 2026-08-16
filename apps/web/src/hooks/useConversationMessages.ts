@@ -2,7 +2,14 @@ import { createElement, useMemo, useRef } from 'react';
 import type { MessagesProps } from '@copilotkit/react-ui';
 import { useLazyToolRenderer } from '@copilotkit/react-core';
 
+// Constants
 import { CHAT_ROLE, TOOL_NAMES } from '@/constants';
+
+/**
+ * Reconciles CopilotKit's live message stream with LangGraph's persisted
+ * snapshot after a resume. Not a CopilotKit hook-version issue — don't
+ * "fix" this by migrating useCoAgent/useLangGraphInterrupt.
+ */
 
 type ChatMessage = MessagesProps['messages'][number];
 type AssistantChatMessage = Extract<ChatMessage, { role: 'assistant' }>;

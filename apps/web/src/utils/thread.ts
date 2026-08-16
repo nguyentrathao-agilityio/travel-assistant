@@ -28,3 +28,9 @@ export const groupThreadsByDate = (threads: ThreadItem[]): ThreadGroups => {
 
   return groups;
 };
+
+/** Whether data tagged with `dataThreadId` still belongs to the currently active thread. */
+export const isCurrentThread = (
+  dataThreadId: string | null,
+  activeThreadId: string | null
+): boolean => dataThreadId === activeThreadId;

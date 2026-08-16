@@ -18,6 +18,8 @@ jest.mock('sonner', () => ({ toast: { error: jest.fn() } }));
 
 jest.mock('@/utils', () => ({
   toAgUiMessage: jest.fn(() => null),
+  isCurrentThread: (dataThreadId: string | null, activeThreadId: string | null) =>
+    dataThreadId === activeThreadId,
 }));
 
 const mockGetThread = langgraphClient.threads.get as jest.Mock;

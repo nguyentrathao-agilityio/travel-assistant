@@ -3,6 +3,7 @@ import { useShallow } from 'zustand/shallow';
 
 import { useConversationMessages } from '@/hooks';
 import { useConversationRendererStore, useThreadStore } from '@/stores';
+import { isCurrentThread } from '@/utils';
 
 import { ChatMessages } from '../ChatMessages';
 
@@ -19,15 +20,15 @@ export const ConversationMessages = (props: MessagesProps) => {
       sendMessage: state.sendMessage,
     }))
   );
-  const isCurrentThread = historyThreadId === activeThreadId;
+  const isThreadCurrent = isCurrentThread(historyThreadId, activeThreadId);
   const messages = useConversationMessages(props.messages, activeThreadId, props.inProgress);
 
   return (
     <ChatMessages
       {...props}
-      messages={isCurrentThread ? messages : props.messages}
+      messages={isThreadCurrent ? messages : props.messages}
       sendMessage={sendMessage}
-      isHistoryLoading={isCurrentThread ? isHistoryLoading : true}
+      isHistoryLoading={isThreadCurrent ? isHistoryLoading : true}
     />
   );
 };

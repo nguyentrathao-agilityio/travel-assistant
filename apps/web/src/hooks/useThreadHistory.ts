@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 
 import { langgraphClient } from '@/lib';
 import { useThreadStore } from '@/stores';
-import { toAgUiMessage } from '@/utils';
+import { isCurrentThread, toAgUiMessage } from '@/utils';
 
 import type { AgUiMessage } from '@/types';
 import type { LangGraphThreadValues } from '@/utils';
@@ -104,7 +104,7 @@ export const useThreadHistory = (threadId: string): ThreadHistoryResult => {
 
   // Effects run after paint. Never expose history belonging to the previous
   // thread during that gap.
-  if (history.threadId !== threadId) {
+  if (!isCurrentThread(history.threadId, threadId)) {
     return emptyHistory(threadId, Boolean(threadId));
   }
 

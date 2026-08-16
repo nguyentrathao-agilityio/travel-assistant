@@ -8,7 +8,6 @@ export * from './useSeedAgentHistory';
 export * from './useLocalTipsAction';
 export * from './usePlacesAction';
 export * from './useRouteAction';
-export * from './useThreadMessages';
 export * from './useTitleSync';
 export * from './useTripState';
 export * from './useScrollToBottom';

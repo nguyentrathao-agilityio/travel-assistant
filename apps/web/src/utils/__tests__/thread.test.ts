@@ -1,4 +1,4 @@
-import { groupThreadsByDate } from '@/utils/thread';
+import { groupThreadsByDate, isCurrentThread } from '@/utils/thread';
 import type { ThreadItem } from '@/stores/threadStore';
 
 const makeThread = (overrides: Partial<ThreadItem> = {}): ThreadItem => ({
@@ -55,5 +55,24 @@ describe('groupThreadsByDate', () => {
     expect(groups.today).toHaveLength(1);
     expect(groups.yesterday).toHaveLength(1);
     expect(groups.older).toHaveLength(2);
+  });
+});
+
+describe('isCurrentThread', () => {
+  it('returns true when the data thread id matches the active thread id', () => {
+    expect(isCurrentThread('thread-1', 'thread-1')).toBe(true);
+  });
+
+  it('returns false when the data thread id differs from the active thread id', () => {
+    expect(isCurrentThread('thread-1', 'thread-2')).toBe(false);
+  });
+
+  it('returns false when either id is null', () => {
+    expect(isCurrentThread(null, 'thread-1')).toBe(false);
+    expect(isCurrentThread('thread-1', null)).toBe(false);
+  });
+
+  it('returns true when both ids are null', () => {
+    expect(isCurrentThread(null, null)).toBe(true);
   });
 });

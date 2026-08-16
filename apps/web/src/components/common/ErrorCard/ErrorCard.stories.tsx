@@ -30,6 +30,13 @@ export const CustomMessage: Story = {
   },
 };
 
+export const UnexpectedBookingResult: Story = {
+  name: 'Unexpected booking result',
+  args: {
+    message: 'Received an unexpected booking result.',
+  },
+};
+
 export const LongMessage: Story = {
   name: 'Long message',
   args: {

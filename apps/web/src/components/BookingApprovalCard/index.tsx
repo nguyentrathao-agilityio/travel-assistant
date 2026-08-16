@@ -32,7 +32,7 @@ const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCardProps) 
   }, [isCancellation, onDecision]);
 
   return (
-    <section className="border-border-tertiary bg-background-primary flex w-full max-w-2xl flex-col gap-3 rounded-lg border p-4">
+    <section className="card-typography border-border-tertiary bg-background-primary flex w-full max-w-2xl flex-col gap-3 rounded-lg border p-4">
       <div className="flex items-start gap-3">
         <BookingIcon size={20} className="text-text-secondary mt-0.5 shrink-0" aria-hidden="true" />
         <div className="min-w-0">

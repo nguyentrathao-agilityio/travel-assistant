@@ -134,7 +134,7 @@ const FlightCard = ({
   const bannerPrice = showBanner ? formatPrice(totalPrice, currency) : undefined;
 
   return (
-    <div className={cn('flex w-full max-w-2xl flex-col gap-3', className)}>
+    <div className={cn('card-typography flex w-full max-w-2xl flex-col gap-3', className)}>
       <div className="border-border-tertiary overflow-hidden rounded-lg shadow">
         {/* Header */}
         <div className="bg-user-gradient px-5 py-3">

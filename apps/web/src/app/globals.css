@@ -29,6 +29,19 @@
     --font-size-badge: 0.875rem;
   }
 
+  /* Keep every standalone tool card at 14px, including Storybook and portal renders. */
+  .card-typography {
+    --font-size-display: 0.875rem;
+    --font-size-heading: 0.875rem;
+    --font-size-card-title: 0.875rem;
+    --font-size-option-title: 0.875rem;
+    --font-size-body: 0.875rem;
+    --font-size-meta: 0.875rem;
+    --font-size-label: 0.875rem;
+    --font-size-badge: 0.875rem;
+    font-size: 0.875rem;
+  }
+
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);

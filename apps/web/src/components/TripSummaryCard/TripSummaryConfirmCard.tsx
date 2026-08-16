@@ -63,7 +63,7 @@ const TripSummaryConfirmCard = ({
 }: TripSummaryConfirmCardProps) => (
   <div
     className={cn(
-      'border-border-secondary bg-background-primary flex w-full max-w-2xl flex-col gap-4 rounded-lg border px-5 py-4',
+      'card-typography border-border-secondary bg-background-primary flex w-full max-w-2xl flex-col gap-4 rounded-lg border px-5 py-4',
       className
     )}
   >

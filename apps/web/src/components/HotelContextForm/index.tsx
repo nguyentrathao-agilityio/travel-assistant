@@ -77,7 +77,7 @@ const HotelContextForm = ({
   }, [submitted, args, values, onConfirm]);
 
   return (
-    <div className="border-border-secondary bg-background-primary flex w-full max-w-sm flex-col gap-3 rounded-lg border shadow">
+    <div className="card-typography border-border-secondary bg-background-primary flex w-full max-w-sm flex-col gap-3 rounded-lg border shadow">
       <div className="border-border-tertiary border-b px-5 py-4">
         <p className="text-card-title text-text-primary font-medium">Search hotels</p>
         <p className="text-meta font-regular text-text-secondary">

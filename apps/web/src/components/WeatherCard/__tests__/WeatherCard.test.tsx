@@ -61,6 +61,11 @@ describe('WeatherCard', () => {
   });
 
   describe('with data', () => {
+    it('uses the 14px card typography scale', () => {
+      const { container } = render(<WeatherCard data={makeWeatherData()} />);
+      expect(container.firstChild).toHaveClass('card-typography');
+    });
+
     it('renders the location name in the header', () => {
       render(<WeatherCard data={makeWeatherData()} />);
       expect(screen.getByText('Da Nang Weather')).toBeInTheDocument();

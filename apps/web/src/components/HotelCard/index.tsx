@@ -64,7 +64,7 @@ const HotelCard = ({
   return (
     <div
       className={cn(
-        'border-border-tertiary flex w-full max-w-2xl flex-col gap-3 overflow-hidden rounded-lg shadow',
+        'card-typography border-border-tertiary flex w-full max-w-2xl flex-col gap-3 overflow-hidden rounded-lg shadow',
         className
       )}
     >

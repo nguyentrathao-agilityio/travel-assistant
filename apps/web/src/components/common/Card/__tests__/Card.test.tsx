@@ -8,6 +8,11 @@ describe('Card', () => {
     expect(screen.getByText('card content')).toBeInTheDocument();
   });
 
+  it('uses the 14px card typography scale', () => {
+    const { container } = render(<Card>card content</Card>);
+    expect(container.firstChild).toHaveClass('card-typography');
+  });
+
   it('has no role by default when not clickable', () => {
     const { container } = render(<Card>content</Card>);
     expect(container.firstChild).not.toHaveAttribute('role');

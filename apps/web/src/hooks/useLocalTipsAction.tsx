@@ -9,6 +9,7 @@ import {
   SetLastTool,
   ToolEmptyCard,
   ToolErrorCard,
+  ToolInvalidResultCard,
   ToolLoading,
 } from '@/components';
 
@@ -40,7 +41,9 @@ export const useLocalTipsAction = () => {
       if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsed = safeParseToolResult(TipsResultSchema, result);
-      if (!parsed.success) return <></>;
+      if (!parsed.success)
+        return <ToolInvalidResultCard message="Received an unexpected local tips result." />;
+
       if (parsed.data.count === 0)
         return <ToolEmptyCard message="No local tips were available for this destination." />;
 

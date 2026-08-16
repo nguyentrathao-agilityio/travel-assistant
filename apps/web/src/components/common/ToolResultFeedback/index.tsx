@@ -51,3 +51,14 @@ export const ToolEmptyCard = ({ message }: { message: string }) => (
     </div>
   </Card>
 );
+
+export const ToolInvalidResultCard = ({ message }: { message: string }) => (
+  <Card className="w-full max-w-sm shadow">
+    <div className="flex items-start gap-2">
+      <AlertCircle size={16} className="text-text-danger mt-0.5 shrink-0" aria-hidden="true" />
+      <Typography variant="body" color="secondary">
+        {message}
+      </Typography>
+    </div>
+  </Card>
+);

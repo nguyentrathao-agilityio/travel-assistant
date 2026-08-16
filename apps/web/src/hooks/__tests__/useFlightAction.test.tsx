@@ -20,6 +20,7 @@ jest.mock('@/components', () => ({
   ToolLoading: () => null,
   ToolEmptyCard: () => null,
   ToolErrorCard: () => null,
+  ToolInvalidResultCard: () => null,
 }));
 
 jest.mock('@/utils', () => ({
@@ -56,18 +57,18 @@ describe('useFlightAction', () => {
     expect(result.type).not.toBe(React.Fragment);
   });
 
-  it('render returns empty fragment when result is null', () => {
+  it('render returns ToolInvalidResultCard when result is null', () => {
     renderHook(() => useFlightAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', result: undefined, args: {} });
-    expect(result.type).toBe(React.Fragment);
+    expect(result.type).not.toBe(React.Fragment);
   });
 
-  it('render returns empty fragment when result has no results property', () => {
+  it('render returns ToolInvalidResultCard when result has no results property', () => {
     renderHook(() => useFlightAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', result: {}, args: {} });
-    expect(result.type).toBe(React.Fragment);
+    expect(result.type).not.toBe(React.Fragment);
   });
 
   it('render returns FlightCard when results are non-empty', () => {

@@ -10,7 +10,13 @@ import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 import { WeatherResultSchema } from '@repo/schemas';
 
 // Components
-import { SetLastTool, ToolErrorCard, WeatherCard, ToolLoading } from '@/components';
+import {
+  SetLastTool,
+  ToolErrorCard,
+  ToolInvalidResultCard,
+  WeatherCard,
+  ToolLoading,
+} from '@/components';
 
 export const useWeatherAction = () => {
   useRenderToolCall({
@@ -27,7 +33,8 @@ export const useWeatherAction = () => {
       if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsed = safeParseToolResult(WeatherResultSchema, result);
-      if (!parsed.success) return <></>;
+      if (!parsed.success)
+        return <ToolInvalidResultCard message="Received an unexpected weather result." />;
 
       return (
         <>

@@ -4,7 +4,14 @@ import { useRenderToolCall } from '@copilotkit/react-core';
 import { PlacesSearchResultSchema } from '@repo/schemas';
 
 // Components
-import { PlacesCard, SetLastTool, ToolEmptyCard, ToolErrorCard, ToolLoading } from '@/components';
+import {
+  PlacesCard,
+  SetLastTool,
+  ToolEmptyCard,
+  ToolErrorCard,
+  ToolInvalidResultCard,
+  ToolLoading,
+} from '@/components';
 
 // Constants
 import { TOOL_NAMES } from '@/constants';
@@ -28,7 +35,9 @@ export const usePlacesAction = () => {
 
       const parsed = safeParseToolResult(PlacesSearchResultSchema, result);
 
-      if (!parsed.success) return <></>;
+      if (!parsed.success)
+        return <ToolInvalidResultCard message="Received an unexpected places result." />;
+
       if (parsed.data.total === 0)
         return <ToolEmptyCard message="No places matched this search." />;
 

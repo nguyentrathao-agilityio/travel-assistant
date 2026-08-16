@@ -13,6 +13,8 @@ jest.mock('@/components', () => ({
   LoadingCard: () => null,
   SetLastTool: () => null,
   ToolLoading: () => null,
+  ToolErrorCard: () => null,
+  ToolInvalidResultCard: () => null,
 }));
 jest.mock('@/utils', () => ({
   ...jest.requireActual('@/utils/toolResult'),
@@ -46,12 +48,12 @@ describe('useTripSummaryAction', () => {
     expect(result).not.toBeNull();
   });
 
-  it('render returns empty fragment when safeParse fails', () => {
+  it('render returns ToolInvalidResultCard when safeParse fails', () => {
     mockSafeParse.mockReturnValue({ success: false });
     renderHook(() => useTripSummaryAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: {} });
-    expect(result.type).toBe(React.Fragment);
+    expect(result.type).not.toBe(React.Fragment);
   });
 
   it('render returns TripSummaryCard when parse succeeds', () => {

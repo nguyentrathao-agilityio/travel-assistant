@@ -2,7 +2,14 @@ import { useCallback } from 'react';
 import { useRenderToolCall } from '@copilotkit/react-core';
 
 // Components
-import { FlightCard, SetLastTool, ToolEmptyCard, ToolErrorCard, ToolLoading } from '@/components';
+import {
+  FlightCard,
+  SetLastTool,
+  ToolEmptyCard,
+  ToolErrorCard,
+  ToolInvalidResultCard,
+  ToolLoading,
+} from '@/components';
 
 // Utils
 import { getToolError, isToolPending, parseToolResult } from '@/utils';
@@ -51,11 +58,15 @@ export const useFlightAction = () => {
             target={`flights from ${args.origin} to ${args.destination} on ${args.departure_date}`}
           />
         );
+
       if (getToolError(result)) return <ToolErrorCard result={result} />;
+
       const parsedResult = parseToolResult(result) as FlightSearchResult | undefined;
       if (parsedResult?.results && parsedResult.results.length === 0)
         return <ToolEmptyCard message="No flights matched this search." />;
-      if (!parsedResult?.results) return <></>;
+
+      if (!parsedResult?.results)
+        return <ToolInvalidResultCard message="Received an unexpected flight result." />;
 
       const confirmedDeparture =
         parsedResult.results.find(

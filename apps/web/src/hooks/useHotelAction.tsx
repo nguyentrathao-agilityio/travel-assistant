@@ -5,7 +5,14 @@ import { useRenderToolCall } from '@copilotkit/react-core';
 import { TOOL_NAMES, TOOL_STATUS } from '@/constants';
 
 // Components
-import { HotelCard, SetLastTool, ToolEmptyCard, ToolErrorCard, ToolLoading } from '@/components';
+import {
+  HotelCard,
+  SetLastTool,
+  ToolEmptyCard,
+  ToolErrorCard,
+  ToolInvalidResultCard,
+  ToolLoading,
+} from '@/components';
 
 // Utils
 import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
@@ -67,7 +74,9 @@ export const useHotelAction = () => {
 
       if (status === TOOL_STATUS.COMPLETE && result) {
         const parsed = safeParseToolResult(HotelSearchResultSchema, result);
-        if (!parsed.success) return <></>;
+        if (!parsed.success)
+          return <ToolInvalidResultCard message="Received an unexpected hotel result." />;
+
         if (parsed.data.results.length === 0)
           return <ToolEmptyCard message="No hotels matched these dates and filters." />;
 

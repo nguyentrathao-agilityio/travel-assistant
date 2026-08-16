@@ -4,7 +4,13 @@ import { useRenderToolCall } from '@copilotkit/react-core';
 import { DestinationExplorerResultSchema } from '@repo/schemas';
 
 // Components
-import { DestinationExplorerCard, SetLastTool, ToolErrorCard, ToolLoading } from '@/components';
+import {
+  DestinationExplorerCard,
+  SetLastTool,
+  ToolErrorCard,
+  ToolInvalidResultCard,
+  ToolLoading,
+} from '@/components';
 
 // Constants
 import { TOOL_NAMES } from '@/constants';
@@ -33,7 +39,10 @@ export const useDestinationExplorerAction = () => {
       if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsed = safeParseToolResult(DestinationExplorerResultSchema, result);
-      if (!parsed.success) return <></>;
+      if (!parsed.success)
+        return (
+          <ToolInvalidResultCard message="Received an unexpected destination explorer result." />
+        );
 
       return (
         <>

@@ -139,7 +139,7 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
       const errorResult = z.object({ error: z.string() }).safeParse(parsedResult);
       if (errorResult.success) return <ErrorCard message={errorResult.data.error} />;
 
-      return <></>;
+      return <ErrorCard message="Received an unexpected booking result." />;
     },
   });
 };

@@ -9,6 +9,7 @@ jest.mock('@/components', () => ({
   LoadingCard: () => null,
   ToolLoading: () => null,
   ToolErrorCard: () => null,
+  ToolInvalidResultCard: () => null,
   SetLastTool: () => null,
 }));
 jest.mock('@/utils', () => ({
@@ -47,10 +48,10 @@ describe('useWeatherAction', () => {
     expect(result).not.toBeNull();
   });
 
-  it('render returns empty fragment when safeParse fails', () => {
+  it('render returns ToolInvalidResultCard when safeParse fails', () => {
     const render = getRender();
     const result = render({ status: 'complete', args: {}, result: {} });
-    expect(result.type).toBe(React.Fragment);
+    expect(result.type).not.toBe(React.Fragment);
   });
 
   it('render returns WeatherCard when safeParse succeeds', () => {

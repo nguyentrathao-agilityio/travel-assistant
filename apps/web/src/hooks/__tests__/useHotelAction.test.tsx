@@ -19,6 +19,7 @@ jest.mock('@/components', () => ({
   ToolLoading: () => null,
   ToolEmptyCard: () => null,
   ToolErrorCard: () => null,
+  ToolInvalidResultCard: () => null,
 }));
 
 jest.mock('@/utils', () => ({
@@ -59,12 +60,12 @@ describe('useHotelAction', () => {
     expect(result).not.toBeNull();
   });
 
-  it('render returns empty fragment when status is complete and safeParse fails', () => {
+  it('render returns ToolInvalidResultCard when status is complete and safeParse fails', () => {
     mockHotelSafeParse.mockReturnValue({ success: false });
     renderHook(() => useHotelAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', result: { total: 1, results: [] }, args: {} });
-    expect(result.type).toBe(React.Fragment);
+    expect(result.type).not.toBe(React.Fragment);
   });
 
   it('render returns an explicit empty state when total is 0', () => {

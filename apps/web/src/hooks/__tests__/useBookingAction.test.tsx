@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { fireEvent, render, renderHook, screen } from '@testing-library/react';
-import { useLangGraphInterrupt } from '@copilotkit/react-core';
+import { useLangGraphInterrupt, useRenderToolCall } from '@copilotkit/react-core';
 
 import { TOOL_NAMES } from '@/constants';
 import { useBookingAction } from '../useBookingAction';
@@ -8,6 +8,7 @@ import { useBookingAction } from '../useBookingAction';
 describe('useBookingAction', () => {
   beforeEach(() => {
     jest.mocked(useLangGraphInterrupt).mockClear();
+    jest.mocked(useRenderToolCall).mockClear();
   });
 
   it('renders LangChain HITL requests and resolves approval with a structured decision', () => {
@@ -63,5 +64,21 @@ describe('useBookingAction', () => {
     expect(resolve).toHaveBeenCalledWith({
       decisions: [{ type: 'reject', message: 'User cancelled or requested changes.' }],
     });
+  });
+
+  it('shows an error card when the completed result matches neither the booking nor error schema', () => {
+    renderHook(() => useBookingAction());
+    const registration = jest
+      .mocked(useRenderToolCall)
+      .mock.calls.find((call) => call[0].name === TOOL_NAMES.BOOK_FLIGHT)?.[0];
+
+    render(
+      registration!.render({
+        status: 'complete',
+        result: JSON.stringify({ unexpected: 'shape' }),
+      } as never) as ReactElement
+    );
+
+    expect(screen.getByText('Received an unexpected booking result.')).toBeInTheDocument();
   });
 });

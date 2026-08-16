@@ -4,7 +4,14 @@ import { useRenderToolCall } from '@copilotkit/react-core';
 import { RouteResultSchema } from '@repo/schemas';
 
 // Components
-import { RouteCard, SetLastTool, ToolEmptyCard, ToolErrorCard, ToolLoading } from '@/components';
+import {
+  RouteCard,
+  SetLastTool,
+  ToolEmptyCard,
+  ToolErrorCard,
+  ToolInvalidResultCard,
+  ToolLoading,
+} from '@/components';
 
 // Constants
 import { TOOL_NAMES } from '@/constants';
@@ -26,7 +33,9 @@ export const useRouteAction = () => {
       if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsed = safeParseToolResult(RouteResultSchema, result);
-      if (!parsed.success) return <></>;
+      if (!parsed.success)
+        return <ToolInvalidResultCard message="Received an unexpected route result." />;
+
       if (parsed.data.stops.length === 0)
         return <ToolEmptyCard message="No route stops were available for this destination." />;
 

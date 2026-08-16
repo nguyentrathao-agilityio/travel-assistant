@@ -8,7 +8,13 @@ import { TripSummaryResultSchema } from '@repo/schemas';
 import { useTripState } from './useTripState';
 
 // Components
-import { SetLastTool, ToolErrorCard, ToolLoading, TripSummaryCard } from '@/components';
+import {
+  SetLastTool,
+  ToolErrorCard,
+  ToolInvalidResultCard,
+  ToolLoading,
+  TripSummaryCard,
+} from '@/components';
 
 // Utils
 import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
@@ -57,7 +63,8 @@ export const useTripSummaryAction = () => {
       if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsed = safeParseToolResult(TripSummaryResultSchema, result);
-      if (!parsed.success) return <></>;
+      if (!parsed.success)
+        return <ToolInvalidResultCard message="Received an unexpected trip summary result." />;
 
       return (
         <>

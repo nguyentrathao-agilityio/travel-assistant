@@ -17,6 +17,18 @@ flowchart LR
     API --> Graph[LangGraph StateGraph]
     Graph --> PG[(Postgres)]
     Graph --> LLM[(OpenAI)]
+
+    classDef actor fill:#e2e8f0,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef ui fill:#fce7f3,stroke:#db2777,color:#831843
+    classDef runtime fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef graph fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef dependency fill:#ccfbf1,stroke:#0f766e,color:#134e4a
+
+    class User actor
+    class Web ui
+    class API runtime
+    class Graph graph
+    class PG,LLM dependency
 ```
 
 Postgres backs three roles, one connection string (`POSTGRES_URL`):

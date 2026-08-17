@@ -21,6 +21,20 @@ flowchart TD
     explore & plan & bookFlight & bookHotel & cancelBooking & general --> supervise
     supervise --> saveMemory --> END((END))
     refusal --> END
+
+    classDef boundary fill:#e2e8f0,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef routing fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef agent fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef control fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef persistence fill:#ccfbf1,stroke:#0f766e,color:#134e4a
+    classDef danger fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+
+    class START,END boundary
+    class classify routing
+    class explore,plan,bookFlight,bookHotel,cancelBooking,general agent
+    class supervise control
+    class saveMemory persistence
+    class refusal danger
 ```
 
 - **Entry** — `classify` routes on intent via `Command.goto`

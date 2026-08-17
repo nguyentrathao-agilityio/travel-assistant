@@ -16,6 +16,20 @@ flowchart TD
     explore & plan & bookFlight & bookHotel & cancelBooking & general --> supervise
     supervise --> saveMemory --> END((END))
     refusal --> END
+
+    classDef boundary fill:#e2e8f0,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef routing fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef agent fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef control fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef persistence fill:#ccfbf1,stroke:#0f766e,color:#134e4a
+    classDef danger fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+
+    class START,END boundary
+    class classify routing
+    class explore,plan,bookFlight,bookHotel,cancelBooking,general agent
+    class supervise control
+    class saveMemory persistence
+    class refusal danger
 ```
 
 - **Entry** — `classify` routes on intent via `Command.goto`
@@ -39,6 +53,14 @@ flowchart LR
     classify -.-> cancelBooking
     classify -.-> general
     classify -.-> refusal
+
+    classDef routing fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef agent fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef danger fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+
+    class classify routing
+    class explore,plan,bookFlight,bookHotel,cancelBooking,general agent
+    class refusal danger
 ```
 
 ## Branches
@@ -72,6 +94,14 @@ flowchart LR
     supervise -->|retry, max 2x| ExplorePlan[explore / plan]
     supervise -->|handoffTarget set| Booking[booking branch]
     supervise -->|complete, failed, or out of retries| saveMemory
+
+    classDef control fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef agent fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef persistence fill:#ccfbf1,stroke:#0f766e,color:#134e4a
+
+    class supervise control
+    class ExplorePlan,Booking agent
+    class saveMemory persistence
 ```
 
 > A booking that times out is marked `WRITE_STATUS_UNKNOWN` and never auto-retried — the side effect

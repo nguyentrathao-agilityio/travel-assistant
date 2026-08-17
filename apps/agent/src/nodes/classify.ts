@@ -33,6 +33,19 @@ type ClassifyCommand = Command<never, GraphStateUpdate, BranchName>;
 const THEME_CONTROL_PATTERN =
   /\b(?:switch|change|set|toggle|turn)\b[\s\S]*\b(?:theme|dark mode|light mode)\b/i;
 
+interface RequestChangeSet {
+  destinationChanged: boolean;
+  originChanged: boolean;
+  datesChanged: boolean;
+  travelersChanged: boolean;
+}
+
+interface RequestInvalidationRules {
+  flightContextChanged: boolean;
+  hotelContextChanged: boolean;
+  destinationContextChanged: boolean;
+}
+
 const emptyExtractedFields = (): IntentClassification['extractedFields'] => ({
   origin: null,
   destination: null,
@@ -42,57 +55,87 @@ const emptyExtractedFields = (): IntentClassification['extractedFields'] => ({
   budget: null,
 });
 
+const requestFieldChanged = <Key extends keyof TravelRequest>(
+  currentRequest: TravelRequest,
+  fields: Partial<TravelRequest>,
+  key: Key
+): boolean => fields[key] !== undefined && fields[key] !== currentRequest[key];
+
+const requestChanges = (
+  currentRequest: TravelRequest,
+  fields: Partial<TravelRequest>
+): RequestChangeSet => ({
+  destinationChanged: requestFieldChanged(currentRequest, fields, 'destination'),
+  originChanged: requestFieldChanged(currentRequest, fields, 'origin'),
+  datesChanged:
+    requestFieldChanged(currentRequest, fields, 'departureDate') ||
+    requestFieldChanged(currentRequest, fields, 'returnDate'),
+  travelersChanged: requestFieldChanged(currentRequest, fields, 'travelers'),
+});
+
+const invalidationRules = ({
+  destinationChanged,
+  originChanged,
+  datesChanged,
+  travelersChanged,
+}: RequestChangeSet): RequestInvalidationRules => ({
+  flightContextChanged: destinationChanged || originChanged || datesChanged || travelersChanged,
+  hotelContextChanged: destinationChanged || datesChanged || travelersChanged,
+  destinationContextChanged: destinationChanged,
+});
+
+const searchResultInvalidation = ({
+  flightContextChanged,
+  hotelContextChanged,
+  destinationContextChanged,
+}: RequestInvalidationRules): GraphStateUpdate['searchResults'] => {
+  if (!flightContextChanged && !hotelContextChanged) return undefined;
+
+  return {
+    ...(flightContextChanged && { flights: undefined }),
+    ...(hotelContextChanged && { hotels: undefined }),
+    ...(destinationContextChanged && {
+      weather: undefined,
+      places: undefined,
+      route: undefined,
+      localTips: undefined,
+    }),
+  };
+};
+
+const selectionInvalidation = ({
+  flightContextChanged,
+  hotelContextChanged,
+  destinationContextChanged,
+}: RequestInvalidationRules): GraphStateUpdate => {
+  if (!flightContextChanged && !hotelContextChanged) return {};
+
+  return {
+    selectedOptions: {
+      ...(flightContextChanged && { flightId: undefined, returnFlightId: undefined }),
+      ...(hotelContextChanged && { hotelId: undefined }),
+      ...(destinationContextChanged && { placeIds: [] }),
+    },
+    ...(flightContextChanged && { flights: undefined, flightSelectionStatus: undefined }),
+    ...(hotelContextChanged && { hotel: undefined, hotelSelectionStatus: undefined }),
+  };
+};
+
 const requestContextUpdate = (
   state: GraphStateType,
   fields: Partial<TravelRequest>
 ): GraphStateUpdate => {
   const currentRequest = state.request ?? {};
-  const destinationChanged =
-    fields.destination !== undefined && fields.destination !== currentRequest.destination;
-  const originChanged = fields.origin !== undefined && fields.origin !== currentRequest.origin;
-  const datesChanged =
-    (fields.departureDate !== undefined && fields.departureDate !== currentRequest.departureDate) ||
-    (fields.returnDate !== undefined && fields.returnDate !== currentRequest.returnDate);
-  const travelersChanged =
-    fields.travelers !== undefined && fields.travelers !== currentRequest.travelers;
-
-  const clearFlight = destinationChanged || originChanged || datesChanged;
-  const clearHotel = destinationChanged || datesChanged;
-  const clearDestinationResults = destinationChanged;
-  const clearFlightSelection = clearFlight || travelersChanged;
-  const clearHotelSelection = clearHotel || travelersChanged;
-  const clearSelections = clearFlightSelection || clearHotelSelection;
+  const rules = invalidationRules(requestChanges(currentRequest, fields));
+  const searchResults = searchResultInvalidation(rules);
 
   return {
     ...(fields.destination !== undefined && { destination: fields.destination }),
     ...(fields.departureDate !== undefined && { startDate: fields.departureDate }),
     ...(fields.returnDate !== undefined && { endDate: fields.returnDate }),
     ...(fields.travelers !== undefined && { travelers: fields.travelers }),
-    ...(clearFlight || clearHotel || clearDestinationResults
-      ? {
-          searchResults: {
-            ...(clearFlight && { flights: undefined }),
-            ...(clearHotel && { hotels: undefined }),
-            ...(clearDestinationResults && {
-              weather: undefined,
-              places: undefined,
-              route: undefined,
-              localTips: undefined,
-            }),
-          },
-        }
-      : {}),
-    ...(clearSelections
-      ? {
-          selectedOptions: {
-            ...(clearFlightSelection && { flightId: undefined, returnFlightId: undefined }),
-            ...(clearHotelSelection && { hotelId: undefined }),
-            ...(clearDestinationResults && { placeIds: [] }),
-          },
-          ...(clearFlightSelection && { flights: undefined, flightSelectionStatus: undefined }),
-          ...(clearHotelSelection && { hotel: undefined, hotelSelectionStatus: undefined }),
-        }
-      : {}),
+    ...(searchResults && { searchResults }),
+    ...selectionInvalidation(rules),
   };
 };
 

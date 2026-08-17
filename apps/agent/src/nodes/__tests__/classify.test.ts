@@ -191,6 +191,70 @@ describe('classifyNode', () => {
     expect(update.hotelSelectionStatus).toBeUndefined();
   });
 
+  it('invalidates traveler-dependent search results and selections when travelers change', async () => {
+    invokeMock.mockResolvedValueOnce(classification('plan', { travelers: 3 }));
+    const result = await classifyNode(
+      state({
+        request: { destination: 'Da Nang', travelers: 2 },
+        searchResults: {
+          flights: {} as GraphStateType['searchResults']['flights'],
+          hotels: {} as GraphStateType['searchResults']['hotels'],
+        },
+        selectedOptions: {
+          flightId: 'flight-1',
+          returnFlightId: 'flight-2',
+          hotelId: 'hotel-1',
+          placeIds: ['place-1'],
+        },
+        flights: { departure: { id: 'flight-1' } } as GraphStateType['flights'],
+        flightSelectionStatus: 'selected',
+        hotel: { id: 'hotel-1' } as GraphStateType['hotel'],
+        hotelSelectionStatus: 'selected',
+      })
+    );
+    const update = updateOf(result);
+
+    expect(update.searchResults).toEqual({ flights: undefined, hotels: undefined });
+    expect(update.selectedOptions).toEqual({
+      flightId: undefined,
+      returnFlightId: undefined,
+      hotelId: undefined,
+    });
+    expect(update.flights).toBeUndefined();
+    expect(update.flightSelectionStatus).toBeUndefined();
+    expect(update.hotel).toBeUndefined();
+    expect(update.hotelSelectionStatus).toBeUndefined();
+  });
+
+  it('preserves dependent state when extracted request values are unchanged', async () => {
+    invokeMock.mockResolvedValueOnce(
+      classification('plan', {
+        origin: 'HAN',
+        destination: 'Da Nang',
+        departureDate: '2026-08-14',
+        returnDate: '2026-08-16',
+        travelers: 2,
+      })
+    );
+    const result = await classifyNode(
+      state({
+        request: {
+          origin: 'HAN',
+          destination: 'Da Nang',
+          departureDate: '2026-08-14',
+          returnDate: '2026-08-16',
+          travelers: 2,
+        },
+      })
+    );
+    const update = updateOf(result);
+
+    expect(update).not.toHaveProperty('searchResults');
+    expect(update).not.toHaveProperty('selectedOptions');
+    expect(update).not.toHaveProperty('flights');
+    expect(update).not.toHaveProperty('hotel');
+  });
+
   it('supplies previous state for follow-up interpretation', async () => {
     invokeMock.mockResolvedValueOnce(classification('book_hotel'));
 

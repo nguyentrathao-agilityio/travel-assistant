@@ -11,8 +11,6 @@ jest.mock('@copilotkit/react-core', () => ({
     isAvailable: true,
     interrupt: null,
   })),
-  useCopilotAction: jest.fn(),
-  useCopilotReadable: jest.fn(),
   useRenderToolCall: jest.fn(),
   useLazyToolRenderer: jest.fn(() => jest.fn(() => null)),
   useHumanInTheLoop: jest.fn(),
@@ -31,6 +29,9 @@ jest.mock('@copilotkit/react-core/v2', () => ({
       subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
     },
   })),
+  useAgentContext: jest.fn(),
+  useFrontendTool: jest.fn(),
+  useRenderTool: jest.fn(),
 }));
 
 jest.mock('@/lib/langgraphClient', () => ({

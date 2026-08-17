@@ -33,7 +33,7 @@ export interface HotelContextFormProps {
 
 /**
  * Collects missing hotel search parameters before the search tool runs.
- * Rendered by useCopilotAction's renderAndWait — shows loading after submit.
+ * Designed for an interactive tool renderer and shows loading after submit.
  */
 const HotelContextForm = ({
   args,

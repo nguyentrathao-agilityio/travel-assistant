@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { useCopilotAction } from '@copilotkit/react-core';
+import { useFrontendTool } from '@copilotkit/react-core/v2';
 import { useBookedActions } from '@/hooks/useBookedActions';
 
 const mockState: {
@@ -32,7 +32,7 @@ jest.mock('@/components', () => ({
 jest.mock('@/utils', () => ({ isToolPending: (s: string) => s === 'inProgress' }));
 
 beforeEach(() => {
-  jest.mocked(useCopilotAction).mockClear();
+  jest.mocked(useFrontendTool).mockClear();
   mockState.flights = undefined;
   mockState.hotel = undefined;
 });
@@ -41,7 +41,7 @@ type RenderFn = (props: { status: string; args?: unknown; result?: unknown }) =>
 
 const getFlightsRender = () => {
   const call = jest
-    .mocked(useCopilotAction)
+    .mocked(useFrontendTool)
     .mock.calls.find((c) => c[0].name === 'show-booked-flights');
 
   return call![0].render as RenderFn;
@@ -49,7 +49,7 @@ const getFlightsRender = () => {
 
 const getHotelRender = () => {
   const call = jest
-    .mocked(useCopilotAction)
+    .mocked(useFrontendTool)
     .mock.calls.find((c) => c[0].name === 'show-booked-hotel');
 
   return call![0].render as RenderFn;
@@ -58,19 +58,19 @@ const getHotelRender = () => {
 describe('useBookedActions', () => {
   it('registers two CopilotKit actions on mount', () => {
     renderHook(() => useBookedActions());
-    expect(jest.mocked(useCopilotAction)).toHaveBeenCalledTimes(2);
+    expect(jest.mocked(useFrontendTool)).toHaveBeenCalledTimes(2);
   });
 
   it('registers the show-booked-flights action', () => {
     renderHook(() => useBookedActions());
-    const names = jest.mocked(useCopilotAction).mock.calls.map((c) => c[0].name);
+    const names = jest.mocked(useFrontendTool).mock.calls.map((c) => c[0].name);
 
     expect(names).toContain('show-booked-flights');
   });
 
   it('registers the show-booked-hotel action', () => {
     renderHook(() => useBookedActions());
-    const names = jest.mocked(useCopilotAction).mock.calls.map((c) => c[0].name);
+    const names = jest.mocked(useFrontendTool).mock.calls.map((c) => c[0].name);
 
     expect(names).toContain('show-booked-hotel');
   });

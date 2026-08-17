@@ -1,4 +1,4 @@
-import { useCopilotReadable } from '@copilotkit/react-core';
+import { useAgentContext } from '@copilotkit/react-core/v2';
 import { useMemo } from 'react';
 
 import { useTripState } from './useTripState';
@@ -45,7 +45,7 @@ export const useBookingContext = () => {
     };
   }, [state.flights, state.hotel]);
 
-  useCopilotReadable({
+  useAgentContext({
     description:
       'Current booking state for agent reasoning. Use show-booked-flights or show-booked-hotel only when the user asks to display a selection.',
     value,

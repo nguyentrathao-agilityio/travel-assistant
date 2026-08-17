@@ -25,7 +25,7 @@ interface LoadingCardProps {
 
 /**
  * Skeleton loader while AI is streaming generative card content.
- * Use in useCopilotAction render when status === "inProgress".
+ * Use in a frontend tool renderer while the tool is in progress.
  */
 const LoadingCard = ({
   lines = 3,

@@ -2,7 +2,7 @@
 import type { KnowledgeSource } from '@/schemas';
 
 // Constants
-import { KNOWLEDGE_NAMESPACE } from '@/constants';
+import { KNOWLEDGE_NAMESPACE, KNOWLEDGE_STALE_CHUNK_SEARCH_LIMIT } from '@/constants';
 
 // Infrastructure
 import { knowledgeStore } from '@/infrastructure/persistence';
@@ -29,7 +29,7 @@ export const ingestKnowledgeSource = async (
   const chunks = await splitKnowledgeSource(source, content);
   const existing = await store.search(KNOWLEDGE_NAMESPACE, {
     filter: { sourceId: source.id },
-    limit: 10_000,
+    limit: KNOWLEDGE_STALE_CHUNK_SEARCH_LIMIT,
   });
   const currentChunkIds = new Set(chunks.map((chunk) => chunk.chunkId));
   const staleChunkIds = existing.map((item) => item.key).filter((key) => !currentChunkIds.has(key));

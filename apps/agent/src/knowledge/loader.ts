@@ -4,7 +4,11 @@ import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import type { KnowledgeDocument, KnowledgeSource } from '@/schemas';
 
 // Constants
-import { KNOWLEDGE_CHUNK_OVERLAP, KNOWLEDGE_CHUNK_SIZE } from '@/constants';
+import {
+  KNOWLEDGE_CHUNK_OVERLAP,
+  KNOWLEDGE_CHUNK_SIZE,
+  KNOWLEDGE_FETCH_TIMEOUT_MS,
+} from '@/constants';
 
 type Fetcher = typeof fetch;
 
@@ -45,7 +49,7 @@ export const loadKnowledgeSource = async (
   // Bound external fetches and request only formats the ingestion pipeline can sanitize.
   const response = await fetcher(source.sourceUrl, {
     headers: { accept: 'text/html,text/markdown,text/plain' },
-    signal: AbortSignal.timeout(15_000),
+    signal: AbortSignal.timeout(KNOWLEDGE_FETCH_TIMEOUT_MS),
   });
 
   if (!response.ok) {

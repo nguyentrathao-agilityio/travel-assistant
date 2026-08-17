@@ -3,6 +3,9 @@ import { z } from 'zod';
 // Schemas
 import { TripCostEstimateSchema, TripSummaryInputSchema, TripSummaryResultSchema } from '@/schemas';
 
+// Constants
+import { MAX_STOPS_LIMIT } from '@/constants';
+
 // Services
 import { searchFlights } from './flights';
 import { searchHotels } from './hotel';
@@ -101,7 +104,7 @@ export const getTripSummary = async (
           availableOnly: true,
         })
       : Promise.resolve(null),
-    getRoute({ city: destination, maxStops: Math.min(days + 2, 8) }),
+    getRoute({ city: destination, maxStops: Math.min(days + 2, MAX_STOPS_LIMIT) }),
   ]);
 
   const flights = flightResult.status === 'fulfilled' ? flightResult.value : null;

@@ -5,7 +5,7 @@ import type { BaseStore } from '@langchain/langgraph-checkpoint';
 import { StoredMemorySchema } from '@/schemas';
 
 // Constants
-import { MEMORY_NAMESPACE } from '@/constants';
+import { MEMORY_NAMESPACE, MEMORY_SEARCH_LIMIT } from '@/constants';
 
 const normalize = (memory: string) => memory.trim().toLowerCase();
 
@@ -18,7 +18,7 @@ const keyOf = (memory: string): string | null => {
 
 /** Reads valid facts from the development memory namespace. */
 export const searchMemories = async (store: BaseStore): Promise<string[]> => {
-  const items = await store.search(MEMORY_NAMESPACE, { limit: 100 });
+  const items = await store.search(MEMORY_NAMESPACE, { limit: MEMORY_SEARCH_LIMIT });
 
   return items
     .map((item) => StoredMemorySchema.safeParse(item.value))
@@ -29,7 +29,7 @@ export const searchMemories = async (store: BaseStore): Promise<string[]> => {
 /** Stores a fact, skipping duplicates and replacing values with the same key prefix. */
 export const saveMemory = async (store: BaseStore, memory: string): Promise<void> => {
   // Load and validate existing facts before checking for semantic duplicates.
-  const items = await store.search(MEMORY_NAMESPACE, { limit: 100 });
+  const items = await store.search(MEMORY_NAMESPACE, { limit: MEMORY_SEARCH_LIMIT });
   const existing = items
     .map((item) => ({ key: item.key, parsed: StoredMemorySchema.safeParse(item.value) }))
     .filter(

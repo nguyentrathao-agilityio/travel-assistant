@@ -11,14 +11,10 @@ import {
 } from '@/schemas';
 
 // Constants
-import { API_URL, ENDPOINTS } from '@/constants';
+import { API_URL, ENDPOINTS, LLM_TIPS_COUNT, LLM_ESSENTIAL_TIPS_COUNT } from '@/constants';
 
 // Infrastructure
 import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
-
-const VALID_CATEGORIES = TipCategorySchema.options;
-const LLM_TIPS_COUNT = 6;
-const LLM_ESSENTIAL_TIPS_COUNT = 2;
 
 const LLMTipSchema = z.object({
   id: z.string(),
@@ -75,7 +71,7 @@ export const generateTipsFromLLM = async (
                 "tips": [
                   {
                     "id": "llm-1",
-                    "category": "<one of: ${VALID_CATEGORIES.join(', ')}>",
+                    "category": "<one of: ${TipCategorySchema.options.join(', ')}>",
                     "scope": "${scope}",
                     "title": "<short title, max 8 words>",
                     "content": "<practical tip, 1-2 sentences>",

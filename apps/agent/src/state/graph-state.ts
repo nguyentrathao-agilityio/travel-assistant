@@ -5,6 +5,9 @@ import { z } from 'zod';
 // Schemas
 import { FlightSchema, HotelAvailabilitySchema, IntentSchema } from '@/schemas';
 
+// Constants
+import { BOOKING_OPERATIONS } from '@/constants';
+
 // State
 import { ExecutionStateSchema, ExecutionUpdateSchema, mergeExecutionState } from './execution';
 import { mergeRequest, TravelRequestSchema, TravelRequestUpdateSchema } from './request';
@@ -50,7 +53,12 @@ export const GraphState = new StateSchema({
   clientTimezone: zodState(z.string().optional()),
   intent: zodState(IntentSchema.optional()),
   refusalMessage: zodState(z.string().optional().nullable()),
-  handoffTarget: zodState(z.enum(['bookFlight', 'bookHotel']).optional()),
+  bookingOperation: zodState(
+    z
+      .enum([BOOKING_OPERATIONS.FLIGHT, BOOKING_OPERATIONS.HOTEL, BOOKING_OPERATIONS.CANCEL])
+      .optional()
+  ),
+  handoffTarget: zodState(z.literal('booking').optional()),
 
   // Explicit, serializable business state for node-to-node coordination.
   request: new ReducedValue(zodState(TravelRequestSchema.default(() => ({}))), {

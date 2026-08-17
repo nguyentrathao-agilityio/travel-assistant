@@ -6,6 +6,9 @@ import { Command } from '@langchain/langgraph';
 // Schemas
 import { FlightBookingInputSchema, HotelBookingInputSchema } from '@/schemas';
 
+// Constants
+import { BOOKING_OPERATIONS } from '@/constants';
+
 // State
 import type { GraphStateType } from '@/state';
 
@@ -28,10 +31,11 @@ export const transferToBookFlightTool = tool(
   async (input, runtime: ToolRuntime<GraphStateType>) =>
     new Command({
       update: {
-        handoffTarget: 'bookFlight',
+        bookingOperation: BOOKING_OPERATIONS.FLIGHT,
+        handoffTarget: 'booking',
         messages: buildHandoffMessages(
           runtime,
-          `Transferred to the flight booking agent. Call bookFlightTool now with exactly these ` +
+          `Transferred to the booking agent for a flight. Call bookFlightTool now with exactly these ` +
             `values — do not ask the user to restate them: flightId=${input.flightId}, ` +
             `adults=${input.adults}, customerName=${input.customerName}, ` +
             `customerEmail=${input.customerEmail}, customerPhone=${input.customerPhone}` +
@@ -42,7 +46,7 @@ export const transferToBookFlightTool = tool(
     }),
   {
     name: 'transferToBookFlightTool',
-    description: `Hand off to the flight booking agent. Call this instead of trying to book
+    description: `Hand off to the booking agent for a flight. Call this instead of trying to book
     yourself as soon as, within this same message, the user has both picked one exact flight from
     search results and given passenger name, email, and phone. Do not use this just to search or
     compare flights — flightsTool already covers that.`,
@@ -54,10 +58,11 @@ export const transferToBookHotelTool = tool(
   async (input, runtime: ToolRuntime<GraphStateType>) =>
     new Command({
       update: {
-        handoffTarget: 'bookHotel',
+        bookingOperation: BOOKING_OPERATIONS.HOTEL,
+        handoffTarget: 'booking',
         messages: buildHandoffMessages(
           runtime,
-          `Transferred to the hotel booking agent. Call bookHotelTool now with exactly these ` +
+          `Transferred to the booking agent for a hotel. Call bookHotelTool now with exactly these ` +
             `values — do not ask the user to restate them: hotelId=${input.hotelId}, ` +
             `city=${input.city}, checkIn=${input.checkIn}, checkOut=${input.checkOut}, ` +
             `rooms=${input.rooms}, adults=${input.adults}, children=${input.children}, ` +
@@ -70,7 +75,7 @@ export const transferToBookHotelTool = tool(
     }),
   {
     name: 'transferToBookHotelTool',
-    description: `Hand off to the hotel booking agent. Call this instead of trying to book
+    description: `Hand off to the booking agent for a hotel. Call this instead of trying to book
     yourself as soon as, within this same message, the user has both picked one exact hotel from
     search results and given stay dates, party size, guest name, email, and phone. Do not use this
     just to search or compare hotels — hotelTool already covers that.`,

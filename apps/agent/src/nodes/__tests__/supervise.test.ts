@@ -9,6 +9,7 @@ import {
   validateExploreResult,
   validateFlightResult,
   validatePlanningResult,
+  validateUnifiedBookingResult,
 } from '@/nodes/supervise';
 
 const state = (overrides: Partial<GraphStateType> = {}): GraphStateType =>
@@ -345,6 +346,25 @@ describe('supervisor validation', () => {
     expect(result.reason).toContain('draft');
   });
 
+  it.each([
+    ['flight', { flightSelectionStatus: 'booked' }],
+    ['hotel', { hotelSelectionStatus: 'booked' }],
+    ['cancel', { messages: [new HumanMessage('Cancel it'), toolResult('cancelBookingTool', {})] }],
+  ] as const)('validates the %s operation through the booking agent', (bookingOperation, data) => {
+    const result = validateUnifiedBookingResult(
+      state({ bookingOperation, ...data } as Partial<GraphStateType>)
+    );
+
+    expect(result.status).toBe('complete');
+  });
+
+  it('requires an operation before validating the booking agent result', () => {
+    expect(validateUnifiedBookingResult(state())).toMatchObject({
+      status: 'incomplete',
+      missingFields: ['bookingOperation'],
+    });
+  });
+
   it('marks a booking timeout as unknown instead of retrying the write', () => {
     const timeout = {
       error: 'Provider request timed out',
@@ -357,7 +377,8 @@ describe('supervisor validation', () => {
       state({
         messages: [new HumanMessage('Book it'), toolResult('bookFlightTool', timeout)],
         selectedOptions: { flightId: 'flight-1', placeIds: [] },
-        execution: { ...state().execution, currentNode: 'bookFlight' },
+        bookingOperation: 'flight',
+        execution: { ...state().execution, currentNode: 'booking' },
       })
     );
 

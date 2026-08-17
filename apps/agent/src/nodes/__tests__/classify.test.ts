@@ -76,9 +76,9 @@ describe('classifyNode', () => {
     ['general', 'general'],
     ['explore', 'explore'],
     ['plan', 'plan'],
-    ['book_flight', 'bookFlight'],
-    ['book_hotel', 'bookHotel'],
-    ['cancel_booking', 'cancelBooking'],
+    ['book_flight', 'booking'],
+    ['book_hotel', 'booking'],
+    ['cancel_booking', 'booking'],
     ['out_of_scope', 'refusal'],
   ] as const)('stores and routes the %s intent to %s', async (intent, branch) => {
     invokeMock.mockResolvedValueOnce(classification(intent));
@@ -92,6 +92,18 @@ describe('classifyNode', () => {
       handoffTarget: undefined,
     });
     expect(result.goto).toEqual([branch]);
+  });
+
+  it.each([
+    ['book_flight', 'flight'],
+    ['book_hotel', 'hotel'],
+    ['cancel_booking', 'cancel'],
+  ] as const)('stores booking operation %s as %s', async (intent, bookingOperation) => {
+    invokeMock.mockResolvedValueOnce(classification(intent));
+
+    const result = await classifyNode(state());
+
+    expect(updateOf(result).bookingOperation).toBe(bookingOperation);
   });
 
   it('stores the language-matched refusal message classifyNode produced for out_of_scope', async () => {

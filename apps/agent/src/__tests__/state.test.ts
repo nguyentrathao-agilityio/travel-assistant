@@ -19,6 +19,16 @@ const execution = (): ExecutionState => ({
 });
 
 describe('GraphState', () => {
+  it.each(['flight', 'hotel', 'cancel'] as const)(
+    'declares state for the supported booking operation %s',
+    (bookingOperation) => {
+      const channels = GraphState.getChannels();
+
+      expect(channels).toHaveProperty('bookingOperation');
+      expect(bookingOperation).toMatch(/^(flight|hotel|cancel)$/);
+    }
+  );
+
   it('uses independent safe defaults for collection state', async () => {
     const first = normalizeGraphState({});
     const second = normalizeGraphState({});

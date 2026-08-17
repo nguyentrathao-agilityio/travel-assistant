@@ -4,16 +4,16 @@
 
 ## The graph
 
-One graph, a shared supervisor, six agent branches, and one deterministic refusal branch. Every
+One graph, a shared supervisor, four agent branches, and one deterministic refusal branch. Every
 message enters through `classify` and leaves through `saveMemory` — except `out_of_scope`, which
 leaves through `refusal` directly.
 
 ```mermaid
 flowchart TD
     START((START)) --> classify
-    classify --> explore & plan & bookFlight & bookHotel & cancelBooking & general
+    classify --> explore & plan & booking & general
     classify --> refusal
-    explore & plan & bookFlight & bookHotel & cancelBooking & general --> supervise
+    explore & plan & booking & general --> supervise
     supervise --> saveMemory --> END((END))
     refusal --> END
 
@@ -26,14 +26,14 @@ flowchart TD
 
     class START,END boundary
     class classify routing
-    class explore,plan,bookFlight,bookHotel,cancelBooking,general agent
+    class explore,plan,booking,general agent
     class supervise control
     class saveMemory persistence
     class refusal danger
 ```
 
 - **Entry** — `classify` routes on intent via `Command.goto`
-- **Branches** — explore, plan, bookFlight, bookHotel, cancelBooking, general
+- **Branches** — explore, plan, booking, general
 - **Refusal** — `out_of_scope` routes straight to `refusal`, skipping supervise and saveMemory entirely
 - **Retry** — explore & plan only, max 2 attempts
 - **Handoff** — plan → booking branch
@@ -48,9 +48,7 @@ flowchart TD
 flowchart LR
     classify -.-> explore
     classify -.-> plan
-    classify -.-> bookFlight
-    classify -.-> bookHotel
-    classify -.-> cancelBooking
+    classify -.-> booking
     classify -.-> general
     classify -.-> refusal
 
@@ -59,7 +57,7 @@ flowchart LR
     classDef danger fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
 
     class classify routing
-    class explore,plan,bookFlight,bookHotel,cancelBooking,general agent
+    class explore,plan,booking,general agent
     class refusal danger
 ```
 
@@ -68,14 +66,12 @@ flowchart LR
 `utils/create-agent.ts` — every branch is built by the same `createSpecializedAgent` factory; each
 just gets its own prompt section and a restricted tool set.
 
-| Branch        | Tools                                                   |
-| ------------- | ------------------------------------------------------- |
-| explore       | destinations · places · local tips · RAG knowledge base |
-| plan          | flights · hotels · routes · weather                     |
-| bookFlight    | revalidate → human approval → submit                    |
-| bookHotel     | revalidate → human approval → submit                    |
-| cancelBooking | retrieve → human approval → cancel                      |
-| general       | open travel conversation, no side effects               |
+| Branch  | Tools                                                          |
+| ------- | -------------------------------------------------------------- |
+| explore | destinations · places · local tips · RAG knowledge base        |
+| plan    | flights · hotels · routes · weather                            |
+| booking | flight/hotel booking or cancellation → human approval → submit |
+| general | open travel conversation, no side effects                      |
 
 ## Refusal
 

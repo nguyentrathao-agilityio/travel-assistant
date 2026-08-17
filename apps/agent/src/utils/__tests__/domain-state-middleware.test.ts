@@ -79,7 +79,7 @@ describe('domain state persistence', () => {
       summary: 'HAN to DAD',
     };
 
-    const update = buildDomainStateUpdate('bookFlight', [
+    const update = buildDomainStateUpdate('booking', [
       new HumanMessage('Book it'),
       toolResult('bookFlightTool', booking),
     ]);
@@ -115,7 +115,7 @@ describe('domain state persistence', () => {
   });
 
   it('marks booking timeouts as write status unknown', () => {
-    const update = buildDomainStateUpdate('cancelBooking', [
+    const update = buildDomainStateUpdate('booking', [
       new HumanMessage('Cancel it'),
       toolResult('cancelBookingTool', {
         error: 'Provider timed out',

@@ -3,12 +3,14 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 // Constants
 import {
   BOOKING_TYPES,
+  BOOKING_OPERATIONS,
   DOMAIN_NODE_NAME,
   FINALIZATION_NODE_NAME,
   MAX_RETRIES_PER_NODE,
   RETRYABLE_DOMAIN_NODE_NAMES,
   TOOL_NAMES,
   type BookingType,
+  type BookingOperation,
   type DomainAgentNodeName,
 } from '@/constants';
 
@@ -209,7 +211,7 @@ export const validateFlightResult = (state: GraphStateType): ValidationResult =>
 export const validateHotelResult = (state: GraphStateType): ValidationResult =>
   validateBookingResult(state, BOOKING_TYPES.HOTEL);
 
-/** Checks the cancellation agent's turn for tool failures or a completed interaction. */
+/** Checks a cancellation operation for tool failures or a completed interaction. */
 export const validateCancellationResult = (state: GraphStateType): ValidationResult => {
   const failure = failureValidation(state, 'Cancellation');
 
@@ -225,13 +227,31 @@ export const validateCancellationResult = (state: GraphStateType): ValidationRes
   };
 };
 
+/** Selects the validation rules for the operation assigned to the unified booking agent. */
+export const validateUnifiedBookingResult = (state: GraphStateType): ValidationResult => {
+  const validators: Record<BookingOperation, (value: GraphStateType) => ValidationResult> = {
+    [BOOKING_OPERATIONS.FLIGHT]: validateFlightResult,
+    [BOOKING_OPERATIONS.HOTEL]: validateHotelResult,
+    [BOOKING_OPERATIONS.CANCEL]: validateCancellationResult,
+  };
+  const operation = state.bookingOperation;
+
+  if (!operation) {
+    return {
+      status: 'incomplete',
+      reason: 'Booking requires an operation.',
+      missingFields: ['bookingOperation'],
+    };
+  }
+
+  return validators[operation](state);
+};
+
 /** Dispatch table from domain node to its validator. */
 const VALIDATOR_BY_NODE: Record<DomainNode, (state: GraphStateType) => ValidationResult> = {
   [DOMAIN_NODE_NAME.EXPLORE]: validateExploreResult,
   [DOMAIN_NODE_NAME.PLAN]: validatePlanningResult,
-  [DOMAIN_NODE_NAME.BOOK_FLIGHT]: validateFlightResult,
-  [DOMAIN_NODE_NAME.BOOK_HOTEL]: validateHotelResult,
-  [DOMAIN_NODE_NAME.CANCEL_BOOKING]: validateCancellationResult,
+  [DOMAIN_NODE_NAME.BOOKING]: validateUnifiedBookingResult,
   [DOMAIN_NODE_NAME.GENERAL]: () => ({ status: 'complete', reason: 'General response completed.' }),
 };
 

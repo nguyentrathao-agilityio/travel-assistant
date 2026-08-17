@@ -1,20 +1,11 @@
-export const DOMAIN_AGENT_NODE_NAMES = [
-  'explore',
-  'plan',
-  'bookFlight',
-  'bookHotel',
-  'cancelBooking',
-  'general',
-] as const;
+export const DOMAIN_AGENT_NODE_NAMES = ['explore', 'plan', 'booking', 'general'] as const;
 
 export type DomainAgentNodeName = (typeof DOMAIN_AGENT_NODE_NAMES)[number];
 
 export const DOMAIN_NODE_NAME = {
   EXPLORE: 'explore',
   PLAN: 'plan',
-  BOOK_FLIGHT: 'bookFlight',
-  BOOK_HOTEL: 'bookHotel',
-  CANCEL_BOOKING: 'cancelBooking',
+  BOOKING: 'booking',
   GENERAL: 'general',
 } as const satisfies Record<string, DomainAgentNodeName>;
 
@@ -27,11 +18,15 @@ export const RETRYABLE_DOMAIN_NODE_NAMES: ReadonlySet<string> = new Set([
 export const BOOKING_TYPES = { FLIGHT: 'flight', HOTEL: 'hotel' } as const;
 export type BookingType = (typeof BOOKING_TYPES)[keyof typeof BOOKING_TYPES];
 
-export const WRITE_AGENT_NODE_NAMES = [
-  'bookFlight',
-  'bookHotel',
-  'cancelBooking',
-] as const satisfies readonly DomainAgentNodeName[];
+export const BOOKING_OPERATIONS = {
+  FLIGHT: 'flight',
+  HOTEL: 'hotel',
+  CANCEL: 'cancel',
+} as const;
+
+export type BookingOperation = (typeof BOOKING_OPERATIONS)[keyof typeof BOOKING_OPERATIONS];
+
+export const WRITE_AGENT_NODE_NAMES = ['booking'] as const satisfies readonly DomainAgentNodeName[];
 
 export const FINALIZATION_NODE_NAME = 'saveMemory' as const;
 

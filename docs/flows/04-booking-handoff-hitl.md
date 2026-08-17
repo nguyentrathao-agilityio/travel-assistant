@@ -3,14 +3,15 @@
 ## Handoff, validated
 
 `tools/handoffs.ts` · `nodes/supervise.ts` — `transferToBookFlightTool` / `transferToBookHotelTool`
-just set `handoffTarget` in state; they don't jump the graph. Supervise reads that field once plan
-finishes and routes straight to the booking branch.
+set `handoffTarget: booking` and the matching `bookingOperation` in state; they don't jump the
+graph. Supervise reads those fields once plan finishes and routes straight to the unified booking
+branch.
 
 ```mermaid
 flowchart LR
-    Plan[plan agent] -->|transferToBookFlightTool| Set["handoffTarget = bookFlight"]
+    Plan[plan agent] -->|transferToBookFlightTool| Set["handoffTarget = booking<br/>bookingOperation = flight"]
     Set --> Supervise[supervise]
-    Supervise --> Book[bookFlight agent]
+    Supervise --> Book[booking agent]
     Book -->|bookFlightTool| Interrupt["interrupt(): wait approval"]
     Interrupt -->|approved| Confirmed[Booking confirmed]
 

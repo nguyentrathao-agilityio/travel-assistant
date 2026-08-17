@@ -8,12 +8,10 @@ import { EXTERNAL_API_RETRY_POLICY, POSTGRES_URL } from './constants';
 import {
   BRANCH_NAMES,
   SUPERVISOR_ROUTES,
-  cancelBookingAgent,
+  bookingAgent,
   classifyNode,
   exploreAgent,
-  flightBookingAgent,
   generalAgent,
-  hotelBookingAgent,
   planningAgent,
   refusalNode,
   routeAfterSupervisor,
@@ -34,9 +32,7 @@ export const buildGraph = () =>
     .addNode('plan', planningAgent, {
       retryPolicy: EXTERNAL_API_RETRY_POLICY,
     })
-    .addNode('bookFlight', flightBookingAgent)
-    .addNode('bookHotel', hotelBookingAgent)
-    .addNode('cancelBooking', cancelBookingAgent)
+    .addNode('booking', bookingAgent)
     .addNode('general', generalAgent)
     .addNode('refusal', refusalNode)
     .addNode('supervise', supervisorNode)
@@ -44,9 +40,7 @@ export const buildGraph = () =>
     .addEdge(START, 'classify')
     .addEdge('explore', 'supervise')
     .addEdge('plan', 'supervise')
-    .addEdge('bookFlight', 'supervise')
-    .addEdge('bookHotel', 'supervise')
-    .addEdge('cancelBooking', 'supervise')
+    .addEdge('booking', 'supervise')
     .addEdge('general', 'supervise')
     .addEdge('refusal', END)
     .addConditionalEdges('supervise', routeAfterSupervisor, SUPERVISOR_ROUTES)

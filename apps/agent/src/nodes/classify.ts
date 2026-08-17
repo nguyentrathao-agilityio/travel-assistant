@@ -22,7 +22,7 @@ import type { GraphStateType, GraphStateUpdate, TravelRequest } from '@/state';
 import { takeRecentMessages } from '@/utils';
 
 // Nodes
-import { routeByIntent, type BranchName } from './routing';
+import { bookingOperationByIntent, routeByIntent, type BranchName } from './routing';
 
 const classifyModel = createChatModel({ apiKey: OPENAI_API_KEY! }).withStructuredOutput(
   IntentClassificationSchema
@@ -164,6 +164,7 @@ const toCommand = (state: GraphStateType, result: IntentClassification): Classif
     update: {
       ...requestContextUpdate(state, fields),
       intent: result.intent,
+      bookingOperation: bookingOperationByIntent(result.intent),
       refusalMessage: result.refusalMessage ?? undefined,
       request: {
         intent: result.intent,

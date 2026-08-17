@@ -41,10 +41,10 @@ export const PLANNING_AGENT_TOOLS_PROMPT = `## Available Tools
   itinerary request.
 - knowledgeSearchTool — trusted background knowledge with source citations. Use for entry rules,
   safety, culture, and stable planning guidance; live facts still require their dedicated tools.
-- transferToBookFlightTool — hand off to the flight booking agent. Call this, not bookFlightTool
+- transferToBookFlightTool — hand off to the booking agent for a flight. Call this, not bookFlightTool
   (you don't have it), once the user has picked one exact flight from search results AND given
   passenger name, email, and phone in this same message.
-- transferToBookHotelTool — hand off to the hotel booking agent. Call this, not bookHotelTool (you
+- transferToBookHotelTool — hand off to the booking agent for a hotel. Call this, not bookHotelTool (you
   don't have it), once the user has picked one exact hotel from search results AND given stay
   dates, party size, guest name, email, and phone in this same message.
 
@@ -85,27 +85,17 @@ searches and every required field is known, call the relevant tools together in 
 step so they can run in parallel. After all tool results return, give one concise combined response.
 Do not delegate a simple search merely to isolate tools or run independent searches sequentially.`;
 
-export const FLIGHT_BOOKING_AGENT_TOOLS_PROMPT = `## Available Tools
-- bookFlightTool — revalidate and book the selected flight after collecting passenger contact
-  data (name, email, phone). Only call after the user has selected an exact flight and provided
-  all contact details. This tool enforces a separate human approval step and re-verifies
-  price/availability after approval before booking — never claim success until it returns a
-  confirmation code.
+export const BOOKING_AGENT_TOOLS_PROMPT = `## Available Tools
+- bookFlightTool — use only when bookingOperation is "flight". Revalidate and book the exact
+  selected flight after collecting passenger name, email, and phone.
+- bookHotelTool — use only when bookingOperation is "hotel". Revalidate and book the exact
+  selected hotel after collecting stay details and guest name, email, and phone.
+- cancelBookingTool — use only when bookingOperation is "cancel" and a booking ID or confirmation
+  code is available.
 
-${WRITE_ACTION_POLICY_PROMPT}`;
-
-export const HOTEL_BOOKING_AGENT_TOOLS_PROMPT = `## Available Tools
-- bookHotelTool — revalidate and book the selected hotel after collecting guest contact data
-  (name, email, phone). Only call after the user has selected an exact hotel and provided all
-  contact details. This tool enforces a separate human approval step and re-verifies
-  availability after approval before booking — never claim success until it returns a
-  confirmation code.
-
-${WRITE_ACTION_POLICY_PROMPT}`;
-
-export const CANCEL_BOOKING_AGENT_TOOLS_PROMPT = `## Available Tools
-- cancelBookingTool — cancel an existing booking after retrieving its ID or confirmation code.
-  Always pauses for explicit human approval before cancelling.
+Never call a write tool that does not match bookingOperation. Ask only for fields required by the
+matching tool. Every write tool pauses for explicit human approval, and booking tools revalidate
+before submission. Never claim success before the selected tool returns a confirmed result.
 
 ${WRITE_ACTION_POLICY_PROMPT}`;
 

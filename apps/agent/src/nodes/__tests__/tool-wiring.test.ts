@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  CANCEL_BOOKING_AGENT_TOOLS,
+  BOOKING_AGENT_TOOLS,
   EXPLORE_AGENT_TOOLS,
-  FLIGHT_BOOKING_AGENT_TOOLS,
   GENERAL_AGENT_TOOLS,
-  HOTEL_BOOKING_AGENT_TOOLS,
   PLANNING_AGENT_TOOLS,
 } from '..';
 import { AGENT_CONFIGS } from '@/constants/agent-config';
@@ -15,7 +13,7 @@ const nameOf = (tools: { name: string }[]) => tools.map((tool) => tool.name).sor
 describe('specialized agent tool wiring', () => {
   it('keeps every domain agent in one typed configuration registry', () => {
     expect(Object.keys(AGENT_CONFIGS).sort()).toEqual(
-      ['explore', 'plan', 'bookFlight', 'bookHotel', 'cancelBooking', 'general'].sort()
+      ['explore', 'plan', 'booking', 'general'].sort()
     );
     for (const [name, config] of Object.entries(AGENT_CONFIGS)) {
       expect(config.name).toBe(name);
@@ -40,18 +38,17 @@ describe('specialized agent tool wiring', () => {
         'weatherTool',
       ].sort()
     );
-    expect(nameOf(FLIGHT_BOOKING_AGENT_TOOLS)).toEqual(['bookFlightTool']);
-    expect(nameOf(HOTEL_BOOKING_AGENT_TOOLS)).toEqual(['bookHotelTool']);
-    expect(nameOf(CANCEL_BOOKING_AGENT_TOOLS)).toEqual(['cancelBookingTool']);
+    expect(nameOf(BOOKING_AGENT_TOOLS)).toEqual(
+      ['bookFlightTool', 'bookHotelTool', 'cancelBookingTool'].sort()
+    );
+    expect(AGENT_CONFIGS.booking.approvalTools).toEqual([
+      'bookFlightTool',
+      'bookHotelTool',
+      'cancelBookingTool',
+    ]);
     expect(GENERAL_AGENT_TOOLS).toEqual([]);
 
-    const allNamedTools = [
-      ...EXPLORE_AGENT_TOOLS,
-      ...PLANNING_AGENT_TOOLS,
-      ...FLIGHT_BOOKING_AGENT_TOOLS,
-      ...HOTEL_BOOKING_AGENT_TOOLS,
-      ...CANCEL_BOOKING_AGENT_TOOLS,
-    ];
+    const allNamedTools = [...EXPLORE_AGENT_TOOLS, ...PLANNING_AGENT_TOOLS, ...BOOKING_AGENT_TOOLS];
     const occurrences = allNamedTools.reduce<Record<string, number>>((counts, item) => {
       counts[item.name] = (counts[item.name] ?? 0) + 1;
 

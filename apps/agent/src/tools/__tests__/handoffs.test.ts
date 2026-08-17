@@ -25,7 +25,10 @@ describe('transferToBookFlightTool', () => {
     )) as Command;
 
     expect(command).toBeInstanceOf(Command);
-    expect((command.update as { handoffTarget: string }).handoffTarget).toBe('bookFlight');
+    expect(command.update).toMatchObject({
+      bookingOperation: 'flight',
+      handoffTarget: 'booking',
+    });
     expect(command.goto).toEqual([]);
   });
 
@@ -96,7 +99,10 @@ describe('transferToBookHotelTool', () => {
       runtimeConfig('call_2')
     )) as Command;
 
-    expect((command.update as { handoffTarget: string }).handoffTarget).toBe('bookHotel');
+    expect(command.update).toMatchObject({
+      bookingOperation: 'hotel',
+      handoffTarget: 'booking',
+    });
     expect(command.goto).toEqual([]);
     const toolMessage = (command.update as { messages: unknown[] }).messages.find(
       (m): m is ToolMessage => m instanceof ToolMessage

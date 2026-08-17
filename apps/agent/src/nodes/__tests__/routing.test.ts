@@ -7,9 +7,9 @@ describe('routeByIntent', () => {
   it.each([
     ['explore', 'explore'],
     ['plan', 'plan'],
-    ['book_flight', 'bookFlight'],
-    ['book_hotel', 'bookHotel'],
-    ['cancel_booking', 'cancelBooking'],
+    ['book_flight', 'booking'],
+    ['book_hotel', 'booking'],
+    ['cancel_booking', 'booking'],
     ['general', 'general'],
     ['out_of_scope', 'refusal'],
   ] as const)('routes intent "%s" to branch "%s"', (intent, branch) => {
@@ -23,8 +23,7 @@ describe('routeByIntent', () => {
 
 describe('routeAfterPlanning', () => {
   it.each([
-    ['bookFlight', 'bookFlight'],
-    ['bookHotel', 'bookHotel'],
+    ['booking', 'booking'],
     [undefined, 'saveMemory'],
   ] as const)('routes handoff target %s to %s', (handoffTarget, expected) => {
     const state = { handoffTarget } as GraphStateType;

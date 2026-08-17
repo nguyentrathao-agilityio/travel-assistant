@@ -8,7 +8,7 @@ The practice focuses primarily on building the agent logic and orchestration lay
 
 ## Architecture
 
-The current agent is a custom LangGraph workflow: a classifier routes to one of six specialized
+The current agent is a custom LangGraph workflow: a classifier routes to one of four specialized
 agent branches or, for clearly off-topic requests, straight to a deterministic `refusal` node.
 Every agent branch's result is checked by a shared `supervise` node before the graph decides
 whether to retry, hand off, or finalize:
@@ -16,9 +16,9 @@ whether to retry, hand off, or finalize:
 ```mermaid
 flowchart TD
     START((START)) --> classify
-    classify --> explore & plan & bookFlight & bookHotel & cancelBooking & general
+    classify --> explore & plan & booking & general
     classify --> refusal
-    explore & plan & bookFlight & bookHotel & cancelBooking & general --> supervise
+    explore & plan & booking & general --> supervise
     supervise --> saveMemory --> END((END))
     refusal --> END
 
@@ -31,14 +31,14 @@ flowchart TD
 
     class START,END boundary
     class classify routing
-    class explore,plan,bookFlight,bookHotel,cancelBooking,general agent
+    class explore,plan,booking,general agent
     class supervise control
     class saveMemory persistence
     class refusal danger
 ```
 
 - **Entry** — `classify` routes on intent via `Command.goto`
-- **Branches** — explore, plan, bookFlight, bookHotel, cancelBooking, general
+- **Branches** — explore, plan, booking, general
 - **Refusal** — `out_of_scope` routes straight to `refusal`, skipping supervise and saveMemory entirely
 - **Retry** — explore & plan only, max 2 attempts
 - **Handoff** — plan → booking branch
@@ -51,7 +51,7 @@ flowchart TD
   tool set.
 - Every branch feeds into a single `supervise` node ([`apps/agent/src/nodes/supervise.ts`](apps/agent/src/nodes/supervise.ts)), which validates the branch's result (tool failures, missing required fields, missing operations) and decides the next hop via `routeAfterSupervisor`.
 - `explore` and `plan` get automatic retries (up to `MAX_RETRIES_PER_NODE`, currently 2) when the supervisor judges the result retryable; other branches don't retry.
-- `plan` requests a booking handoff by setting `handoffTarget` in state — the supervisor reads it and routes straight to `bookFlight` or `bookHotel` instead of falling through to `saveMemory`.
+- `plan` requests a booking handoff by setting `handoffTarget: booking` and a `bookingOperation` in state. The supervisor routes to the unified booking branch, which handles flight booking, hotel booking, or cancellation.
 - Booking and cancellation tools pause with a LangGraph interrupt and require explicit human
   approval before producing a side effect.
 - `PostgresSaver` persists per-thread checkpoints so conversations and interrupted runs can

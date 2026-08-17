@@ -33,7 +33,7 @@ describe('ChatEmptyState', () => {
 
       render(<ChatEmptyState onSuggestionClick={onSuggestionClick} />);
       await user.click(screen.getByText('Plan my trip'));
-      expect(onSuggestionClick).toHaveBeenCalledWith('Plan a trip to Da Nang');
+      expect(onSuggestionClick).toHaveBeenCalledWith('Trip Summary for Da Nang');
     });
 
     it('calls onSuggestionClick with secondary suggestion message when clicked', async () => {
@@ -51,7 +51,7 @@ describe('ChatEmptyState', () => {
 
       render(<ChatEmptyState onSuggestionClick={onSuggestionClick} />);
       await user.click(screen.getByText('Da Nang'));
-      expect(onSuggestionClick).toHaveBeenCalledWith('Plan a trip to Da Nang');
+      expect(onSuggestionClick).toHaveBeenCalledWith('Trip Summary for Da Nang');
     });
   });
 });

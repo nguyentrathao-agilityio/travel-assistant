@@ -130,11 +130,18 @@ describe('createSpecializedAgent', () => {
   });
 
   it('adds HITL middleware before a configured write tool executes', () => {
-    createSpecializedAgent(config({ name: 'bookFlight', approvalTools: ['bookFlightTool'] }));
+    createSpecializedAgent(
+      config({
+        name: 'booking',
+        approvalTools: ['bookFlightTool', 'bookHotelTool', 'cancelBookingTool'],
+      })
+    );
 
     expect(humanInTheLoopMiddlewareMock).toHaveBeenCalledWith({
       interruptOn: {
         bookFlightTool: { allowedDecisions: ['approve', 'reject'] },
+        bookHotelTool: { allowedDecisions: ['approve', 'reject'] },
+        cancelBookingTool: { allowedDecisions: ['approve', 'reject'] },
       },
     });
     expect(createAgentMock.mock.calls[0][0].middleware).toContainEqual({
@@ -142,6 +149,8 @@ describe('createSpecializedAgent', () => {
       options: {
         interruptOn: {
           bookFlightTool: { allowedDecisions: ['approve', 'reject'] },
+          bookHotelTool: { allowedDecisions: ['approve', 'reject'] },
+          cancelBookingTool: { allowedDecisions: ['approve', 'reject'] },
         },
       },
     });

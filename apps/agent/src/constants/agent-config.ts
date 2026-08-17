@@ -5,11 +5,9 @@ import type { DomainAgentNodeName } from './agents';
 
 // Prompts
 import {
-  CANCEL_BOOKING_AGENT_TOOLS_PROMPT,
+  BOOKING_AGENT_TOOLS_PROMPT,
   EXPLORE_AGENT_TOOLS_PROMPT,
-  FLIGHT_BOOKING_AGENT_TOOLS_PROMPT,
   GENERAL_AGENT_PROMPT_SUFFIX,
-  HOTEL_BOOKING_AGENT_TOOLS_PROMPT,
   PLANNING_AGENT_TOOLS_PROMPT,
   type AgentPromptSections,
 } from '@/prompts';
@@ -71,30 +69,14 @@ export const AGENT_CONFIGS = {
       includeMemoryContext: true,
     },
   },
-  bookFlight: {
-    name: 'bookFlight',
-    tools: [bookFlightTool],
-    approvalTools: ['bookFlightTool'],
+  booking: {
+    name: 'booking',
+    tools: [bookFlightTool, bookHotelTool, cancelBookingTool],
+    approvalTools: ['bookFlightTool', 'bookHotelTool', 'cancelBookingTool'],
     prompt: {
-      toolsSection: FLIGHT_BOOKING_AGENT_TOOLS_PROMPT,
+      toolsSection: BOOKING_AGENT_TOOLS_PROMPT,
       includeBookingRules: true,
       includeBookingContext: true,
     },
-  },
-  bookHotel: {
-    name: 'bookHotel',
-    tools: [bookHotelTool],
-    approvalTools: ['bookHotelTool'],
-    prompt: {
-      toolsSection: HOTEL_BOOKING_AGENT_TOOLS_PROMPT,
-      includeBookingRules: true,
-      includeBookingContext: true,
-    },
-  },
-  cancelBooking: {
-    name: 'cancelBooking',
-    tools: [cancelBookingTool],
-    approvalTools: ['cancelBookingTool'],
-    prompt: { toolsSection: CANCEL_BOOKING_AGENT_TOOLS_PROMPT },
   },
 } satisfies Record<DomainAgentNodeName, SpecializedAgentConfig>;

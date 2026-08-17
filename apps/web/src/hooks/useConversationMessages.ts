@@ -26,6 +26,7 @@ const BOOKING_TOOL_NAMES = new Set<string>([
 const canonicalize = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(canonicalize);
   if (typeof value !== 'object' || value === null) return value;
+
   return Object.fromEntries(
     Object.entries(value)
       .sort(([left], [right]) => left.localeCompare(right))
@@ -48,6 +49,7 @@ const findLastUserMessageIndex = (messages: ChatMessage[]): number => {
   for (let index = messages.length - 1; index >= 0; index -= 1) {
     if (messages[index].role === CHAT_ROLE.USER) return index;
   }
+
   return -1;
 };
 
@@ -86,6 +88,7 @@ export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMess
       ) {
         result[resultIndex] = { ...latestMessage, content: message.content };
       }
+
       continue;
     }
 
@@ -94,6 +97,7 @@ export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMess
         seenMessageIds.add(nextMessage.id);
         resultIndexByMessageId.set(nextMessage.id, result.length);
       }
+
       result.push(nextMessage);
     };
 
@@ -112,6 +116,7 @@ export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMess
       if (message.content) {
         pushMessage(message);
       }
+
       continue;
     }
 
@@ -124,9 +129,11 @@ export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMess
       if (!BOOKING_TOOL_NAMES.has(name)) return true;
 
       const signature = bookingToolCallSignature(name, toolArguments);
+
       if (seenBookingToolCalls.has(signature)) return false;
 
       seenBookingToolCalls.add(signature);
+
       return true;
     });
 
@@ -146,6 +153,7 @@ const attachGenerativeUi = (
     if (message.role !== CHAT_ROLE.ASSISTANT) return message;
 
     const toolCalls = message.toolCalls ?? [];
+
     if (toolCalls.length === 0) return message;
 
     const renderedNodes = toolCalls
@@ -159,6 +167,7 @@ const attachGenerativeUi = (
       generativeUI: () => createElement('div', { className: 'flex flex-col gap-3' }, renderedNodes),
       hasResolvedToolCard: true,
     };
+
     return resolved;
   });
 
@@ -185,16 +194,19 @@ export const useConversationMessages = (
 
       if (typeof message.content === 'string' && message.content.trim()) {
         assistantContentByIdRef.current.set(message.id, message.content);
+
         return message;
       }
 
       const previousContent = assistantContentByIdRef.current.get(message.id);
+
       if (!message.toolCalls?.length || !previousContent) return message;
 
       return { ...message, content: previousContent };
     });
 
     let reconciled = contentReconciled;
+
     if (inProgress) {
       const currentUserIndex = findLastUserMessageIndex(contentReconciled);
       const previousUserIndex = findLastUserMessageIndex(previousMessagesRef.current);
@@ -254,6 +266,7 @@ export const useConversationMessages = (
           }));
 
         const retainedCardMessages: ResolvedToolCardMessage[] = [];
+
         for (const previousCardMessage of missingCardMessages) {
           const matchingMessageIndex = reconciled.findIndex(
             ({ id }) => id && id === previousCardMessage.id
@@ -265,6 +278,7 @@ export const useConversationMessages = (
           }
 
           const matchingMessage = reconciled[matchingMessageIndex];
+
           if (matchingMessage.role !== CHAT_ROLE.ASSISTANT) continue;
           reconciled = reconciled.map((message, index) =>
             index === matchingMessageIndex
@@ -290,6 +304,7 @@ export const useConversationMessages = (
     }
 
     const messagesWithGenerativeUi = attachGenerativeUi(reconciled, lazyToolRendered);
+
     previousMessagesRef.current = messagesWithGenerativeUi;
 
     return messagesWithGenerativeUi;

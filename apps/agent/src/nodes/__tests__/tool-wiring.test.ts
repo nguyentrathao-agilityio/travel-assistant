@@ -54,8 +54,10 @@ describe('specialized agent tool wiring', () => {
     ];
     const occurrences = allNamedTools.reduce<Record<string, number>>((counts, item) => {
       counts[item.name] = (counts[item.name] ?? 0) + 1;
+
       return counts;
     }, {});
+
     expect(occurrences).toEqual(
       expect.objectContaining({
         knowledgeSearchTool: 2,

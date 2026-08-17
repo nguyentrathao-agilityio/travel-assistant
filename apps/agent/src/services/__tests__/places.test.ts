@@ -33,6 +33,7 @@ describe('getPlaces', () => {
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ total: 1, results: [apiPlace], city: 'Da Nang' }))
       );
+
     vi.stubGlobal('fetch', fetchMock);
 
     const result = await getPlaces({ city: 'Da Nang' });
@@ -48,6 +49,7 @@ describe('getPlaces', () => {
 
   it('throws a wrapped error when the network request itself fails', async () => {
     const fetchMock = vi.fn().mockRejectedValueOnce(new Error('offline'));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(getPlaces({ city: 'Da Nang' })).rejects.toThrow('Network request failed');
@@ -57,6 +59,7 @@ describe('getPlaces', () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response('', { status: 404, statusText: 'Not Found' }));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(getPlaces({ city: 'Nowhere' })).rejects.toThrow('API error 404');
@@ -64,6 +67,7 @@ describe('getPlaces', () => {
 
   it('throws when the API response does not match the expected shape', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ oops: true })));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(getPlaces({ city: 'Da Nang' })).rejects.toThrow('Invalid response from');

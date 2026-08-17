@@ -24,6 +24,7 @@ jest.mock('@/utils', () => ({
 const mockSafeParse = jest.fn<{ success: boolean; data?: unknown }, unknown[]>(() => ({
   success: false,
 }));
+
 jest.mock('@repo/schemas', () => ({
   PlacesSearchResultSchema: { safeParse: (arg: unknown) => mockSafeParse(arg) },
 }));
@@ -45,6 +46,7 @@ describe('usePlacesAction', () => {
     renderHook(() => usePlacesAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'inProgress', args: {}, result: undefined });
+
     expect(result).not.toBeNull();
   });
 
@@ -53,6 +55,7 @@ describe('usePlacesAction', () => {
     renderHook(() => usePlacesAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: {} });
+
     expect(result.type).not.toBe(React.Fragment);
   });
 
@@ -61,6 +64,7 @@ describe('usePlacesAction', () => {
     renderHook(() => usePlacesAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: { total: 0, results: [] } });
+
     expect(result.type).not.toBe(React.Fragment);
   });
 
@@ -86,17 +90,21 @@ describe('usePlacesAction', () => {
         },
       ],
     };
+
     mockSafeParse.mockReturnValue({ success: true, data: placesData });
     renderHook(() => usePlacesAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: placesData });
+
     expect(result).not.toBeNull();
     const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;
+
     expect(card).not.toBeNull();
   });
 
   it('parses a persisted JSON result before schema validation', () => {
     const placesData = { total: 1, results: [{ id: 'p1' }] };
+
     mockSafeParse.mockReturnValue({ success: true, data: placesData });
     renderHook(() => usePlacesAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];

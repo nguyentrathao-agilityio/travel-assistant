@@ -35,6 +35,7 @@ describe('ConfirmBanner', () => {
   it('calls onChangeClick when Change button is clicked', async () => {
     const user = userEvent.setup();
     const onChangeClick = jest.fn();
+
     render(<ConfirmBanner {...defaultProps} onChangeClick={onChangeClick} />);
     await user.click(screen.getByRole('button', { name: 'Change' }));
     expect(onChangeClick).toHaveBeenCalledTimes(1);
@@ -43,6 +44,7 @@ describe('ConfirmBanner', () => {
   it('calls onConfirmClick when Confirm button is clicked', async () => {
     const user = userEvent.setup();
     const onConfirmClick = jest.fn();
+
     render(<ConfirmBanner {...defaultProps} onConfirmClick={onConfirmClick} />);
     await user.click(screen.getByRole('button', { name: 'Confirm' }));
     expect(onConfirmClick).toHaveBeenCalledTimes(1);

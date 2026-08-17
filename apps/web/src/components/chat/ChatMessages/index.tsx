@@ -92,6 +92,7 @@ const ChatMessages = ({
     lastUserMessageIndex !== -1 &&
     messages.slice(lastUserMessageIndex + 1).some((message) => {
       const candidate = message as ConversationChatMessage;
+
       return candidate.role === CHAT_ROLE.ASSISTANT && !!candidate.content;
     });
 

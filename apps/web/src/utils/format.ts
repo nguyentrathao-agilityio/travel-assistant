@@ -73,6 +73,7 @@ export const formatPrice = (price: number, currency: string): string =>
  */
 export const formatAmount = (amount: number, currency = 'USD'): string => {
   if (amount === 0) return '—';
+
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
@@ -102,6 +103,7 @@ export const formatDuration = (minutes: number): string => {
 
 export const formatDisplayDate = (iso?: string): string => {
   if (!iso) return '';
+
   return new Date(iso).toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'short',
@@ -113,6 +115,8 @@ export const formatDisplayDate = (iso?: string): string => {
 export const offsetDate = (startDate: string | undefined, dayOffset: number): string | null => {
   if (!startDate) return null;
   const d = new Date(startDate);
+
   d.setDate(d.getDate() + dayOffset);
+
   return d.toISOString().split('T')[0];
 };

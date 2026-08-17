@@ -50,6 +50,7 @@ export const createSpecializedAgent = (config: SpecializedAgentConfig) =>
         const memories = config.prompt.includeMemoryContext
           ? await searchMemories(memoryStore)
           : [];
+
         return buildAgentSystemPrompt(state as unknown as GraphStateType, config.prompt, memories);
       }),
     ],

@@ -42,6 +42,7 @@ export const useTripState = () => {
     hasRestoredRef.current = true;
     const saved = useTripStateStore.getState().tripStates[sessionId];
     const clientDate = { clientDate: todayClientIso(), clientTimezone: getClientTimezone() };
+
     setState(() =>
       saved && Object.keys(saved).length > 0 ? { ...saved, ...clientDate } : clientDate
     );
@@ -79,6 +80,7 @@ export const useTripState = () => {
   const selectFlight = useCallback(
     (flight: Flight, type: keyof SelectedFlight) => {
       const current = useTripStateStore.getState().tripStates[sessionId] ?? {};
+
       setTripState(sessionId, {
         ...current,
         flights: { ...(current.flights ?? {}), [type]: flight },
@@ -96,6 +98,7 @@ export const useTripState = () => {
   const selectHotel = useCallback(
     (hotel: HotelAvailability) => {
       const current = useTripStateStore.getState().tripStates[sessionId] ?? {};
+
       setTripState(sessionId, {
         ...current,
         hotel,

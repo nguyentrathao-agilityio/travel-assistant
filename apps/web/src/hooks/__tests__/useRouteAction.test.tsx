@@ -24,6 +24,7 @@ jest.mock('@/utils', () => ({
 const mockSafeParse = jest.fn<{ success: boolean; data?: unknown }, unknown[]>(() => ({
   success: false,
 }));
+
 jest.mock('@repo/schemas', () => ({
   RouteResultSchema: { safeParse: (arg: unknown) => mockSafeParse(arg) },
 }));
@@ -45,6 +46,7 @@ describe('useRouteAction', () => {
     renderHook(() => useRouteAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'inProgress', args: {}, result: undefined });
+
     expect(result).not.toBeNull();
   });
 
@@ -53,6 +55,7 @@ describe('useRouteAction', () => {
     renderHook(() => useRouteAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: {} });
+
     expect(result.type).not.toBe(React.Fragment);
   });
 
@@ -64,6 +67,7 @@ describe('useRouteAction', () => {
     renderHook(() => useRouteAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: { stops: [] } });
+
     expect(result.type).not.toBe(React.Fragment);
   });
 
@@ -78,12 +82,15 @@ describe('useRouteAction', () => {
       ],
       legs: [{ mode: 'walk', durationMin: 15, distanceKm: 1.2 }],
     };
+
     mockSafeParse.mockReturnValue({ success: true, data: routeData });
     renderHook(() => useRouteAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: routeData });
+
     expect(result).not.toBeNull();
     const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;
+
     expect(card).not.toBeNull();
   });
 });

@@ -15,6 +15,7 @@ const HOTEL_BADGES = {
 // Computes badges for a list of hotels based on price, rating, and value heuristics
 export const computeHotelBadges = (hotels: HotelAvailability[]): Map<string, HotelBadge> => {
   const map = new Map<string, HotelBadge>();
+
   if (hotels.length < 2) return map;
 
   const cheapest = hotels.reduce((min, curr) =>
@@ -29,6 +30,7 @@ export const computeHotelBadges = (hotels: HotelAvailability[]): Map<string, Hot
 
   if (hotels.length >= 3) {
     const untagged = hotels.find((hotel) => !map.has(hotel.id));
+
     if (untagged) {
       map.set(untagged.id, HOTEL_BADGES.bestValue);
     }

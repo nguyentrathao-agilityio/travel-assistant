@@ -17,6 +17,7 @@ export const groupThreadsByDate = (threads: ThreadItem[]): ThreadGroups => {
 
   for (const thread of threads) {
     const key = toLocalDateKey(new Date(thread.createdAt));
+
     if (key === todayKey) {
       groups.today.push(thread);
     } else if (key === yesterdayKey) {

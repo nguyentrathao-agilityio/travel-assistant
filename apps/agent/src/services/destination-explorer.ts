@@ -26,6 +26,7 @@ export const getDestinationExplorer = async (
   const places = await getPlaces({ city, recommended: true, sort: 'rating_desc', limit: 3 });
 
   const parsed = DestinationExplorerResultSchema.safeParse({ city, places, tips, weather });
+
   if (!parsed.success) {
     throw new Error(`Failed to build destination explorer result: ${parsed.error.message}`);
   }

@@ -17,6 +17,7 @@ export const useTripStateStore = create<TripStateStore>()((set) => ({
   clearTripState: (threadId) =>
     set((previousState) => {
       const remainingTripStates = { ...previousState.tripStates };
+
       delete remainingTripStates[threadId];
 
       return { tripStates: remainingTripStates };

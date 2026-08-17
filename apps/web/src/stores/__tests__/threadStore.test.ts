@@ -104,6 +104,7 @@ describe('useThreadStore — synchronous actions', () => {
       { id: 't1', title: 'Thread', createdAt: new Date().toISOString() },
       { id: 't2', title: 'Thread', createdAt: new Date().toISOString() },
     ];
+
     useThreadStore.getState().setThreads(threads);
     expect(useThreadStore.getState().threads).toHaveLength(2);
   });
@@ -139,6 +140,7 @@ describe('useThreadStore — fetchThreads', () => {
     mockLanggraphClient.threads.search.mockResolvedValueOnce([]);
     mockLanggraphClient.threads.create.mockResolvedValueOnce(makeThread('mock-id'));
     const fetchPromise = useThreadStore.getState().fetchThreads();
+
     expect(useThreadStore.getState().isLoading).toBe(true);
     await fetchPromise;
     expect(useThreadStore.getState().isLoading).toBe(false);
@@ -146,6 +148,7 @@ describe('useThreadStore — fetchThreads', () => {
 
   it('populates threads from API response', async () => {
     const activeId = useThreadStore.getState().activeThreadId;
+
     mockLanggraphClient.threads.search.mockResolvedValueOnce([
       makeThread(activeId, 'Trip to Da Nang'),
     ]);
@@ -156,6 +159,7 @@ describe('useThreadStore — fetchThreads', () => {
 
   it('populates a brand-new thread that has no values field yet (never run)', async () => {
     const activeId = useThreadStore.getState().activeThreadId;
+
     mockLanggraphClient.threads.search.mockResolvedValueOnce([
       {
         thread_id: activeId,
@@ -173,6 +177,7 @@ describe('useThreadStore — fetchThreads', () => {
 
   it('shows error toast on API failure', async () => {
     const { toast } = jest.requireMock('sonner');
+
     mockLanggraphClient.threads.search.mockRejectedValueOnce(new Error('Network error'));
     await useThreadStore.getState().fetchThreads();
     expect(toast.error).toHaveBeenCalledWith('Failed to load threads.');
@@ -189,6 +194,7 @@ describe('useThreadStore — fetchThreads', () => {
   it('sets hasMoreThreads when a full page comes back', async () => {
     const activeId = useThreadStore.getState().activeThreadId;
     const fullPage = Array.from({ length: 10 }, (_, i) => makeThread(`t${i}`, 'Thread', i));
+
     fullPage.push(makeThread(activeId));
     mockLanggraphClient.threads.search.mockResolvedValueOnce(fullPage.slice(0, 10));
     await useThreadStore.getState().fetchThreads();
@@ -197,6 +203,7 @@ describe('useThreadStore — fetchThreads', () => {
 
   it('clears hasMoreThreads when fewer than a full page comes back', async () => {
     const activeId = useThreadStore.getState().activeThreadId;
+
     mockLanggraphClient.threads.search.mockResolvedValueOnce([makeThread(activeId)]);
     await useThreadStore.getState().fetchThreads();
     expect(useThreadStore.getState().hasMoreThreads).toBe(false);
@@ -208,6 +215,7 @@ describe('useThreadStore — fetchThreads', () => {
     mockLanggraphClient.threads.create.mockResolvedValueOnce(makeThread('mock-id'));
 
     const activeId = useThreadStore.getState().activeThreadId;
+
     await useThreadStore.getState().fetchThreads();
 
     expect(mockLanggraphClient.threads.create).toHaveBeenCalledWith(
@@ -221,6 +229,7 @@ describe('useThreadStore — fetchThreads', () => {
     // recent threads returned by the paginated search — it must not be recreated or
     // have activeThreadId reassigned to some other thread.
     const activeId = useThreadStore.getState().activeThreadId;
+
     mockLanggraphClient.threads.get.mockResolvedValueOnce(makeThread(activeId));
     mockLanggraphClient.threads.search.mockResolvedValueOnce([
       makeThread('recent-1'),
@@ -236,6 +245,7 @@ describe('useThreadStore — fetchThreads', () => {
 
   it('derives a title from a human message with content-part-array shape (not just plain string)', async () => {
     const activeId = useThreadStore.getState().activeThreadId;
+
     mockLanggraphClient.threads.search.mockResolvedValueOnce([
       {
         thread_id: activeId,
@@ -273,6 +283,7 @@ describe('useThreadStore — fetchMoreThreads', () => {
 
   it('requests the next page using the current thread count as offset', async () => {
     const existing = [makeThreadItem('t1'), makeThreadItem('t2')];
+
     useThreadStore.setState({ threads: existing, hasMoreThreads: true });
     mockLanggraphClient.threads.search.mockResolvedValueOnce([]);
 
@@ -312,6 +323,7 @@ describe('useThreadStore — fetchMoreThreads', () => {
 
   it('resets isLoadingMore and shows a toast on failure', async () => {
     const { toast } = jest.requireMock('sonner');
+
     useThreadStore.setState({ threads: [makeThreadItem('t1')], hasMoreThreads: true });
     mockLanggraphClient.threads.search.mockRejectedValueOnce(new Error('Network error'));
 
@@ -333,6 +345,7 @@ describe('useThreadStore — createThread', () => {
     mockLanggraphClient.threads.create.mockResolvedValueOnce(makeThread('mock-id'));
     await useThreadStore.getState().createThread();
     const newThread = useThreadStore.getState().threads[0];
+
     expect(useThreadStore.getState().activeThreadId).toBe(newThread?.id);
   });
 
@@ -347,6 +360,7 @@ describe('useThreadStore — createThread', () => {
 describe('useThreadStore — deleteThread', () => {
   it('removes the thread from the list', async () => {
     const thread = { id: 't1', title: 'Thread', createdAt: new Date().toISOString() };
+
     useThreadStore.setState({ threads: [thread], activeThreadId: 'other' });
     mockLanggraphClient.threads.delete.mockResolvedValueOnce(undefined);
     await useThreadStore.getState().deleteThread('t1');
@@ -368,6 +382,7 @@ describe('useThreadStore — deleteThread', () => {
 
   it('restores threads on API error', async () => {
     const thread = { id: 't1', title: 'Thread', createdAt: new Date().toISOString() };
+
     useThreadStore.setState({ threads: [thread], activeThreadId: 'other' });
     mockLanggraphClient.threads.delete.mockRejectedValueOnce(new Error('Server error'));
     await useThreadStore.getState().deleteThread('t1');

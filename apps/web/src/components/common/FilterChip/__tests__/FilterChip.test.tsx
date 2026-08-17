@@ -26,6 +26,7 @@ describe('FilterChip', () => {
   it('calls onSelect with the option value when clicked', async () => {
     const user = userEvent.setup();
     const onSelect = jest.fn();
+
     render(<FilterChip option={baseOption} isActive={false} onSelect={onSelect} />);
     await user.click(screen.getByRole('button'));
     expect(onSelect).toHaveBeenCalledWith('all');

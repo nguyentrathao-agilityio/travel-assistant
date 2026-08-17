@@ -92,6 +92,7 @@ describe('useTripState', () => {
 
   it('selectFlight calls setState with the flight under the correct type key', () => {
     const { result } = renderHook(() => useTripState());
+
     mockSetState.mockClear(); // clear the useEffect setState call on mount
     act(() => {
       result.current.selectFlight(makeFlight(), 'departure');
@@ -99,6 +100,7 @@ describe('useTripState', () => {
     expect(mockSetState).toHaveBeenCalled();
     const updater = mockSetState.mock.calls[0][0];
     const newState = updater({});
+
     expect(newState.flights?.departure?.id).toBe('f1');
     expect(newState.flightSelectionStatus).toBe('confirmed');
     expect(mockSetTripState).toHaveBeenCalledWith(
@@ -109,6 +111,7 @@ describe('useTripState', () => {
 
   it('selectHotel calls setState with the hotel', () => {
     const { result } = renderHook(() => useTripState());
+
     mockSetState.mockClear();
     act(() => {
       result.current.selectHotel(makeHotel());
@@ -116,6 +119,7 @@ describe('useTripState', () => {
     expect(mockSetState).toHaveBeenCalled();
     const updater = mockSetState.mock.calls[0][0];
     const newState = updater({});
+
     expect(newState.hotel?.id).toBe('h1');
     expect(newState.hotelSelectionStatus).toBe('confirmed');
     expect(mockSetTripState).toHaveBeenCalledWith(
@@ -129,6 +133,7 @@ describe('useTripState', () => {
 
   it('clearTrip calls setState with empty object', () => {
     const { result } = renderHook(() => useTripState());
+
     mockSetState.mockClear();
     act(() => {
       result.current.clearTrip();
@@ -136,6 +141,7 @@ describe('useTripState', () => {
     expect(mockSetState).toHaveBeenCalled();
     const updater = mockSetState.mock.calls[0][0];
     const newState = updater({ flights: { departure: makeFlight() } });
+
     expect(newState).toEqual({});
   });
 });

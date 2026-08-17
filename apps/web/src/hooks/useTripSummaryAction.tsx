@@ -63,6 +63,7 @@ export const useTripSummaryAction = () => {
       if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsed = safeParseToolResult(TripSummaryResultSchema, result);
+
       if (!parsed.success)
         return <ToolInvalidResultCard message="Received an unexpected trip summary result." />;
 

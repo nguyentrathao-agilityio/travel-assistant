@@ -44,6 +44,7 @@ describe('knowledgeSearchTool', () => {
       ],
       retrieval: { strategy: 'hybrid', searchedDocuments: 1 },
     };
+
     searchKnowledgeMock.mockResolvedValueOnce(searchResult);
 
     const result = JSON.parse(await knowledgeSearchTool.invoke(input));

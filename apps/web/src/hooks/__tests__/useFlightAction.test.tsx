@@ -47,6 +47,7 @@ describe('useFlightAction', () => {
     renderHook(() => useFlightAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'inProgress', result: undefined, args: {} });
+
     expect(result).not.toBeNull();
   });
 
@@ -54,6 +55,7 @@ describe('useFlightAction', () => {
     renderHook(() => useFlightAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', result: { results: [] }, args: {} });
+
     expect(result.type).not.toBe(React.Fragment);
   });
 
@@ -61,6 +63,7 @@ describe('useFlightAction', () => {
     renderHook(() => useFlightAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', result: undefined, args: {} });
+
     expect(result.type).not.toBe(React.Fragment);
   });
 
@@ -68,6 +71,7 @@ describe('useFlightAction', () => {
     renderHook(() => useFlightAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', result: {}, args: {} });
+
     expect(result.type).not.toBe(React.Fragment);
   });
 
@@ -93,8 +97,10 @@ describe('useFlightAction', () => {
       result: { results: [flight], count: 1 },
       args: { origin: 'HAN', destination: 'SGN' },
     });
+
     expect(result).not.toBeNull();
     const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;
+
     expect(card).not.toBeNull();
   });
 
@@ -109,6 +115,7 @@ describe('useFlightAction', () => {
     const result = render({ status: 'complete', result: serializedResult, args: {} });
 
     const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;
+
     expect(card).not.toBeNull();
   });
 });

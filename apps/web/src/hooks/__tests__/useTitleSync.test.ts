@@ -6,6 +6,7 @@ let mockThreads: { id: string; title: string | null }[] = [];
 
 const mockUpdateThread = jest.fn((threadId: string, updates: { title?: string | null }) => {
   const thread = mockThreads.find((t) => t.id === threadId);
+
   if (!thread) return;
   Object.assign(thread, updates);
 });
@@ -23,10 +24,12 @@ jest.mock('@copilotkit/react-core/v2', () => ({
 jest.mock('@/stores', () => {
   const useThreadStore = (selector: (state: { threads: unknown[] }) => unknown) =>
     selector({ threads: mockThreads });
+
   useThreadStore.getState = () => ({
     activeThreadId: 'thread-1',
     updateThread: mockUpdateThread,
   });
+
   return { useThreadStore };
 });
 
@@ -66,6 +69,7 @@ describe('useTitleSync', () => {
 
   it('truncates title to 50 characters with ellipsis', () => {
     const longMessage = 'A'.repeat(60);
+
     mockMessages.mockReturnValue([{ role: 'user', content: longMessage }]);
     renderHook(() => useTitleSync());
     expect(mockUpdateThread).toHaveBeenCalledWith(
@@ -77,6 +81,7 @@ describe('useTitleSync', () => {
   it('retries once the thread list loads after the first message already arrived', () => {
     mockMessages.mockReturnValue([{ role: 'user', content: 'Find me flights to Da Nang' }]);
     const { rerender } = renderHook(() => useTitleSync());
+
     expect(mockThreads).toEqual([]); // first attempt dropped — thread not loaded yet
 
     mockThreads = [{ id: 'thread-1', title: null }];

@@ -53,6 +53,7 @@ describe('extractCopilotText', () => {
 
   it('extracts text from a ContentPart array', () => {
     const parts = [{ type: 'text', text: 'hi there' }];
+
     expect(extractCopilotText(parts)).toBe('hi there');
   });
 
@@ -61,11 +62,13 @@ describe('extractCopilotText', () => {
       { type: 'text', text: 'first' },
       { type: 'text', text: 'second' },
     ];
+
     expect(extractCopilotText(parts)).toBe('first');
   });
 
   it('returns empty string when no text part found', () => {
     const parts = [{ type: 'image' }];
+
     expect(extractCopilotText(parts)).toBe('');
   });
 

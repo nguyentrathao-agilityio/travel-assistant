@@ -31,6 +31,7 @@ const IS_OPERATION_MISSING: Record<PlanningOperation, OperationMissingCheck> = {
 export const missingRequiredOperations = (state: GraphStateType): string[] => {
   const results = state.searchResults;
   const toolNames = new Set(latestTurnToolMessages(state.messages).map(({ name }) => name));
+
   return (state.execution.requiredOperations ?? []).filter((operation) =>
     IS_OPERATION_MISSING[operation](results, toolNames)
   );
@@ -44,6 +45,7 @@ export const missingOperationsResult = (
 ): ValidationResult => {
   const requiredOperations = state.execution.requiredOperations ?? [];
   const madeProgress = missingOperations.length < requiredOperations.length;
+
   return madeProgress
     ? { status: 'incomplete', reason, retryable: true }
     : { status: 'incomplete', reason, missingFields: missingOperations };

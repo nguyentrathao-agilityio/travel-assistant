@@ -49,6 +49,7 @@ export const computeBadges = (flights: Flight[] = []): Map<string, FlightBadge> 
   if (flights.length >= 3) {
     // "Most popular" is a positional heuristic — first flight not already tagged
     const untagged = flights.find((flight) => !map.has(flight.id));
+
     if (untagged) {
       map.set(untagged.id, FLIGHT_BADGES.popular);
     }

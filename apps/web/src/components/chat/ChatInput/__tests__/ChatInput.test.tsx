@@ -27,6 +27,7 @@ describe('ChatInput', () => {
 
     it('hides quick prompts when there is text in the input', async () => {
       const user = userEvent.setup();
+
       render(<ChatInput onSend={jest.fn()} />);
       await user.type(screen.getByLabelText('Chat message'), 'Hello');
       expect(screen.queryByText('Plan a 7-day Vietnam trip')).not.toBeInTheDocument();
@@ -34,6 +35,7 @@ describe('ChatInput', () => {
 
     it('applies additional className', () => {
       const { container } = render(<ChatInput onSend={jest.fn()} className="extra" />);
+
       expect(container.firstChild).toHaveClass('extra');
     });
   });
@@ -46,6 +48,7 @@ describe('ChatInput', () => {
 
     it('send button is enabled when input has text', async () => {
       const user = userEvent.setup();
+
       render(<ChatInput onSend={jest.fn()} />);
       await user.type(screen.getByLabelText('Chat message'), 'Hello');
       expect(screen.getByLabelText('Send message')).toBeEnabled();
@@ -53,6 +56,7 @@ describe('ChatInput', () => {
 
     it('send button is disabled while streaming', async () => {
       const user = userEvent.setup();
+
       render(<ChatInput onSend={jest.fn()} isStreaming />);
       await user.type(screen.getByLabelText('Chat message'), 'Hello');
       expect(screen.getByLabelText('Send message')).toBeDisabled();
@@ -68,6 +72,7 @@ describe('ChatInput', () => {
     it('calls onSend with trimmed text when send button is clicked', async () => {
       const onSend = jest.fn();
       const user = userEvent.setup();
+
       render(<ChatInput onSend={onSend} />);
       await user.type(screen.getByLabelText('Chat message'), '  Hello world  ');
       await user.click(screen.getByLabelText('Send message'));
@@ -76,8 +81,10 @@ describe('ChatInput', () => {
 
     it('clears the input after sending', async () => {
       const user = userEvent.setup();
+
       render(<ChatInput onSend={jest.fn()} />);
       const textarea = screen.getByLabelText('Chat message');
+
       await user.type(textarea, 'Hello');
       await user.click(screen.getByLabelText('Send message'));
       expect(textarea).toHaveValue('');
@@ -86,6 +93,7 @@ describe('ChatInput', () => {
     it('calls onSend when Enter is pressed', async () => {
       const onSend = jest.fn();
       const user = userEvent.setup();
+
       render(<ChatInput onSend={onSend} />);
       await user.type(screen.getByLabelText('Chat message'), 'Hello{Enter}');
       expect(onSend).toHaveBeenCalledWith('Hello');
@@ -94,6 +102,7 @@ describe('ChatInput', () => {
     it('does not call onSend when Shift+Enter is pressed', async () => {
       const onSend = jest.fn();
       const user = userEvent.setup();
+
       render(<ChatInput onSend={onSend} />);
       await user.type(screen.getByLabelText('Chat message'), 'Hello{Shift>}{Enter}{/Shift}');
       expect(onSend).not.toHaveBeenCalled();
@@ -102,6 +111,7 @@ describe('ChatInput', () => {
     it('does not call onSend for whitespace-only input', async () => {
       const onSend = jest.fn();
       const user = userEvent.setup();
+
       render(<ChatInput onSend={onSend} />);
       await user.type(screen.getByLabelText('Chat message'), '   {Enter}');
       expect(onSend).not.toHaveBeenCalled();
@@ -111,6 +121,7 @@ describe('ChatInput', () => {
   describe('quick prompts', () => {
     it('fills the textarea when a quick prompt is clicked', async () => {
       const user = userEvent.setup();
+
       render(<ChatInput onSend={jest.fn()} />);
       await user.click(screen.getByText('Plan a 7-day Vietnam trip'));
       expect(screen.getByLabelText('Chat message')).toHaveValue('Plan a 7-day Vietnam trip');

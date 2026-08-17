@@ -80,14 +80,17 @@ describe('HotelOptionItem', () => {
     const hotel = makeHotel({
       amenities: ['WiFi', 'Pool', 'Gym', 'Spa', 'Restaurant', 'Bar', 'Parking'],
     });
+
     render(<HotelOptionItem hotel={hotel} isSelected={false} />);
     expect(screen.getByText('+2 more')).toBeInTheDocument();
   });
 
   it('renders image when imageUrl is provided', () => {
     const hotel = makeHotel({ imageUrl: 'https://example.com/hotel.jpg' });
+
     render(<HotelOptionItem hotel={hotel} isSelected={false} />);
     const img = screen.getByRole('img', { name: 'Hotel A' });
+
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute('src', 'https://example.com/hotel.jpg');
   });
@@ -105,6 +108,7 @@ describe('HotelOptionItem', () => {
   it('calls onSelect with hotel id when Select is clicked', async () => {
     const onSelect = jest.fn();
     const user = userEvent.setup();
+
     render(<HotelOptionItem hotel={makeHotel()} isSelected={false} onSelect={onSelect} />);
     await user.click(screen.getByRole('button', { name: 'Select' }));
     expect(onSelect).toHaveBeenCalledWith('h1');

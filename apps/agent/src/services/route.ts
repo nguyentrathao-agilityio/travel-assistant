@@ -28,10 +28,12 @@ const fetchRouteLeg = async (origin: string, destination: string): Promise<Route
 
   try {
     const res = await fetch(url);
+
     if (!res.ok) return null;
 
     const raw = await res.json();
     const parsed = RouteLegApiSchema.safeParse(raw);
+
     return parsed.success ? parsed.data : null;
   } catch {
     return null;
@@ -55,6 +57,7 @@ export const getRoute = async (inputData: {
   })}`;
 
   let placesRes: Response;
+
   try {
     placesRes = await fetch(placesUrl);
   } catch (cause) {
@@ -67,6 +70,7 @@ export const getRoute = async (inputData: {
 
   const placesRaw = await placesRes.json();
   const placesParsed = PlacesResultSchema.safeParse(placesRaw);
+
   if (!placesParsed.success) {
     throw new Error(`Invalid response from ${placesUrl}: ${placesParsed.error.message}`);
   }
@@ -74,6 +78,7 @@ export const getRoute = async (inputData: {
   const placesData = placesParsed.data;
 
   const places = placesData.results.slice(0, maxStops);
+
   if (places.length === 0) throw new Error(`No places found for ${city}`);
 
   const legPromises = places

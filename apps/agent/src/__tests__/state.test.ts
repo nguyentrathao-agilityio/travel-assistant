@@ -94,11 +94,13 @@ describe('GraphState', () => {
 
   it('retains the official messages reducer and produces serializable business state', async () => {
     const channel = GraphState.getChannels().messages;
+
     channel.update([[new HumanMessage('hello')]]);
     channel.update([[new HumanMessage('again')]]);
     expect(channel.get()).toHaveLength(2);
 
     const normalized = normalizeGraphState({ destination: 'Tokyo', travelers: 2 });
+
     expect(normalized.request).toMatchObject({ destination: 'Tokyo', travelers: 2 });
     expect(() => JSON.stringify(normalized)).not.toThrow();
   });

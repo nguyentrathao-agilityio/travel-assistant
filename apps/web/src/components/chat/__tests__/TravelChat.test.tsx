@@ -55,6 +55,7 @@ describe('TravelChat', () => {
     });
     it('renders the CopilotChat component', () => {
       const { CopilotChat } = jest.requireMock('@copilotkit/react-ui');
+
       render(<TravelChat />);
       expect(CopilotChat).toHaveBeenCalled();
     });

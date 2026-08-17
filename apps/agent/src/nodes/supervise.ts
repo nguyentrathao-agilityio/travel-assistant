@@ -54,6 +54,7 @@ const searchPreconditionFailure = (
   labels: { failureLabel: string; destinationReason: string; operationsLabel: string }
 ): ValidationResult | undefined => {
   const failure = failureValidation(state, labels.failureLabel);
+
   if (failure) return failure;
 
   if (!requestDestination(state) && latestTurnToolMessages(state).length === 0) {
@@ -65,6 +66,7 @@ const searchPreconditionFailure = (
   }
 
   const missingOperations = missingRequiredOperations(state);
+
   if (missingOperations.length > 0) {
     return missingOperationsResult(
       state,
@@ -83,6 +85,7 @@ export const validateExploreResult = (state: GraphStateType): ValidationResult =
     destinationReason: 'A destination is required before destination exploration can continue.',
     operationsLabel: 'Exploration',
   });
+
   if (precondition) return precondition;
 
   const hasResult = Boolean(
@@ -91,6 +94,7 @@ export const validateExploreResult = (state: GraphStateType): ValidationResult =
     state.searchResults.localTips ||
     latestTurnToolMessages(state).some(({ name }) => name === TOOL_NAMES.KNOWLEDGE_SEARCH)
   );
+
   return hasResult
     ? { status: 'complete', reason: 'Explore result is available.' }
     : {
@@ -118,6 +122,7 @@ export const validatePlanningResult = (state: GraphStateType): ValidationResult 
     destinationReason: 'A destination is required before planning can continue.',
     operationsLabel: 'Planning',
   });
+
   if (precondition) return precondition;
 
   const results = state.searchResults;
@@ -132,6 +137,7 @@ export const validatePlanningResult = (state: GraphStateType): ValidationResult 
     latestToolNames.has(TOOL_NAMES.KNOWLEDGE_SEARCH) ||
     latestToolNames.has(TOOL_NAMES.TRIP_SUMMARY)
   );
+
   return hasResult
     ? {
         status: 'complete',
@@ -171,6 +177,7 @@ const BOOKING_STATE_ACCESSORS: Record<
 /** Checks a flight/hotel booking's turn for write failures, confirmation, or a draft selection. */
 const validateBookingResult = (state: GraphStateType, type: BookingType): ValidationResult => {
   const failure = failureValidation(state, `${type} booking`);
+
   if (failure) return writeFailureResult(failure, `${type} booking`);
 
   const { isBooked, hasDraft, missingField } = BOOKING_STATE_ACCESSORS[type];
@@ -182,6 +189,7 @@ const validateBookingResult = (state: GraphStateType, type: BookingType): Valida
       reason: `${type} booking remains a draft or requires user input/approval.`,
     };
   }
+
   return {
     status: 'incomplete',
     reason: `${type} booking requires an exact selected option.`,
@@ -200,9 +208,11 @@ export const validateHotelResult = (state: GraphStateType): ValidationResult =>
 /** Checks the cancellation agent's turn for tool failures or a completed interaction. */
 export const validateCancellationResult = (state: GraphStateType): ValidationResult => {
   const failure = failureValidation(state, 'Cancellation');
+
   if (failure) return writeFailureResult(failure, 'cancellation');
 
   const hasInteraction = latestTurnToolMessages(state).length > 0;
+
   return {
     status: hasInteraction ? 'complete' : 'incomplete',
     reason: hasInteraction
@@ -258,6 +268,7 @@ export const supervisorNode = (
   config?: RunnableConfig
 ): GraphStateUpdate => {
   const node = state.execution.currentNode;
+
   if (!isDomainNode(node)) {
     return {
       supervisor: {
@@ -280,6 +291,7 @@ export const supervisorNode = (
   }
 
   const validation = validatorFor(node, state);
+
   if (validation.nextNode) {
     return {
       supervisor: { ...validation, nextNode: validation.nextNode },
@@ -288,6 +300,7 @@ export const supervisorNode = (
   }
 
   const retries = state.execution.retryCount[node] ?? 0;
+
   if (validation.error) traceRecovery(config, node, validation.error, retries);
   if (validation.retryable && RETRYABLE_DOMAIN_NODE_NAMES.has(node)) {
     if (retries < MAX_RETRIES_PER_NODE) {

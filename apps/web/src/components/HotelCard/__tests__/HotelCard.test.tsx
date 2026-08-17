@@ -54,11 +54,13 @@ describe('HotelCard', () => {
   describe('loading / empty states', () => {
     it('renders without crashing when data is provided', () => {
       const { container } = render(<HotelCard data={makeData()} />);
+
       expect(container.firstChild).toBeInTheDocument();
     });
 
     it('renders hotel list when data is defined', () => {
       const { container } = render(<HotelCard data={makeData()} />);
+
       expect(container.firstChild).toBeInTheDocument();
     });
   });
@@ -103,6 +105,7 @@ describe('HotelCard', () => {
   describe('selection and confirm banner', () => {
     it('shows confirm banner after selecting a hotel', async () => {
       const user = userEvent.setup();
+
       render(<HotelCard data={makeData()} onSelect={jest.fn()} />);
       await user.click(screen.getAllByTestId('hotel-option')[0]);
       expect(screen.getByRole('button', { name: /confirm/i })).toBeInTheDocument();
@@ -111,6 +114,7 @@ describe('HotelCard', () => {
     it('calls onSelect with the hotel when confirm is clicked', async () => {
       const onSelect = jest.fn();
       const user = userEvent.setup();
+
       render(<HotelCard data={makeData()} onSelect={onSelect} />);
       await user.click(screen.getAllByTestId('hotel-option')[0]);
       await user.click(screen.getByRole('button', { name: /confirm/i }));
@@ -120,6 +124,7 @@ describe('HotelCard', () => {
     it('continues the booking flow after confirming a selection', async () => {
       const onContinueBooking = jest.fn();
       const user = userEvent.setup();
+
       render(
         <HotelCard data={makeData()} onSelect={jest.fn()} onContinueBooking={onContinueBooking} />
       );
@@ -131,9 +136,11 @@ describe('HotelCard', () => {
     it('allows selecting a different hotel after confirming the current selection', async () => {
       const onSelect = jest.fn();
       const user = userEvent.setup();
+
       render(<HotelCard data={makeData()} onSelect={onSelect} />);
 
       const hotelOptions = screen.getAllByTestId('hotel-option');
+
       await user.click(hotelOptions[0]);
       await user.click(screen.getByRole('button', { name: /confirm/i }));
       await user.click(hotelOptions[1]);
@@ -145,6 +152,7 @@ describe('HotelCard', () => {
 
     it('hides confirm banner after clicking Change', async () => {
       const user = userEvent.setup();
+
       render(<HotelCard data={makeData()} onSelect={jest.fn()} />);
       await user.click(screen.getAllByTestId('hotel-option')[0]);
       await user.click(screen.getByRole('button', { name: /change/i }));

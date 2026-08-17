@@ -40,6 +40,7 @@ describe('tipsTool', () => {
       country: 'Vietnam',
       tips: [{ category: 'food', text: 'Try bun cha.' }],
     };
+
     getLocalTipsMock.mockResolvedValueOnce(tipsResult);
 
     const result = artifactOf(await tipsTool.invoke(toolCall(tipsTool.name, input)));

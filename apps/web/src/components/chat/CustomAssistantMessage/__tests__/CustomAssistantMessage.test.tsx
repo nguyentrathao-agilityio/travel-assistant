@@ -26,6 +26,7 @@ describe('CustomAssistantMessage', () => {
     );
 
     const response = screen.getByText('A compact response.').closest('.text-body');
+
     expect(response).toBeInTheDocument();
     expect(response).toHaveClass('assistant-message-text');
   });
@@ -157,6 +158,7 @@ describe('CustomAssistantMessage', () => {
       />
     );
     const up = screen.getByRole('button', { name: /Thumbs up/i });
+
     expect(up).toHaveClass('text-brand-600');
   });
 });

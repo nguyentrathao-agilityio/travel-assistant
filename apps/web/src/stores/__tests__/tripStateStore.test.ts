@@ -20,6 +20,7 @@ describe('useTripStateStore', () => {
 
   it('setTripState stores state for a thread', () => {
     const state = makeState();
+
     useTripStateStore.getState().setTripState('thread-1', state);
     expect(useTripStateStore.getState().tripStates['thread-1']).toEqual(state);
   });

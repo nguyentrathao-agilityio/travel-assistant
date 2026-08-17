@@ -91,10 +91,12 @@ const TripRouteSection = ({ route, days, startDate, className }: TripRouteSectio
 
   // Group current day's stops into time-of-day slots
   const slotMap = new Map<RouteTimeSlot, { stop: LandmarkStop; globalIdx: number }[]>();
+
   ROUTE_TIME_SLOTS.forEach(({ key }) => slotMap.set(key, []));
   currentStops.forEach((stop, idx) => {
     const globalIdx = activeDay * stopsPerDay + idx;
     const slot = getSlot(idx, currentStops.length);
+
     slotMap.get(slot)!.push({ stop, globalIdx });
   });
 

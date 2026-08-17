@@ -35,6 +35,7 @@ const matchesOptionalFields = (
     !document.validUntil || document.validUntil >= new Date().toISOString().slice(0, 10);
   const cityMatches =
     !document.city || !input.city || normalize(document.city) === normalize(input.city);
+
   return isCurrent && cityMatches;
 };
 
@@ -43,6 +44,7 @@ export const searchKnowledge = async (
   store: KnowledgeStoreLike = knowledgeStore
 ): Promise<KnowledgeSearchResult> => {
   const filter: Record<string, string> = {};
+
   if (input.country) filter.country = input.country;
   if (input.category) filter.category = input.category;
 
@@ -53,6 +55,7 @@ export const searchKnowledge = async (
 
   let strategy: KnowledgeSearchResult['retrieval']['strategy'] = 'hybrid';
   let items;
+
   try {
     items = await store.search(KNOWLEDGE_NAMESPACE, {
       query: input.query,
@@ -74,9 +77,11 @@ export const searchKnowledge = async (
 
   let rejectedDocuments = 0;
   const acceptedResults: KnowledgeSearchResult['results'] = [];
+
   for (const item of items) {
     const score = item.score ?? 0;
     const parsed = KnowledgeDocumentSchema.safeParse(item.value);
+
     if (
       !parsed.success ||
       score < KNOWLEDGE_MIN_SCORE ||
@@ -85,6 +90,7 @@ export const searchKnowledge = async (
       rejectedDocuments += 1;
       continue;
     }
+
     acceptedResults.push({
       document: parsed.data,
       score: Number(score.toFixed(4)),

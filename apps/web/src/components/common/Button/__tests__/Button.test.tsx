@@ -25,6 +25,7 @@ describe('Button', () => {
     it('renders left icon with aria-hidden', () => {
       render(<Button leftIcon={<span data-testid="left-icon">★</span>}>Click</Button>);
       const icon = screen.getByTestId('left-icon');
+
       expect(icon).toBeInTheDocument();
       expect(icon.parentElement).toHaveAttribute('aria-hidden', 'true');
     });
@@ -32,6 +33,7 @@ describe('Button', () => {
     it('renders right icon with aria-hidden', () => {
       render(<Button rightIcon={<span data-testid="right-icon">→</span>}>Click</Button>);
       const icon = screen.getByTestId('right-icon');
+
       expect(icon).toBeInTheDocument();
       expect(icon.parentElement).toHaveAttribute('aria-hidden', 'true');
     });
@@ -53,6 +55,7 @@ describe('Button', () => {
     it('calls onClick when clicked', async () => {
       const onClick = jest.fn();
       const user = userEvent.setup();
+
       render(<Button onClick={onClick}>Click</Button>);
       await user.click(screen.getByRole('button'));
       expect(onClick).toHaveBeenCalledTimes(1);
@@ -61,6 +64,7 @@ describe('Button', () => {
     it('does not call onClick when disabled', async () => {
       const onClick = jest.fn();
       const user = userEvent.setup();
+
       render(
         <Button disabled onClick={onClick}>
           Click
@@ -72,6 +76,7 @@ describe('Button', () => {
 
     it('does not throw when clicked without onClick handler', async () => {
       const user = userEvent.setup();
+
       render(<Button>Click</Button>);
       await expect(user.click(screen.getByRole('button'))).resolves.not.toThrow();
     });

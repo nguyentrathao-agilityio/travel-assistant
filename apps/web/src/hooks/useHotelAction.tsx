@@ -74,6 +74,7 @@ export const useHotelAction = () => {
 
       if (status === TOOL_STATUS.COMPLETE && result) {
         const parsed = safeParseToolResult(HotelSearchResultSchema, result);
+
         if (!parsed.success)
           return <ToolInvalidResultCard message="Received an unexpected hotel result." />;
 

@@ -28,13 +28,16 @@ const inFlightThreadHistory = new Map<string, Promise<ThreadHistoryResponse>>();
 const getThreadHistory = (threadId: string, revision: number): Promise<ThreadHistoryResponse> => {
   const key = `${threadId}:${revision}`;
   const existing = inFlightThreadHistory.get(key);
+
   if (existing) return existing;
 
   const request = langgraphClient.threads.get<LangGraphThreadValues>(threadId);
   const sharedRequest = request.finally(() => {
     if (inFlightThreadHistory.get(key) === sharedRequest) inFlightThreadHistory.delete(key);
   });
+
   inFlightThreadHistory.set(key, sharedRequest);
+
   return sharedRequest;
 };
 
@@ -64,10 +67,12 @@ export const useThreadHistory = (threadId: string): ThreadHistoryResult => {
   useEffect(() => {
     if (!threadId) {
       setHistory(emptyHistory(threadId, false));
+
       return;
     }
 
     let isCurrentRequest = true;
+
     setHistory(emptyHistory(threadId, true));
 
     getThreadHistory(threadId, threadRevision)
@@ -76,6 +81,7 @@ export const useThreadHistory = (threadId: string): ThreadHistoryResult => {
 
         const messages = (thread.values?.messages ?? []).flatMap((message, index) => {
           const convertedMessage = toAgUiMessage(message, `${threadId}:${index}`);
+
           return convertedMessage ? [convertedMessage] : [];
         });
 
@@ -85,6 +91,7 @@ export const useThreadHistory = (threadId: string): ThreadHistoryResult => {
         if (!isCurrentRequest) return;
 
         const isMissingThread = error.message.toLowerCase().includes('not found');
+
         setHistory({
           threadId,
           messages: [],

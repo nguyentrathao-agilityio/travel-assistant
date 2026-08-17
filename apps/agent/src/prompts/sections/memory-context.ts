@@ -6,11 +6,13 @@ const ORIGIN_FACT_KEY_HINTS = ['home', 'departure'];
 
 const keyOf = (memory: string): string | null => {
   const separatorIndex = memory.indexOf(':');
+
   return separatorIndex === -1 ? null : memory.slice(0, separatorIndex).trim().toLowerCase();
 };
 
 const isLocationFact = (memory: string): boolean => {
   const key = keyOf(memory);
+
   if (key === null) return false;
   if (ORIGIN_FACT_KEY_HINTS.some((hint) => key.includes(hint))) return false;
 
@@ -19,6 +21,7 @@ const isLocationFact = (memory: string): boolean => {
 
 export const buildMemoryContext = (memories: string[]): string | null => {
   const safeMemories = memories.filter((memory) => !isLocationFact(memory));
+
   if (safeMemories.length === 0) return null;
 
   return [

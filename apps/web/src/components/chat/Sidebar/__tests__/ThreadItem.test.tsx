@@ -53,6 +53,7 @@ describe('ThreadItem', () => {
           onDelete={jest.fn()}
         />
       );
+
       expect(container.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
     });
   });
@@ -62,6 +63,7 @@ describe('ThreadItem', () => {
       const { container } = render(
         <ThreadItem id="t1" title="Trip" isActive onSelect={jest.fn()} onDelete={jest.fn()} />
       );
+
       expect(container.querySelector('.bg-sidebar-item-active')).toBeInTheDocument();
     });
   });
@@ -70,6 +72,7 @@ describe('ThreadItem', () => {
     it('calls onSelect with the thread id when row is clicked', async () => {
       const onSelect = jest.fn();
       const user = userEvent.setup();
+
       render(
         <ThreadItem
           id="thread-7"
@@ -95,6 +98,7 @@ describe('ThreadItem', () => {
           onDelete={jest.fn()}
         />
       );
+
       // Focus the outer row element (first child), not the delete button
       (container.firstChild as HTMLElement).focus();
       await user.keyboard('{Enter}');
@@ -104,6 +108,7 @@ describe('ThreadItem', () => {
     it('calls onDelete with the thread id when delete button is clicked', async () => {
       const onDelete = jest.fn();
       const user = userEvent.setup();
+
       render(
         <ThreadItem
           id="thread-7"
@@ -120,6 +125,7 @@ describe('ThreadItem', () => {
     it('does not call onSelect when delete button is clicked', async () => {
       const onSelect = jest.fn();
       const user = userEvent.setup();
+
       render(
         <ThreadItem
           id="t1"

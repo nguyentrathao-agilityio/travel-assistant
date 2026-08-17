@@ -11,6 +11,7 @@ describe('Input', () => {
   it('calls onChange with the new value when typed', async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
+
     render(<Input value="" onChange={onChange} />);
     await user.type(screen.getByRole('textbox'), 'a');
     expect(onChange).toHaveBeenCalledWith('a');
@@ -30,6 +31,7 @@ describe('Input', () => {
     render(<Input value="" onChange={jest.fn()} label="Destination" />);
     const label = screen.getByText('Destination');
     const input = screen.getByRole('textbox');
+
     expect(label).toHaveAttribute('for', input.id);
   });
 
@@ -43,6 +45,7 @@ describe('Input', () => {
       <Input value="" onChange={jest.fn()} hint="Required" isError={true} />
     );
     const hint = container.querySelector('p');
+
     expect(hint).toHaveClass('text-red-500');
   });
 

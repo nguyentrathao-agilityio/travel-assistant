@@ -70,6 +70,7 @@ describe('PlacesConfirmCard', () => {
   it('renders "Search places" title', () => {
     render(<PlacesConfirmCard {...defaultArgs} />);
     const matches = screen.getAllByText('Search places');
+
     expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -81,6 +82,7 @@ describe('PlacesConfirmCard', () => {
   it('calls onConfirm with city when confirmed', async () => {
     const onConfirm = jest.fn();
     const user = userEvent.setup();
+
     render(<PlacesConfirmCard {...defaultArgs} onConfirm={onConfirm} />);
     await user.click(screen.getByRole('button', { name: /search places/i }));
     expect(onConfirm).toHaveBeenCalledWith(expect.objectContaining({ city: 'Da Nang' }));
@@ -89,8 +91,10 @@ describe('PlacesConfirmCard', () => {
   it('calls onConfirm with updated city after typing', async () => {
     const onConfirm = jest.fn();
     const user = userEvent.setup();
+
     render(<PlacesConfirmCard {...defaultArgs} onConfirm={onConfirm} />);
     const cityInput = screen.getByDisplayValue('Da Nang');
+
     await user.clear(cityInput);
     await user.type(cityInput, 'Hoi An');
     await user.click(screen.getByRole('button', { name: /search places/i }));
@@ -100,6 +104,7 @@ describe('PlacesConfirmCard', () => {
   it('calls onCancel when Cancel is clicked', async () => {
     const onCancel = jest.fn();
     const user = userEvent.setup();
+
     render(<PlacesConfirmCard {...defaultArgs} onCancel={onCancel} />);
     await user.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onCancel).toHaveBeenCalledTimes(1);

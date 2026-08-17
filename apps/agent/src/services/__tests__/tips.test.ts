@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const createMock = vi.fn();
+
 vi.mock('@/infrastructure/llm', () => ({
   getOpenAIClient: () => ({ responses: { create: createMock } }),
   OPENAI_CLIENT_MODEL: 'gpt-4o-mini',
@@ -32,6 +33,7 @@ describe('getLocalTips', () => {
           JSON.stringify({ country: 'Vietnam', count: 1, summary: 'Overview', tips: [apiTip] })
         )
       );
+
     vi.stubGlobal('fetch', fetchMock);
 
     const result = await getLocalTips({ country: 'Vietnam' });
@@ -58,6 +60,7 @@ describe('getLocalTips', () => {
           JSON.stringify({ country: 'Vietnam', count: 0, summary: 'Overview', tips: [] })
         )
       );
+
     vi.stubGlobal('fetch', fetchMock);
     createMock.mockResolvedValueOnce({
       output_text: JSON.stringify({
@@ -85,6 +88,7 @@ describe('getLocalTips', () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response('', { status: 500, statusText: 'Server Error' }));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(getLocalTips({ country: 'Vietnam' })).rejects.toThrow('API error 500');
@@ -92,6 +96,7 @@ describe('getLocalTips', () => {
 
   it('throws when the API response does not match the expected shape', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ oops: true })));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(getLocalTips({ country: 'Vietnam' })).rejects.toThrow('Invalid response from');

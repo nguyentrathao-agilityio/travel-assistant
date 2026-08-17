@@ -26,8 +26,10 @@ const mockLeg: TravelLeg = {
 const mockDurationFormatter = (min: number) => {
   const hours = Math.floor(min / 60);
   const minutes = min % 60;
+
   if (hours === 0) return `${minutes}m`;
   if (minutes === 0) return `${hours}h`;
+
   return `${hours}h ${minutes}m`;
 };
 
@@ -71,6 +73,7 @@ export const AllTransports: Story = {
   name: 'All transport types',
   render: () => {
     const transports: TravelLeg['transport'][] = ['flight', 'train', 'taxi', 'bus'];
+
     return (
       <div className="flex flex-col gap-2">
         {transports.map((transport) => (

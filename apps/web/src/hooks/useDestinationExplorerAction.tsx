@@ -39,6 +39,7 @@ export const useDestinationExplorerAction = () => {
       if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsed = safeParseToolResult(DestinationExplorerResultSchema, result);
+
       if (!parsed.success)
         return (
           <ToolInvalidResultCard message="Received an unexpected destination explorer result." />

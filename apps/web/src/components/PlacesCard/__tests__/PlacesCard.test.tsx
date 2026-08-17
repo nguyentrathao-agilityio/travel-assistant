@@ -83,6 +83,7 @@ describe('PlacesCard', () => {
 
     it('applies additional className', () => {
       const { container } = render(<PlacesCard data={makePlacesData()} className="custom" />);
+
       expect(container.querySelector('.custom')).toBeInTheDocument();
     });
   });

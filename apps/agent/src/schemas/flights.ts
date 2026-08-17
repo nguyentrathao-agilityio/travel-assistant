@@ -50,6 +50,7 @@ export const FlightInputSchema = z.preprocess(
     })
     .superRefine((data, ctx) => {
       const today = todayIso();
+
       if (data.departure_date < today) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -57,6 +58,7 @@ export const FlightInputSchema = z.preprocess(
           path: ['departure_date'],
         });
       }
+
       if (data.return_date && data.return_date < data.departure_date) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

@@ -21,6 +21,7 @@ const flightChanged = (a: Flight, b: Flight): boolean =>
 export const bookFlightTool = tool(
   async (input) => {
     let flight: Flight;
+
     try {
       flight = await withToolTimeout(getFlight(input.flightId));
     } catch (error) {
@@ -29,6 +30,7 @@ export const bookFlightTool = tool(
 
     try {
       const fresh = await withToolTimeout(getFlight(input.flightId));
+
       if (fresh.seats_available < input.adults) throw new Error('Not enough seats are available');
 
       if (flightChanged(fresh, flight)) {

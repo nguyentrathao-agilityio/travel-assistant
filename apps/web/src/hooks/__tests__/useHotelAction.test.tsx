@@ -30,6 +30,7 @@ jest.mock('@/utils', () => ({
 const mockHotelSafeParse = jest.fn<{ success: boolean; data?: unknown }, unknown[]>(() => ({
   success: false,
 }));
+
 jest.mock('@repo/schemas', () => ({
   HotelAvailability: {},
   HotelSearchResultSchema: { safeParse: (arg: unknown) => mockHotelSafeParse(arg) },
@@ -57,6 +58,7 @@ describe('useHotelAction', () => {
     renderHook(() => useHotelAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'inProgress', result: undefined, args: {} });
+
     expect(result).not.toBeNull();
   });
 
@@ -65,6 +67,7 @@ describe('useHotelAction', () => {
     renderHook(() => useHotelAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', result: { total: 1, results: [] }, args: {} });
+
     expect(result.type).not.toBe(React.Fragment);
   });
 
@@ -73,6 +76,7 @@ describe('useHotelAction', () => {
     renderHook(() => useHotelAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', result: { total: 0, results: [] }, args: {} });
+
     expect(result.type).not.toBe(React.Fragment);
   });
 
@@ -103,6 +107,7 @@ describe('useHotelAction', () => {
         },
       ],
     };
+
     mockHotelSafeParse.mockReturnValue({ success: true, data: hotelData });
     renderHook(() => useHotelAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
@@ -111,8 +116,10 @@ describe('useHotelAction', () => {
       result: hotelData,
       args: { city: 'Da Nang', checkIn: '2026-07-01', checkOut: '2026-07-04' },
     });
+
     expect(result).not.toBeNull();
     const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;
+
     expect(card).not.toBeNull();
   });
 
@@ -120,6 +127,7 @@ describe('useHotelAction', () => {
     renderHook(() => useHotelAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', result: undefined, args: {} });
+
     expect(result.type).toBe(React.Fragment);
   });
 });

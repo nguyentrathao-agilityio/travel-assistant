@@ -16,6 +16,7 @@ import { latestTurnToolMessages } from './domain-state/tool-messages';
 
 const { messages: _messages, copilotkit: _copilotkit, ...domainStateFields } = GraphState.fields;
 const DomainStateSchema = new StateSchema(domainStateFields);
+
 type DomainStateUpdate = typeof DomainStateSchema.Update;
 
 /** Persists validated rich-UI artifacts without changing their message/tool contracts. */
@@ -31,10 +32,12 @@ export const buildDomainStateUpdate = (
 
   for (const message of latestTurnToolMessages(messages)) {
     const graphError = graphErrorFromTool(taskName, message);
+
     if (graphError) errors.push(graphError);
     parseSearchArtifact(message, searchResults);
 
     const booking = BookingSchema.safeParse(message.artifact);
+
     if (!booking.success) continue;
     if (booking.data.status === 'confirmed' && booking.data.type === 'flight') {
       update.flightSelectionStatus = 'booked';
@@ -47,6 +50,7 @@ export const buildDomainStateUpdate = (
 
   if (Object.keys(searchResults).length > 0) update.searchResults = searchResults;
   if (errors.length > 0) update.execution = { ...update.execution, errors };
+
   return update;
 };
 

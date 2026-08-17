@@ -19,6 +19,7 @@ const graphErrorCode = (
   if (WRITE_TASKS.has(taskName) && code === TOOL_ERROR_CODES.TIMEOUT) {
     return GRAPH_ERROR_CODES.WRITE_STATUS_UNKNOWN;
   }
+
   return GRAPH_ERROR_CODE_BY_TOOL_ERROR_CODE[code] ?? GRAPH_ERROR_CODES.PROVIDER_ERROR;
 };
 
@@ -28,9 +29,11 @@ export const graphErrorFromTool = (
   message: ToolMessage
 ): GraphError | undefined => {
   const parsed = ToolErrorSchema.safeParse(message.artifact);
+
   if (!parsed.success) return undefined;
 
   const isWrite = WRITE_TASKS.has(taskName);
+
   return {
     node: taskName,
     operation: message.name ?? 'unknownTool',

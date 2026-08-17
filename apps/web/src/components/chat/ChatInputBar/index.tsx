@@ -50,6 +50,7 @@ const ChatInputBar = ({ onSend, onStop, inProgress, hideStopButton = false }: In
 
   const handleSubmit = useCallback(async () => {
     const trimmed = value.trim();
+
     if (!trimmed || submitDisabled) return;
 
     setLastTool(null);
@@ -61,6 +62,7 @@ const ChatInputBar = ({ onSend, onStop, inProgress, hideStopButton = false }: In
   const handleChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setValue(e.target.value);
     const el = e.target;
+
     el.style.height = 'auto';
     el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`;
   }, []);

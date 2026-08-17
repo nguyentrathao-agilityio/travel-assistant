@@ -27,8 +27,10 @@ const toolFailures = (state: GraphStateType): ToolFailure[] =>
     if (message.status !== 'error' && !isErrorArtifact(message.artifact)) return [];
     const name = message.name ?? 'unknownTool';
     const parsed = ToolErrorSchema.safeParse(message.artifact);
+
     if (!parsed.success) {
       const retryable = RETRYABLE_DOMAIN_NODE_NAMES.has(state.execution.currentNode ?? '');
+
       return [
         {
           name,
@@ -42,8 +44,10 @@ const toolFailures = (state: GraphStateType): ToolFailure[] =>
         },
       ];
     }
+
     const code: GraphError['code'] =
       GRAPH_ERROR_CODE_BY_TOOL_ERROR_CODE[parsed.data.code] ?? GRAPH_ERROR_CODES.PROVIDER_ERROR;
+
     return [
       {
         name,
@@ -65,8 +69,10 @@ export const failureValidation = (
   label: string
 ): ValidationResult | undefined => {
   const failures = toolFailures(state);
+
   if (failures.length === 0) return undefined;
   const retryable = failures.every(({ error }) => error.retryable);
+
   return {
     status: 'failed',
     reason: `${label} failed: ${failures.map(({ name }) => name).join(', ')}`,
@@ -78,6 +84,7 @@ export const failureValidation = (
 /** Failed writes with an unknown outcome (e.g. a timeout) must be verified, never blindly retried. */
 export const writeFailureResult = (failure: ValidationResult, label: string): ValidationResult => {
   const isUnknownOutcome = failure.error?.code === GRAPH_ERROR_CODES.TIMEOUT;
+
   return {
     status: 'failed',
     reason: isUnknownOutcome

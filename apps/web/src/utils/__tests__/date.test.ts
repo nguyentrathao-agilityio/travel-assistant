@@ -11,6 +11,7 @@ describe('todayClientIso', () => {
 
   it('returns the correct date for a specific mocked time', () => {
     const mockDate = new Date('2026-06-15T10:00:00');
+
     jest.spyOn(global, 'Date').mockImplementation(() => mockDate as unknown as Date);
     expect(todayClientIso()).toBe('2026-06-15');
     jest.restoreAllMocks();

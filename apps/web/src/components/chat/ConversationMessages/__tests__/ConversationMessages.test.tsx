@@ -9,6 +9,7 @@ jest.mock('@/hooks', () => ({
 }));
 
 const mockChatMessages = jest.fn((_props: unknown) => null);
+
 jest.mock('../../ChatMessages', () => ({
   ChatMessages: (props: unknown) => mockChatMessages(props),
 }));

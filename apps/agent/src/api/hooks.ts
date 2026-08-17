@@ -24,6 +24,7 @@ export const createCopilotKitHooks = (
 const stampRequestStart = ({ request, path }: HookContext): Request => {
   console.log(`[copilotkit] -> ${request.method} ${path}`);
   const headers = new Headers(request.headers);
+
   headers.set(REQUEST_START_HEADER_NAME, Date.now().toString());
 
   return new Request(request, { headers });
@@ -38,6 +39,7 @@ const rejectUnregisteredAgent = (
     route.method === 'agent/run' ||
     route.method === 'agent/connect' ||
     route.method === 'agent/stop';
+
   if (!hasAgentId || registeredAgentIds.includes(route.agentId)) return;
 
   throw new Response(

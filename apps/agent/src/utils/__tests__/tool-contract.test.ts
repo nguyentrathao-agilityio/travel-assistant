@@ -23,6 +23,7 @@ describe('mapToolError', () => {
 
   it('always produces a JSON-serializable error envelope', () => {
     const result = mapToolError(Symbol('failure'), 'test-provider', 'fallback');
+
     expect(() => JSON.stringify(result)).not.toThrow();
   });
 });
@@ -33,6 +34,7 @@ describe('withToolTimeout', () => {
     const operation = new Promise<string>(() => undefined);
     const result = withToolTimeout(operation, 25);
     const assertion = expect(result).rejects.toMatchObject({ name: 'ToolTimeoutError' });
+
     await vi.advanceTimersByTimeAsync(25);
     await assertion;
     vi.useRealTimers();

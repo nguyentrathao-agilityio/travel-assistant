@@ -81,6 +81,7 @@ describe('StopCard', () => {
     it('renders map link when lat/lng are provided', () => {
       render(<StopCard stop={makeStop()} index={1} formatDuration={formatDuration} />);
       const link = screen.getByRole('link', { name: /map/i });
+
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute('href', 'https://maps?q=16,108.2');
     });
@@ -100,6 +101,7 @@ describe('StopCard', () => {
   describe('leg connector', () => {
     it('renders LegConnector when nextLeg is provided', () => {
       const nextLeg: TravelLeg = { transport: 'walk', durationMin: 10 };
+
       render(
         <StopCard stop={makeStop()} index={1} nextLeg={nextLeg} formatDuration={formatDuration} />
       );

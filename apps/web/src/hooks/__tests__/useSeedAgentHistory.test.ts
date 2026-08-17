@@ -72,6 +72,7 @@ describe('useSeedAgentHistory', () => {
       ({ threadId }) => useSeedAgentHistory(threadId, persisted, false),
       { initialProps: { threadId: 'thread-1' } }
     );
+
     expect(mockSetMessages).toHaveBeenCalledTimes(1);
 
     rerender({ threadId: 'thread-1' });
@@ -83,6 +84,7 @@ describe('useSeedAgentHistory', () => {
       ({ threadId }) => useSeedAgentHistory(threadId, persisted, false),
       { initialProps: { threadId: 'thread-1' } }
     );
+
     expect(mockSetMessages).toHaveBeenCalledTimes(1);
 
     rerender({ threadId: 'thread-2' });
@@ -95,6 +97,7 @@ describe('useSeedAgentHistory', () => {
       ({ threadId }) => useSeedAgentHistory(threadId, persisted, false),
       { initialProps: { threadId: 'thread-1' } }
     );
+
     expect(mockSetMessages).not.toHaveBeenCalled();
 
     mockMessages.mockReturnValue([]);

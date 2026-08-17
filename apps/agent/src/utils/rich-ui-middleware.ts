@@ -36,6 +36,7 @@ const buildFact = (
   };
 
   if (name && factByToolName[name]) return factByToolName[name];
+
   return name && WRITE_TOOL_NAMES.has(name)
     ? 'The booking action result is available.'
     : 'The result is available.';
@@ -52,16 +53,20 @@ export const buildRichUiToolSummary = (name: string | undefined, artifact: unkno
 
 const freshToolMessageCutoff = (messages: readonly unknown[]): number => {
   let cutoff = messages.length;
+
   while (cutoff > 0 && messages[cutoff - 1] instanceof ToolMessage) cutoff -= 1;
+
   return cutoff;
 };
 
 const safeErrorContent = (artifact: unknown): string | undefined => {
   const parsed = ToolErrorSchema.safeParse(artifact);
+
   if (!parsed.success) return undefined;
   const action = parsed.data.retryable
     ? 'Tell the user they can try again; do not expose provider internals.'
     : 'Tell the user the operation cannot be retried automatically; do not expose provider internals.';
+
   return `The tool failed with ${parsed.data.code} from ${parsed.data.provider}. ${action}`;
 };
 
@@ -71,6 +76,7 @@ export const richUiModelMiddleware = createMiddleware({
   name: 'RichUiModelContent',
   wrapModelCall: (request, handler) => {
     const cutoff = freshToolMessageCutoff(request.messages);
+
     return handler({
       ...request,
       messages: request.messages.map((message, index) => {
@@ -79,7 +85,9 @@ export const richUiModelMiddleware = createMiddleware({
         const safeError = isErrorArtifact(message.artifact)
           ? safeErrorContent(message.artifact)
           : undefined;
+
         if (isErrorArtifact(message.artifact) && !safeError) return message;
+
         return new ToolMessage({
           id: message.id,
           content: safeError ?? buildRichUiToolSummary(message.name, message.artifact),

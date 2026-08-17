@@ -22,6 +22,7 @@ class BridgedLangGraphAgent extends LangGraphAgent {
     });
 
     const assistant = assistants.find((candidate) => candidate.graph_id === this.graphId);
+
     if (assistant) return assistant;
 
     return super.getAssistant();

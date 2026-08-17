@@ -42,11 +42,13 @@ vi.mock('@/infrastructure/persistence', () => ({
 }));
 
 const searchMemoriesMock = vi.fn();
+
 vi.mock('@/services/memory', () => ({
   searchMemories: (...args: unknown[]) => searchMemoriesMock(...args),
 }));
 
 const buildAgentSystemPromptMock = vi.fn((..._args: unknown[]) => 'system prompt text');
+
 vi.mock('@/prompts', () => ({
   buildAgentSystemPrompt: (...args: unknown[]) => buildAgentSystemPromptMock(...args),
 }));
@@ -95,6 +97,7 @@ describe('createSpecializedAgent', () => {
     expect(createAgentMock).toHaveBeenCalledTimes(1);
 
     const call = createAgentMock.mock.calls[0][0];
+
     expect(call.model).toBe('fake-model');
     expect(call.tools).toBe(tools);
     expect(call.stateSchema).toBe('fake-graph-state');
@@ -115,6 +118,7 @@ describe('createSpecializedAgent', () => {
     const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[3].fn;
 
     const fakeState = { messages: [] };
+
     await dynamicPromptFn(fakeState);
 
     expect(searchMemoriesMock).toHaveBeenCalledWith('fake-memory-store');
@@ -148,6 +152,7 @@ describe('createSpecializedAgent', () => {
     const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[3].fn;
 
     const fakeState = { messages: [] };
+
     await dynamicPromptFn(fakeState);
 
     expect(searchMemoriesMock).not.toHaveBeenCalled();

@@ -42,6 +42,7 @@ describe('ApiKeyOverlay', () => {
 
     it('toggles input to text type when show button is clicked', async () => {
       const user = userEvent.setup();
+
       render(<ApiKeyOverlay />);
       await user.click(screen.getByLabelText('Show API key'));
       expect(screen.getByPlaceholderText('sk-...')).toHaveAttribute('type', 'text');
@@ -49,6 +50,7 @@ describe('ApiKeyOverlay', () => {
 
     it('toggles back to password type on second click', async () => {
       const user = userEvent.setup();
+
       render(<ApiKeyOverlay />);
       await user.click(screen.getByLabelText('Show API key'));
       await user.click(screen.getByLabelText('Hide API key'));
@@ -59,6 +61,7 @@ describe('ApiKeyOverlay', () => {
   describe('validation', () => {
     it('shows error when submitted with a non-sk- key', async () => {
       const user = userEvent.setup();
+
       render(<ApiKeyOverlay />);
       await user.type(screen.getByPlaceholderText('sk-...'), 'invalid-key');
       await user.click(screen.getByRole('button', { name: /continue/i }));
@@ -67,6 +70,7 @@ describe('ApiKeyOverlay', () => {
 
     it('clears error when the input changes', async () => {
       const user = userEvent.setup();
+
       render(<ApiKeyOverlay />);
       await user.type(screen.getByPlaceholderText('sk-...'), 'invalid-key');
       await user.click(screen.getByRole('button', { name: /continue/i }));
@@ -77,6 +81,7 @@ describe('ApiKeyOverlay', () => {
 
     it('enables the continue button when input has text', async () => {
       const user = userEvent.setup();
+
       render(<ApiKeyOverlay />);
       await user.type(screen.getByPlaceholderText('sk-...'), 'sk-test');
       expect(screen.getByRole('button', { name: /continue/i })).toBeEnabled();
@@ -86,6 +91,7 @@ describe('ApiKeyOverlay', () => {
   describe('submission', () => {
     it('calls setApiKey with trimmed valid key on form submit', async () => {
       const user = userEvent.setup();
+
       render(<ApiKeyOverlay />);
       await user.type(screen.getByPlaceholderText('sk-...'), 'sk-abc123');
       await user.click(screen.getByRole('button', { name: /continue/i }));
@@ -94,6 +100,7 @@ describe('ApiKeyOverlay', () => {
 
     it('calls setApiKey when Enter key is pressed with valid key', async () => {
       const user = userEvent.setup();
+
       render(<ApiKeyOverlay />);
       await user.type(screen.getByPlaceholderText('sk-...'), 'sk-abc123{Enter}');
       expect(mockSetApiKey).toHaveBeenCalledWith('sk-abc123');
@@ -101,6 +108,7 @@ describe('ApiKeyOverlay', () => {
 
     it('does not call setApiKey when Enter key is pressed with invalid key', async () => {
       const user = userEvent.setup();
+
       render(<ApiKeyOverlay />);
       await user.type(screen.getByPlaceholderText('sk-...'), 'bad-key{Enter}');
       expect(mockSetApiKey).not.toHaveBeenCalled();

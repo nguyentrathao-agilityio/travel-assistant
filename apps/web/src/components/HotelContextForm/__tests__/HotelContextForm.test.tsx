@@ -41,6 +41,7 @@ describe('HotelContextForm', () => {
         check_in: '2026-07-01',
         check_out: '2026-07-07',
       };
+
       render(<HotelContextForm args={args} onConfirm={onConfirm} onCancel={onCancel} />);
       expect(screen.queryByPlaceholderText('e.g. Paris, Tokyo')).not.toBeInTheDocument();
     });
@@ -60,6 +61,7 @@ describe('HotelContextForm', () => {
   describe('interactions', () => {
     it('enables submit once required fields are filled', async () => {
       const user = userEvent.setup();
+
       render(<HotelContextForm args={baseArgs} onConfirm={onConfirm} onCancel={onCancel} />);
       await user.type(screen.getByPlaceholderText('e.g. Paris, Tokyo'), 'Paris');
       await user.type(screen.getAllByPlaceholderText('YYYY-MM-DD')[0], '2026-07-01');
@@ -69,6 +71,7 @@ describe('HotelContextForm', () => {
 
     it('calls onConfirm with merged args on submit', async () => {
       const user = userEvent.setup();
+
       render(<HotelContextForm args={baseArgs} onConfirm={onConfirm} onCancel={onCancel} />);
       await user.type(screen.getByPlaceholderText('e.g. Paris, Tokyo'), 'Paris');
       await user.type(screen.getAllByPlaceholderText('YYYY-MM-DD')[0], '2026-07-01');
@@ -79,6 +82,7 @@ describe('HotelContextForm', () => {
 
     it('calls onCancel when cancel button is clicked', async () => {
       const user = userEvent.setup();
+
       render(<HotelContextForm args={baseArgs} onConfirm={onConfirm} onCancel={onCancel} />);
       await user.click(screen.getByRole('button', { name: 'Cancel' }));
       expect(onCancel).toHaveBeenCalledTimes(1);
@@ -86,6 +90,7 @@ describe('HotelContextForm', () => {
 
     it('disables fields after submit', async () => {
       const user = userEvent.setup();
+
       render(<HotelContextForm args={baseArgs} onConfirm={onConfirm} onCancel={onCancel} />);
       await user.type(screen.getByPlaceholderText('e.g. Paris, Tokyo'), 'Paris');
       await user.type(screen.getAllByPlaceholderText('YYYY-MM-DD')[0], '2026-07-01');

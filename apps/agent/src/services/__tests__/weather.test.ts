@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const createMock = vi.fn();
+
 vi.mock('@/infrastructure/llm', () => ({
   getOpenAIClient: () => ({ responses: { create: createMock } }),
   OPENAI_CLIENT_MODEL: 'gpt-4o-mini',
@@ -40,6 +41,7 @@ afterEach(() => {
 describe('getWeather', () => {
   it('maps a valid API response to camelCase and includes an AI travel tip', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify(apiResponse)));
+
     vi.stubGlobal('fetch', fetchMock);
     createMock.mockResolvedValueOnce({ output_text: 'Wear light clothing.' });
 
@@ -53,6 +55,7 @@ describe('getWeather', () => {
 
   it('falls back to a generic travel tip when the AI call fails', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify(apiResponse)));
+
     vi.stubGlobal('fetch', fetchMock);
     createMock.mockRejectedValueOnce(new Error('openai down'));
 
@@ -65,6 +68,7 @@ describe('getWeather', () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response('', { status: 500, statusText: 'Server Error' }));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(getWeather({ city: 'Da Nang' })).rejects.toThrow('Weather API failed: 500');
@@ -72,6 +76,7 @@ describe('getWeather', () => {
 
   it('throws when the API response does not match the expected shape', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ oops: true })));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(getWeather({ city: 'Da Nang' })).rejects.toThrow('Invalid weather response shape');

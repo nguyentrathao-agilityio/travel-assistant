@@ -55,6 +55,7 @@ describe('formatTime', () => {
 describe('formatDateRange', () => {
   it('formats check-in and check-out as range', () => {
     const result = formatDateRange('2026-06-10', '2026-06-17');
+
     expect(result).toBe('Jun 10 - Jun 17');
   });
 });
@@ -62,21 +63,25 @@ describe('formatDateRange', () => {
 describe('formatRelativeTime', () => {
   it('returns "Just now" for timestamps under 1 minute ago', () => {
     const thirtySecondsAgo = new Date(Date.now() - 30_000).toISOString();
+
     expect(formatRelativeTime(thirtySecondsAgo)).toBe('Just now');
   });
 
   it('returns minutes for timestamps under 1 hour ago', () => {
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60_000).toISOString();
+
     expect(formatRelativeTime(fiveMinutesAgo)).toBe('5m ago');
   });
 
   it('returns hours for timestamps under 24 hours ago', () => {
     const threeHoursAgo = new Date(Date.now() - 3 * 60 * 60_000).toISOString();
+
     expect(formatRelativeTime(threeHoursAgo)).toBe('3h ago');
   });
 
   it('returns days for timestamps under 7 days ago', () => {
     const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60_000).toISOString();
+
     expect(formatRelativeTime(twoDaysAgo)).toBe('2d ago');
   });
 });

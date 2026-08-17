@@ -20,6 +20,7 @@ const buildHandoffMessages = (
     content: instruction,
     tool_call_id: runtime.toolCallId,
   });
+
   return [...lastAiMessage, transferMessage];
 };
 

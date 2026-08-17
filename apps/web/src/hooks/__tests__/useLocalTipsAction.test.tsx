@@ -20,6 +20,7 @@ jest.mock('@/utils', () => ({
 const mockSafeParse = jest.fn<{ success: boolean; data?: unknown }, unknown[]>(() => ({
   success: false,
 }));
+
 jest.mock('@repo/schemas', () => ({
   TipsResultSchema: { safeParse: (arg: unknown) => mockSafeParse(arg) },
 }));
@@ -41,6 +42,7 @@ describe('useLocalTipsAction', () => {
     renderHook(() => useLocalTipsAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'inProgress', args: {}, result: undefined });
+
     expect(result).not.toBeNull();
   });
 
@@ -49,6 +51,7 @@ describe('useLocalTipsAction', () => {
     renderHook(() => useLocalTipsAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: {} });
+
     expect(result.type).not.toBe(React.Fragment);
   });
 
@@ -60,6 +63,7 @@ describe('useLocalTipsAction', () => {
     renderHook(() => useLocalTipsAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: { count: 0 } });
+
     expect(result.type).not.toBe(React.Fragment);
   });
 
@@ -80,10 +84,12 @@ describe('useLocalTipsAction', () => {
         },
       ],
     };
+
     mockSafeParse.mockReturnValue({ success: true, data: tipsData });
     renderHook(() => useLocalTipsAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: tipsData });
+
     expect(result).not.toBeNull();
   });
 });

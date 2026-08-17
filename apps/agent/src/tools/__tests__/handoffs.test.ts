@@ -45,6 +45,7 @@ describe('transferToBookFlightTool', () => {
     const toolMessage = (command.update as { messages: unknown[] }).messages.find(
       (m): m is ToolMessage => m instanceof ToolMessage
     );
+
     expect(toolMessage?.tool_call_id).toBe('call_1');
     expect(toolMessage?.content).toContain('flightId=FL1');
     expect(toolMessage?.content).toContain('adults=2');
@@ -70,6 +71,7 @@ describe('transferToBookFlightTool', () => {
     )) as Command;
 
     const messages = (command.update as { messages: unknown[] }).messages;
+
     expect(messages).toHaveLength(2);
     expect(messages).toContain(callingMessage);
     expect(messages).not.toContain(olderMessage);
@@ -99,6 +101,7 @@ describe('transferToBookHotelTool', () => {
     const toolMessage = (command.update as { messages: unknown[] }).messages.find(
       (m): m is ToolMessage => m instanceof ToolMessage
     );
+
     expect(toolMessage?.tool_call_id).toBe('call_2');
     expect(toolMessage?.content).toContain('hotelId=HTL1');
     expect(toolMessage?.content).toContain('checkIn=2026-08-05');

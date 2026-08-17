@@ -41,6 +41,7 @@ const parseBookingResponse = async (response: Response): Promise<Booking> => {
   if (!apiBooking.success) throw new Error('Invalid booking response');
 
   const booking = BookingSchema.safeParse(mapApiBooking(apiBooking.data));
+
   if (!booking.success) throw new Error('Invalid mapped booking response');
 
   return booking.data;
@@ -55,10 +56,13 @@ const createIdempotencyKey = (action: string, payload: object): string =>
 const request = async (path: string, init?: RequestInit): Promise<Response> => {
   if (!API_URL) throw new Error(ERROR_MESSAGES.NO_API_URL);
   const response = await fetch(`${API_URL}${path}`, init);
+
   if (!response.ok) {
     const message = await response.text();
+
     throw new Error(`${response.status} ${message || response.statusText}`);
   }
+
   return response;
 };
 
@@ -92,6 +96,7 @@ export const revalidateHotel = async (input: HotelBookingInput) => {
   if (!availability.success) throw new Error('Invalid hotel availability response');
 
   const hotel = availability.data.results.find(({ id }) => id === validated.hotelId);
+
   if (!hotel?.available) throw new Error('The selected hotel is no longer available');
   if (hotel.available_rooms < validated.rooms) throw new Error('Not enough rooms are available');
 
@@ -127,6 +132,7 @@ export const submitFlightBooking = async (
     },
     body: JSON.stringify(payload),
   });
+
   return parseBookingResponse(response);
 };
 
@@ -153,18 +159,21 @@ export const submitHotelBooking = async (input: HotelBookingInput): Promise<Book
     },
     body: JSON.stringify(payload),
   });
+
   return parseBookingResponse(response);
 };
 
 /** Fetches and validates a booking by ID. */
 export const getBooking = async (bookingId: string): Promise<Booking> => {
   const response = await request(`${ENDPOINTS.BOOKINGS}/${encodeURIComponent(bookingId)}`);
+
   return parseBookingResponse(response);
 };
 
 /** Validates that a booking exists, then cancels it. */
 export const cancelBooking = async (input: CancelBookingInput): Promise<Booking> => {
   const validated = CancelBookingInputSchema.parse(input);
+
   await getBooking(validated.bookingId);
   const response = await request(
     `${ENDPOINTS.BOOKINGS}/${encodeURIComponent(validated.bookingId)}/cancel`,
@@ -173,5 +182,6 @@ export const cancelBooking = async (input: CancelBookingInput): Promise<Booking>
       headers: { 'Idempotency-Key': createIdempotencyKey('cancel', validated) },
     }
   );
+
   return parseBookingResponse(response);
 };

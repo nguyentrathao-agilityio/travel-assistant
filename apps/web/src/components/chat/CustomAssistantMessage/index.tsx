@@ -11,6 +11,7 @@ const hasRenderedContent = (node: Node): boolean => {
   if (!(node instanceof HTMLElement || node instanceof SVGElement)) return false;
 
   const tagName = node.tagName.toLowerCase();
+
   if (['canvas', 'iframe', 'img', 'input', 'svg', 'video'].includes(tagName)) return true;
   if ([...node.childNodes].some(hasRenderedContent)) return true;
 
@@ -75,26 +76,32 @@ const CustomAssistantMessage = (props: AssistantMessageProps) => {
 
   useLayoutEffect(() => {
     const container = cardContainerRef.current;
+
     if (!container) {
       setHasCard(false);
+
       return;
     }
 
     const updateHasCard = () => setHasCard([...container.childNodes].some(hasRenderedContent));
+
     updateHasCard();
 
     const observer = new MutationObserver(updateHasCard);
+
     observer.observe(container, {
       attributes: true,
       characterData: true,
       childList: true,
       subtree: true,
     });
+
     return () => observer.disconnect();
   }, [assistantUi]);
 
   // Potential generative UI must mount once so its actual rendered DOM can be inspected.
   const hasContent = hasMessage || isLoading || hasPotentialCard;
+
   if (!hasContent) return null;
 
   const renderBefore = hasPotentialCard && assistantUiPosition === 'before';

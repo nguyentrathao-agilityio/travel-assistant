@@ -29,6 +29,7 @@ const createArtifactParser =
   ): ArtifactParser =>
   (artifact) => {
     const parsed = schema.safeParse(artifact);
+
     return parsed.success ? toUpdate(parsed.data) : undefined;
   };
 
@@ -63,9 +64,11 @@ export const parseSearchArtifact = (
   searchResults: Partial<SearchResults>
 ): void => {
   const { artifact, name } = message;
+
   if (artifact === undefined || message.status === 'error' || !isSearchArtifactToolName(name))
     return;
 
   const update = SEARCH_ARTIFACT_PARSERS[name](artifact);
+
   if (update) Object.assign(searchResults, update);
 };

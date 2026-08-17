@@ -6,10 +6,13 @@ import { buildRichUiToolSummary, richUiModelMiddleware } from '@/utils/rich-ui-m
 
 const invokeMiddleware = async (messages: unknown[]) => {
   let captured: { messages: unknown[] } | undefined;
+
   await richUiModelMiddleware.wrapModelCall!({ messages } as never, async (request) => {
     captured = request as { messages: unknown[] };
+
     return { output: undefined } as never;
   });
+
   return captured!.messages as ToolMessage[];
 };
 

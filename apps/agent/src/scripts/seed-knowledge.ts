@@ -17,11 +17,13 @@ const seedKnowledge = async (): Promise<void> => {
     for (const source of sources) {
       try {
         const result = await ingestKnowledgeSource(source);
+
         console.log(
           `[knowledge] ${result.sourceId}: ${result.chunks} chunks, ${result.deletedStaleChunks} stale deleted`
         );
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
+
         failures.push(`${source.id}: ${message}`);
         console.error(`[knowledge] ${source.id}: ${message}`);
       }

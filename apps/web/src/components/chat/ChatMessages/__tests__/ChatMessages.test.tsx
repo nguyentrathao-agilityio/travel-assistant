@@ -88,6 +88,7 @@ describe('ChatMessages', () => {
         content: '',
         name: 'coagent-state-render',
       } as unknown as CKMessage;
+
       render(<ChatMessages {...defaultProps} messages={[placeholder]} />);
       expect(screen.getByTestId('empty-state')).toBeInTheDocument();
     });
@@ -104,6 +105,7 @@ describe('ChatMessages', () => {
 
     it('renders a RenderMessage for each message', () => {
       const messages = [makeMessage('m1'), makeMessage('m2')];
+
       render(<ChatMessages {...defaultProps} messages={messages} />);
       expect(screen.getAllByTestId('message')).toHaveLength(2);
       expect(screen.getByText('m1')).toBeInTheDocument();
@@ -235,6 +237,7 @@ describe('ChatMessages', () => {
 
       expect(screen.queryByText('Find places')).not.toBeInTheDocument();
       const indicator = screen.getByRole('status', { name: 'Loading suggestions' });
+
       expect(indicator).toHaveClass('pl-[52px]');
       expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
     });

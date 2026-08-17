@@ -388,6 +388,7 @@ describe('supervisor validation', () => {
         })
       );
       const route = supervisorUpdate(update).nextNode;
+
       expect(route).toBe(retryCount < MAX_RETRIES_PER_NODE ? 'plan' : 'saveMemory');
     }
   });

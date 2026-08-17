@@ -40,6 +40,7 @@ describe('FlightContextForm', () => {
 
     it('does not render required fields when already provided in args', () => {
       const args: FlightArgs = { ...baseArgs, destination: 'SGN', departure_date: '2026-07-01' };
+
       render(<FlightContextForm args={args} onConfirm={onConfirm} onCancel={onCancel} />);
       expect(screen.queryByPlaceholderText('e.g. SGN, HAN')).not.toBeInTheDocument();
     });
@@ -59,6 +60,7 @@ describe('FlightContextForm', () => {
       const { container } = render(
         <FlightContextForm args={baseArgs} onConfirm={onConfirm} onCancel={onCancel} disabled />
       );
+
       expect(container.firstChild).toBeNull();
     });
   });
@@ -66,6 +68,7 @@ describe('FlightContextForm', () => {
   describe('interactions', () => {
     it('enables submit once all required fields are filled', async () => {
       const user = userEvent.setup();
+
       render(<FlightContextForm args={baseArgs} onConfirm={onConfirm} onCancel={onCancel} />);
       await user.type(screen.getByPlaceholderText('e.g. SGN, HAN'), 'SGN');
       await user.type(screen.getAllByPlaceholderText('YYYY-MM-DD')[0], '2026-07-01');
@@ -74,6 +77,7 @@ describe('FlightContextForm', () => {
 
     it('calls onConfirm with merged args when submitted', async () => {
       const user = userEvent.setup();
+
       render(<FlightContextForm args={baseArgs} onConfirm={onConfirm} onCancel={onCancel} />);
       await user.type(screen.getByPlaceholderText('e.g. SGN, HAN'), 'SGN');
       await user.type(screen.getAllByPlaceholderText('YYYY-MM-DD')[0], '2026-07-01');
@@ -83,6 +87,7 @@ describe('FlightContextForm', () => {
 
     it('calls onCancel when cancel button is clicked', async () => {
       const user = userEvent.setup();
+
       render(<FlightContextForm args={baseArgs} onConfirm={onConfirm} onCancel={onCancel} />);
       await user.click(screen.getByRole('button', { name: 'Cancel' }));
       expect(onCancel).toHaveBeenCalledTimes(1);
@@ -90,6 +95,7 @@ describe('FlightContextForm', () => {
 
     it('hides the form after submit', async () => {
       const user = userEvent.setup();
+
       render(<FlightContextForm args={baseArgs} onConfirm={onConfirm} onCancel={onCancel} />);
       await user.type(screen.getByPlaceholderText('e.g. SGN, HAN'), 'SGN');
       await user.type(screen.getAllByPlaceholderText('YYYY-MM-DD')[0], '2026-07-01');

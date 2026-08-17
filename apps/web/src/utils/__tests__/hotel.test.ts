@@ -35,6 +35,7 @@ describe('computeHotelBadges', () => {
       makeHotel({ id: 'h2', pricePerNight: 80 }),
     ];
     const badges = computeHotelBadges(hotels);
+
     expect(badges.get('h2')?.label).toBe('Cheapest');
   });
 
@@ -44,6 +45,7 @@ describe('computeHotelBadges', () => {
       makeHotel({ id: 'h2', pricePerNight: 150, rating: 4.8 }),
     ];
     const badges = computeHotelBadges(hotels);
+
     expect(badges.get('h1')?.label).toBe('Cheapest');
     expect(badges.get('h2')?.label).toBe('Best rated');
   });
@@ -54,6 +56,7 @@ describe('computeHotelBadges', () => {
       makeHotel({ id: 'h2', pricePerNight: 150, rating: 3.5 }),
     ];
     const badges = computeHotelBadges(hotels);
+
     expect(badges.get('h1')?.label).toBe('Cheapest');
     expect(badges.has('h2')).toBe(false);
   });
@@ -65,6 +68,7 @@ describe('computeHotelBadges', () => {
       makeHotel({ id: 'h3', pricePerNight: 120, rating: 4.0 }),
     ];
     const badges = computeHotelBadges(hotels);
+
     expect(badges.get('h3')?.label).toBe('Best value');
   });
 });

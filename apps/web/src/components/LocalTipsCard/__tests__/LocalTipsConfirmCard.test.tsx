@@ -93,9 +93,11 @@ describe('LocalTipsConfirmCard', () => {
   it('calls onConfirm with updated city and country values', async () => {
     const onConfirm = jest.fn();
     const user = userEvent.setup();
+
     render(<LocalTipsConfirmCard {...defaultArgs} onConfirm={onConfirm} />);
 
     const cityInput = screen.getByDisplayValue('Da Nang');
+
     await user.clear(cityInput);
     await user.type(cityInput, 'Hoi An');
 
@@ -106,6 +108,7 @@ describe('LocalTipsConfirmCard', () => {
   it('calls onCancel when Cancel button is clicked', async () => {
     const onCancel = jest.fn();
     const user = userEvent.setup();
+
     render(<LocalTipsConfirmCard {...defaultArgs} onCancel={onCancel} />);
     await user.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onCancel).toHaveBeenCalledTimes(1);
@@ -113,8 +116,10 @@ describe('LocalTipsConfirmCard', () => {
 
   it('toggles essentialOnly switch when clicked', async () => {
     const user = userEvent.setup();
+
     render(<LocalTipsConfirmCard {...defaultArgs} essentialOnly={false} />);
     const toggle = screen.getByRole('switch');
+
     expect(toggle).toHaveAttribute('aria-checked', 'false');
     await user.click(toggle);
     expect(toggle).toHaveAttribute('aria-checked', 'true');
@@ -123,6 +128,7 @@ describe('LocalTipsConfirmCard', () => {
   it('calls onConfirm with essentialOnly set to true after toggle', async () => {
     const onConfirm = jest.fn();
     const user = userEvent.setup();
+
     render(<LocalTipsConfirmCard {...defaultArgs} essentialOnly={false} onConfirm={onConfirm} />);
     await user.click(screen.getByRole('switch'));
     await user.click(screen.getByRole('button', { name: /get tips/i }));

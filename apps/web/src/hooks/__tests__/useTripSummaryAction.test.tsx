@@ -24,6 +24,7 @@ jest.mock('@/utils', () => ({
 const mockSafeParse = jest.fn<{ success: boolean; data?: unknown }, unknown[]>(() => ({
   success: false,
 }));
+
 jest.mock('@repo/schemas', () => ({
   TripSummaryResultSchema: { safeParse: (arg: unknown) => mockSafeParse(arg) },
 }));
@@ -45,6 +46,7 @@ describe('useTripSummaryAction', () => {
     renderHook(() => useTripSummaryAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'inProgress', args: {}, result: undefined });
+
     expect(result).not.toBeNull();
   });
 
@@ -53,6 +55,7 @@ describe('useTripSummaryAction', () => {
     renderHook(() => useTripSummaryAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: {} });
+
     expect(result.type).not.toBe(React.Fragment);
   });
 
@@ -74,12 +77,15 @@ describe('useTripSummaryAction', () => {
         breakdown: [{ label: 'Flight', amount: 800, currency: 'USD' }],
       },
     };
+
     mockSafeParse.mockReturnValue({ success: true, data: summaryData });
     renderHook(() => useTripSummaryAction());
     const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
     const result = render({ status: 'complete', args: {}, result: summaryData });
+
     expect(result).not.toBeNull();
     const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;
+
     expect(card).not.toBeNull();
   });
 });

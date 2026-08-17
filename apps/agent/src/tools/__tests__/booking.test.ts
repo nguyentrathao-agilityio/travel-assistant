@@ -128,6 +128,7 @@ describe('bookFlightTool', () => {
 
   it('stops without writing when the price changes after middleware approval', async () => {
     const changedFlight = { ...baseFlight, price: 150 };
+
     getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(changedFlight);
     const result = artifactOf<{ error: string }>(
       await bookFlightTool.invoke(toolCall(bookFlightTool.name, flightInput))
@@ -139,6 +140,7 @@ describe('bookFlightTool', () => {
 
   it('rejects without booking when seats are no longer sufficient after resuming', async () => {
     const soldOut = { ...baseFlight, seats_available: 0 };
+
     getFlightMock.mockResolvedValueOnce(baseFlight).mockResolvedValueOnce(soldOut);
 
     const result = artifactOf<{ error: string }>(
@@ -165,6 +167,7 @@ describe('bookHotelTool', () => {
 
   it('stops without writing when the total price changes after middleware approval', async () => {
     const changedHotel = { ...baseHotel, total_price: 200 };
+
     revalidateHotelMock.mockResolvedValueOnce(baseHotel).mockResolvedValueOnce(changedHotel);
     const result = artifactOf<{ error: string }>(
       await bookHotelTool.invoke(toolCall(bookHotelTool.name, hotelInput))

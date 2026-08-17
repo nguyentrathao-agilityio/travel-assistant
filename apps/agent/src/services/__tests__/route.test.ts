@@ -32,6 +32,7 @@ describe('getRoute', () => {
         new Response(JSON.stringify({ results: [place('p1', 'A'), place('p2', 'B')] }))
       )
       .mockResolvedValueOnce(new Response(JSON.stringify(routeLeg)));
+
     vi.stubGlobal('fetch', fetchMock);
 
     const result = await getRoute({ city: 'Da Nang', maxStops: 2 });
@@ -50,6 +51,7 @@ describe('getRoute', () => {
         new Response(JSON.stringify({ results: [place('p1', 'A'), place('p2', 'B')] }))
       )
       .mockResolvedValueOnce(new Response('', { status: 500 }));
+
     vi.stubGlobal('fetch', fetchMock);
 
     const result = await getRoute({ city: 'Da Nang', maxStops: 2 });
@@ -60,6 +62,7 @@ describe('getRoute', () => {
 
   it('throws when no places are found for the city', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ results: [] })));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(getRoute({ city: 'Nowhere' })).rejects.toThrow('No places found for Nowhere');
@@ -69,6 +72,7 @@ describe('getRoute', () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response('', { status: 500, statusText: 'Server Error' }));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(getRoute({ city: 'Da Nang' })).rejects.toThrow('API error 500');
@@ -76,6 +80,7 @@ describe('getRoute', () => {
 
   it('throws a wrapped error when the places network request itself fails', async () => {
     const fetchMock = vi.fn().mockRejectedValueOnce(new Error('offline'));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(getRoute({ city: 'Da Nang' })).rejects.toThrow('Network request failed');

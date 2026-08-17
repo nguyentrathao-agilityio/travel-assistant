@@ -36,27 +36,32 @@ describe('toFahrenheit', () => {
 describe('getWeatherIcon', () => {
   it('returns a default icon when code is undefined', () => {
     const { icon, color } = getWeatherIcon(undefined);
+
     expect(icon).toBeDefined();
     expect(color.length).toBeGreaterThan(0);
   });
 
   it('returns a sunny icon for code 0', () => {
     const { color } = getWeatherIcon(0);
+
     expect(color).toContain('yellow');
   });
 
   it('returns a cloud icon for code 48', () => {
     const { color } = getWeatherIcon(48);
+
     expect(color).toContain('gray');
   });
 
   it('returns a rain icon for code 67', () => {
     const { color } = getWeatherIcon(67);
+
     expect(color).toContain('blue');
   });
 
   it('returns a snow icon for code 77', () => {
     const { color } = getWeatherIcon(77);
+
     expect(color).toContain('sky');
   });
 });
@@ -82,6 +87,7 @@ describe('getBestDayIndex', () => {
 
   it('returns the index of the day with lowest precipitation probability', () => {
     const forecasts = [makeForecast(80), makeForecast(20), makeForecast(60)];
+
     expect(getBestDayIndex(forecasts)).toBe(1);
   });
 
@@ -91,6 +97,7 @@ describe('getBestDayIndex', () => {
 
   it('returns the first best day when multiple days tie for lowest', () => {
     const forecasts = [makeForecast(20), makeForecast(20), makeForecast(80)];
+
     expect(getBestDayIndex(forecasts)).toBe(0);
   });
 });

@@ -5,6 +5,7 @@ describe('LoadingCard', () => {
   it('has role=status and aria-busy=true', () => {
     render(<LoadingCard />);
     const card = screen.getByRole('status');
+
     expect(card).toHaveAttribute('aria-busy', 'true');
   });
 
@@ -21,6 +22,7 @@ describe('LoadingCard', () => {
   it('renders the specified number of skeleton lines', () => {
     const { container } = render(<LoadingCard lines={5} />);
     const skeletonLines = container.querySelectorAll('[aria-hidden="true"].animate-pulse');
+
     expect(skeletonLines.length).toBeGreaterThanOrEqual(5);
   });
 

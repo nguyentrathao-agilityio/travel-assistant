@@ -36,6 +36,7 @@ type Story = StoryObj<typeof Input>;
 export const Default: Story = {
   render: (args) => {
     const [value, setValue] = useState('');
+
     return <Input {...args} value={value} onChange={setValue} />;
   },
 };
@@ -44,6 +45,7 @@ export const WithLabel: Story = {
   name: 'With label',
   render: (args) => {
     const [value, setValue] = useState('');
+
     return <Input {...args} value={value} onChange={setValue} label="Destination" />;
   },
 };
@@ -52,6 +54,7 @@ export const WithHint: Story = {
   name: 'With hint text',
   render: (args) => {
     const [value, setValue] = useState('');
+
     return (
       <Input
         {...args}
@@ -68,6 +71,7 @@ export const WithError: Story = {
   name: 'With error',
   render: (args) => {
     const [value, setValue] = useState('invalid');
+
     return (
       <Input
         {...args}
@@ -91,6 +95,7 @@ export const Email: Story = {
   name: 'Email input',
   render: (args) => {
     const [value, setValue] = useState('');
+
     return (
       <Input
         {...args}
@@ -107,6 +112,7 @@ export const Email: Story = {
 export const Password: Story = {
   render: (args) => {
     const [value, setValue] = useState('');
+
     return (
       <Input
         {...args}
@@ -124,6 +130,7 @@ export const WithClearButton: Story = {
   name: 'With clear button',
   render: () => {
     const [value, setValue] = useState('Sample text');
+
     return (
       <Input
         value={value}

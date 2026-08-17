@@ -115,6 +115,7 @@ export const searchHotels = async (inputData: {
     if (error instanceof Error) {
       throw new Error(`Failed to search hotels: ${error.message}`);
     }
+
     throw new Error('Failed to search hotels: Unknown error');
   }
 };

@@ -37,6 +37,7 @@ describe('tripSummaryTool', () => {
       hotel: { id: 'hotel-1', price_per_night: 90 },
       route: { city: 'Da Nang', stops: [] },
     };
+
     getTripSummaryMock.mockResolvedValueOnce(tripSummaryResult);
 
     const result = artifactOf(await tripSummaryTool.invoke(toolCall(tripSummaryTool.name, input)));

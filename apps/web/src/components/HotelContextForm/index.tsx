@@ -56,8 +56,10 @@ const HotelContextForm = ({
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const key = e.currentTarget.dataset.key as FieldKey | undefined;
+
     if (!key) return;
     const val = e.currentTarget.value;
+
     setValues((prev) => ({ ...prev, [key]: val }));
   }, []);
 
@@ -69,8 +71,10 @@ const HotelContextForm = ({
       ...HOTEL_OPTIONAL_FIELDS.filter((f) => !args[f.key]),
     ];
     const filled: HotelArgs = { ...args };
+
     allMissing.forEach(({ key }) => {
       const val = values[key];
+
       if (val?.trim()) filled[key] = val;
     });
     onConfirm(filled);

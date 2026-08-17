@@ -46,6 +46,7 @@ export const HotelInputSchema = z.preprocess(
     })
     .superRefine((data, ctx) => {
       const today = todayIso();
+
       if (data.checkIn < today) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -53,6 +54,7 @@ export const HotelInputSchema = z.preprocess(
           path: ['checkIn'],
         });
       }
+
       if (data.checkOut <= data.checkIn) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

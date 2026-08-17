@@ -48,6 +48,7 @@ const mapTip = (tip: ApiTip): TipItem => ({
 /** Strips markdown code fences from a string, returning the inner content. */
 const stripCodeFences = (text: string): string => {
   const match = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
+
   return match ? match[1].trim() : text;
 };
 
@@ -92,12 +93,14 @@ export const generateTipsFromLLM = async (
 
     if (!parsed.success) {
       console.error('LLM tips validation failed:', parsed.error.flatten());
+
       return [];
     }
 
     return parsed.data.tips;
   } catch (error) {
     console.error('Failed to generate LLM tips:', error);
+
     return [];
   }
 };
@@ -119,6 +122,7 @@ export const getLocalTips = async (input: z.infer<typeof TipsInputSchema>): Prom
   const url = `${API_URL}${ENDPOINTS.TIPS}?${new URLSearchParams(params)}`;
 
   let res: Response;
+
   try {
     res = await fetch(url);
   } catch (cause) {

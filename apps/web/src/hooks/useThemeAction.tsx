@@ -33,7 +33,9 @@ export const useThemeAction = () => {
     handler: async ({ theme: requested }) => {
       const next =
         requested === THEME.TOGGLE ? (theme === THEME.DARK ? THEME.LIGHT : THEME.DARK) : requested;
+
       if (next === THEME.LIGHT || next === THEME.DARK) setTheme(next);
+
       return next;
     },
     render: ({ status, result }) => {

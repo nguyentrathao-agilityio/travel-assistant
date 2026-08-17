@@ -42,6 +42,7 @@ const normalizeToolName = (name: string): string => LEGACY_TOOL_NAMES[name] ?? n
 
 const toolCallArguments = (call: ToolCall): string => {
   const value = call.args ?? call.function?.arguments ?? {};
+
   if (typeof value === 'string') return value;
 
   return JSON.stringify(value);
@@ -114,6 +115,7 @@ export const toAgUiMessage = (
     if (!content.trim() && !toolCalls?.length) return null;
 
     const result: AgUiAssistantMessage = { id, role: CHAT_ROLE.ASSISTANT };
+
     if (content.trim()) result.content = content;
     if (toolCalls?.length) result.toolCalls = toolCalls;
 

@@ -37,6 +37,7 @@ const ChatInput = ({
 
   const handleSubmit = useCallback(() => {
     const trimmed = value.trim();
+
     if (!trimmed || isStreaming) return;
     onSend(trimmed);
     setValue('');
@@ -49,6 +50,7 @@ const ChatInput = ({
     setValue(e.target.value);
     // Auto-resize
     const el = e.target;
+
     el.style.height = 'auto';
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
   }, []);

@@ -39,6 +39,7 @@ describe('FilterBar', () => {
     it('calls onChange with the selected filter value', async () => {
       const onChange = jest.fn();
       const user = userEvent.setup();
+
       render(<FilterBar filters={filters} activeFilter="all" onChange={onChange} />);
       await user.click(screen.getByText('Departure'));
       expect(onChange).toHaveBeenCalledWith('departure');
@@ -47,6 +48,7 @@ describe('FilterBar', () => {
     it('calls onChange when a different chip is clicked', async () => {
       const onChange = jest.fn();
       const user = userEvent.setup();
+
       render(<FilterBar filters={filters} activeFilter="departure" onChange={onChange} />);
       await user.click(screen.getByText('Return'));
       expect(onChange).toHaveBeenCalledWith('return');

@@ -40,6 +40,7 @@ export const useFlightAction = () => {
       const returnText = returnFlight
         ? ` and return flight ${returnFlight.id} (${returnFlight.flightNumber})`
         : '';
+
       void sendMessage?.(
         `I selected flight ${departure.id} (${departure.flightNumber})${returnText}. Continue the booking and ask only for missing passenger details.`
       );
@@ -62,6 +63,7 @@ export const useFlightAction = () => {
       if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsedResult = parseToolResult(result) as FlightSearchResult | undefined;
+
       if (parsedResult?.results && parsedResult.results.length === 0)
         return <ToolEmptyCard message="No flights matched this search." />;
 

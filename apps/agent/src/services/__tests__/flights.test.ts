@@ -28,6 +28,7 @@ describe('searchFlights', () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ count: 1, results: [apiFlight] })));
+
     vi.stubGlobal('fetch', fetchMock);
 
     const result = await searchFlights(input);
@@ -61,6 +62,7 @@ describe('searchFlights', () => {
         })
       )
     );
+
     vi.stubGlobal('fetch', fetchMock);
 
     const result = await searchFlights({ ...input, return_date: '2026-08-02' });
@@ -73,6 +75,7 @@ describe('searchFlights', () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response('', { status: 500, statusText: 'Server Error' }));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(searchFlights(input)).rejects.toThrow('Flight search failed: 500');
@@ -80,6 +83,7 @@ describe('searchFlights', () => {
 
   it('throws when the API response does not match the expected shape', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ oops: true })));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(searchFlights(input)).rejects.toThrow('Invalid flight search response shape');

@@ -27,6 +27,7 @@ const LocalTipsDrawer = ({ stopName, tips, onOpen }: LocalTipsDrawerProps) => {
   const handleToggle = useCallback(() => {
     setIsOpen((prev) => {
       if (!prev) onOpen?.();
+
       return !prev;
     });
   }, [onOpen]);

@@ -40,6 +40,7 @@ describe('placesTool', () => {
     const placesResult = {
       results: [{ id: 'p1', name: 'Cha Ca La Vong', city: 'Hanoi', category: 'restaurant' }],
     };
+
     getPlacesMock.mockResolvedValueOnce(placesResult);
 
     const result = artifactOf(await placesTool.invoke(toolCall(placesTool.name, input)));

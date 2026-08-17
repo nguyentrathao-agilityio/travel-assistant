@@ -34,6 +34,7 @@ describe('CollapsibleSection', () => {
       const { container } = render(
         <CollapsibleSection title="Tips" tips={[]} className="custom-class" />
       );
+
       expect(container.firstChild).toHaveClass('custom-class');
     });
   });
@@ -41,6 +42,7 @@ describe('CollapsibleSection', () => {
   describe('toggle behaviour', () => {
     it('expands when the header is clicked', async () => {
       const user = userEvent.setup();
+
       render(<CollapsibleSection title="Tips" tips={tips} />);
       await user.click(screen.getByRole('button'));
       expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'true');
@@ -48,6 +50,7 @@ describe('CollapsibleSection', () => {
 
     it('collapses after being expanded', async () => {
       const user = userEvent.setup();
+
       render(<CollapsibleSection title="Tips" tips={tips} />);
       await user.click(screen.getByRole('button'));
       await user.click(screen.getByRole('button'));
@@ -56,6 +59,7 @@ describe('CollapsibleSection', () => {
 
     it('shows tips when expanded', async () => {
       const user = userEvent.setup();
+
       render(<CollapsibleSection title="Tips" tips={tips} />);
       await user.click(screen.getByRole('button'));
       expect(screen.getByText('Tip one')).toBeInTheDocument();

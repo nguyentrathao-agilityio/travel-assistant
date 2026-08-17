@@ -20,6 +20,7 @@ describe('CollapsedThreadButton', () => {
       const { container } = render(
         <CollapsedThreadButton id="t1" title="Trip" isActive={false} onSelect={jest.fn()} />
       );
+
       expect(container.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
     });
   });
@@ -29,6 +30,7 @@ describe('CollapsedThreadButton', () => {
       const { container } = render(
         <CollapsedThreadButton id="t1" title="Trip" isActive onSelect={jest.fn()} />
       );
+
       expect(container.querySelector('.bg-sidebar-item-active')).toBeInTheDocument();
     });
 
@@ -36,6 +38,7 @@ describe('CollapsedThreadButton', () => {
       const { container } = render(
         <CollapsedThreadButton id="t1" title="Trip" isActive={false} onSelect={jest.fn()} />
       );
+
       expect(container.querySelector('.hover\\:bg-sidebar-item-hover')).toBeInTheDocument();
     });
   });
@@ -44,6 +47,7 @@ describe('CollapsedThreadButton', () => {
     it('calls onSelect with the thread id when clicked', async () => {
       const onSelect = jest.fn();
       const user = userEvent.setup();
+
       render(
         <CollapsedThreadButton id="thread-42" title="Trip" isActive={false} onSelect={onSelect} />
       );
@@ -53,6 +57,7 @@ describe('CollapsedThreadButton', () => {
 
     it('does not call onSelect when disabled', () => {
       const onSelect = jest.fn();
+
       render(<CollapsedThreadButton id="t1" title="Trip" isActive={false} onSelect={onSelect} />);
       // button is not disabled by default — interaction guard is via component prop
       expect(screen.getByTitle('Trip')).not.toBeDisabled();

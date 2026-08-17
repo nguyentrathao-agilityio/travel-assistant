@@ -41,6 +41,7 @@ describe('weatherTool', () => {
         wind_speed_kmh: 10,
       },
     };
+
     getWeatherMock.mockResolvedValueOnce(weatherResult);
 
     const result = artifactOf(await weatherTool.invoke(toolCall(weatherTool.name, input)));

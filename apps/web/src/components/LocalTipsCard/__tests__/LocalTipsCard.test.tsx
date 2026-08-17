@@ -78,6 +78,7 @@ describe('LocalTipsCard', () => {
 
     it('applies additional className', () => {
       const { container } = render(<LocalTipsCard data={makeTipsData()} className="custom" />);
+
       expect(container.querySelector('.custom')).toBeInTheDocument();
     });
   });

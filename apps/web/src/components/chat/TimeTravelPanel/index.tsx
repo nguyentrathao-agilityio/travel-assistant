@@ -18,18 +18,22 @@ const messageLabel = (message: LangGraphRawMessage | undefined): string => {
   if (!message) return 'Workflow initialized';
   const role = message.role ?? message.type ?? 'message';
   const text = langgraphMessageText(message.content).trim();
+
   if (text) return `${role}: ${text}`;
   const tool = message.tool_calls?.[0]?.name ?? message.additional_kwargs?.tool_calls?.[0]?.name;
+
   return tool ? `assistant called ${tool}` : role;
 };
 
 const checkpointLabel = (state: ThreadState<LangGraphThreadValues>): string => {
   const messages = state.values?.messages ?? [];
+
   return messageLabel(messages.at(-1));
 };
 
 const writeNodes = (state: ThreadState<LangGraphThreadValues>): string[] => {
   const writes = state.metadata?.writes;
+
   return writes && typeof writes === 'object' ? Object.keys(writes) : [];
 };
 
@@ -54,6 +58,7 @@ export const TimeTravelPanel = ({ open, onClose }: TimeTravelPanelProps) => {
       const states = await langgraphClient.threads.getHistory<LangGraphThreadValues>(threadId, {
         limit: HISTORY_LIMIT,
       });
+
       setHistory(states);
       setSelectedId((current) =>
         current && states.some((state) => state.checkpoint.checkpoint_id === current)
@@ -129,6 +134,7 @@ export const TimeTravelPanel = ({ open, onClose }: TimeTravelPanelProps) => {
               {history.map((state, index) => {
                 const id = state.checkpoint.checkpoint_id;
                 const nodes = writeNodes(state);
+
                 return (
                   <li key={id}>
                     <button

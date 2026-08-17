@@ -45,6 +45,7 @@ export const loadKnowledgeSource = async (
     headers: { accept: 'text/html,text/markdown,text/plain' },
     signal: AbortSignal.timeout(15_000),
   });
+
   if (!response.ok) {
     throw new Error(`Failed to load ${source.id}: HTTP ${response.status}`);
   }
@@ -53,9 +54,11 @@ export const loadKnowledgeSource = async (
     await response.text(),
     response.headers.get('content-type') ?? ''
   );
+
   if (content.length < 100) {
     throw new Error(`Failed to load ${source.id}: source content is empty or too short`);
   }
+
   return content;
 };
 
@@ -70,11 +73,13 @@ export const splitKnowledgeSource = async (
   content: string
 ): Promise<KnowledgeDocument[]> => {
   const chunks = await splitter.splitText(content);
+
   return chunks
     .map((chunk) => chunk.trim())
     .filter(Boolean)
     .map((chunk, chunkIndex) => {
       const chunkId = `${source.id}:chunk:${String(chunkIndex).padStart(4, '0')}`;
+
       return {
         ...source,
         id: chunkId,

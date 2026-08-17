@@ -30,11 +30,13 @@ const makeFlight = (): Flight => ({
 describe('TripFlightSection', () => {
   it('returns null when neither suggested nor booked is provided', () => {
     const { container } = render(<TripFlightSection />);
+
     expect(container.firstChild).toBeNull();
   });
 
   it('renders flight info when suggested is provided', () => {
     const flight = makeFlight();
+
     render(<TripFlightSection suggested={flight} />);
     expect(screen.getByTestId('flight-option-item')).toBeInTheDocument();
     expect(screen.getByText('VN100')).toBeInTheDocument();
@@ -42,12 +44,14 @@ describe('TripFlightSection', () => {
 
   it('shows "suggested" badge when no booked flight', () => {
     const flight = makeFlight();
+
     render(<TripFlightSection suggested={flight} />);
     expect(screen.getByText('suggested')).toBeInTheDocument();
   });
 
   it('shows "booked" badge when booked flight is provided', () => {
     const flight = makeFlight();
+
     render(<TripFlightSection booked={flight} />);
     expect(screen.getByText('booked')).toBeInTheDocument();
   });
@@ -55,6 +59,7 @@ describe('TripFlightSection', () => {
   it('renders return flight section when bookedReturn is provided', () => {
     const departure = makeFlight();
     const returnFlight = { ...makeFlight(), id: 'f2', flightNumber: 'VN200' };
+
     render(<TripFlightSection booked={departure} bookedReturn={returnFlight} />);
     expect(screen.getByText('Departure')).toBeInTheDocument();
     expect(screen.getByText('Return')).toBeInTheDocument();
@@ -63,6 +68,7 @@ describe('TripFlightSection', () => {
 
   it('does not render return section when bookedReturn is not provided', () => {
     const flight = makeFlight();
+
     render(<TripFlightSection booked={flight} />);
     expect(screen.queryByText('Departure')).not.toBeInTheDocument();
     expect(screen.queryByText('Return')).not.toBeInTheDocument();

@@ -24,6 +24,7 @@ const SelectedFlightSchema = z.object({
   departure: FlightSchema.optional(),
   return: FlightSchema.optional(),
 });
+
 export const SelectionStatusSchema = z.enum(['selected', 'confirmed', 'booked']);
 export type SelectionStatus = z.infer<typeof SelectionStatusSchema>;
 

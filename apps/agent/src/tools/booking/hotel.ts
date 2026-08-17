@@ -23,6 +23,7 @@ const hotelChanged = (a: Hotel, b: Hotel): boolean =>
 export const bookHotelTool = tool(
   async (input) => {
     let hotel: Hotel;
+
     try {
       hotel = await withToolTimeout(revalidateHotel(input));
     } catch (error) {
@@ -31,6 +32,7 @@ export const bookHotelTool = tool(
 
     try {
       const fresh = await withToolTimeout(revalidateHotel(input));
+
       if (hotelChanged(fresh, hotel)) {
         return formatBookingToolResult({
           error: 'Hotel details changed before booking. Review the latest option and try again.',

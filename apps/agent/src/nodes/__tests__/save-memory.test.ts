@@ -56,6 +56,7 @@ describe('saveMemoryNode', () => {
 
   it('never throws when extraction fails, so a broken save can never block the response', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
     invokeMock.mockRejectedValueOnce(new Error('network error'));
     const state = { messages: [] } as unknown as GraphStateType;
 
@@ -104,6 +105,7 @@ describe('saveMemoryNode', () => {
     await saveMemoryNode(state);
 
     const config = invokeMock.mock.calls[0][1] as { metadata?: Record<string, unknown> };
+
     expect(config?.metadata?.['copilotkit:emit-messages']).toBe(false);
   });
 });

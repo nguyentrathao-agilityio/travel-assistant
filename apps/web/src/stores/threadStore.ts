@@ -22,8 +22,10 @@ const firstHumanMessageText = (messages: Message[] | undefined): string | null =
   for (const message of messages ?? []) {
     if (message.type !== 'human') continue;
     const text = langgraphMessageText(message.content).trim();
+
     if (text) return text;
   }
+
   return null;
 };
 
@@ -122,6 +124,7 @@ export const useThreadStore = create<ThreadStore>()(
                 isResumed: true,
                 hasMoreThreads: items.length === THREAD_PAGE_SIZE,
               });
+
               return;
             }
 
@@ -149,6 +152,7 @@ export const useThreadStore = create<ThreadStore>()(
 
       fetchMoreThreads: async () => {
         const { isLoadingMore, hasMoreThreads, threads } = get();
+
         if (isLoadingMore || !hasMoreThreads) return;
 
         set({ isLoadingMore: true });
@@ -184,6 +188,7 @@ export const useThreadStore = create<ThreadStore>()(
 
         if (latestEmptyThread) {
           set({ activeThreadId: latestEmptyThread.id, isResumed: true });
+
           return;
         }
 
@@ -227,6 +232,7 @@ export const useThreadStore = create<ThreadStore>()(
         if (isActive) {
           const remainingThreads = threadsSnapshot.filter((thread) => thread.id !== threadId);
           const nextThreadId = remainingThreads[0]?.id ?? crypto.randomUUID();
+
           set({ activeThreadId: nextThreadId, isResumed: remainingThreads.length > 0 });
         }
 

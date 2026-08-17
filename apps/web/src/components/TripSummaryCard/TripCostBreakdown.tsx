@@ -35,6 +35,7 @@ const TripCostBreakdown = ({ estimate, className }: TripCostBreakdownProps) => {
   const getCostItem = (label: string): { Icon: LucideIcon; colorClass: string } => {
     const l = label.toLowerCase();
     const match = COST_ICON_MAP.find(({ keywords }) => keywords.some((k) => l.includes(k)));
+
     return match
       ? { Icon: match.icon, colorClass: match.colorClass }
       : { Icon: Tag, colorClass: 'text-icon-ticket' };
@@ -60,6 +61,7 @@ const TripCostBreakdown = ({ estimate, className }: TripCostBreakdownProps) => {
         <ul className="divide-border-secondary divide-y">
           {estimate.breakdown.map((item) => {
             const { Icon, colorClass } = getCostItem(item.label);
+
             return (
               <li key={item.label} className="flex items-center justify-between gap-3 px-4 py-2.5">
                 <div className="flex items-center gap-2">

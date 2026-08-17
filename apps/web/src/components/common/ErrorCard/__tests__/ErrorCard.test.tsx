@@ -16,6 +16,7 @@ describe('ErrorCard', () => {
 
   it('renders an alert icon', () => {
     const { container } = render(<ErrorCard />);
+
     expect(container.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
   });
 });

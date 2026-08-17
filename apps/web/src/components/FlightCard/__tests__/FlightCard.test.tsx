@@ -48,11 +48,13 @@ describe('FlightCard', () => {
   describe('loading / empty states', () => {
     it('renders without crashing when data is provided', () => {
       const { container } = render(<FlightCard data={makeData()} />);
+
       expect(container.firstChild).toBeInTheDocument();
     });
 
     it('renders flight list when data is defined', () => {
       const { container } = render(<FlightCard data={makeData()} />);
+
       expect(container.firstChild).toBeInTheDocument();
     });
   });
@@ -65,6 +67,7 @@ describe('FlightCard', () => {
 
     it('renders origin and destination in header', () => {
       const { container } = render(<FlightCard data={makeData()} origin="HAN" destination="SGN" />);
+
       // origin + destination share a Typography element with an icon between them
       expect(container.textContent).toContain('HAN');
       expect(container.textContent).toContain('SGN');
@@ -89,6 +92,7 @@ describe('FlightCard', () => {
   describe('selection and confirm banner', () => {
     it('shows confirm banner after selecting a departure flight (one-way)', async () => {
       const user = userEvent.setup();
+
       render(<FlightCard data={makeData()} onSelect={jest.fn()} />);
       await user.click(screen.getAllByTestId('flight-option')[0]);
       expect(screen.getByRole('button', { name: /confirm/i })).toBeInTheDocument();
@@ -97,6 +101,7 @@ describe('FlightCard', () => {
     it('calls onSelect when the confirm button is clicked', async () => {
       const onSelect = jest.fn();
       const user = userEvent.setup();
+
       render(<FlightCard data={makeData()} onSelect={onSelect} />);
       await user.click(screen.getAllByTestId('flight-option')[0]);
       await user.click(screen.getByRole('button', { name: /confirm/i }));
@@ -106,6 +111,7 @@ describe('FlightCard', () => {
     it('continues the booking flow after confirming a selection', async () => {
       const onContinueBooking = jest.fn();
       const user = userEvent.setup();
+
       render(
         <FlightCard data={makeData()} onSelect={jest.fn()} onContinueBooking={onContinueBooking} />
       );
@@ -120,9 +126,11 @@ describe('FlightCard', () => {
     it('allows selecting a different flight after confirming the current selection', async () => {
       const onSelect = jest.fn();
       const user = userEvent.setup();
+
       render(<FlightCard data={makeData()} onSelect={onSelect} />);
 
       const flightOptions = screen.getAllByTestId('flight-option');
+
       await user.click(flightOptions[0]);
       await user.click(screen.getByRole('button', { name: /confirm/i }));
       await user.click(flightOptions[1]);
@@ -134,6 +142,7 @@ describe('FlightCard', () => {
 
     it('hides confirm banner and clears selection when Change is clicked', async () => {
       const user = userEvent.setup();
+
       render(<FlightCard data={makeData()} onSelect={jest.fn()} />);
       await user.click(screen.getAllByTestId('flight-option')[0]);
       await user.click(screen.getByRole('button', { name: /change/i }));

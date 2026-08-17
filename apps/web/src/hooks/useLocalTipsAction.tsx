@@ -41,6 +41,7 @@ export const useLocalTipsAction = () => {
       if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsed = safeParseToolResult(TipsResultSchema, result);
+
       if (!parsed.success)
         return <ToolInvalidResultCard message="Received an unexpected local tips result." />;
 

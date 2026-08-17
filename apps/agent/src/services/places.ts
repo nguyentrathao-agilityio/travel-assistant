@@ -54,6 +54,7 @@ export const getPlaces = async (
   const url = `${API_URL}${ENDPOINTS.PLACES_SEARCH}?${new URLSearchParams(params)}`;
 
   let res: Response;
+
   try {
     res = await fetch(url);
   } catch (cause) {
@@ -66,6 +67,7 @@ export const getPlaces = async (
 
   const raw = await res.json();
   const parsed = ApiPlacesSearchResponseSchema.safeParse(raw);
+
   if (!parsed.success) {
     throw new Error(`Invalid response from ${url}: ${parsed.error.message}`);
   }

@@ -69,6 +69,7 @@ describe('RouteCard', () => {
 
     it('applies additional className', () => {
       const { container } = render(<RouteCard data={makeRoute()} className="custom" />);
+
       expect(container.firstChild).toHaveClass('custom');
     });
   });

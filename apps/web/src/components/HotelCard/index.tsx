@@ -49,6 +49,7 @@ const HotelCard = ({
 
   const handleConfirm = useCallback(() => {
     const selectedHotel = data?.results.find((h) => h.id === selectedId);
+
     if (selectedHotel) {
       onSelect?.(selectedHotel);
       onContinueBooking?.(selectedHotel);
@@ -101,6 +102,7 @@ const HotelCard = ({
         ) : (
           data.results.map((hotel) => {
             const badge = badges.get(hotel.id);
+
             return (
               <HotelOptionItem
                 key={hotel.id}

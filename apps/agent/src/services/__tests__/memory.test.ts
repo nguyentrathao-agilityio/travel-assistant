@@ -50,6 +50,7 @@ describe('saveMemory', () => {
 
     expect(store.put).toHaveBeenCalledTimes(1);
     const [namespace, , value, index] = (store.put as ReturnType<typeof vi.fn>).mock.calls[0];
+
     expect(namespace).toEqual(['dev', 'memories']);
     expect(value).toEqual({ memory: 'Lives in Da Nang' });
     expect(index).toBe(false);
@@ -71,6 +72,7 @@ describe('saveMemory', () => {
     expect(store.delete).toHaveBeenCalledWith(['dev', 'memories'], 'old-id');
     expect(store.put).toHaveBeenCalledTimes(1);
     const [, , value] = (store.put as ReturnType<typeof vi.fn>).mock.calls[0];
+
     expect(value).toEqual({ memory: 'Departure city: Da Nang' });
   });
 

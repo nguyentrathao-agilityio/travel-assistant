@@ -22,12 +22,15 @@ export const useTitleSync = () => {
     if (activeThread?.title) return;
 
     const firstUserMessage = (messages as unknown[]).find(isUserMessage);
+
     if (!firstUserMessage) return;
 
     const text = extractCopilotText(firstUserMessage.content).trim();
+
     if (!text) return;
 
     const title = text.length > TITLE_MAX_LENGTH ? `${text.slice(0, TITLE_MAX_LENGTH)}…` : text;
+
     updateThread(activeThreadId, { title });
   }, [messages, threads]);
 };

@@ -35,6 +35,7 @@ describe('routeTool', () => {
       city: 'Hanoi',
       stops: [{ name: 'Hoan Kiem Lake', city: 'Hanoi' }],
     };
+
     getRouteMock.mockResolvedValueOnce(routeResult);
 
     const result = artifactOf(await routeTool.invoke(toolCall(routeTool.name, input)));

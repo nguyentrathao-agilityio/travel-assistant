@@ -19,7 +19,9 @@ export const DeleteThreadModal = ({ threadTitle, onConfirm, onCancel }: DeleteTh
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel();
     };
+
     document.addEventListener('keydown', onKey);
+
     return () => document.removeEventListener('keydown', onKey);
   }, [onCancel]);
 

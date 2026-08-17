@@ -11,6 +11,7 @@ export const useInterruptElement = () => {
     const subscription = copilotkit.subscribe({
       onInterruptElementChanged: ({ interruptElement }) => setInterrupt(interruptElement),
     });
+
     return () => subscription.unsubscribe();
   }, [copilotkit]);
 

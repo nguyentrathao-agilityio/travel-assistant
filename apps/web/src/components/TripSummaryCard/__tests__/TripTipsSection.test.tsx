@@ -42,6 +42,7 @@ const makeTip = (
 describe('TripTipsSection', () => {
   it('returns null when no tips provided', () => {
     const { container } = render(<TripTipsSection />);
+
     expect(container.firstChild).toBeNull();
   });
 
@@ -49,6 +50,7 @@ describe('TripTipsSection', () => {
     const { container } = render(
       <TripTipsSection tips={{ country: 'Vietnam', count: 0, summary: '', tips: [] }} />
     );
+
     expect(container.firstChild).toBeNull();
   });
 
@@ -63,6 +65,7 @@ describe('TripTipsSection', () => {
         makeTip('t3', 'Non-Essential Tip', false, 'money'),
       ],
     };
+
     render(<TripTipsSection tips={tips} />);
     expect(screen.getByText('Essential Tip 1')).toBeInTheDocument();
     expect(screen.getByText('Essential Tip 2')).toBeInTheDocument();
@@ -79,6 +82,7 @@ describe('TripTipsSection', () => {
         makeTip('t2', 'Regular Tip 2', false, 'transport'),
       ],
     };
+
     render(<TripTipsSection tips={tips} />);
     expect(screen.getByText('Regular Tip 1')).toBeInTheDocument();
     expect(screen.getByText('Regular Tip 2')).toBeInTheDocument();
@@ -91,6 +95,7 @@ describe('TripTipsSection', () => {
       summary: '',
       tips: [makeTip('t1', 'Food Tip', true, 'food')],
     };
+
     render(<TripTipsSection tips={tips} />);
     expect(screen.getByText('food')).toBeInTheDocument();
   });
@@ -105,9 +110,11 @@ describe('TripTipsSection', () => {
       summary: '',
       tips: tipItems,
     };
+
     render(<TripTipsSection tips={tips} />);
     // Only 4 essential tips should be shown (MAX_TIPS = 4)
     const renderedTips = screen.getAllByText(/^Tip \d+$/);
+
     expect(renderedTips.length).toBeLessThanOrEqual(4);
   });
 });

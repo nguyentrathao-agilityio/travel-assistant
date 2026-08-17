@@ -50,6 +50,7 @@ const estimateDailyCosts = async (destination: string): Promise<DailyRates> => {
     });
 
     const parsed = DailyRatesSchema.safeParse(JSON.parse(response.output_text));
+
     return parsed.success ? parsed.data : FALLBACK_RATES;
   } catch {
     return FALLBACK_RATES;

@@ -31,8 +31,10 @@ export const toFahrenheit = (c: number): number =>
 /** Maps a WMO weather-interpretation code to the closest lucide-react icon. */
 export const getWeatherIcon = (code?: number): { icon: LucideIcon; color: string } => {
   const defaultIcon = { icon: CloudLightning, color: 'text-gray-500' };
+
   if (code === undefined) return defaultIcon;
   const match = WEATHER_ICON_THRESHOLDS.find(([threshold]) => code <= threshold);
+
   return {
     icon: match ? match[1] : defaultIcon.icon,
     color: match ? match[2] : defaultIcon.color,
@@ -42,6 +44,7 @@ export const getWeatherIcon = (code?: number): { icon: LucideIcon; color: string
 /** Formats an ISO date string (YYYY-MM-DD) as "Mon DD", e.g. "May 29". */
 export const formatDayDate = (dateStr: string): string => {
   const date = new Date(`${dateStr}T00:00:00`);
+
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 

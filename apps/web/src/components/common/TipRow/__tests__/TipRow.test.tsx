@@ -10,11 +10,13 @@ describe('TipRow', () => {
 
   it('renders the default Info icon when no icon prop is provided', () => {
     const { container } = render(<TipRow text="some tip" />);
+
     expect(container.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
   });
 
   it('renders a custom icon when provided', () => {
     const { container } = render(<TipRow text="tip" icon={MapPin} />);
+
     expect(container.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
   });
 

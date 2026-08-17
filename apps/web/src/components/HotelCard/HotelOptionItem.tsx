@@ -74,6 +74,7 @@ const HotelOptionItem = ({
             {hotel.amenities.slice(0, HOTEL_AMENITIES_MAX_DISPLAY).map((amenity, idx) => {
               const Icon = getAmenityIcon(amenity);
               const colorClass = getAmenityColor(amenity, idx);
+
               return (
                 <div
                   key={amenity}

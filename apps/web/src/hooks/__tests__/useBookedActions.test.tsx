@@ -43,6 +43,7 @@ const getFlightsRender = () => {
   const call = jest
     .mocked(useCopilotAction)
     .mock.calls.find((c) => c[0].name === 'show-booked-flights');
+
   return call![0].render as RenderFn;
 };
 
@@ -50,6 +51,7 @@ const getHotelRender = () => {
   const call = jest
     .mocked(useCopilotAction)
     .mock.calls.find((c) => c[0].name === 'show-booked-hotel');
+
   return call![0].render as RenderFn;
 };
 
@@ -62,12 +64,14 @@ describe('useBookedActions', () => {
   it('registers the show-booked-flights action', () => {
     renderHook(() => useBookedActions());
     const names = jest.mocked(useCopilotAction).mock.calls.map((c) => c[0].name);
+
     expect(names).toContain('show-booked-flights');
   });
 
   it('registers the show-booked-hotel action', () => {
     renderHook(() => useBookedActions());
     const names = jest.mocked(useCopilotAction).mock.calls.map((c) => c[0].name);
+
     expect(names).toContain('show-booked-hotel');
   });
 
@@ -76,6 +80,7 @@ describe('useBookedActions', () => {
       renderHook(() => useBookedActions());
       const render = getFlightsRender();
       const result = render({ status: 'inProgress', args: {} });
+
       expect(result).not.toBeNull();
     });
 
@@ -84,6 +89,7 @@ describe('useBookedActions', () => {
       renderHook(() => useBookedActions());
       const render = getFlightsRender();
       const result = render({ status: 'complete', args: {} });
+
       expect(result.type).toBe(React.Fragment);
     });
 
@@ -102,10 +108,12 @@ describe('useBookedActions', () => {
         seatsAvailable: 5,
         stops: 0,
       };
+
       mockState.flights = { departure };
       renderHook(() => useBookedActions());
       const render = getFlightsRender();
       const result = render({ status: 'complete', args: {} });
+
       expect(result).not.toBeNull();
       expect(result.type).not.toBe(React.Fragment);
     });
@@ -125,6 +133,7 @@ describe('useBookedActions', () => {
         seatsAvailable: 5,
         stops: 0,
       });
+
       mockState.flights = {
         departure: makeFlight('f1', 'VN100'),
         return: makeFlight('f2', 'VN200'),
@@ -132,6 +141,7 @@ describe('useBookedActions', () => {
       renderHook(() => useBookedActions());
       const render = getFlightsRender();
       const result = render({ status: 'complete', args: {} });
+
       expect(result).not.toBeNull();
       expect(result.type).not.toBe(React.Fragment);
     });
@@ -142,6 +152,7 @@ describe('useBookedActions', () => {
       renderHook(() => useBookedActions());
       const render = getHotelRender();
       const result = render({ status: 'inProgress', args: {} });
+
       expect(result).not.toBeNull();
     });
 
@@ -150,6 +161,7 @@ describe('useBookedActions', () => {
       renderHook(() => useBookedActions());
       const render = getHotelRender();
       const result = render({ status: 'complete', args: {} });
+
       expect(result.type).toBe(React.Fragment);
     });
 
@@ -177,6 +189,7 @@ describe('useBookedActions', () => {
       renderHook(() => useBookedActions());
       const render = getHotelRender();
       const result = render({ status: 'complete', args: {} });
+
       expect(result).not.toBeNull();
       expect(result.type).not.toBe(React.Fragment);
     });

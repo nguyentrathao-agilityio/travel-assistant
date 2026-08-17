@@ -49,6 +49,7 @@ describe('Providers', () => {
 
   it('renders without crashing when no children', () => {
     const { container } = render(<Providers>{null}</Providers>);
+
     expect(container).toBeDefined();
   });
 });

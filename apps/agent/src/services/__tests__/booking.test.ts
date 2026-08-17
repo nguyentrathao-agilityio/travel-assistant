@@ -47,6 +47,7 @@ describe('booking service', () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response(JSON.stringify(booking), { status: 201 }));
+
     vi.stubGlobal('fetch', fetchMock);
 
     const input = {
@@ -75,6 +76,7 @@ describe('booking service', () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response(JSON.stringify(booking), { status: 201 }));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await submitHotelBooking({
@@ -99,11 +101,13 @@ describe('booking service', () => {
       .fn()
       .mockResolvedValueOnce(new Response(JSON.stringify(booking), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify(cancelled), { status: 200 }));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await cancelBooking({ bookingId: booking.id });
 
     const cancelRequest = fetchMock.mock.calls[1][1] as RequestInit;
+
     expect((cancelRequest.headers as Record<string, string>)['Idempotency-Key']).toHaveLength(64);
   });
 
@@ -148,6 +152,7 @@ describe('booking service', () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response(JSON.stringify(availability), { status: 200 }));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(

@@ -41,6 +41,7 @@ import { Button } from '../common';
 const ConversationInput = (props: InputProps) => {
   const setSendMessage = useConversationRendererStore((state) => state.setSendMessage);
   const onSendRef = useRef(props.onSend);
+
   onSendRef.current = props.onSend;
 
   // CopilotChat creates a new onSend function during some internal renders.
@@ -51,6 +52,7 @@ const ConversationInput = (props: InputProps) => {
 
   useEffect(() => {
     setSendMessage(sendMessage);
+
     return () => setSendMessage(null);
   }, [sendMessage, setSendMessage]);
 

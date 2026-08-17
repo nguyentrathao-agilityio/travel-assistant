@@ -7,12 +7,14 @@ describe('Divider', () => {
   it('renders a horizontal separator by default', () => {
     render(<Divider />);
     const separator = screen.getByRole('separator');
+
     expect(separator).toHaveAttribute('aria-orientation', 'horizontal');
   });
 
   it('renders a vertical separator', () => {
     render(<Divider orientation="vertical" />);
     const separator = screen.getByRole('separator');
+
     expect(separator).toHaveAttribute('aria-orientation', 'vertical');
   });
 
@@ -23,6 +25,7 @@ describe('Divider', () => {
 
   it('applies additional className', () => {
     const { container } = render(<Divider className="my-custom" />);
+
     expect(container.firstChild).toHaveClass('my-custom');
   });
 });

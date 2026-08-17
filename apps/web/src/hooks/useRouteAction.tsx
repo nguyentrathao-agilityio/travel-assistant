@@ -33,6 +33,7 @@ export const useRouteAction = () => {
       if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsed = safeParseToolResult(RouteResultSchema, result);
+
       if (!parsed.success)
         return <ToolInvalidResultCard message="Received an unexpected route result." />;
 

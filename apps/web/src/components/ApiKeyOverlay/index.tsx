@@ -26,10 +26,13 @@ const ApiKeyOverlay = () => {
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const trimmed = value.trim();
+
       if (!trimmed.startsWith('sk-')) {
         setError('Key must start with "sk-"');
+
         return;
       }
+
       setApiKey(trimmed);
     },
     [value, setApiKey]
@@ -39,6 +42,7 @@ const ApiKeyOverlay = () => {
     (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter') {
         const trimmed = value.trim();
+
         if (!trimmed.startsWith('sk-')) {
           setError('Key must start with "sk-"');
         } else {

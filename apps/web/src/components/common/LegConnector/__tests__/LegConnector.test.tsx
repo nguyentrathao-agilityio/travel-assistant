@@ -4,6 +4,7 @@ import { LegConnector } from '@/components/common/LegConnector';
 // jest.mock is hoisted before imports, so use jest.requireActual inside the factory
 jest.mock('@/constants', () => {
   const { Footprints } = jest.requireActual<typeof import('lucide-react')>('lucide-react');
+
   return {
     TRAVEL_TRANSPORT_MAP: {
       walk: { icon: Footprints, label: 'Walk' },

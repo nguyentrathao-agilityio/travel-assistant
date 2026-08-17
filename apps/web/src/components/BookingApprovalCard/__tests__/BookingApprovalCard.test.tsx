@@ -30,6 +30,7 @@ describe('BookingApprovalCard', () => {
 
   it('requires an explicit decision and prevents double submit', () => {
     const onDecision = jest.fn();
+
     render(
       <BookingApprovalCard
         request={{
@@ -58,6 +59,7 @@ describe('BookingApprovalCard', () => {
 
   it('submits edit rather than disguising it as rejection', () => {
     const onDecision = jest.fn();
+
     render(
       <BookingApprovalCard
         request={{

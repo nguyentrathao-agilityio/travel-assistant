@@ -33,6 +33,7 @@ export const useWeatherAction = () => {
       if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const parsed = safeParseToolResult(WeatherResultSchema, result);
+
       if (!parsed.success)
         return <ToolInvalidResultCard message="Received an unexpected weather result." />;
 

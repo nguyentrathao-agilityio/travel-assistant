@@ -37,6 +37,7 @@ export const ingestKnowledgeSource = async (
   for (const chunk of chunks) {
     await store.put(KNOWLEDGE_NAMESPACE, chunk.chunkId, chunk);
   }
+
   for (const chunkId of staleChunkIds) {
     await store.delete(KNOWLEDGE_NAMESPACE, chunkId);
   }

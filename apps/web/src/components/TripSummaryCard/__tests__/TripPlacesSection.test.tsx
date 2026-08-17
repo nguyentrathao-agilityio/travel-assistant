@@ -37,11 +37,13 @@ const makePlacesResult = (count: number, total = count): PlacesSearchResult => (
 describe('TripPlacesSection', () => {
   it('returns null when no places provided', () => {
     const { container } = render(<TripPlacesSection />);
+
     expect(container.firstChild).toBeNull();
   });
 
   it('returns null when places results are empty', () => {
     const { container } = render(<TripPlacesSection places={{ total: 0, results: [] }} />);
+
     expect(container.firstChild).toBeNull();
   });
 

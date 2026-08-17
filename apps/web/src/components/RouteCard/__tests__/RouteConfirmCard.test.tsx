@@ -75,6 +75,7 @@ describe('RouteConfirmCard', () => {
   it('calls onConfirm with city and maxStops when confirmed', async () => {
     const onConfirm = jest.fn();
     const user = userEvent.setup();
+
     render(<RouteConfirmCard {...defaultArgs} onConfirm={onConfirm} />);
     await user.click(screen.getByRole('button', { name: /plan route/i }));
     expect(onConfirm).toHaveBeenCalledWith(
@@ -85,8 +86,10 @@ describe('RouteConfirmCard', () => {
   it('calls onConfirm with updated city when city is changed', async () => {
     const onConfirm = jest.fn();
     const user = userEvent.setup();
+
     render(<RouteConfirmCard {...defaultArgs} onConfirm={onConfirm} />);
     const cityInput = screen.getByDisplayValue('Da Nang');
+
     await user.clear(cityInput);
     await user.type(cityInput, 'Hoi An');
     await user.click(screen.getByRole('button', { name: /plan route/i }));
@@ -96,6 +99,7 @@ describe('RouteConfirmCard', () => {
   it('calls onConfirm with updated maxStops when stop chip is selected', async () => {
     const onConfirm = jest.fn();
     const user = userEvent.setup();
+
     render(<RouteConfirmCard {...defaultArgs} onConfirm={onConfirm} />);
     await user.click(screen.getByTestId('chip-3'));
     await user.click(screen.getByRole('button', { name: /plan route/i }));
@@ -105,6 +109,7 @@ describe('RouteConfirmCard', () => {
   it('calls onCancel when Cancel is clicked', async () => {
     const onCancel = jest.fn();
     const user = userEvent.setup();
+
     render(<RouteConfirmCard {...defaultArgs} onCancel={onCancel} />);
     await user.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onCancel).toHaveBeenCalledTimes(1);

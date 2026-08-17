@@ -42,6 +42,7 @@ export const generateTravelTip = async (
     return response.output_text.trim() || 'Check local weather conditions before heading out';
   } catch (error) {
     console.error('Failed to generate AI travel tip:', error);
+
     return 'Check local weather conditions before heading out';
   }
 };
@@ -104,6 +105,7 @@ export const getWeather = async (inputData: {
     if (error instanceof Error) {
       throw new Error(`Failed to fetch weather: ${error.message}`);
     }
+
     throw new Error('Failed to fetch weather: Unknown error');
   }
 };

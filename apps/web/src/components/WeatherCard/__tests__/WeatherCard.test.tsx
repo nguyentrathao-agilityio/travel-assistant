@@ -51,11 +51,13 @@ describe('WeatherCard', () => {
   describe('loading state', () => {
     it('renders without crashing when data is provided', () => {
       const { container } = render(<WeatherCard data={makeWeatherData()} />);
+
       expect(container.firstChild).toBeInTheDocument();
     });
 
     it('renders weather content when data is defined', () => {
       const { container } = render(<WeatherCard data={makeWeatherData()} />);
+
       expect(container.firstChild).toBeInTheDocument();
     });
   });
@@ -63,6 +65,7 @@ describe('WeatherCard', () => {
   describe('with data', () => {
     it('uses the 14px card typography scale', () => {
       const { container } = render(<WeatherCard data={makeWeatherData()} />);
+
       expect(container.firstChild).toHaveClass('card-typography');
     });
 
@@ -89,6 +92,7 @@ describe('WeatherCard', () => {
     it('marks day 1 as best when it has lowest precipitation', () => {
       render(<WeatherCard data={makeWeatherData()} />);
       const cards = screen.getAllByTestId('weather-day-card');
+
       expect(cards[0]).toHaveAttribute('data-best', 'true');
     });
 
@@ -104,6 +108,7 @@ describe('WeatherCard', () => {
 
     it('applies additional className', () => {
       const { container } = render(<WeatherCard data={makeWeatherData()} className="custom" />);
+
       expect(container.querySelector('.custom')).toBeInTheDocument();
     });
   });

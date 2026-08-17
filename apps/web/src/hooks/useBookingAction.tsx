@@ -47,6 +47,7 @@ const hitlRequestSchema = z.object({
 
 const bookingApprovalRequest = (value: unknown): BookingApprovalRequest | null => {
   const parsed = hitlRequestSchema.safeParse(value);
+
   if (!parsed.success || parsed.data.actionRequests.length !== 1) return null;
 
   const action = parsed.data.actionRequests[0];
@@ -58,9 +59,11 @@ const bookingApprovalRequest = (value: unknown): BookingApprovalRequest | null =
     [TOOL_NAMES.CANCEL_BOOKING]: 'cancel_booking',
   } as const;
   const approvalAction = actionByTool[action.name as keyof typeof actionByTool];
+
   if (!approvalAction) return null;
 
   const referenceId = String(args.flightId ?? args.hotelId ?? args.bookingId ?? '');
+
   return {
     type: 'booking_approval',
     approvalId: `${action.name}:${referenceId}`,
@@ -125,6 +128,7 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
     render: ({ status, result }) => {
       if (status === 'inProgress' || status === 'executing') {
         if (isAwaitingApproval) return <></>;
+
         return <ToolLoading action="Completing" target="your booking" />;
       }
 
@@ -132,11 +136,13 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
 
       const parsedResult = parseToolResult(result);
       const bookingResult = bookingResultSchema.safeParse(parsedResult);
+
       if (bookingResult.success) {
         return <BookingResultCard booking={bookingResult.data} />;
       }
 
       const errorResult = z.object({ error: z.string() }).safeParse(parsedResult);
+
       if (errorResult.success) return <ErrorCard message={errorResult.data.error} />;
 
       return <ErrorCard message="Received an unexpected booking result." />;
@@ -151,6 +157,7 @@ export const useBookingAction = () => {
     enabled: ({ eventValue }) => bookingApprovalRequest(eventValue) !== null,
     render: ({ event, resolve }) => {
       const approvalRequest = bookingApprovalRequest(event.value);
+
       if (!approvalRequest) return <></>;
 
       const handleDecision = (decision: BookingDecision) => {
@@ -161,6 +168,7 @@ export const useBookingAction = () => {
               : { type: 'reject', message: 'User cancelled or requested changes.' },
           ],
         };
+
         (resolve as unknown as (value: typeof hitlResponse) => void)(hitlResponse);
       };
 
@@ -169,6 +177,7 @@ export const useBookingAction = () => {
   });
 
   const isAwaitingApproval = interrupt !== null;
+
   useBookingResultRenderer(TOOL_NAMES.BOOK_FLIGHT, isAwaitingApproval);
   useBookingResultRenderer(TOOL_NAMES.BOOK_HOTEL, isAwaitingApproval);
   useBookingResultRenderer(TOOL_NAMES.CANCEL_BOOKING, isAwaitingApproval);

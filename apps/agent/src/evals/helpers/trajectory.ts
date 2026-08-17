@@ -11,6 +11,7 @@ export const runAgent = async (
     messages: [new HumanMessage(humanText)],
     ...extraState,
   })) as { messages: BaseMessage[] };
+
   return result.messages;
 };
 

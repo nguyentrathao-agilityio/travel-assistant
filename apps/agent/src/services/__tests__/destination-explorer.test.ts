@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const getWeatherMock = vi.fn();
 const getLocalTipsMock = vi.fn();
 const getPlacesMock = vi.fn();
+
 vi.mock('@/services/weather', () => ({
   getWeather: (...args: unknown[]) => getWeatherMock(...args),
 }));

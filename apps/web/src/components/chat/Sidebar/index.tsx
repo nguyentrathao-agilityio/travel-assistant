@@ -52,6 +52,7 @@ export const Sidebar = () => {
 
   const filteredThreads = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
+
     return query
       ? threads.filter((thread) => thread.title?.toLowerCase().includes(query))
       : threads;
@@ -80,6 +81,7 @@ export const Sidebar = () => {
 
     const root = scrollContainerRef.current;
     const sentinel = loadMoreSentinelRef.current;
+
     if (!root || !sentinel) return;
 
     const observer = new IntersectionObserver(
@@ -88,6 +90,7 @@ export const Sidebar = () => {
       },
       { root, rootMargin: '80px' }
     );
+
     observer.observe(sentinel);
 
     return () => observer.disconnect();
@@ -102,6 +105,7 @@ export const Sidebar = () => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
+
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [createThread]);
 
@@ -232,6 +236,7 @@ export const Sidebar = () => {
         {!collapsed &&
           DATE_GROUP_KEYS.map((key) => {
             const items = groups[key];
+
             if (!items.length) return null;
 
             return (

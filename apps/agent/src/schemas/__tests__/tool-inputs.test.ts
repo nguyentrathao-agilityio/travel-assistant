@@ -12,6 +12,7 @@ describe('standardized tool inputs', () => {
       destination: 'sgn',
       departure_date: '2099-01-01',
     });
+
     expect(valid.origin).toBe('DAD');
     expect(FlightInputSchema.safeParse({ ...valid, origin: 'Da Nang' }).success).toBe(false);
   });
@@ -22,6 +23,7 @@ describe('standardized tool inputs', () => {
       checkIn: '2099-01-01',
       checkOut: '2099-01-02',
     });
+
     expect(result.adults).toBe(2);
   });
 

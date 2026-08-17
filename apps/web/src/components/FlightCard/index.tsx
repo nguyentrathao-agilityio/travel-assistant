@@ -53,6 +53,7 @@ const FlightCard = ({
   const handleSelectDeparture = useCallback(
     (id: string) => {
       const flight = data?.results?.find((f) => f.id === id) ?? null;
+
       setSelectedDeparture(flight);
       setConfirmed(false);
       if (!selectedReturn && data?.returnResults?.length) {
@@ -65,6 +66,7 @@ const FlightCard = ({
   const handleSelectReturn = useCallback(
     (id: string) => {
       const flight = data?.returnResults?.find((f) => f.id === id) ?? null;
+
       setSelectedReturn(flight);
       setConfirmed(false);
       if (!selectedDeparture && data?.results?.length) {
@@ -178,6 +180,7 @@ const FlightCard = ({
           ) : (
             activeFlights?.map((flight) => {
               const badge = activeBadges.get(flight.id);
+
               return (
                 <FlightOptionItem
                   key={flight.id}

@@ -11,8 +11,10 @@ const buildPersistenceGraph = () =>
     .addNode('extract', (state: GraphStateType) => {
       const latest = state.messages.at(-1)?.content;
       const text = typeof latest === 'string' ? latest : '';
+
       if (text.includes('Da Nang')) return { request: { destination: 'Da Nang' } };
       if (text.includes('second')) return { selectedOptions: { hotelId: 'hotel-2' } };
+
       return {};
     })
     .addEdge(START, 'extract')
@@ -28,6 +30,7 @@ describe('checkpointed graph integration', () => {
     await graph.invoke({ messages: [new HumanMessage('Book the second one.')] }, thread);
 
     const snapshot = await graph.getState(thread);
+
     expect(snapshot.values.request).toMatchObject({ destination: 'Da Nang' });
     expect(snapshot.values.selectedOptions).toMatchObject({ hotelId: 'hotel-2' });
     expect(snapshot.values.messages).toHaveLength(2);
@@ -77,7 +80,9 @@ describe('compiled HITL graph integration', () => {
           action: 'confirm_hotel',
           draftId: 'draft-1',
         }) as { decision: string };
+
         if (decision.decision === 'approve') write('draft-1');
+
         return { execution: { completedTasks: ['approval'] } };
       })
       .addEdge(START, 'approve')
@@ -89,6 +94,7 @@ describe('compiled HITL graph integration', () => {
       { messages: [new HumanMessage('Book it')] },
       thread
     )) as unknown as { __interrupt__: Array<{ value: unknown }> };
+
     expect(paused.__interrupt__).toHaveLength(1);
     expect(paused.__interrupt__[0].value).toMatchObject({ draftId: 'draft-1' });
     expect(write).not.toHaveBeenCalled();
@@ -103,7 +109,9 @@ describe('compiled HITL graph integration', () => {
     const graph = new StateGraph(GraphState)
       .addNode('approve', () => {
         const decision = interrupt({ draftId: 'draft-2' }) as { decision: string };
+
         if (decision.decision === 'approve') write();
+
         return { execution: { completedTasks: ['approval'] } };
       })
       .addEdge(START, 'approve')

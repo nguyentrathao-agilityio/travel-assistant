@@ -43,32 +43,38 @@ describe('getAmenityColor', () => {
 describe('getRatingColor', () => {
   it('returns success classes for rating >= 4.5', () => {
     const { bgClass, textClass } = getRatingColor(4.8);
+
     expect(bgClass).toContain('success');
     expect(textClass).toContain('success');
   });
 
   it('returns secondary classes for rating >= 4 and < 4.5', () => {
     const { bgClass } = getRatingColor(4.2);
+
     expect(bgClass).toContain('secondary');
   });
 
   it('returns primary classes for rating >= 3.5 and < 4', () => {
     const { bgClass } = getRatingColor(3.7);
+
     expect(bgClass).toContain('primary');
   });
 
   it('returns warning classes for rating >= 3 and < 3.5', () => {
     const { bgClass } = getRatingColor(3.2);
+
     expect(bgClass).toContain('warning');
   });
 
   it('returns danger classes for rating < 3', () => {
     const { bgClass } = getRatingColor(2.5);
+
     expect(bgClass).toContain('danger');
   });
 
   it('returns success classes at exactly 4.5', () => {
     const { bgClass } = getRatingColor(4.5);
+
     expect(bgClass).toContain('success');
   });
 });

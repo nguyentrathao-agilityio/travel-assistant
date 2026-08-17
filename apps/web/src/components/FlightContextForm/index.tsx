@@ -58,8 +58,10 @@ const FlightContextForm = ({
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const key = e.currentTarget.dataset.key as FieldKey | undefined;
+
     if (!key) return;
     const val = e.currentTarget.value;
+
     setValues((prev) => ({ ...prev, [key]: val }));
   }, []);
 
@@ -70,8 +72,10 @@ const FlightContextForm = ({
       ...FLIGHT_OPTIONAL_FIELDS.filter((f) => !args[f.key as keyof FlightArgs]),
     ];
     const filled: FlightArgs = { ...args };
+
     allMissing.forEach(({ key }) => {
       const val = values[key as FieldKey];
+
       if (val?.trim()) filled[key as keyof FlightArgs] = val as never;
     });
     onConfirm(filled);

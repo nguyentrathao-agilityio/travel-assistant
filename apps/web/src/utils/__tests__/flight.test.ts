@@ -30,6 +30,7 @@ describe('getAirlineIconClass', () => {
     const codes = ['AA', 'VN', 'QR', 'SQ', 'EK'];
     const classes = codes.map(getAirlineIconClass);
     const uniqueClasses = new Set(classes);
+
     expect(uniqueClasses.size).toBeGreaterThan(1);
   });
 
@@ -48,6 +49,7 @@ describe('computeBadges', () => {
   it('assigns cheapest badge to the lowest-price flight', () => {
     const flights = [makeFlight({ id: 'f1', price: 300 }), makeFlight({ id: 'f2', price: 100 })];
     const badges = computeBadges(flights);
+
     expect(badges.get('f2')?.label).toBe('Cheapest');
   });
 
@@ -57,6 +59,7 @@ describe('computeBadges', () => {
       makeFlight({ id: 'f2', price: 200, durationMinutes: 90 }),
     ];
     const badges = computeBadges(flights);
+
     expect(badges.get('f1')?.label).toBe('Cheapest');
     expect(badges.get('f2')?.label).toBe('Fastest');
   });
@@ -67,6 +70,7 @@ describe('computeBadges', () => {
       makeFlight({ id: 'f2', price: 200, durationMinutes: 200 }),
     ];
     const badges = computeBadges(flights);
+
     expect(badges.get('f1')?.label).toBe('Cheapest');
     expect(badges.has('f2')).toBe(false);
   });
@@ -78,6 +82,7 @@ describe('computeBadges', () => {
       makeFlight({ id: 'f3', price: 300, durationMinutes: 300 }),
     ];
     const badges = computeBadges(flights);
+
     expect(badges.get('f2')?.label).toBe('Most popular');
   });
 });

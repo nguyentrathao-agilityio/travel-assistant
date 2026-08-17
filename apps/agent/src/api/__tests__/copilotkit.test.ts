@@ -33,6 +33,7 @@ vi.mock('@copilotkit/runtime/langgraph', () => ({
 }));
 
 const createCopilotKitHooksMock = vi.fn((..._args: unknown[]) => 'hooks-object');
+
 vi.mock('@/api/hooks', () => ({
   createCopilotKitHooks: (...args: unknown[]) => createCopilotKitHooksMock(...args),
 }));
@@ -43,11 +44,13 @@ type FakeTravelAgent = { graphId: string; getAssistant: () => Promise<unknown> }
 
 const registerAndCaptureAgent = (): FakeTravelAgent => {
   const app = { route: vi.fn() } as unknown as Hono;
+
   registerCopilotKit(app);
 
   const { agents } = CopilotRuntimeMock.mock.calls[0][0] as {
     agents: { travelAgent: FakeTravelAgent };
   };
+
   return agents.travelAgent;
 };
 
@@ -73,6 +76,7 @@ describe('BridgedLangGraphAgent.getAssistant', () => {
   it('resolves the assistant whose graph_id matches, without falling back to the base lookup', async () => {
     const travelAgent = registerAndCaptureAgent();
     const matched = { graph_id: travelAgent.graphId, id: 'matched' };
+
     searchMock.mockResolvedValueOnce([{ graph_id: 'other-graph' }, matched]);
 
     const assistant = await travelAgent.getAssistant();
@@ -83,6 +87,7 @@ describe('BridgedLangGraphAgent.getAssistant', () => {
 
   it('falls back to the base lookup when no assistant matches the graph id', async () => {
     const travelAgent = registerAndCaptureAgent();
+
     searchMock.mockResolvedValueOnce([{ graph_id: 'other-graph' }]);
     superGetAssistantMock.mockResolvedValueOnce({ id: 'fallback' });
 

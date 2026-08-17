@@ -9,6 +9,7 @@ describe('useConversationMessages', () => {
   it('attaches generativeUI to a persisted assistant message with tool calls', () => {
     const rendered = <div key="call-1">weather-card</div>;
     const lazyRenderer = jest.fn(() => rendered);
+
     jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => lazyRenderer));
 
     const persistedMessages = [
@@ -34,6 +35,7 @@ describe('useConversationMessages', () => {
     );
     const genUi = assistantMessage?.generativeUI?.();
     const { container } = render(genUi as React.ReactElement);
+
     expect(container.firstElementChild?.className).toContain('flex-col');
     expect(container.textContent).toBe('weather-card');
   });
@@ -46,12 +48,14 @@ describe('useConversationMessages', () => {
     const { result } = renderHook(() => useConversationMessages(persistedMessages));
 
     const [message] = result.current;
+
     expect(message.role === 'assistant' && message.generativeUI).toBeFalsy();
   });
 
   it('does not overwrite generativeUI already attached by CopilotKit on live messages', () => {
     const liveRenderer = jest.fn(() => <div>live</div>);
     const lazyToolRendered = jest.fn();
+
     jest.mocked(useLazyToolRenderer).mockReturnValue(lazyToolRendered);
 
     const liveMessages = [
@@ -61,6 +65,7 @@ describe('useConversationMessages', () => {
     const { result } = renderHook(() => useConversationMessages(liveMessages));
 
     const [message] = result.current;
+
     expect(message.role === 'assistant' && message.generativeUI).toBe(liveRenderer);
     expect(lazyToolRendered).not.toHaveBeenCalled();
   });
@@ -170,8 +175,10 @@ describe('useConversationMessages', () => {
   it('keeps a rendered tool card visible when an in-progress text snapshot temporarily omits its tool call', () => {
     const lazyToolRendered = jest.fn((message: { toolCalls?: { id: string }[] }) => {
       const toolCall = message.toolCalls?.[0];
+
       return toolCall ? () => <div key={toolCall.id}>{toolCall.id}-card</div> : null;
     });
+
     jest
       .mocked(useLazyToolRenderer)
       .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useLazyToolRenderer>);
@@ -217,8 +224,10 @@ describe('useConversationMessages', () => {
   it('merges a retained card into a replacement text snapshot with the same assistant message ID', () => {
     const lazyToolRendered = jest.fn((message: { toolCalls?: { id: string }[] }) => {
       const toolCall = message.toolCalls?.[0];
+
       return toolCall ? () => <div key={toolCall.id}>{toolCall.id}-card</div> : null;
     });
+
     jest
       .mocked(useLazyToolRenderer)
       .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useLazyToolRenderer>);
@@ -307,9 +316,12 @@ describe('useConversationMessages', () => {
     // simulates that upstream behavior by rendering per single-toolCall message.
     const lazyToolRendered = jest.fn((message: { toolCalls?: { id: string }[] }) => {
       const toolCall = message.toolCalls?.[0];
+
       if (!toolCall) return null;
+
       return () => <div key={toolCall.id}>{toolCall.id}-card</div>;
     });
+
     jest
       .mocked(useLazyToolRenderer)
       .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useLazyToolRenderer>);
@@ -348,6 +360,7 @@ describe('useConversationMessages', () => {
     const { container } = render(rendered as React.ReactElement);
 
     const wrapper = container.firstElementChild;
+
     expect(wrapper?.className).toContain('flex-col');
     expect(wrapper?.className).toContain('gap-3');
     expect(wrapper?.children).toHaveLength(3);

@@ -8,5 +8,6 @@ export const stripNulls = (raw: unknown): unknown => {
       ])
     );
   }
+
   return raw;
 };

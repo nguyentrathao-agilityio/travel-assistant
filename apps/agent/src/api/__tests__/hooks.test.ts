@@ -82,6 +82,7 @@ describe('onBeforeHandler (rejectUnregisteredAgent)', () => {
     } catch (thrown) {
       expect(thrown).toBeInstanceOf(Response);
       const response = thrown as Response;
+
       expect(response.status).toBe(400);
       await expect(response.json()).resolves.toEqual({
         error: 'invalid_request',
@@ -104,8 +105,10 @@ describe('onResponse (logResponse)', () => {
     } as unknown as ResponseHookContext);
 
     const [message] = logSpy.mock.calls[0] as [string];
+
     expect(message).toContain('-> 200 ');
     const [, elapsedMsStr] = message.match(/(\d+)ms$/) ?? [];
+
     expect(Number(elapsedMsStr)).toBeGreaterThanOrEqual(100);
   });
 

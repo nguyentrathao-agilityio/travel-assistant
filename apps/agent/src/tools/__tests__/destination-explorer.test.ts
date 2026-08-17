@@ -37,6 +37,7 @@ describe('destinationExplorerTool', () => {
       tips: { country: 'Vietnam', tips: [] },
       weather: null,
     };
+
     getDestinationExplorerMock.mockResolvedValueOnce(destinationExplorerResult);
 
     const result = artifactOf(

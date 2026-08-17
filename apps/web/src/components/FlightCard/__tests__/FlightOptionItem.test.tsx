@@ -87,6 +87,7 @@ describe('FlightOptionItem', () => {
   it('calls onSelect with flight id when Select is clicked', async () => {
     const onSelect = jest.fn();
     const user = userEvent.setup();
+
     render(<FlightOptionItem flight={makeFlight()} isSelected={false} onSelect={onSelect} />);
     await user.click(screen.getByRole('button', { name: 'Select' }));
     expect(onSelect).toHaveBeenCalledWith('f1');

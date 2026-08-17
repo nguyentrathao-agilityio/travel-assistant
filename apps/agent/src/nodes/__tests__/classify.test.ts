@@ -217,6 +217,7 @@ describe('classifyNode', () => {
     );
 
     const messages = invokeMock.mock.calls.at(-1)?.[0] as Array<{ content: string }>;
+
     expect(messages[1].content).toContain('"destination":"Da Nang"');
     expect(messages[1].content).toContain('"hotelId":"hotel-2"');
   });
@@ -252,6 +253,7 @@ describe('classifyNode', () => {
     await classifyNode(state({ messages: messages as GraphStateType['messages'] }));
 
     const callArgs = invokeMock.mock.calls.at(-1)?.[0] as unknown[];
+
     expect(callArgs).toHaveLength(6);
   });
 
@@ -261,6 +263,7 @@ describe('classifyNode', () => {
     await classifyNode(state());
 
     const config = invokeMock.mock.calls.at(-1)?.[1] as { metadata?: Record<string, unknown> };
+
     expect(config?.metadata?.['copilotkit:emit-messages']).toBe(false);
   });
 });

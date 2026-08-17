@@ -6,6 +6,7 @@ import { getToolError } from '@/utils/toolResult';
 
 export const ToolErrorCard = ({ result }: { result: unknown }) => {
   const error = getToolError(result);
+
   if (!error) return null;
   const publicMessage =
     error.code === 'TIMEOUT'

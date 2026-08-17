@@ -95,6 +95,7 @@ describe('ChatInputBar', () => {
       const onSend = jest.fn();
       const onStop = jest.fn();
       const user = userEvent.setup();
+
       render(<ChatInputBar {...makeProps({ inProgress: true, onSend, onStop })} />);
       await user.type(screen.getByLabelText('Chat message'), 'Keep this draft');
 
@@ -108,6 +109,7 @@ describe('ChatInputBar', () => {
     it('calls onSend with trimmed text when send button is clicked', async () => {
       const onSend = jest.fn().mockResolvedValue(undefined);
       const user = userEvent.setup();
+
       render(<ChatInputBar {...makeProps({ onSend })} />);
       await user.type(screen.getByLabelText('Chat message'), '  Hello  ');
       await user.click(screen.getByLabelText('Send message'));
@@ -116,6 +118,7 @@ describe('ChatInputBar', () => {
 
     it('clears the textarea after sending', async () => {
       const user = userEvent.setup();
+
       render(<ChatInputBar {...makeProps({ onSend: jest.fn().mockResolvedValue(undefined) })} />);
       await user.type(screen.getByLabelText('Chat message'), 'Hello');
       await user.click(screen.getByLabelText('Send message'));
@@ -125,6 +128,7 @@ describe('ChatInputBar', () => {
     it('submits on Enter key (not Shift+Enter)', async () => {
       const onSend = jest.fn().mockResolvedValue(undefined);
       const user = userEvent.setup();
+
       render(<ChatInputBar {...makeProps({ onSend })} />);
       await user.type(screen.getByLabelText('Chat message'), 'Hello{Enter}');
       expect(onSend).toHaveBeenCalledWith('Hello');
@@ -133,6 +137,7 @@ describe('ChatInputBar', () => {
     it('does not submit on Shift+Enter', async () => {
       const onSend = jest.fn();
       const user = userEvent.setup();
+
       render(<ChatInputBar {...makeProps({ onSend })} />);
       await user.type(screen.getByLabelText('Chat message'), 'Hello{Shift>}{Enter}{/Shift}');
       expect(onSend).not.toHaveBeenCalled();

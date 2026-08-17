@@ -45,6 +45,7 @@ export const replaceCostEstimateWithBookings = ({
     if (flightIndex !== -1) {
       const originalFlightCost = newBreakdown[flightIndex].amount ?? 0;
       const totalFlightCost = bookedFlight.departure.price + (bookedFlight.return?.price ?? 0);
+
       newGrandTotal = newGrandTotal - originalFlightCost + totalFlightCost;
       newBreakdown[flightIndex] = {
         ...newBreakdown[flightIndex],
@@ -63,6 +64,7 @@ export const replaceCostEstimateWithBookings = ({
     if (hotelIndex !== -1) {
       const originalHotelCost = newBreakdown[hotelIndex].amount ?? 0;
       const totalHotelCost = bookedHotel.pricePerNight * days;
+
       newGrandTotal = newGrandTotal - originalHotelCost + totalHotelCost;
       newBreakdown[hotelIndex] = {
         ...newBreakdown[hotelIndex],

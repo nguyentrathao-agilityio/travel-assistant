@@ -10,12 +10,15 @@ const useScrollToBottom = (messageCount: number) => {
   // Track whether user is near bottom via scroll events
   useEffect(() => {
     const el = scrollContainerRef.current;
+
     if (!el) return;
     const onScroll = () => {
       isNearBottomRef.current =
         el.scrollHeight - el.scrollTop - el.clientHeight < SCROLL_BOTTOM_THRESHOLD_PX;
     };
+
     el.addEventListener('scroll', onScroll, { passive: true });
+
     return () => el.removeEventListener('scroll', onScroll);
   }, []);
 
@@ -23,8 +26,10 @@ const useScrollToBottom = (messageCount: number) => {
   useEffect(() => {
     if (messageCount === prevCountRef.current) return;
     const wasEmpty = prevCountRef.current === 0;
+
     prevCountRef.current = messageCount;
     const el = scrollContainerRef.current;
+
     if (!el) return;
     if (wasEmpty || isNearBottomRef.current) {
       el.scrollTo({ top: el.scrollHeight, behavior: wasEmpty ? 'instant' : 'smooth' });
@@ -35,6 +40,7 @@ const useScrollToBottom = (messageCount: number) => {
   // Scroll during streaming when message content grows
   useEffect(() => {
     const el = scrollContainerRef.current;
+
     if (!el) return;
     let rafId: number;
     const observer = new MutationObserver(() => {
@@ -45,6 +51,7 @@ const useScrollToBottom = (messageCount: number) => {
         }
       });
     });
+
     observer.observe(el, { childList: true, subtree: true, characterData: true });
 
     return () => {

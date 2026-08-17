@@ -56,26 +56,32 @@ describe('TripCostBreakdown', () => {
   it('shows plural "nights" label in grand total when days > 1', () => {
     render(<TripCostBreakdown estimate={makeEstimate()} />);
     const text = document.body.textContent ?? '';
+
     expect(text).toContain('nights');
   });
 
   it('shows singular "night" in grand total when days === 1', () => {
     const estimate = { ...makeEstimate(), days: 1 };
+
     render(<TripCostBreakdown estimate={estimate} />);
     const text = document.body.textContent ?? '';
+
     expect(text).toContain('night');
   });
 
   it('shows plural "travelers" in grand total when travelers > 1', () => {
     render(<TripCostBreakdown estimate={makeEstimate()} />);
     const text = document.body.textContent ?? '';
+
     expect(text).toContain('travelers');
   });
 
   it('shows singular "traveler" in grand total when travelers === 1', () => {
     const estimate = { ...makeEstimate(), travelers: 1 };
+
     render(<TripCostBreakdown estimate={estimate} />);
     const text = document.body.textContent ?? '';
+
     expect(text).toContain('traveler');
   });
 

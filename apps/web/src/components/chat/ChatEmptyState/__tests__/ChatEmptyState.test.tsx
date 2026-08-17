@@ -30,6 +30,7 @@ describe('ChatEmptyState', () => {
     it('calls onSuggestionClick with primary suggestion message when clicked', async () => {
       const onSuggestionClick = jest.fn();
       const user = userEvent.setup();
+
       render(<ChatEmptyState onSuggestionClick={onSuggestionClick} />);
       await user.click(screen.getByText('Plan my trip'));
       expect(onSuggestionClick).toHaveBeenCalledWith('Plan a trip to Da Nang');
@@ -38,6 +39,7 @@ describe('ChatEmptyState', () => {
     it('calls onSuggestionClick with secondary suggestion message when clicked', async () => {
       const onSuggestionClick = jest.fn();
       const user = userEvent.setup();
+
       render(<ChatEmptyState onSuggestionClick={onSuggestionClick} />);
       await user.click(screen.getByText('Find places'));
       expect(onSuggestionClick).toHaveBeenCalledWith('Show me places to visit in Da Nang');
@@ -46,6 +48,7 @@ describe('ChatEmptyState', () => {
     it('calls onSuggestionClick with city prefill when a destination pill is clicked', async () => {
       const onSuggestionClick = jest.fn();
       const user = userEvent.setup();
+
       render(<ChatEmptyState onSuggestionClick={onSuggestionClick} />);
       await user.click(screen.getByText('Da Nang'));
       expect(onSuggestionClick).toHaveBeenCalledWith('Plan a trip to Da Nang');

@@ -22,11 +22,13 @@ describe('TypingIndicator', () => {
 
     it('renders three animated dots', () => {
       const { container } = render(<TypingIndicator />);
+
       expect(container.querySelectorAll('.animate-bounce')).toHaveLength(3);
     });
 
     it('dots container is aria-hidden', () => {
       const { container } = render(<TypingIndicator />);
+
       expect(container.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
     });
 

@@ -15,6 +15,7 @@ describe('toTravelLeg', () => {
 
   it('preserves durationMin and distanceKm', () => {
     const result = toTravelLeg(makeLeg({ durationMin: 25, distanceKm: 2.5 }));
+
     expect(result.durationMin).toBe(25);
     expect(result.distanceKm).toBe(2.5);
   });
@@ -23,6 +24,7 @@ describe('toTravelLeg', () => {
 describe('toMapsUrl', () => {
   it('returns a Google Maps URL for valid coordinates', () => {
     const url = toMapsUrl(16.047, 108.206);
+
     expect(url).toBe('https://www.google.com/maps?q=16.047,108.206');
   });
 

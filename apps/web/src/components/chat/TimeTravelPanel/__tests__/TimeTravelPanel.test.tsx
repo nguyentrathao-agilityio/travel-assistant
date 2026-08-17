@@ -46,6 +46,7 @@ describe('TimeTravelPanel', () => {
 
   it('replays from the selected checkpoint without new input', async () => {
     const onClose = jest.fn();
+
     render(<TimeTravelPanel open onClose={onClose} />);
 
     fireEvent.click(await screen.findByRole('button', { name: /Replay execution/i }));

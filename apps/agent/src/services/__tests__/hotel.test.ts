@@ -49,6 +49,7 @@ afterEach(() => {
 describe('searchHotels', () => {
   it('maps a valid API response to camelCase results', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify(apiResponse)));
+
     vi.stubGlobal('fetch', fetchMock);
 
     const result = await searchHotels(input);
@@ -77,6 +78,7 @@ describe('searchHotels', () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response('', { status: 500, statusText: 'Server Error' }));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(searchHotels(input)).rejects.toThrow('Hotel API failed: 500');
@@ -84,6 +86,7 @@ describe('searchHotels', () => {
 
   it('throws when the API response does not match the expected shape', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ oops: true })));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(searchHotels(input)).rejects.toThrow('Invalid hotel response shape');
@@ -91,6 +94,7 @@ describe('searchHotels', () => {
 
   it('throws a wrapped error when the network request itself fails', async () => {
     const fetchMock = vi.fn().mockRejectedValueOnce(new Error('network down'));
+
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(searchHotels(input)).rejects.toThrow('Failed to search hotels: network down');

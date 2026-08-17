@@ -16,6 +16,7 @@ export const knowledgeSearchTool = tool(
   async (input) => {
     try {
       const result = await withToolTimeout(searchKnowledge(input));
+
       return JSON.stringify(result);
     } catch (error) {
       return JSON.stringify(mapToolError(error, 'knowledge-store', TOOL_ERROR_MESSAGES.KNOWLEDGE));

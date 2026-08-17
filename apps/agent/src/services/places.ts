@@ -12,6 +12,9 @@ import {
 // Constants
 import { API_URL, ENDPOINTS } from '@/constants';
 
+// Utils
+import { fetchAndValidate } from '@/utils/http';
+
 const mapPlace = (place: ApiPlace): PlaceResultItem => ({
   id: place.id,
   shortCode: place.short_code,
@@ -52,27 +55,7 @@ export const getPlaces = async (
   );
 
   const url = `${API_URL}${ENDPOINTS.PLACES_SEARCH}?${new URLSearchParams(params)}`;
-
-  let res: Response;
-
-  try {
-    res = await fetch(url);
-  } catch (cause) {
-    throw new Error(`Network request failed: ${url}`, { cause });
-  }
-
-  if (!res.ok) {
-    throw new Error(`API error ${res.status} ${res.statusText}: ${url}`);
-  }
-
-  const raw = await res.json();
-  const parsed = ApiPlacesSearchResponseSchema.safeParse(raw);
-
-  if (!parsed.success) {
-    throw new Error(`Invalid response from ${url}: ${parsed.error.message}`);
-  }
-
-  const data = parsed.data;
+  const data = await fetchAndValidate(url, ApiPlacesSearchResponseSchema);
 
   return {
     total: data.total,

@@ -16,6 +16,9 @@ import { API_URL, ENDPOINTS, LLM_TIPS_COUNT, LLM_ESSENTIAL_TIPS_COUNT } from '@/
 // Infrastructure
 import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
 
+// Utils
+import { fetchAndValidate } from '@/utils/http';
+
 const LLMTipSchema = z.object({
   id: z.string(),
   category: TipCategorySchema,
@@ -116,27 +119,7 @@ export const getLocalTips = async (input: z.infer<typeof TipsInputSchema>): Prom
   );
 
   const url = `${API_URL}${ENDPOINTS.TIPS}?${new URLSearchParams(params)}`;
-
-  let res: Response;
-
-  try {
-    res = await fetch(url);
-  } catch (cause) {
-    throw new Error(`Network request failed: ${url}`, { cause });
-  }
-
-  if (!res.ok) {
-    throw new Error(`API error ${res.status} ${res.statusText}: ${url}`);
-  }
-
-  const raw = await res.json();
-  const parsed = ApiTipsResponseSchema.safeParse(raw);
-
-  if (!parsed.success) {
-    throw new Error(`Invalid response from ${url}: ${parsed.error.message}`);
-  }
-
-  const data = parsed.data;
+  const data = await fetchAndValidate(url, ApiTipsResponseSchema);
   const apiTips = data.tips.map(mapTip);
   const tips = apiTips?.length
     ? apiTips

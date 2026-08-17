@@ -19,6 +19,9 @@ import {
   ROUTE_MODE_MAP,
 } from '@/constants';
 
+// Utils
+import { fetchAndValidate } from '@/utils/http';
+
 const mapRouteMode = (mode: string): TransportMode =>
   (ROUTE_MODE_MAP[mode] as TransportMode) ?? 'taxi';
 
@@ -27,14 +30,7 @@ const fetchRouteLeg = async (origin: string, destination: string): Promise<Route
   const url = `${API_URL}${ENDPOINTS.PLACES_ROUTE}?${new URLSearchParams({ origin, destination })}`;
 
   try {
-    const res = await fetch(url);
-
-    if (!res.ok) return null;
-
-    const raw = await res.json();
-    const parsed = RouteLegApiSchema.safeParse(raw);
-
-    return parsed.success ? parsed.data : null;
+    return await fetchAndValidate(url, RouteLegApiSchema);
   } catch {
     return null;
   }
@@ -57,27 +53,7 @@ export const getRoute = async (inputData: {
     limit: String(Math.min(maxStops, MAX_STOPS_LIMIT)),
   })}`;
 
-  let placesRes: Response;
-
-  try {
-    placesRes = await fetch(placesUrl);
-  } catch (cause) {
-    throw new Error(`Network request failed: ${placesUrl}`, { cause });
-  }
-
-  if (!placesRes.ok) {
-    throw new Error(`API error ${placesRes.status} ${placesRes.statusText}: ${placesUrl}`);
-  }
-
-  const placesRaw = await placesRes.json();
-  const placesParsed = PlacesResultSchema.safeParse(placesRaw);
-
-  if (!placesParsed.success) {
-    throw new Error(`Invalid response from ${placesUrl}: ${placesParsed.error.message}`);
-  }
-
-  const placesData = placesParsed.data;
-
+  const placesData = await fetchAndValidate(placesUrl, PlacesResultSchema);
   const places = placesData.results.slice(0, maxStops);
 
   if (places.length === 0) throw new Error(`No places found for ${city}`);

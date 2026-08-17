@@ -1,16 +1,68 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { mapToolError, withToolTimeout } from '@/utils/tool-contract';
+import { TOOL_ERROR_CODES } from '@/schemas';
+import {
+  classifyToolError,
+  mapToolError,
+  ToolTimeoutError,
+  withToolTimeout,
+} from '@/utils/tool-contract';
+
+describe('classifyToolError', () => {
+  it.each([
+    [new ToolTimeoutError(25), 'provider failed', TOOL_ERROR_CODES.TIMEOUT, true],
+    [
+      new Error('401 Unauthorized'),
+      '401 Unauthorized',
+      TOOL_ERROR_CODES.AUTHENTICATION_FAILED,
+      false,
+    ],
+    [
+      new Error('429 rate limit exceeded'),
+      '429 rate limit exceeded',
+      TOOL_ERROR_CODES.RATE_LIMITED,
+      true,
+    ],
+    [
+      new Error('503 Service Unavailable'),
+      '503 Service Unavailable',
+      TOOL_ERROR_CODES.PROVIDER_UNAVAILABLE,
+      true,
+    ],
+    [
+      new Error('Invalid provider response shape'),
+      'Invalid provider response shape',
+      TOOL_ERROR_CODES.INVALID_PROVIDER_RESPONSE,
+      false,
+    ],
+    [new Error('validation failed'), 'validation failed', TOOL_ERROR_CODES.VALIDATION_ERROR, false],
+    [
+      new Error('unexpected failure'),
+      'unexpected failure',
+      TOOL_ERROR_CODES.UNKNOWN_PROVIDER_ERROR,
+      false,
+    ],
+  ] as const)('classifies %s as %s', (error, message, code, retryable) => {
+    expect(classifyToolError(error, message)).toEqual({ code, retryable });
+  });
+
+  it('keeps the most specific timeout classification when multiple patterns match', () => {
+    expect(classifyToolError(new Error('401 request timed out'), '401 request timed out')).toEqual({
+      code: TOOL_ERROR_CODES.TIMEOUT,
+      retryable: true,
+    });
+  });
+});
 
 describe('mapToolError', () => {
   it.each([
-    ['request timed out', 'TIMEOUT', true],
-    ['429 rate limit exceeded', 'RATE_LIMITED', true],
-    ['503 Service Unavailable', 'PROVIDER_UNAVAILABLE', true],
-    ['401 Unauthorized', 'AUTHENTICATION_FAILED', false],
-    ['Invalid provider response shape', 'INVALID_PROVIDER_RESPONSE', false],
-    ['validation failed', 'VALIDATION_ERROR', false],
-    ['unexpected failure', 'UNKNOWN_PROVIDER_ERROR', false],
+    ['request timed out', TOOL_ERROR_CODES.TIMEOUT, true],
+    ['429 rate limit exceeded', TOOL_ERROR_CODES.RATE_LIMITED, true],
+    ['503 Service Unavailable', TOOL_ERROR_CODES.PROVIDER_UNAVAILABLE, true],
+    ['401 Unauthorized', TOOL_ERROR_CODES.AUTHENTICATION_FAILED, false],
+    ['Invalid provider response shape', TOOL_ERROR_CODES.INVALID_PROVIDER_RESPONSE, false],
+    ['validation failed', TOOL_ERROR_CODES.VALIDATION_ERROR, false],
+    ['unexpected failure', TOOL_ERROR_CODES.UNKNOWN_PROVIDER_ERROR, false],
   ] as const)('maps %s to %s', (message, code, retryable) => {
     expect(mapToolError(new Error(message), 'test-provider', 'fallback')).toEqual({
       error: message,
@@ -24,6 +76,7 @@ describe('mapToolError', () => {
   it('always produces a JSON-serializable error envelope', () => {
     const result = mapToolError(Symbol('failure'), 'test-provider', 'fallback');
 
+    expect(result.code).toBe(TOOL_ERROR_CODES.UNKNOWN_PROVIDER_ERROR);
     expect(() => JSON.stringify(result)).not.toThrow();
   });
 });

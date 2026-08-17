@@ -19,3 +19,9 @@ export const WRITE_TOOL_NAMES: ReadonlySet<string> = new Set([
   TOOL_NAMES.BOOK_HOTEL,
   TOOL_NAMES.CANCEL_BOOKING,
 ]);
+
+export const TOOL_TIMEOUT_MS = 15_000;
+
+export const AUTHENTICATION_STATUS_PATTERN = /\b(401|403)\b/;
+export const RATE_LIMIT_STATUS_PATTERN = /\b429\b/;
+export const SERVER_ERROR_STATUS_PATTERN = /\b5\d\d\b/;

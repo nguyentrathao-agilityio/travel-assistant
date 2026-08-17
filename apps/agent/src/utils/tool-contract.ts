@@ -1,10 +1,19 @@
 // Schemas
-import { ToolErrorSchema, type ToolError } from '@/schemas';
+import { TOOL_ERROR_CODES, ToolErrorSchema, type ToolError, type ToolErrorCode } from '@/schemas';
 
 // Constants
-import { contentAndArtifact } from '@/constants';
+import {
+  AUTHENTICATION_STATUS_PATTERN,
+  contentAndArtifact,
+  RATE_LIMIT_STATUS_PATTERN,
+  SERVER_ERROR_STATUS_PATTERN,
+  TOOL_TIMEOUT_MS,
+} from '@/constants';
 
-export const TOOL_TIMEOUT_MS = 15_000;
+export interface ToolErrorClassification {
+  code: ToolErrorCode;
+  retryable: boolean;
+}
 
 export class ToolTimeoutError extends Error {
   constructor(timeoutMs: number) {
@@ -29,32 +38,60 @@ export const withToolTimeout = async <T>(
   }
 };
 
+export const classifyToolError = (error: unknown, message: string): ToolErrorClassification => {
+  const normalizedMessage = message.toLowerCase();
+  const isTimeout =
+    error instanceof ToolTimeoutError ||
+    normalizedMessage.includes('timeout') ||
+    normalizedMessage.includes('timed out');
+
+  if (isTimeout) return { code: TOOL_ERROR_CODES.TIMEOUT, retryable: true };
+
+  const isAuthenticationFailure =
+    AUTHENTICATION_STATUS_PATTERN.test(message) || normalizedMessage.includes('unauthorized');
+
+  if (isAuthenticationFailure) {
+    return { code: TOOL_ERROR_CODES.AUTHENTICATION_FAILED, retryable: false };
+  }
+
+  const isRateLimited =
+    RATE_LIMIT_STATUS_PATTERN.test(message) || normalizedMessage.includes('rate limit');
+
+  if (isRateLimited) return { code: TOOL_ERROR_CODES.RATE_LIMITED, retryable: true };
+
+  const isProviderUnavailable =
+    SERVER_ERROR_STATUS_PATTERN.test(message) ||
+    normalizedMessage.includes('network request failed') ||
+    normalizedMessage.includes('unavailable');
+
+  if (isProviderUnavailable) {
+    return { code: TOOL_ERROR_CODES.PROVIDER_UNAVAILABLE, retryable: true };
+  }
+
+  const isInvalidProviderResponse =
+    normalizedMessage.includes('invalid') && normalizedMessage.includes('response');
+
+  if (isInvalidProviderResponse) {
+    return { code: TOOL_ERROR_CODES.INVALID_PROVIDER_RESPONSE, retryable: false };
+  }
+
+  const isValidationFailure = normalizedMessage.includes('validation');
+
+  if (isValidationFailure) {
+    return { code: TOOL_ERROR_CODES.VALIDATION_ERROR, retryable: false };
+  }
+
+  // Treat unmatched provider failures as non-retryable until explicitly classified.
+  return { code: TOOL_ERROR_CODES.UNKNOWN_PROVIDER_ERROR, retryable: false };
+};
+
 export const mapToolError = (
   error: unknown,
   provider: string,
   fallbackMessage: string
 ): ToolError => {
   const message = error instanceof Error ? error.message : fallbackMessage;
-  const normalized = message.toLowerCase();
-
-  const classification =
-    error instanceof ToolTimeoutError ||
-    normalized.includes('timeout') ||
-    normalized.includes('timed out')
-      ? { code: 'TIMEOUT' as const, retryable: true }
-      : /\b(401|403)\b/.test(message) || normalized.includes('unauthorized')
-        ? { code: 'AUTHENTICATION_FAILED' as const, retryable: false }
-        : /\b429\b/.test(message) || normalized.includes('rate limit')
-          ? { code: 'RATE_LIMITED' as const, retryable: true }
-          : /\b5\d\d\b/.test(message) ||
-              normalized.includes('network request failed') ||
-              normalized.includes('unavailable')
-            ? { code: 'PROVIDER_UNAVAILABLE' as const, retryable: true }
-            : normalized.includes('invalid') && normalized.includes('response')
-              ? { code: 'INVALID_PROVIDER_RESPONSE' as const, retryable: false }
-              : normalized.includes('validation')
-                ? { code: 'VALIDATION_ERROR' as const, retryable: false }
-                : { code: 'UNKNOWN_PROVIDER_ERROR' as const, retryable: false };
+  const classification = classifyToolError(error, message);
 
   return ToolErrorSchema.parse({
     error: message,

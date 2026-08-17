@@ -67,6 +67,7 @@ const isResolvedToolCardMessage = (
 export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMessage[] => {
   const seenMessageIds = new Set<string>();
   const seenToolCallIds = new Set<string>();
+  const seenToolResultCallIds = new Set<string>();
   const seenBookingToolCalls = new Set<string>();
   const result: ChatMessage[] = [];
   const resultIndexByMessageId = new Map<string, number>();
@@ -74,6 +75,11 @@ export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMess
   // Walk newest-first so live messages win while older content can fill streaming gaps.
   for (let index = messages.length - 1; index >= 0; index -= 1) {
     const message = messages[index];
+
+    if (message.role === CHAT_ROLE.TOOL) {
+      if (seenToolResultCallIds.has(message.toolCallId)) continue;
+      seenToolResultCallIds.add(message.toolCallId);
+    }
 
     if (message.id && seenMessageIds.has(message.id)) {
       const resultIndex = resultIndexByMessageId.get(message.id);

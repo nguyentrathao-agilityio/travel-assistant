@@ -311,6 +311,62 @@ describe('useConversationMessages', () => {
     expect(result.current.map(({ id }) => id)).toEqual(['u1', 'a-final']);
   });
 
+  it('dedupes a tool result that has different IDs in history vs. the live stream', () => {
+    const lazyToolRendered = jest.fn((message: { toolCalls?: { id: string }[] }) => {
+      const toolCall = message.toolCalls?.[0];
+
+      return toolCall ? () => <div key={toolCall.id}>{toolCall.id}-card</div> : null;
+    });
+
+    jest
+      .mocked(useLazyToolRenderer)
+      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useLazyToolRenderer>);
+
+    const tripSummaryCall = {
+      id: 'call-trip-summary',
+      type: 'function' as const,
+      function: { name: 'tripSummaryTool', arguments: '{}' },
+    };
+
+    // The assistant's tool-call and final-text messages carry the same ID in both
+    // history and the live stream (both derive from the model's own chunk ID), but
+    // the AG-UI bridge mints a fresh random ID per tool RESULT message regardless of
+    // the underlying ToolMessage.id — so only the "tool"-role entries diverge here,
+    // matching the mismatch actually observed between persisted history and live replay.
+    const messages: TestMessages = [
+      { id: 'a-call', role: 'assistant' as const, content: '', toolCalls: [tripSummaryCall] },
+      {
+        id: 'thread-1:1',
+        role: 'tool' as const,
+        toolCallId: 'call-trip-summary',
+        content: 'Trip summary ready.',
+      },
+      { id: 'a-text', role: 'assistant' as const, content: 'Here is your trip summary.' },
+      { id: 'a-call', role: 'assistant' as const, content: '', toolCalls: [tripSummaryCall] },
+      {
+        id: 'live-t1',
+        role: 'tool' as const,
+        toolCallId: 'call-trip-summary',
+        content: 'Trip summary ready.',
+      },
+      { id: 'a-text', role: 'assistant' as const, content: 'Here is your trip summary.' },
+    ];
+
+    const { result } = renderHook(() => useConversationMessages(messages));
+
+    const toolMessages = result.current.filter((message) => message.role === 'tool');
+    const cardMessages = result.current.filter(
+      (message) => message.role === 'assistant' && message.generativeUI
+    );
+    const textMessages = result.current.filter(
+      (message) => message.role === 'assistant' && message.content === 'Here is your trip summary.'
+    );
+
+    expect(toolMessages).toHaveLength(1);
+    expect(cardMessages).toHaveLength(1);
+    expect(textMessages).toHaveLength(1);
+  });
+
   it('renders every tool call in a multi-tool message, overriding CopilotKit single-tool-call generativeUI', () => {
     // CopilotKit's own useLazyToolRenderer only ever resolves toolCalls[0]; this
     // simulates that upstream behavior by rendering per single-toolCall message.

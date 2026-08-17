@@ -4,6 +4,10 @@ export const CLASSIFY_SYSTEM_PROMPT = `Analyze the user's latest message. Return
 Also return requiredOperations for every read operation explicitly requested in the latest message:
 weather, flights, hotels, places, route, tripSummary, or knowledge. Return [] when none apply.
 For a multi-part request include every requested operation; do not mark booking writes as read operations.
+When the request wants a full trip summary or itinerary, return requiredOperations: ["tripSummary"]
+only — never also include flights, hotels, or route alongside it, even if the message separately
+mentions flying or a hotel: tripSummaryTool covers all of those in one call, and listing them
+separately forces a redundant retry that duplicates the agent's response.
 
 ## Intent Categories
 - explore: discovering destinations, attractions, places, local tips, or trusted travel knowledge.

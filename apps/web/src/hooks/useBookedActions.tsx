@@ -18,7 +18,7 @@ export const useBookedActions = () => {
     {
       name: ACTIONS.SHOW_BOOKED_FLIGHTS,
       description:
-        'Display the currently selected flights as a card. Always call this when the user asks which flight they selected.',
+        'Display the currently selected flights as a card. Only call this when the user explicitly asks a standalone question like "which flight did I pick?" or "what did I select?" — never call this while collecting passenger details or preparing a booking confirmation. During an active booking flow, use the flight ID already known from the search results earlier in this conversation instead; calling this tool there can incorrectly report no selection even when one was made conversationally.',
       parameters: z.object({}),
       handler: async () => 'Flights displayed',
       render: ({ status }) => {
@@ -49,7 +49,7 @@ export const useBookedActions = () => {
     {
       name: ACTIONS.SHOW_BOOKED_HOTEL,
       description:
-        'Display the currently selected hotel as a card. Always call this when the user asks which hotel they selected.',
+        'Display the currently selected hotel as a card. Only call this when the user explicitly asks a standalone question like "which hotel did I pick?" or "what did I select?" — never call this while collecting guest details or preparing a booking confirmation. During an active booking flow, use the hotel ID already known from the search results earlier in this conversation instead; calling this tool there can incorrectly report no selection even when one was made conversationally.',
       parameters: z.object({}),
       handler: async () => 'Hotel displayed',
       render: ({ status }) => {

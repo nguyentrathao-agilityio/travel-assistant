@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools';
 
 // Schemas
-import { TripSummaryInputSchema } from '@/schemas';
+import { TripSummaryInputSchema, TripSummaryToolSchema } from '@/schemas';
 
 // Constants
 import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
@@ -12,9 +12,27 @@ import { getTripSummary } from '@/services/trip-summary';
 // Utils
 import { executeReadTool } from '@/utils/tool-contract';
 
+const validateAndGetTripSummary = (
+  input: unknown
+): Promise<Awaited<ReturnType<typeof getTripSummary>>> => {
+  const parsed = TripSummaryInputSchema.safeParse(input);
+
+  if (!parsed.success) {
+    const details = parsed.error.issues.map((issue) => issue.message).join('; ');
+
+    return Promise.reject(new Error(`Validation error: ${details}`));
+  }
+
+  return getTripSummary(parsed.data);
+};
+
 export const tripSummaryTool = tool(
   async (input) =>
-    executeReadTool(getTripSummary(input), 'travel-api', TOOL_ERROR_MESSAGES.TRIP_SUMMARY),
+    executeReadTool(
+      validateAndGetTripSummary(input),
+      'travel-api',
+      TOOL_ERROR_MESSAGES.TRIP_SUMMARY
+    ),
   {
     name: TOOL_NAMES.TRIP_SUMMARY,
     description: `Generate a full trip summary — cheapest flight + highest-rated hotel + landmark route + cost estimate in one unified result.
@@ -35,7 +53,7 @@ export const tripSummaryTool = tool(
 
     Once destination and (flightOrigin or skipFlights) are known, call immediately — missing
     optional fields are not a reason to ask another question first.`,
-    schema: TripSummaryInputSchema,
+    schema: TripSummaryToolSchema,
     responseFormat: 'content_and_artifact',
   }
 );

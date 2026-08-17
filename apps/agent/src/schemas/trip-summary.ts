@@ -8,39 +8,54 @@ import { RouteResultSchema } from './route';
 // Utils
 import { isValidIsoDate } from '@/utils/date';
 
-export const TripSummaryInputSchema = z
-  .object({
-    destination: z.string().describe('Destination city, e.g. "Da Nang"'),
-    startDate: z
-      .string()
-      .refine(isValidIsoDate, 'Must be a valid YYYY-MM-DD date')
-      .optional()
-      .describe('Trip start date YYYY-MM-DD'),
-    endDate: z
-      .string()
-      .refine(isValidIsoDate, 'Must be a valid YYYY-MM-DD date')
-      .optional()
-      .describe('Trip end date YYYY-MM-DD'),
-    travelers: z.number().int().min(1).optional().describe('Number of travelers'),
-    flightOrigin: z.string().optional().describe('IATA departure airport code, e.g. HAN'),
-    skipFlights: z
-      .boolean()
-      .optional()
-      .describe('Skip flight search — user already has booked flights'),
-    skipHotel: z
-      .boolean()
-      .optional()
-      .describe('Skip hotel search — user already has booked a hotel'),
-  })
-  .superRefine((data, ctx) => {
-    if (data.startDate && data.endDate && data.endDate < data.startDate) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'endDate must be on or after startDate',
-        path: ['endDate'],
-      });
-    }
-  });
+const TripSummaryInputShape = z.object({
+  destination: z.string().describe('Destination city, e.g. "Da Nang"'),
+  startDate: z
+    .string()
+    .refine(isValidIsoDate, 'Must be a valid YYYY-MM-DD date')
+    .optional()
+    .describe('Trip start date YYYY-MM-DD'),
+  endDate: z
+    .string()
+    .refine(isValidIsoDate, 'Must be a valid YYYY-MM-DD date')
+    .optional()
+    .describe('Trip end date YYYY-MM-DD'),
+  travelers: z.number().int().optional().describe('Number of travelers (min 1)'),
+  flightOrigin: z.string().optional().describe('IATA departure airport code, e.g. HAN'),
+  skipFlights: z
+    .boolean()
+    .optional()
+    .describe('Skip flight search — user already has booked flights'),
+  skipHotel: z.boolean().optional().describe('Skip hotel search — user already has booked a hotel'),
+});
+
+/** Business-rule checks applied on top of {@link TripSummaryInputShape}. */
+const refineTripSummaryInput = (
+  data: z.infer<typeof TripSummaryInputShape>,
+  ctx: z.RefinementCtx
+) => {
+  if (data.startDate && data.endDate && data.endDate < data.startDate) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'endDate must be on or after startDate',
+      path: ['endDate'],
+    });
+  }
+
+  if (data.travelers !== undefined && data.travelers < 1) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'travelers must be at least 1',
+      path: ['travelers'],
+    });
+  }
+};
+
+/** Structural schema for the `tool()` config — safe for LangChain's pre-handler validation. */
+export const TripSummaryToolSchema = TripSummaryInputShape;
+
+/** Full schema, including business rules — re-validated inside the tool handler. */
+export const TripSummaryInputSchema = TripSummaryInputShape.superRefine(refineTripSummaryInput);
 
 export type TripSummaryInput = z.infer<typeof TripSummaryInputSchema>;
 

@@ -26,6 +26,7 @@ type ThreadHistoryResponse = Awaited<
 const inFlightThreadHistory = new Map<string, Promise<ThreadHistoryResponse>>();
 
 const getThreadHistory = (threadId: string, revision: number): Promise<ThreadHistoryResponse> => {
+  // Share duplicate StrictMode requests without caching completed revisions.
   const key = `${threadId}:${revision}`;
   const existing = inFlightThreadHistory.get(key);
 
@@ -65,6 +66,7 @@ export const useThreadHistory = (threadId: string): ThreadHistoryResult => {
   );
 
   useEffect(() => {
+    // Reset immediately when there is no persisted thread to load.
     if (!threadId) {
       setHistory(emptyHistory(threadId, false));
 
@@ -75,6 +77,7 @@ export const useThreadHistory = (threadId: string): ThreadHistoryResult => {
 
     setHistory(emptyHistory(threadId, true));
 
+    // Load and normalize the latest persisted snapshot for the active revision.
     getThreadHistory(threadId, threadRevision)
       .then((thread) => {
         if (!isCurrentRequest) return;
@@ -92,6 +95,7 @@ export const useThreadHistory = (threadId: string): ThreadHistoryResult => {
 
         const isMissingThread = error.message.toLowerCase().includes('not found');
 
+        // Treat a missing thread as an empty conversation; report all other failures.
         setHistory({
           threadId,
           messages: [],
@@ -104,6 +108,7 @@ export const useThreadHistory = (threadId: string): ThreadHistoryResult => {
         }
       });
 
+    // Ignore late responses after a thread switch or effect cleanup.
     return () => {
       isCurrentRequest = false;
     };

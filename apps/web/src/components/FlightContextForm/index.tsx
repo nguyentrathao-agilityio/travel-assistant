@@ -56,6 +56,7 @@ const FlightContextForm = ({
 
   const canSubmit = !disabled && missingRequired.every((f) => values[f.key]?.trim());
 
+  // Keep all dynamic fields in one state map keyed by their shared configuration.
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const key = e.currentTarget.dataset.key as FieldKey | undefined;
 
@@ -65,6 +66,7 @@ const FlightContextForm = ({
     setValues((prev) => ({ ...prev, [key]: val }));
   }, []);
 
+  // Merge supplied values with the original tool arguments before resuming the search.
   const handleConfirm = useCallback(() => {
     setSubmitted(true);
     const allMissing = [
@@ -81,10 +83,10 @@ const FlightContextForm = ({
     onConfirm(filled);
   }, [args, values, onConfirm]);
 
-  // Hide when submitted locally OR when parent disables (e.g. new message arrived)
+  // Remove stale forms after submission or when a newer interaction supersedes them.
   if (submitted || disabled) return null;
 
-  // Render order: origin (optional, if missing) → required fields → remaining optional
+  // Present origin first, followed by required fields and remaining optional context.
   const missingOrigin = missingOptional.filter((f) => f.key === ORIGIN_KEY);
   const missingOtherOptional = missingOptional.filter((f) => f.key !== ORIGIN_KEY);
   const formFields = [

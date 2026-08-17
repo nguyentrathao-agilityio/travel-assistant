@@ -53,6 +53,7 @@ const searchPreconditionFailure = (
   state: GraphStateType,
   labels: { failureLabel: string; destinationReason: string; operationsLabel: string }
 ): ValidationResult | undefined => {
+  // Stop on provider failures before evaluating request completeness.
   const failure = failureValidation(state, labels.failureLabel);
 
   if (failure) return failure;
@@ -65,6 +66,7 @@ const searchPreconditionFailure = (
     };
   }
 
+  // Report any domain operations that still need to run.
   const missingOperations = missingRequiredOperations(state);
 
   if (missingOperations.length > 0) {
@@ -109,6 +111,7 @@ export const validateExploreResult = (state: GraphStateType): ValidationResult =
  * required data, or a usable result.
  */
 export const validatePlanningResult = (state: GraphStateType): ValidationResult => {
+  // Honor an explicit booking handoff before assessing ordinary planning output.
   if (state.handoffTarget) {
     return {
       status: 'complete',
@@ -125,6 +128,7 @@ export const validatePlanningResult = (state: GraphStateType): ValidationResult 
 
   if (precondition) return precondition;
 
+  // Accept either persisted search artifacts or tools whose output is intentionally transient.
   const results = state.searchResults;
   const latestToolNames = new Set(latestTurnToolMessages(state).map(({ name }) => name));
   // tripSummaryTool only lands in searchResults.route when the summary includes a route.
@@ -267,6 +271,7 @@ export const supervisorNode = (
   state: GraphStateType,
   config?: RunnableConfig
 ): GraphStateUpdate => {
+  // Reject invalid graph origins instead of routing unknown state back into the graph.
   const node = state.execution.currentNode;
 
   if (!isDomainNode(node)) {
@@ -290,6 +295,7 @@ export const supervisorNode = (
     };
   }
 
+  // Run the domain-specific validator and honor any explicit handoff first.
   const validation = validatorFor(node, state);
 
   if (validation.nextNode) {
@@ -299,6 +305,7 @@ export const supervisorNode = (
     };
   }
 
+  // Retry eligible read operations within the configured recovery budget.
   const retries = state.execution.retryCount[node] ?? 0;
 
   if (validation.error) traceRecovery(config, node, validation.error, retries);
@@ -337,6 +344,7 @@ export const supervisorNode = (
     };
   }
 
+  // Finalize completed or non-retryable outcomes with their collected diagnostics.
   return {
     supervisor: { status: validation.status, nextNode: 'saveMemory', reason: validation.reason },
     execution: {

@@ -46,6 +46,7 @@ const hitlRequestSchema = z.object({
 });
 
 const bookingApprovalRequest = (value: unknown): BookingApprovalRequest | null => {
+  // Accept only a single well-formed interrupt that maps to a supported booking action.
   const parsed = hitlRequestSchema.safeParse(value);
 
   if (!parsed.success || parsed.data.actionRequests.length !== 1) return null;
@@ -62,6 +63,7 @@ const bookingApprovalRequest = (value: unknown): BookingApprovalRequest | null =
 
   if (!approvalAction) return null;
 
+  // Normalize the tool-specific identifier into the shared approval contract.
   const referenceId = String(args.flightId ?? args.hotelId ?? args.bookingId ?? '');
 
   return {
@@ -126,6 +128,7 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
     description: 'Render a booking or cancellation result.',
     parameters: bookingToolParameters[toolName],
     render: ({ status, result }) => {
+      // Keep approval UI authoritative while a booking tool is paused.
       if (status === 'inProgress' || status === 'executing') {
         if (isAwaitingApproval) return <></>;
 
@@ -134,6 +137,7 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
 
       if (status !== TOOL_STATUS.COMPLETE) return <></>;
 
+      // Render validated successes and surface structured provider failures safely.
       const parsedResult = parseToolResult(result);
       const bookingResult = bookingResultSchema.safeParse(parsedResult);
 
@@ -151,6 +155,7 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
 };
 
 export const useBookingAction = () => {
+  // Register the human approval gate shared by booking and cancellation tools.
   const interrupt = useInterruptElement();
 
   useLangGraphInterrupt({
@@ -176,6 +181,7 @@ export const useBookingAction = () => {
     },
   });
 
+  // Register result renderers with awareness of the active approval state.
   const isAwaitingApproval = interrupt !== null;
 
   useBookingResultRenderer(TOOL_NAMES.BOOK_FLIGHT, isAwaitingApproval);

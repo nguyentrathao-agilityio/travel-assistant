@@ -7,7 +7,7 @@ const useScrollToBottom = (messageCount: number) => {
   const prevCountRef = useRef(messageCount);
   const isNearBottomRef = useRef(true);
 
-  // Track whether user is near bottom via scroll events
+  // Preserve the user's reading position unless they are following the latest messages.
   useEffect(() => {
     const el = scrollContainerRef.current;
 
@@ -22,7 +22,7 @@ const useScrollToBottom = (messageCount: number) => {
     return () => el.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Scroll when a new message is added
+  // Reveal new messages automatically only for an empty or bottom-following conversation.
   useEffect(() => {
     if (messageCount === prevCountRef.current) return;
     const wasEmpty = prevCountRef.current === 0;
@@ -37,7 +37,7 @@ const useScrollToBottom = (messageCount: number) => {
     }
   }, [messageCount]);
 
-  // Scroll during streaming when message content grows
+  // Keep streamed content visible for users already following the conversation.
   useEffect(() => {
     const el = scrollContainerRef.current;
 

@@ -108,6 +108,7 @@ export const useThreadStore = create<ThreadStore>()(
       },
 
       fetchThreads: async () => {
+        // Load the first page and independently verify the persisted active thread.
         set({ isLoading: true });
         try {
           const currentThreadId = get().activeThreadId;
@@ -117,6 +118,7 @@ export const useThreadStore = create<ThreadStore>()(
           ]);
 
           if (!activeExists) {
+            // Resume the newest server thread or initialize an empty server session.
             if (items.length > 0) {
               set({
                 threads: items,
@@ -151,6 +153,7 @@ export const useThreadStore = create<ThreadStore>()(
       },
 
       fetchMoreThreads: async () => {
+        // Append the next page without duplicating threads already in local state.
         const { isLoadingMore, hasMoreThreads, threads } = get();
 
         if (isLoadingMore || !hasMoreThreads) return;
@@ -172,6 +175,7 @@ export const useThreadStore = create<ThreadStore>()(
       },
 
       createThread: async () => {
+        // Reuse an existing empty draft before creating another server thread.
         if (get().isCreating) return;
 
         const { threads, activeThreadId } = get();
@@ -192,6 +196,7 @@ export const useThreadStore = create<ThreadStore>()(
           return;
         }
 
+        // Optimistically expose the new conversation while the server record is created.
         const threadId = crypto.randomUUID();
         const newThread: ThreadItem = {
           id: threadId,
@@ -221,6 +226,7 @@ export const useThreadStore = create<ThreadStore>()(
       },
 
       deleteThread: async (threadId: string) => {
+        // Snapshot state so a failed optimistic deletion can be rolled back.
         const { threads, activeThreadId } = get();
         const threadsSnapshot = threads;
         const isActive = threadId === activeThreadId;
@@ -236,6 +242,7 @@ export const useThreadStore = create<ThreadStore>()(
           set({ activeThreadId: nextThreadId, isResumed: remainingThreads.length > 0 });
         }
 
+        // Persist the deletion and restore the list if the server rejects it.
         try {
           await langgraphClient.threads.delete(threadId);
         } catch {

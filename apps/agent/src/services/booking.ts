@@ -35,6 +35,7 @@ const mapApiBooking = (apiBooking: ApiBooking): Booking => ({
 });
 
 const parseBookingResponse = async (response: Response): Promise<Booking> => {
+  // Validate both the provider contract and the normalized application model.
   const responseBody: unknown = await response.json();
   const apiBooking = ApiBookingSchema.safeParse(responseBody);
 
@@ -54,6 +55,7 @@ const createIdempotencyKey = (action: string, payload: object): string =>
     .digest('hex');
 
 const request = async (path: string, init?: RequestInit): Promise<Response> => {
+  // Centralize booking API availability and transport error handling.
   if (!API_URL) throw new Error(ERROR_MESSAGES.NO_API_URL);
   const response = await fetch(`${API_URL}${path}`, init);
 
@@ -79,6 +81,7 @@ export const getFlight = async (flightId: string) => {
 
 /** Revalidates hotel availability and room count before booking. */
 export const revalidateHotel = async (input: HotelBookingInput) => {
+  // Re-run availability with normalized booking criteria before committing the reservation.
   const validated = HotelBookingInputSchema.parse(input);
   const params = new URLSearchParams({
     city: validated.city,
@@ -113,6 +116,7 @@ export const submitFlightBooking = async (
     departure_time: string;
   }
 ): Promise<Booking> => {
+  // Translate validated client input into the provider booking contract.
   const validated = FlightBookingInputSchema.parse(input);
   const payload = {
     flight_number: flight.flight_number,
@@ -124,6 +128,7 @@ export const submitFlightBooking = async (
     passenger_phone: validated.customerPhone,
     ...(validated.notes && { notes: validated.notes }),
   };
+  // Submit with a deterministic key so identical retries remain idempotent.
   const response = await request(ENDPOINTS.FLIGHT_BOOKING, {
     method: 'POST',
     headers: {
@@ -138,6 +143,7 @@ export const submitFlightBooking = async (
 
 /** Creates a hotel booking. Idempotent per identical payload; does not re-check availability. */
 export const submitHotelBooking = async (input: HotelBookingInput): Promise<Booking> => {
+  // Translate validated client input into the provider booking contract.
   const validated = HotelBookingInputSchema.parse(input);
   const payload = {
     hotel_id: validated.hotelId,
@@ -151,6 +157,7 @@ export const submitHotelBooking = async (input: HotelBookingInput): Promise<Book
     guest_phone: validated.customerPhone,
     ...(validated.notes && { notes: validated.notes }),
   };
+  // Submit with a deterministic key so identical retries remain idempotent.
   const response = await request(ENDPOINTS.HOTEL_BOOKING, {
     method: 'POST',
     headers: {
@@ -172,6 +179,7 @@ export const getBooking = async (bookingId: string): Promise<Booking> => {
 
 /** Validates that a booking exists, then cancels it. */
 export const cancelBooking = async (input: CancelBookingInput): Promise<Booking> => {
+  // Confirm the target exists before issuing the irreversible cancellation request.
   const validated = CancelBookingInputSchema.parse(input);
 
   await getBooking(validated.bookingId);

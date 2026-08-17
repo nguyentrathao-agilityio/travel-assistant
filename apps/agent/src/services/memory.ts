@@ -28,6 +28,7 @@ export const searchMemories = async (store: BaseStore): Promise<string[]> => {
 
 /** Stores a fact, skipping duplicates and replacing values with the same key prefix. */
 export const saveMemory = async (store: BaseStore, memory: string): Promise<void> => {
+  // Load and validate existing facts before checking for semantic duplicates.
   const items = await store.search(MEMORY_NAMESPACE, { limit: 100 });
   const existing = items
     .map((item) => ({ key: item.key, parsed: StoredMemorySchema.safeParse(item.value) }))
@@ -38,6 +39,7 @@ export const saveMemory = async (store: BaseStore, memory: string): Promise<void
 
   if (existing.some(({ parsed }) => normalize(parsed.data.memory) === normalize(memory))) return;
 
+  // Replace prior values that share the same fact key while preserving unrelated memories.
   const newKey = keyOf(memory);
 
   if (newKey) {
@@ -46,5 +48,6 @@ export const saveMemory = async (store: BaseStore, memory: string): Promise<void
     await Promise.all(superseded.map(({ key }) => store.delete(MEMORY_NAMESPACE, key)));
   }
 
+  // Persist the deduplicated fact under an independent store key.
   await store.put(MEMORY_NAMESPACE, randomUUID(), { memory }, false);
 };

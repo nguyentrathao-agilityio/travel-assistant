@@ -43,6 +43,7 @@ export const searchKnowledge = async (
   input: KnowledgeSearchInput,
   store: KnowledgeStoreLike = knowledgeStore
 ): Promise<KnowledgeSearchResult> => {
+  // Build provider filters and an expanded candidate pool for post-search validation.
   const filter: Record<string, string> = {};
 
   if (input.country) filter.country = input.country;
@@ -56,6 +57,7 @@ export const searchKnowledge = async (
   let strategy: KnowledgeSearchResult['retrieval']['strategy'] = 'hybrid';
   let items;
 
+  // Prefer hybrid retrieval, falling back to lexical search when vectors are unavailable.
   try {
     items = await store.search(KNOWLEDGE_NAMESPACE, {
       query: input.query,
@@ -75,6 +77,7 @@ export const searchKnowledge = async (
     });
   }
 
+  // Validate, score, and apply optional freshness and location constraints.
   let rejectedDocuments = 0;
   const acceptedResults: KnowledgeSearchResult['results'] = [];
 
@@ -98,6 +101,7 @@ export const searchKnowledge = async (
     });
   }
 
+  // Rank the valid candidates and enforce the caller's requested result limit.
   const ranked = acceptedResults
     .sort((left, right) => right.score - left.score)
     .slice(0, input.maxResults);

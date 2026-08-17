@@ -71,6 +71,7 @@ export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMess
   const result: ChatMessage[] = [];
   const resultIndexByMessageId = new Map<string, number>();
 
+  // Walk newest-first so live messages win while older content can fill streaming gaps.
   for (let index = messages.length - 1; index >= 0; index -= 1) {
     const message = messages[index];
 
@@ -92,6 +93,7 @@ export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMess
       continue;
     }
 
+    // Keep message indexing and insertion consistent across every role branch.
     const pushMessage = (nextMessage: ChatMessage) => {
       if (nextMessage.id) {
         seenMessageIds.add(nextMessage.id);
@@ -120,6 +122,7 @@ export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMess
       continue;
     }
 
+    // Deduplicate tool calls by stable ID and booking intent within the current user turn.
     const toolCalls = message.toolCalls.filter((toolCall) => {
       if (seenToolCallIds.has(toolCall.id)) return false;
 
@@ -142,6 +145,7 @@ export const normalizeConversationMessages = (messages: ChatMessage[]): ChatMess
     }
   }
 
+  // Restore chronological order after newest-first reconciliation.
   return result.reverse();
 };
 
@@ -182,12 +186,14 @@ export const useConversationMessages = (
   const conversationIdRef = useRef(conversationId);
 
   if (conversationIdRef.current !== conversationId) {
+    // Prevent cached content from leaking across conversation boundaries.
     conversationIdRef.current = conversationId;
     assistantContentByIdRef.current.clear();
     previousMessagesRef.current = [];
   }
 
   return useMemo(() => {
+    // Preserve the last visible assistant text when streaming snapshots omit it temporarily.
     const normalized = normalizeConversationMessages(messages);
     const contentReconciled = normalized.map((message) => {
       if (message.role !== CHAT_ROLE.ASSISTANT || !message.id) return message;
@@ -208,6 +214,7 @@ export const useConversationMessages = (
     let reconciled = contentReconciled;
 
     if (inProgress) {
+      // Retain visible content and resolved cards until the active stream catches up.
       const currentUserIndex = findLastUserMessageIndex(contentReconciled);
       const previousUserIndex = findLastUserMessageIndex(previousMessagesRef.current);
       const currentUserId = contentReconciled[currentUserIndex]?.id;
@@ -303,6 +310,7 @@ export const useConversationMessages = (
       }
     }
 
+    // Attach resolved tool cards only after message content and ordering are stable.
     const messagesWithGenerativeUi = attachGenerativeUi(reconciled, lazyToolRendered);
 
     previousMessagesRef.current = messagesWithGenerativeUi;

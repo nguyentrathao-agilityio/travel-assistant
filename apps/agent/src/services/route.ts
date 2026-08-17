@@ -47,6 +47,7 @@ export const getRoute = async (inputData: {
   city: string;
   maxStops?: number;
 }): Promise<RouteResult> => {
+  // Fetch the highest-rated landmarks within the requested stop limit.
   const { city, maxStops = DEFAULT_STOPS } = inputData;
 
   const placesUrl = `${API_URL}${ENDPOINTS.PLACES_SEARCH}?${new URLSearchParams({
@@ -81,11 +82,13 @@ export const getRoute = async (inputData: {
 
   if (places.length === 0) throw new Error(`No places found for ${city}`);
 
+  // Resolve travel legs concurrently while preserving landmark order.
   const legPromises = places
     .slice(0, -1)
     .map((place, i) => fetchRouteLeg(place.id, places[i + 1].id));
   const routeResults = await Promise.all(legPromises);
 
+  // Normalize place and route responses into the itinerary contract.
   const stops: LandmarkStop[] = places.map((place) => ({
     name: place.name,
     city: place.city,
@@ -113,6 +116,7 @@ export const getRoute = async (inputData: {
     })
     .filter((leg): leg is TourLeg => leg !== null);
 
+  // Combine visit and travel time into the complete tour duration.
   const totalDurationMin =
     stops.reduce((sum, stop) => sum + (stop.visitDurationMin ?? 0), 0) +
     legs.reduce((sum, leg) => sum + leg.durationMin, 0);

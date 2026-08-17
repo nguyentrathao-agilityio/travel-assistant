@@ -19,6 +19,7 @@ const decodeHtmlEntities = (value: string): string =>
 
 /** Sanitizes fetched content into plain text for chunking and embedding. */
 export const sanitizeSourceContent = (rawContent: string, contentType = ''): string => {
+  // Remove executable markup before converting supported source formats to plain text.
   const withoutExecutableContent = rawContent
     .replace(/<(script|style|noscript|svg)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
     .replace(/<!--[\s\S]*?-->/g, ' ');
@@ -41,6 +42,7 @@ export const loadKnowledgeSource = async (
   source: KnowledgeSource,
   fetcher: Fetcher = fetch
 ): Promise<string> => {
+  // Bound external fetches and request only formats the ingestion pipeline can sanitize.
   const response = await fetcher(source.sourceUrl, {
     headers: { accept: 'text/html,text/markdown,text/plain' },
     signal: AbortSignal.timeout(15_000),
@@ -50,6 +52,7 @@ export const loadKnowledgeSource = async (
     throw new Error(`Failed to load ${source.id}: HTTP ${response.status}`);
   }
 
+  // Reject unusable content before it reaches chunking and embedding.
   const content = sanitizeSourceContent(
     await response.text(),
     response.headers.get('content-type') ?? ''
@@ -72,6 +75,7 @@ export const splitKnowledgeSource = async (
   source: KnowledgeSource,
   content: string
 ): Promise<KnowledgeDocument[]> => {
+  // Turn overlapping text chunks into stable, source-linked documents for retrieval.
   const chunks = await splitter.splitText(content);
 
   return chunks

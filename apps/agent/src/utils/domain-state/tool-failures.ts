@@ -24,6 +24,7 @@ type ToolFailure = { name: string; error: GraphError };
 /** Extracts a structured error for each failed tool call in the current turn. */
 const toolFailures = (state: GraphStateType): ToolFailure[] =>
   latestResultPerTool(state.messages).flatMap((message): ToolFailure[] => {
+    // Convert both structured and legacy failures into one graph error contract.
     if (message.status !== 'error' && !isErrorArtifact(message.artifact)) return [];
     const name = message.name ?? 'unknownTool';
     const parsed = ToolErrorSchema.safeParse(message.artifact);
@@ -68,6 +69,7 @@ export const failureValidation = (
   state: GraphStateType,
   label: string
 ): ValidationResult | undefined => {
+  // Aggregate current-turn failures into the supervisor's retry decision.
   const failures = toolFailures(state);
 
   if (failures.length === 0) return undefined;
@@ -83,6 +85,7 @@ export const failureValidation = (
 
 /** Failed writes with an unknown outcome (e.g. a timeout) must be verified, never blindly retried. */
 export const writeFailureResult = (failure: ValidationResult, label: string): ValidationResult => {
+  // Convert ambiguous write timeouts into verification-required terminal failures.
   const isUnknownOutcome = failure.error?.code === GRAPH_ERROR_CODES.TIMEOUT;
 
   return {

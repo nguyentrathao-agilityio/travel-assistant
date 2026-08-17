@@ -43,6 +43,7 @@ const buildFact = (
 };
 
 export const buildRichUiToolSummary = (name: string | undefined, artifact: unknown): string => {
+  // Reduce each supported artifact to a safe fact the model can reference without duplicating UI.
   const value = recordOf(artifact);
   const results = Array.isArray(value?.results) ? value.results.length : undefined;
   const count = typeof value?.count === 'number' ? value.count : results;
@@ -75,6 +76,7 @@ const safeErrorContent = (artifact: unknown): string | undefined => {
 export const richUiModelMiddleware = createMiddleware({
   name: 'RichUiModelContent',
   wrapModelCall: (request, handler) => {
+    // Restrict rewriting to tool messages produced in the current model turn.
     const cutoff = freshToolMessageCutoff(request.messages);
 
     return handler({
@@ -82,6 +84,7 @@ export const richUiModelMiddleware = createMiddleware({
       messages: request.messages.map((message, index) => {
         if (!(index >= cutoff && message instanceof ToolMessage && message.artifact !== undefined))
           return message;
+        // Preserve actionable errors while collapsing successful rich-card payloads.
         const safeError = isErrorArtifact(message.artifact)
           ? safeErrorContent(message.artifact)
           : undefined;

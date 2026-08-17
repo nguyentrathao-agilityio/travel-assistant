@@ -100,7 +100,7 @@ The aim of this project is to build a realistic AI-powered travel planning assis
 - **TypeScript** v5.9.3
 - **React + Vite**
 - **TurboRepo**
-- **CopilotKit** v1.57.1
+- **CopilotKit** v1.67.1
 - **AG-UI** v1.0.2
 - **LangChain** v1.1.48
 - **LangGraph** v1.3.4

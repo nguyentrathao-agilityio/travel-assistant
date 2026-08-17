@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useShallow } from 'zustand/shallow';
 
 import { Button, Divider } from '@/components';
-import { CollapsedThreadButton } from './CollapsedThreadButton';
 import { DeleteThreadModal } from './DeleteThreadModal';
 import { ThreadItem } from './ThreadItem';
 
@@ -206,10 +205,7 @@ export const Sidebar = () => {
       <div
         ref={scrollContainerRef}
         data-testid="thread-list-scroll"
-        className={cn(
-          'scrollbar-thin flex-1 overflow-y-auto',
-          collapsed && 'flex flex-col items-center'
-        )}
+        className={cn('scrollbar-thin flex-1 overflow-y-auto', collapsed && 'hidden')}
       >
         {isLoading && !threads.length && !collapsed && (
           <div className="space-y-1 px-3">
@@ -221,17 +217,6 @@ export const Sidebar = () => {
             ))}
           </div>
         )}
-
-        {collapsed &&
-          threads.map((thread) => (
-            <CollapsedThreadButton
-              key={thread.id}
-              id={thread.id}
-              title={thread.title ?? ''}
-              isActive={thread.id === activeThreadId}
-              onSelect={selectThread}
-            />
-          ))}
 
         {!collapsed &&
           DATE_GROUP_KEYS.map((key) => {

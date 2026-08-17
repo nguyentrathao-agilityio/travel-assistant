@@ -54,12 +54,6 @@ jest.mock('../ThreadItem', () => ({
   ),
 }));
 
-jest.mock('../CollapsedThreadButton', () => ({
-  CollapsedThreadButton: ({ id }: { id: string }) => (
-    <div data-testid="collapsed-thread-button" data-id={id} />
-  ),
-}));
-
 beforeEach(() => {
   mockFetchThreads.mockClear();
   mockFetchMoreThreads.mockClear();
@@ -101,7 +95,6 @@ describe('Sidebar', () => {
       render(<Sidebar />);
       await user.click(screen.getByLabelText('Collapse sidebar'));
       expect(screen.queryAllByTestId('thread-item')).toHaveLength(0);
-      expect(screen.getAllByTestId('collapsed-thread-button')).toHaveLength(2);
     });
 
     it('expands the sidebar when the brand icon is clicked in collapsed state', async () => {

@@ -17,3 +17,4 @@ export * from './useDestinationExplorerAction';
 export * from './useThemeAction';
 export * from './useBookingAction';
 export * from './useInterruptElement';
+export * from './useDefaultToolRenderer';

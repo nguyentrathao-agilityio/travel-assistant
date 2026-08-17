@@ -17,6 +17,7 @@ import {
   useBookingAction,
   useBookingContext,
   useDestinationExplorerAction,
+  useDefaultToolRenderer,
   useFlightAction,
   useThemeAction,
   useHotelAction,
@@ -82,6 +83,7 @@ export const TravelChat = () => {
   }, [activeThreadId, isHistoryLoading, setHistoryStatus]);
 
   useBookingContext();
+  useDefaultToolRenderer();
   useBookingAction();
   useFlightAction();
   useHotelAction();

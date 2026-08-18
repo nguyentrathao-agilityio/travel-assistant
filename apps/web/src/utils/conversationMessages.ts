@@ -231,8 +231,6 @@ export const reconcileConversationMessages = (
     previousMessages
   );
 
-  if (!inProgress) return normalized;
-
   const currentUserIndex = findLastUserMessageIndex(normalized);
   const previousUserIndex = findLastUserMessageIndex(previousMessages);
   const currentUserId = normalized[currentUserIndex]?.id;
@@ -245,7 +243,7 @@ export const reconcileConversationMessages = (
   const previousTurn = previousMessages.slice(previousUserIndex + 1);
   let reconciled = [...normalized];
 
-  if (!normalized.slice(currentUserIndex + 1).some(isVisibleAssistantMessage)) {
+  if (inProgress && !normalized.slice(currentUserIndex + 1).some(isVisibleAssistantMessage)) {
     const currentMessageIds = new Set(normalized.map(({ id }) => id));
     const missingVisibleMessages = previousTurn.filter(
       (message) => isVisibleAssistantMessage(message) && !currentMessageIds.has(message.id)
@@ -276,6 +274,8 @@ export const reconcileConversationMessages = (
   );
 
   if (retainedToolResults.length) reconciled = [...reconciled, ...retainedToolResults];
+
+  if (!inProgress) return reconciled;
 
   return mergeMissingCardCalls(reconciled, previousTurn, currentToolCallIds);
 };

@@ -10,7 +10,7 @@ import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
 import { cancelBooking, getBooking } from '@/services';
 
 // Utils
-import { bookingToolError, formatBookingToolResult } from '@/utils/booking-approval';
+import { formatBookingToolFailure, formatBookingToolResult } from '@/utils/booking-approval';
 import { withToolTimeout } from '@/utils/tool-contract';
 
 export const cancelBookingTool = tool(
@@ -18,13 +18,13 @@ export const cancelBookingTool = tool(
     try {
       await withToolTimeout(getBooking(input.bookingId));
     } catch (error) {
-      return formatBookingToolResult(bookingToolError(error, TOOL_ERROR_MESSAGES.BOOKING_CANCEL));
+      return formatBookingToolFailure(error, TOOL_ERROR_MESSAGES.BOOKING_CANCEL);
     }
 
     try {
       return formatBookingToolResult(await withToolTimeout(cancelBooking(input)));
     } catch (error) {
-      return formatBookingToolResult(bookingToolError(error, TOOL_ERROR_MESSAGES.BOOKING_CANCEL));
+      return formatBookingToolFailure(error, TOOL_ERROR_MESSAGES.BOOKING_CANCEL);
     }
   },
   {

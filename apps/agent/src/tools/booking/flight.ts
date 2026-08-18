@@ -10,7 +10,7 @@ import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
 import { getFlight, submitFlightBooking } from '@/services';
 
 // Utils
-import { bookingToolError, formatBookingToolResult } from '@/utils/booking-approval';
+import { formatBookingToolFailure, formatBookingToolResult } from '@/utils/booking-approval';
 import { withToolTimeout } from '@/utils/tool-contract';
 
 type Flight = Awaited<ReturnType<typeof getFlight>>;
@@ -25,7 +25,7 @@ export const bookFlightTool = tool(
     try {
       flight = await withToolTimeout(getFlight(input.flightId));
     } catch (error) {
-      return formatBookingToolResult(bookingToolError(error, TOOL_ERROR_MESSAGES.FLIGHT_BOOKING));
+      return formatBookingToolFailure(error, TOOL_ERROR_MESSAGES.FLIGHT_BOOKING);
     }
 
     try {
@@ -41,7 +41,7 @@ export const bookFlightTool = tool(
 
       return formatBookingToolResult(await withToolTimeout(submitFlightBooking(input, fresh)));
     } catch (error) {
-      return formatBookingToolResult(bookingToolError(error, TOOL_ERROR_MESSAGES.FLIGHT_BOOKING));
+      return formatBookingToolFailure(error, TOOL_ERROR_MESSAGES.FLIGHT_BOOKING);
     }
   },
   {

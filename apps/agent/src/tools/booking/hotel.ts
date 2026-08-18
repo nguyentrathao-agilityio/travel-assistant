@@ -10,7 +10,7 @@ import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
 import { revalidateHotel, submitHotelBooking } from '@/services';
 
 // Utils
-import { bookingToolError, formatBookingToolResult } from '@/utils/booking-approval';
+import { formatBookingToolFailure, formatBookingToolResult } from '@/utils/booking-approval';
 import { withToolTimeout } from '@/utils/tool-contract';
 
 type Hotel = Awaited<ReturnType<typeof revalidateHotel>>;
@@ -27,7 +27,7 @@ export const bookHotelTool = tool(
     try {
       hotel = await withToolTimeout(revalidateHotel(input));
     } catch (error) {
-      return formatBookingToolResult(bookingToolError(error, TOOL_ERROR_MESSAGES.HOTEL_BOOKING));
+      return formatBookingToolFailure(error, TOOL_ERROR_MESSAGES.HOTEL_BOOKING);
     }
 
     try {
@@ -41,7 +41,7 @@ export const bookHotelTool = tool(
 
       return formatBookingToolResult(await withToolTimeout(submitHotelBooking(input)));
     } catch (error) {
-      return formatBookingToolResult(bookingToolError(error, TOOL_ERROR_MESSAGES.HOTEL_BOOKING));
+      return formatBookingToolFailure(error, TOOL_ERROR_MESSAGES.HOTEL_BOOKING);
     }
   },
   {

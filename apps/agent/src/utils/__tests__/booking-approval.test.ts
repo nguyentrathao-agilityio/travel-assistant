@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { bookingToolError, formatBookingToolResult } from '@/utils/booking-approval';
+import {
+  bookingToolError,
+  formatBookingToolFailure,
+  formatBookingToolResult,
+} from '@/utils/booking-approval';
 
 describe('bookingToolError', () => {
   it('uses the Error message when the caught value is an Error', () => {
@@ -24,5 +28,19 @@ describe('formatBookingToolResult', () => {
     const booking = { id: 'booking-1', status: 'confirmed' };
 
     expect(formatBookingToolResult(booking)).toEqual([JSON.stringify(booking), booking]);
+  });
+});
+
+describe('formatBookingToolFailure', () => {
+  it('normalizes a caught booking error directly into a content-and-artifact tuple', () => {
+    const [content, artifact] = formatBookingToolFailure(
+      new Error('provider timeout'),
+      'fallback message'
+    );
+
+    expect(JSON.parse(content)).toEqual(artifact);
+    expect(artifact).toEqual(
+      expect.objectContaining({ error: 'provider timeout', retryable: false })
+    );
   });
 });

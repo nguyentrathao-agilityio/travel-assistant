@@ -22,6 +22,20 @@ describe('OpenAI key verification route', () => {
     expect(verify).toHaveBeenCalledWith('sk-valid');
   });
 
+  it('includes CORS headers on POST responses', async () => {
+    const verify = vi.fn();
+    const app = new Hono();
+    registerOpenAiKeyRoutes(app, { verify });
+
+    const response = await app.request('/auth/openai/verify', {
+      method: 'POST',
+      headers: { Origin: 'https://web.example' },
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get('access-control-allow-origin')).toBe('*');
+  });
+
   it.each([
     [undefined, 400, 'missing_key'],
     ['not-a-key', 400, 'invalid_format'],

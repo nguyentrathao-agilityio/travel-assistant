@@ -1,4 +1,5 @@
 import type { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import OpenAI from 'openai';
 
 import { OPENAI_API_KEY_HEADER, OPENAI_CLIENT_MODEL } from '@/constants';
@@ -45,6 +46,17 @@ export const registerOpenAiKeyRoutes = (
   app: Hono,
   dependencies: OpenAiKeyRouteDependencies = defaultDependencies
 ): void => {
+  app.use(
+    '/auth/openai/*',
+    cors({
+      origin: '*',
+      allowMethods: ['POST', 'OPTIONS'],
+      allowHeaders: [OPENAI_API_KEY_HEADER, 'Content-Type'],
+      credentials: false,
+      maxAge: 86400,
+    })
+  );
+
   app.post('/auth/openai/verify', async (context) => {
     const apiKey = context.req.header(OPENAI_API_KEY_HEADER)?.trim();
 

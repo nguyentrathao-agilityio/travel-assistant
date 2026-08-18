@@ -4,7 +4,7 @@ import { SystemMessage, ToolMessage } from '@langchain/core/messages';
 import { MemoryExtractionSchema } from '@/schemas';
 
 // Constants
-import { BOOKING_TOOL_NAMES, MAX_EXTRACT_MEMORY_MESSAGES, OPENAI_API_KEY } from '@/constants';
+import { isBookingToolName, MAX_EXTRACT_MEMORY_MESSAGES, OPENAI_API_KEY } from '@/constants';
 
 // Services
 import { saveMemory } from '@/services/memory';
@@ -27,7 +27,7 @@ const extractionModel = createChatModel({ apiKey: OPENAI_API_KEY! }).withStructu
 );
 
 const isBookingToolMessage = (message: GraphStateType['messages'][number]): boolean =>
-  message instanceof ToolMessage && BOOKING_TOOL_NAMES.includes(message.name ?? '');
+  message instanceof ToolMessage && isBookingToolName(message.name ?? '');
 
 /**
  * Extracts durable facts from the latest turn and persists them to long-term memory.

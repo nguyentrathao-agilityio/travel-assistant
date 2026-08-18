@@ -14,11 +14,15 @@ export const TOOL_NAMES = {
   CANCEL_BOOKING: 'cancelBookingTool',
 } as const;
 
-export const WRITE_TOOL_NAMES: ReadonlySet<string> = new Set([
+export const BOOKING_TOOL_NAMES = [
   TOOL_NAMES.BOOK_FLIGHT,
   TOOL_NAMES.BOOK_HOTEL,
   TOOL_NAMES.CANCEL_BOOKING,
-]);
+] as const;
+
+export const WRITE_TOOL_NAMES: ReadonlySet<string> = new Set(BOOKING_TOOL_NAMES);
+
+export const isBookingToolName = (name: string): boolean => WRITE_TOOL_NAMES.has(name);
 
 export const TOOL_TIMEOUT_MS = 15_000;
 

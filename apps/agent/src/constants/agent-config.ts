@@ -2,6 +2,7 @@ import type { StructuredToolInterface } from '@langchain/core/tools';
 
 // Constants
 import type { DomainAgentNodeName } from './agents';
+import { BOOKING_TOOL_NAMES } from './tools';
 
 // Prompts
 import {
@@ -33,7 +34,7 @@ import {
 export interface SpecializedAgentConfig {
   name: DomainAgentNodeName;
   tools: StructuredToolInterface[];
-  approvalTools?: string[];
+  approvalTools?: readonly string[];
   prompt: AgentPromptSections;
 }
 
@@ -72,7 +73,7 @@ export const AGENT_CONFIGS = {
   booking: {
     name: 'booking',
     tools: [bookFlightTool, bookHotelTool, cancelBookingTool],
-    approvalTools: ['bookFlightTool', 'bookHotelTool', 'cancelBookingTool'],
+    approvalTools: BOOKING_TOOL_NAMES,
     prompt: {
       toolsSection: BOOKING_AGENT_TOOLS_PROMPT,
       includeBookingRules: true,

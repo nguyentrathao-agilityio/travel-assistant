@@ -7,6 +7,7 @@ import {
   PLANNING_AGENT_TOOLS,
 } from '..';
 import { AGENT_CONFIGS } from '@/constants/agent-config';
+import { isBookingToolName } from '@/constants';
 
 const nameOf = (tools: { name: string }[]) => tools.map((tool) => tool.name).sort();
 
@@ -64,5 +65,12 @@ describe('specialized agent tool wiring', () => {
         cancelBookingTool: 1,
       })
     );
+  });
+
+  it('identifies only booking write tools from the shared registry', () => {
+    expect(isBookingToolName('bookFlightTool')).toBe(true);
+    expect(isBookingToolName('bookHotelTool')).toBe(true);
+    expect(isBookingToolName('cancelBookingTool')).toBe(true);
+    expect(isBookingToolName('flightsTool')).toBe(false);
   });
 });

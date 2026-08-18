@@ -85,11 +85,6 @@ describe('supervisor validation', () => {
   });
 
   it('accepts a successful trip summary even when it has no route to persist to searchResults', () => {
-    // Regression: domain-state-middleware only copies tripSummaryTool's artifact into
-    // searchResults.route when the summary happens to include a route. A flight+hotel-only
-    // summary leaves searchResults untouched, so hasResult must also check for the tool call
-    // directly or a fully successful trip summary reads as incomplete and retries, producing
-    // duplicate replies that re-narrate the card's contents as text.
     const messages = [
       new HumanMessage('Put together a full itinerary summary for my Tokyo trip, flying from HAN'),
       toolResult(TOOL_NAMES.TRIP_SUMMARY, {

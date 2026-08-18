@@ -28,6 +28,15 @@ describe('knowledge loader', () => {
     expect(result).not.toContain('<main>');
   });
 
+  it('decodes named and numeric entities while preserving block boundaries', () => {
+    const result = sanitizeSourceContent(
+      '<article><p>Entry&#160;rules &amp; visas</p><p>Traveler&#x27;s checklist</p></article>',
+      'text/html; charset=utf-8'
+    );
+
+    expect(result).toBe("Entry rules & visas\nTraveler's checklist");
+  });
+
   it('creates deterministic chunk ids and retains source metadata', async () => {
     const content = `${'Official travel guidance. '.repeat(60)}\n\n${'Entry requirements. '.repeat(60)}`;
     const chunks = await splitKnowledgeSource(source, content);

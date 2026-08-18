@@ -5,3 +5,4 @@ export * from './schema';
 export * from './create-agent';
 export * from './rich-ui-middleware';
 export * from './messages';
+export * from './html';

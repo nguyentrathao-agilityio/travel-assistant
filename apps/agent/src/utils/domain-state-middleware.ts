@@ -52,34 +52,19 @@ export const buildDomainStateUpdate = (
       }
       continue;
     }
-    if (
-      booking.data.status === BOOKING_STATUSES.CONFIRMED &&
-      booking.data.type === BOOKING_TYPES.FLIGHT
-    ) {
-      update.flightSelectionStatus = SELECTION_STATUSES.BOOKED;
-      update.selectedOptions = { flightId: booking.data.referenceId };
-      update.flightBooking = booking.data;
-    } else if (
-      booking.data.status === BOOKING_STATUSES.CONFIRMED &&
-      booking.data.type === BOOKING_TYPES.HOTEL
-    ) {
-      update.hotelSelectionStatus = SELECTION_STATUSES.BOOKED;
-      update.selectedOptions = { hotelId: booking.data.referenceId };
-      update.hotelBooking = booking.data;
-    } else if (
-      booking.data.status === BOOKING_STATUSES.CANCELLED &&
-      booking.data.type === BOOKING_TYPES.FLIGHT
-    ) {
-      update.flightSelectionStatus = SELECTION_STATUSES.CANCELLED;
-      update.selectedOptions = { flightId: undefined };
-      update.flightBooking = booking.data;
-    } else if (
-      booking.data.status === BOOKING_STATUSES.CANCELLED &&
-      booking.data.type === BOOKING_TYPES.HOTEL
-    ) {
-      update.hotelSelectionStatus = SELECTION_STATUSES.CANCELLED;
-      update.selectedOptions = { hotelId: undefined };
-      update.hotelBooking = booking.data;
+    const { data } = booking;
+    const isConfirmed = data.status === BOOKING_STATUSES.CONFIRMED;
+    const selectionStatus = isConfirmed ? SELECTION_STATUSES.BOOKED : SELECTION_STATUSES.CANCELLED;
+    const selectedId = isConfirmed ? data.referenceId : undefined;
+
+    if (data.type === BOOKING_TYPES.FLIGHT) {
+      update.flightSelectionStatus = selectionStatus;
+      update.selectedOptions = { flightId: selectedId };
+      update.flightBooking = data;
+    } else {
+      update.hotelSelectionStatus = selectionStatus;
+      update.selectedOptions = { hotelId: selectedId };
+      update.hotelBooking = data;
     }
   }
 

@@ -10,36 +10,11 @@ import {
   KNOWLEDGE_FETCH_TIMEOUT_MS,
 } from '@/constants';
 
+import { sanitizeSourceContent } from '@/utils/html';
+
+export { sanitizeSourceContent } from '@/utils/html';
+
 type Fetcher = typeof fetch;
-
-const decodeHtmlEntities = (value: string): string =>
-  value
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;|&apos;/gi, "'")
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>');
-
-/** Sanitizes fetched content into plain text for chunking and embedding. */
-export const sanitizeSourceContent = (rawContent: string, contentType = ''): string => {
-  // Remove executable markup before converting supported source formats to plain text.
-  const withoutExecutableContent = rawContent
-    .replace(/<(script|style|noscript|svg)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
-    .replace(/<!--[\s\S]*?-->/g, ' ');
-  const plainText = contentType.includes('html')
-    ? withoutExecutableContent
-        .replace(/<(br|hr)\s*\/?>/gi, '\n')
-        .replace(/<\/(article|div|h[1-6]|li|main|p|section)>/gi, '\n')
-        .replace(/<[^>]+>/g, ' ')
-    : withoutExecutableContent;
-
-  return decodeHtmlEntities(plainText)
-    .replace(/\r/g, '')
-    .replace(/[^\S\n]+/g, ' ')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-};
 
 /** Fetches and sanitizes a source, rejecting failed or suspiciously short responses. */
 export const loadKnowledgeSource = async (

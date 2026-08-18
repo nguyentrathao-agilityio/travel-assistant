@@ -2,6 +2,7 @@ export * from './agent';
 export * from './amenities';
 export * from './booking';
 export * from './cn';
+export * from './conversationMessages';
 export * from './date';
 export * from './flight';
 export * from './format';

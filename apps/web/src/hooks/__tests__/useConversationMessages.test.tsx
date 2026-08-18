@@ -221,6 +221,72 @@ describe('useConversationMessages', () => {
     expect(container.textContent).toBe('call-weather-card');
   });
 
+  it('does not regress a completed tool card to loading when its result is temporarily omitted', () => {
+    const lazyToolRendered = jest.fn(
+      (
+        message: { toolCalls?: { id: string }[] },
+        messages: Array<{ role: string; toolCallId?: string }>
+      ) => {
+        const toolCall = message.toolCalls?.[0];
+
+        if (!toolCall) return null;
+
+        const hasResult = messages.some(
+          (candidate) => candidate.role === 'tool' && candidate.toolCallId === toolCall.id
+        );
+
+        return () => <div key={toolCall.id}>{hasResult ? 'resolved-card' : 'loading-card'}</div>;
+      }
+    );
+
+    jest
+      .mocked(useLazyToolRenderer)
+      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useLazyToolRenderer>);
+
+    const completedSnapshot: TestMessages = [
+      { id: 'u1', role: 'user' as const, content: 'Find places in Da Nang' },
+      {
+        id: 'a-tool',
+        role: 'assistant' as const,
+        content: '',
+        toolCalls: [
+          {
+            id: 'call-places',
+            type: 'function' as const,
+            function: { name: 'placesTool', arguments: '{"city":"Da Nang"}' },
+          },
+        ],
+      },
+      {
+        id: 't1',
+        role: 'tool' as const,
+        toolCallId: 'call-places',
+        content: '{"total":8}',
+      },
+    ];
+    const pendingSnapshot: TestMessages = completedSnapshot.slice(0, 2);
+
+    const { result, rerender } = renderHook(
+      ({ messages }) => useConversationMessages(messages, 'thread-1', true),
+      { initialProps: { messages: completedSnapshot } }
+    );
+
+    const renderCard = () => {
+      const cardMessage = result.current.find(
+        (message) => message.role === 'assistant' && message.id === 'a-tool'
+      );
+      const card = cardMessage?.role === 'assistant' ? cardMessage.generativeUI?.() : undefined;
+
+      return render(card as React.ReactElement).container.textContent;
+    };
+
+    expect(renderCard()).toBe('resolved-card');
+
+    rerender({ messages: pendingSnapshot });
+
+    expect(renderCard()).toBe('resolved-card');
+  });
+
   it('merges a retained card into a replacement text snapshot with the same assistant message ID', () => {
     const lazyToolRendered = jest.fn((message: { toolCalls?: { id: string }[] }) => {
       const toolCall = message.toolCalls?.[0];
@@ -328,11 +394,6 @@ describe('useConversationMessages', () => {
       function: { name: 'tripSummaryTool', arguments: '{}' },
     };
 
-    // The assistant's tool-call and final-text messages carry the same ID in both
-    // history and the live stream (both derive from the model's own chunk ID), but
-    // the AG-UI bridge mints a fresh random ID per tool RESULT message regardless of
-    // the underlying ToolMessage.id — so only the "tool"-role entries diverge here,
-    // matching the mismatch actually observed between persisted history and live replay.
     const messages: TestMessages = [
       { id: 'a-call', role: 'assistant' as const, content: '', toolCalls: [tripSummaryCall] },
       {

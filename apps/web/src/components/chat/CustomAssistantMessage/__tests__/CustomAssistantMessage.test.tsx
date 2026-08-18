@@ -127,6 +127,25 @@ describe('CustomAssistantMessage', () => {
     expect(screen.queryByLabelText('Assistant avatar')).not.toBeInTheDocument();
   });
 
+  it('does not render an avatar when generative UI contains only an empty styled wrapper', () => {
+    render(
+      <CustomAssistantMessage
+        message={
+          {
+            ...BASE_MESSAGE,
+            content: '',
+            generativeUI: () => <div className="empty-card-wrapper" />,
+          } as any
+        }
+        isLoading={false}
+        isGenerating={false}
+        rawData={null}
+      />
+    );
+
+    expect(screen.queryByLabelText('Assistant avatar')).not.toBeInTheDocument();
+  });
+
   it('renders an avatar when a card is present without message content', () => {
     render(
       <CustomAssistantMessage

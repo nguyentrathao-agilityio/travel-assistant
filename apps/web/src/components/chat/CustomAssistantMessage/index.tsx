@@ -13,9 +13,8 @@ const hasRenderedContent = (node: Node): boolean => {
   const tagName = node.tagName.toLowerCase();
 
   if (['canvas', 'iframe', 'img', 'input', 'svg', 'video'].includes(tagName)) return true;
-  if ([...node.childNodes].some(hasRenderedContent)) return true;
 
-  return node.hasAttribute('class') || node.hasAttribute('style');
+  return [...node.childNodes].some(hasRenderedContent);
 };
 
 const CopyButton = ({

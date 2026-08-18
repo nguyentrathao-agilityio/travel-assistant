@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+// Utils
 import {
   bookingToolError,
   formatBookingToolFailure,

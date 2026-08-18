@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+// Constants
+import { API_URL, ENDPOINTS, ERROR_MESSAGES } from '@/constants';
+
 // Schemas
 import {
   ApiFlightSchema,
@@ -8,9 +11,6 @@ import {
   FlightSchema,
   FlightSearchResultSchema,
 } from '@/schemas';
-
-// Constants
-import { API_URL, ENDPOINTS, ERROR_MESSAGES } from '@/constants';
 
 const FLIGHTS_DEFAULT_ADULTS = 1;
 

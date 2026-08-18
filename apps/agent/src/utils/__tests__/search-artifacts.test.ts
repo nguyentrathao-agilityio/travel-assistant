@@ -1,7 +1,10 @@
 import { ToolMessage } from '@langchain/core/messages';
 import { describe, expect, it } from 'vitest';
 
+// State
 import type { SearchResults } from '@/state';
+
+// Utils
 import { parseSearchArtifact } from '@/utils/domain-state/search-artifacts';
 
 const toolResult = (name: string, artifact: unknown, status?: 'success' | 'error') =>

@@ -1,10 +1,10 @@
 import { tool } from '@langchain/core/tools';
 
-// Schemas
-import { HotelBookingInputSchema } from '@/schemas';
-
 // Constants
 import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_RESPONSE_FORMAT } from '@/constants';
+
+// Schemas
+import { HotelBookingInputSchema } from '@/schemas';
 
 // Services
 import { revalidateHotel, submitHotelBooking } from '@/services';

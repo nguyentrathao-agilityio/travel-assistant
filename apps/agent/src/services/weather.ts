@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
-// Schemas
-import { WeatherResponse, WeatherResponseSchema, WeatherResultSchema } from '@/schemas';
-
 // Constants
 import { API_URL, ENDPOINTS } from '@/constants';
 
 // Infrastructure
 import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
+
+// Schemas
+import { WeatherResponse, WeatherResponseSchema, WeatherResultSchema } from '@/schemas';
 
 type WeatherToolOutput = z.infer<typeof WeatherResultSchema>;
 

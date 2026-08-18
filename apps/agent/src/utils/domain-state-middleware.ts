@@ -1,8 +1,5 @@
-import { createMiddleware } from 'langchain';
 import { StateSchema } from '@langchain/langgraph';
-
-// Schemas
-import { BookingSchema } from '@/schemas/booking';
+import { createMiddleware } from 'langchain';
 
 // Constants
 import {
@@ -12,11 +9,15 @@ import {
   type DomainAgentNodeName,
 } from '@/constants';
 
+// Schemas
+import { BookingSchema } from '@/schemas/booking';
+
 // State
 import { GraphState, SELECTION_STATUSES, type GraphError, type SearchResults } from '@/state';
 
-import { graphErrorFromTool } from './domain-state/tool-errors';
+// Utils
 import { parseSearchArtifact } from './domain-state/search-artifacts';
+import { graphErrorFromTool } from './domain-state/tool-errors';
 import { latestTurnToolMessages } from './domain-state/tool-messages';
 
 const { messages: _messages, copilotkit: _copilotkit, ...domainStateFields } = GraphState.fields;

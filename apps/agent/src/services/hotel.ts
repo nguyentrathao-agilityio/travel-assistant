@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
-// Schemas
-import { HotelSearchResponseSchema, HotelSearchResultSchema } from '@/schemas';
-
 // Constants
 import { API_URL, ENDPOINTS } from '@/constants';
+
+// Schemas
+import { HotelSearchResponseSchema, HotelSearchResultSchema } from '@/schemas';
 
 type HotelToolOutput = z.infer<typeof HotelSearchResultSchema>;
 

@@ -1,11 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
   ErrorHookContext,
   HandlerHookContext,
   HookContext,
   ResponseHookContext,
 } from '@copilotkit/runtime/v2';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+// Api
 import { createCopilotKitHooks } from '@/api/hooks';
 
 const REQUEST_START_HEADER_NAME = 'x-cpk-request-start';

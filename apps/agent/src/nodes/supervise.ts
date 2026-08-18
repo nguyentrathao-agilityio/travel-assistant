@@ -16,17 +16,6 @@ import {
   type DomainAgentNodeName,
 } from '@/constants';
 
-// Utils
-import { failureValidation, writeFailureResult } from '@/utils/domain-state/tool-failures';
-import {
-  isIntentionalBookingRejection,
-  latestTurnToolMessages as latestTurnToolMessagesFromList,
-} from '@/utils/domain-state/tool-messages';
-import {
-  missingOperationsResult,
-  missingRequiredOperations,
-} from '@/utils/domain-state/required-operations';
-
 // Schemas
 import { BookingSchema } from '@/schemas/booking';
 
@@ -42,6 +31,17 @@ import {
   type SupervisorRoute,
   type ValidationResult,
 } from '@/state';
+
+// Utils
+import {
+  missingOperationsResult,
+  missingRequiredOperations,
+} from '@/utils/domain-state/required-operations';
+import { failureValidation, writeFailureResult } from '@/utils/domain-state/tool-failures';
+import {
+  isIntentionalBookingRejection,
+  latestTurnToolMessages as latestTurnToolMessagesFromList,
+} from '@/utils/domain-state/tool-messages';
 
 export type { SupervisorRoute };
 export const SUPERVISOR_ROUTES: SupervisorRoute[] = [...SUPERVISOR_NEXT_NODE_NAMES];

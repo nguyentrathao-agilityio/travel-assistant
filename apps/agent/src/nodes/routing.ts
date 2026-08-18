@@ -1,6 +1,3 @@
-// Schemas
-import type { Intent } from '@/schemas';
-
 // Constants
 import {
   BOOKING_OPERATIONS,
@@ -9,6 +6,9 @@ import {
   type DomainAgentNodeName,
 } from '@/constants';
 import type { BookingOperation } from '@/constants';
+
+// Schemas
+import type { Intent } from '@/schemas';
 
 // State
 import type { GraphStateType } from '@/state';

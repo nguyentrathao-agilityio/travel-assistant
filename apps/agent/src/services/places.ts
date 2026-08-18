@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+// Constants
+import { API_URL, ENDPOINTS, PLACES_SORT } from '@/constants';
+
 // Schemas
 import {
   PlacesInputSchema,
@@ -8,9 +11,6 @@ import {
   type PlaceResultItem,
   type ApiPlace,
 } from '@/schemas';
-
-// Constants
-import { API_URL, ENDPOINTS, PLACES_SORT } from '@/constants';
 
 // Utils
 import { fetchAndValidate } from '@/utils/http';

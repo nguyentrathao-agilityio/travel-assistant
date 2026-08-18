@@ -1,14 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
+// Tools
+import { bookFlightTool, bookHotelTool, cancelBookingTool } from '@/tools/booking';
+import { destinationExplorerTool } from '@/tools/destination-explorer';
 import { flightsTool } from '@/tools/flights';
 import { hotelTool } from '@/tools/hotel';
 import { placesTool } from '@/tools/places';
-import { weatherTool } from '@/tools/weather';
 import { routeTool } from '@/tools/route';
 import { tipsTool } from '@/tools/tips';
 import { tripSummaryTool } from '@/tools/trip-summary';
-import { destinationExplorerTool } from '@/tools/destination-explorer';
-import { bookFlightTool, bookHotelTool, cancelBookingTool } from '@/tools/booking';
+import { weatherTool } from '@/tools/weather';
 
 describe('multi-domain search coordination', () => {
   it.each([

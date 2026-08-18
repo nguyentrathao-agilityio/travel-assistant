@@ -1,10 +1,10 @@
 import { tool } from '@langchain/core/tools';
 
-// Schemas
-import { DestinationExplorerInputSchema } from '@/schemas';
-
 // Constants
 import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_PROVIDERS, TOOL_RESPONSE_FORMAT } from '@/constants';
+
+// Schemas
+import { DestinationExplorerInputSchema } from '@/schemas';
 
 // Services
 import { getDestinationExplorer } from '@/services/destination-explorer';

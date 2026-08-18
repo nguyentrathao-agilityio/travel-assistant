@@ -1,7 +1,10 @@
 import { AIMessage, type BaseMessage } from '@langchain/core/messages';
 import { describe, expect, it } from 'vitest';
 
+// Nodes
 import { refusalNode } from '@/nodes/refusal';
+
+// State
 import type { GraphStateType } from '@/state';
 
 const state = (overrides: Partial<GraphStateType> = {}): GraphStateType =>

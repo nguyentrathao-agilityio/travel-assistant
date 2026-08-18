@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+// Constants
+import { API_URL, ENDPOINTS, LLM_TIPS_COUNT, LLM_ESSENTIAL_TIPS_COUNT } from '@/constants';
+
+// Infrastructure
+import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
+
 // Schemas
 import {
   TipCategorySchema,
@@ -9,12 +15,6 @@ import {
   type TipItem,
   type ApiTip,
 } from '@/schemas';
-
-// Constants
-import { API_URL, ENDPOINTS, LLM_TIPS_COUNT, LLM_ESSENTIAL_TIPS_COUNT } from '@/constants';
-
-// Infrastructure
-import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
 
 // Utils
 import { fetchAndValidate } from '@/utils/http';

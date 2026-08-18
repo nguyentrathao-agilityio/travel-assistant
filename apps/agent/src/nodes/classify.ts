@@ -1,11 +1,8 @@
-import { Command } from '@langchain/langgraph';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { OutputParserException } from '@langchain/core/output_parsers';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import { Command } from '@langchain/langgraph';
 import { z } from 'zod';
-
-// Schemas
-import { IntentClassificationSchema, type IntentClassification } from '@/schemas';
 
 // Constants
 import {
@@ -18,17 +15,20 @@ import {
 // Infrastructure
 import { createChatModel, openAiApiKeyFromConfig } from '@/infrastructure/llm';
 
+// Nodes
+import { bookingOperationByIntent, routeByIntent, type BranchName } from './routing';
+
 // Prompts
 import { CLASSIFY_SYSTEM_PROMPT } from '@/prompts';
+
+// Schemas
+import { IntentClassificationSchema, type IntentClassification } from '@/schemas';
 
 // State
 import type { GraphStateType, GraphStateUpdate, TravelRequest } from '@/state';
 
 // Utils
 import { takeRecentMessages } from '@/utils';
-
-// Nodes
-import { bookingOperationByIntent, routeByIntent, type BranchName } from './routing';
 
 type ClassifyCommand = Command<never, GraphStateUpdate, BranchName>;
 

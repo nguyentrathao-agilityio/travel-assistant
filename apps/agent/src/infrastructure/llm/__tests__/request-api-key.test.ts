@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+// Infrastructure
 import { currentOpenAiApiKey, openAiApiKeyFromConfig, withOpenAiApiKey } from '../request-api-key';
 
 describe('request OpenAI API key', () => {

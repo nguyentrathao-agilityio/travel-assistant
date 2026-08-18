@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+// Tools
+import { bookFlightTool, bookHotelTool, cancelBookingTool } from '@/tools/booking';
+
 const getFlightMock = vi.fn();
 const submitFlightBookingMock = vi.fn();
 const revalidateHotelMock = vi.fn();
@@ -15,8 +18,6 @@ vi.mock('@/services', () => ({
   getBooking: (...args: unknown[]) => getBookingMock(...args),
   cancelBooking: (...args: unknown[]) => cancelBookingMock(...args),
 }));
-
-import { bookFlightTool, bookHotelTool, cancelBookingTool } from '@/tools/booking';
 
 const toolCall = (name: string, args: object) => ({
   name,

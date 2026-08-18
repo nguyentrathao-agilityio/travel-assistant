@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+// Services
+import { getDestinationExplorer } from '@/services/destination-explorer';
+
 const getWeatherMock = vi.fn();
 const getLocalTipsMock = vi.fn();
 const getPlacesMock = vi.fn();
@@ -11,8 +14,6 @@ vi.mock('@/services/tips', () => ({
   getLocalTips: (...args: unknown[]) => getLocalTipsMock(...args),
 }));
 vi.mock('@/services/places', () => ({ getPlaces: (...args: unknown[]) => getPlacesMock(...args) }));
-
-import { getDestinationExplorer } from '@/services/destination-explorer';
 
 const weather = {
   location: { name: 'Da Nang', country: 'Vietnam', latitude: 16.05, longitude: 108.2 },

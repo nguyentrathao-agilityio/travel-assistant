@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
+// Schemas
 import { TOOL_ERROR_CODES } from '@/schemas';
+
+// Utils
 import {
   classifyToolError,
   mapToolError,

@@ -1,11 +1,11 @@
-import { randomUUID } from 'node:crypto';
 import type { BaseStore } from '@langchain/langgraph-checkpoint';
-
-// Schemas
-import { StoredMemorySchema } from '@/schemas';
+import { randomUUID } from 'node:crypto';
 
 // Constants
 import { MEMORY_NAMESPACE, MEMORY_SEARCH_LIMIT } from '@/constants';
+
+// Schemas
+import { StoredMemorySchema } from '@/schemas';
 
 const normalize = (memory: string) => memory.trim().toLowerCase();
 

@@ -1,12 +1,12 @@
-import { ReducedValue, StateSchema } from '@langchain/langgraph';
 import { CopilotKitStateSchema, zodState } from '@copilotkit/sdk-js/langgraph';
+import { ReducedValue, StateSchema } from '@langchain/langgraph';
 import { z } from 'zod';
-
-// Schemas
-import { BookingSchema, FlightSchema, HotelAvailabilitySchema, IntentSchema } from '@/schemas';
 
 // Constants
 import { BOOKING_OPERATIONS } from '@/constants';
+
+// Schemas
+import { BookingSchema, FlightSchema, HotelAvailabilitySchema, IntentSchema } from '@/schemas';
 
 // State
 import { ExecutionStateSchema, ExecutionUpdateSchema, mergeExecutionState } from './execution';

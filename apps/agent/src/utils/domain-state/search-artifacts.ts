@@ -1,6 +1,9 @@
 import type { ToolMessage } from '@langchain/core/messages';
 import type { z } from 'zod';
 
+// Constants
+import { TOOL_NAMES } from '@/constants';
+
 // Schemas
 import {
   DestinationExplorerResultSchema,
@@ -12,9 +15,6 @@ import {
   TripSummaryResultSchema,
   WeatherResultSchema,
 } from '@/schemas';
-
-// Constants
-import { TOOL_NAMES } from '@/constants';
 
 // State
 import type { SearchResults } from '@/state';

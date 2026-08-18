@@ -1,7 +1,10 @@
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 import { PostgresStore } from '@langchain/langgraph-checkpoint-postgres/store';
 
+// Constants
 import { POSTGRES_URL } from '@/constants';
+
+// Infrastructure
 import { knowledgeStore } from '@/infrastructure/persistence';
 
 /** Runs checkpoint and memory-store migrations outside the request path. */

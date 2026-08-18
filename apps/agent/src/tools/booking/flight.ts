@@ -1,10 +1,10 @@
 import { tool } from '@langchain/core/tools';
 
-// Schemas
-import { FlightBookingInputSchema } from '@/schemas';
-
 // Constants
 import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_RESPONSE_FORMAT } from '@/constants';
+
+// Schemas
+import { FlightBookingInputSchema } from '@/schemas';
 
 // Services
 import { getFlight, submitFlightBooking } from '@/services';

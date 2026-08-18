@@ -1,10 +1,10 @@
 import { tool } from '@langchain/core/tools';
 
-// Schemas
-import { HotelInputSchema, HotelToolSchema } from '@/schemas';
-
 // Constants
 import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_PROVIDERS, TOOL_RESPONSE_FORMAT } from '@/constants';
+
+// Schemas
+import { HotelInputSchema, HotelToolSchema } from '@/schemas';
 
 // Services
 import { searchHotels } from '@/services/hotel';

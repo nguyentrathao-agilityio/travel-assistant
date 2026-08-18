@@ -1,5 +1,11 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ToolMessage } from '@langchain/core/messages';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+// Nodes
+import { saveMemoryNode } from '@/nodes/save-memory';
+
+// State
+import type { GraphStateType } from '@/state';
 
 const { invokeMock } = vi.hoisted(() => ({ invokeMock: vi.fn() }));
 const saveMemoryMock = vi.fn();
@@ -18,9 +24,6 @@ vi.mock('@/infrastructure/persistence/memory-store', () => ({
 vi.mock('@/services/memory', () => ({
   saveMemory: (...args: unknown[]) => saveMemoryMock(...args),
 }));
-
-import { saveMemoryNode } from '@/nodes/save-memory';
-import type { GraphStateType } from '@/state';
 
 afterEach(() => {
   vi.clearAllMocks();

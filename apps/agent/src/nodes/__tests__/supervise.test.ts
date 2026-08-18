@@ -1,8 +1,10 @@
 import { HumanMessage, ToolMessage } from '@langchain/core/messages';
 import { describe, expect, it } from 'vitest';
 
+// Constants
 import { MAX_RETRIES_PER_NODE, TOOL_NAMES } from '@/constants';
-import type { GraphStateType, GraphStateUpdate } from '@/state';
+
+// Nodes
 import {
   routeAfterSupervisor,
   supervisorNode,
@@ -11,6 +13,9 @@ import {
   validatePlanningResult,
   validateUnifiedBookingResult,
 } from '@/nodes/supervise';
+
+// State
+import type { GraphStateType, GraphStateUpdate } from '@/state';
 
 const state = (overrides: Partial<GraphStateType> = {}): GraphStateType =>
   ({

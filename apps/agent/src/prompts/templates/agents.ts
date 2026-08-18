@@ -1,4 +1,4 @@
-// Templates
+// Prompts
 import { WRITE_ACTION_POLICY_PROMPT } from './base';
 
 export const EXPLORE_AGENT_TOOLS_PROMPT = `## Available Tools

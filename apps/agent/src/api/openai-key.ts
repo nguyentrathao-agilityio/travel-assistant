@@ -2,6 +2,7 @@ import type { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import OpenAI from 'openai';
 
+// Constants
 import { OPENAI_API_KEY_HEADER, OPENAI_CLIENT_MODEL } from '@/constants';
 
 type VerificationErrorCode =

@@ -1,6 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StructuredToolInterface } from '@langchain/core/tools';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Constants
 import type { SpecializedAgentConfig } from '@/constants/agent-config';
+
+// Utils
+import { createSpecializedAgent } from '@/utils/create-agent';
 
 const {
   createAgentMock,
@@ -64,8 +69,6 @@ vi.mock('@/utils/domain-state-middleware', () => ({
 vi.mock('@/state', () => ({
   GraphState: 'fake-graph-state',
 }));
-
-import { createSpecializedAgent } from '@/utils/create-agent';
 
 const FAKE_GRAPH = { id: 'compiled-graph' };
 const tools = ['tool-a', 'tool-b'] as unknown as StructuredToolInterface[];

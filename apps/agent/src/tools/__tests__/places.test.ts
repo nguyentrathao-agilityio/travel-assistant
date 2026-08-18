@@ -1,12 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+// Tools
+import { placesTool } from '@/tools/places';
+
 const getPlacesMock = vi.fn();
 
 vi.mock('@/services/places', () => ({
   getPlaces: (...args: unknown[]) => getPlacesMock(...args),
 }));
-
-import { placesTool } from '@/tools/places';
 
 const toolCall = (name: string, args: object) => ({
   name,

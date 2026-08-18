@@ -1,7 +1,10 @@
-import { describe, expect, it } from 'vitest';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
+import { describe, expect, it } from 'vitest';
 
+// Constants
 import { TOOL_READY_OUTPUT } from '@/constants';
+
+// Utils
 import { buildRichUiToolSummary, richUiModelMiddleware } from '@/utils/rich-ui-middleware';
 
 const invokeMiddleware = async (messages: unknown[]) => {

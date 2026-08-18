@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { describe, expect, it, vi } from 'vitest';
 
+// Api
 import { registerOpenAiKeyRoutes } from '../openai-key';
 
 const request = (app: Hono, apiKey?: string) =>

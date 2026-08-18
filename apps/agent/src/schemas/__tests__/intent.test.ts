@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+// Schemas
 import { IntentClassificationSchema, IntentSchema } from '@/schemas/intent';
 
 describe('IntentSchema', () => {

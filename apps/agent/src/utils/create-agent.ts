@@ -1,24 +1,25 @@
-import { createAgent, dynamicSystemPromptMiddleware, humanInTheLoopMiddleware } from 'langchain';
 import { createCopilotkitMiddleware } from '@copilotkit/sdk-js/langgraph';
+import { createAgent, dynamicSystemPromptMiddleware, humanInTheLoopMiddleware } from 'langchain';
 
+// Constants
 import type { SpecializedAgentConfig } from '@/constants/agent-config';
 
-// Services
-import { searchMemories } from '@/services/memory';
-
 // Infrastructure
-import { memoryStore } from '@/infrastructure/persistence';
 import { createChatModel } from '@/infrastructure/llm';
+import { memoryStore } from '@/infrastructure/persistence';
 
 // Prompts
 import { buildAgentSystemPrompt } from '@/prompts';
+
+// Services
+import { searchMemories } from '@/services/memory';
 
 // State
 import { GraphState, type GraphStateType } from '@/state';
 
 // Utils
-import { richUiModelMiddleware } from './rich-ui-middleware';
 import { createDomainStateMiddleware } from './domain-state-middleware';
+import { richUiModelMiddleware } from './rich-ui-middleware';
 
 /** Builds a specialized agent with shared middleware and a dynamic system prompt. */
 export const createSpecializedAgent = (config: SpecializedAgentConfig, apiKey: string) =>

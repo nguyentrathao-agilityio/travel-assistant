@@ -1,5 +1,16 @@
-import { describe, expect, it, vi } from 'vitest';
 import { HumanMessage } from '@langchain/core/messages';
+import { describe, expect, it, vi } from 'vitest';
+
+// Nodes
+import { classifyNode } from '@/nodes/classify';
+
+// State
+import {
+  mergeRequest,
+  type GraphStateType,
+  type GraphStateUpdate,
+  type TravelRequest,
+} from '@/state';
 
 const { createChatModelMock, invokeMock } = vi.hoisted(() => {
   const invoke = vi.fn();
@@ -16,14 +27,6 @@ vi.mock('@/infrastructure/llm', () => ({
   openAiApiKeyFromConfig: vi.fn(() => 'sk-request'),
   createChatModel: createChatModelMock,
 }));
-
-import { classifyNode } from '@/nodes/classify';
-import {
-  mergeRequest,
-  type GraphStateType,
-  type GraphStateUpdate,
-  type TravelRequest,
-} from '@/state';
 
 const state = (overrides: Partial<GraphStateType> = {}): GraphStateType =>
   ({ messages: [], ...overrides }) as GraphStateType;

@@ -1,15 +1,15 @@
 import { z } from 'zod';
 
-// Schemas
-import { DestinationExplorerInputSchema, DestinationExplorerResultSchema } from '@/schemas';
-
 // Constants
 import { PLACES_SORT } from '@/constants';
 
+// Schemas
+import { DestinationExplorerInputSchema, DestinationExplorerResultSchema } from '@/schemas';
+
 // Services
-import { getWeather } from './weather';
-import { getLocalTips } from './tips';
 import { getPlaces } from './places';
+import { getLocalTips } from './tips';
+import { getWeather } from './weather';
 
 type DestinationExplorerToolOutput = z.infer<typeof DestinationExplorerResultSchema>;
 

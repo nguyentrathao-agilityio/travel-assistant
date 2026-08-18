@@ -1,13 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+// Services
+import { generateTipsFromLLM, getLocalTips } from '@/services/tips';
+
 const createMock = vi.fn();
 
 vi.mock('@/infrastructure/llm', () => ({
   getOpenAIClient: () => ({ responses: { create: createMock } }),
   OPENAI_CLIENT_MODEL: 'gpt-4o-mini',
 }));
-
-import { generateTipsFromLLM, getLocalTips } from '@/services/tips';
 
 const apiTip = {
   id: 't1',

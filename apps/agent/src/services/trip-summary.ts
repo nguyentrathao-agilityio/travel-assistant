@@ -1,18 +1,18 @@
 import { z } from 'zod';
 
-// Schemas
-import { TripCostEstimateSchema, TripSummaryInputSchema, TripSummaryResultSchema } from '@/schemas';
-
 // Constants
 import { FLIGHT_SORT, MAX_STOPS_LIMIT } from '@/constants';
+
+// Infrastructure
+import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
+
+// Schemas
+import { TripCostEstimateSchema, TripSummaryInputSchema, TripSummaryResultSchema } from '@/schemas';
 
 // Services
 import { searchFlights } from './flights';
 import { searchHotels } from './hotel';
 import { getRoute } from './route';
-
-// Infrastructure
-import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
 
 // Utils
 import { daysBetween, todayIso } from '@/utils/date';

@@ -1,14 +1,8 @@
 import { SystemMessage, ToolMessage } from '@langchain/core/messages';
 import type { RunnableConfig } from '@langchain/core/runnables';
 
-// Schemas
-import { MemoryExtractionSchema } from '@/schemas';
-
 // Constants
 import { isBookingToolName, MAX_EXTRACT_MEMORY_MESSAGES } from '@/constants';
-
-// Services
-import { saveMemory } from '@/services/memory';
 
 // Infrastructure
 import { createChatModel, openAiApiKeyFromConfig } from '@/infrastructure/llm';
@@ -16,6 +10,12 @@ import { memoryStore } from '@/infrastructure/persistence';
 
 // Prompts
 import { EXTRACT_MEMORY_SYSTEM_PROMPT } from '@/prompts';
+
+// Schemas
+import { MemoryExtractionSchema } from '@/schemas';
+
+// Services
+import { saveMemory } from '@/services/memory';
 
 // State
 import type { GraphStateType } from '@/state';

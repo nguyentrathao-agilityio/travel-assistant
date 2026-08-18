@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+// Nodes
 import { routeAfterPlanning, routeByIntent } from '@/nodes/routing';
+
+// State
 import type { GraphStateType } from '@/state';
 
 describe('routeByIntent', () => {

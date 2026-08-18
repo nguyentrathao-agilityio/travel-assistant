@@ -1,11 +1,11 @@
 import { ToolMessage } from 'langchain';
 import { createMiddleware } from 'langchain';
 
-// Schemas
-import { ToolErrorSchema } from '@/schemas';
-
 // Constants
 import { TOOL_NAMES, TOOL_READY_OUTPUT, WRITE_TOOL_NAMES } from '@/constants';
+
+// Schemas
+import { ToolErrorSchema } from '@/schemas';
 
 // Utils
 import { isErrorArtifact } from '@/utils/artifact';

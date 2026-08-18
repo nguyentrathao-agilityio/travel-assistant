@@ -1,11 +1,16 @@
 import type { RunnableConfig } from '@langchain/core/runnables';
 
-// Utils
-import { createSpecializedAgent } from '@/utils';
+// Constants
+import { AGENT_CONFIGS } from '@/constants/agent-config';
+
+// Infrastructure
 import { openAiApiKeyFromConfig, withOpenAiApiKey } from '@/infrastructure/llm';
+
+// State
 import type { GraphStateType } from '@/state';
 
-import { AGENT_CONFIGS } from '@/constants/agent-config';
+// Utils
+import { createSpecializedAgent } from '@/utils';
 
 export const PLANNING_AGENT_TOOLS = AGENT_CONFIGS.plan.tools;
 

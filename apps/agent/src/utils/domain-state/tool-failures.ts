@@ -15,8 +15,8 @@ import {
 } from '@/state';
 
 // Utils
-import { isIntentionalBookingRejection, latestResultPerTool } from './tool-messages';
 import { isErrorArtifact } from '../artifact';
+import { isIntentionalBookingRejection, latestResultPerTool } from './tool-messages';
 
 type ToolFailure = { name: string; error: GraphError };
 

@@ -1,5 +1,8 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Hono } from 'hono';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+// Api
+import { registerCopilotKit } from '@/api/copilotkit';
 
 const { CopilotRuntimeMock, createCopilotHonoHandlerMock } = vi.hoisted(() => ({
   CopilotRuntimeMock: vi.fn(),
@@ -37,8 +40,6 @@ const createCopilotKitHooksMock = vi.fn((..._args: unknown[]) => 'hooks-object')
 vi.mock('@/api/hooks', () => ({
   createCopilotKitHooks: (...args: unknown[]) => createCopilotKitHooksMock(...args),
 }));
-
-import { registerCopilotKit } from '@/api/copilotkit';
 
 type FakeTravelAgent = { graphId: string; getAssistant: () => Promise<unknown> };
 

@@ -1,12 +1,12 @@
-// State
-import type { GraphStateType } from '@/state';
-
 // Prompts
-import { BOOKING_RULES_SECTION } from './sections/booking-rules';
 import { buildBookingContext } from './sections/booking-context';
+import { BOOKING_RULES_SECTION } from './sections/booking-rules';
 import { buildClientContext } from './sections/client-context';
 import { buildMemoryContext } from './sections/memory-context';
 import { BASE_SYSTEM_PROMPT } from './templates';
+
+// State
+import type { GraphStateType } from '@/state';
 
 export interface AgentPromptSections {
   toolsSection: string;

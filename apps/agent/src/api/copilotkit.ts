@@ -1,17 +1,17 @@
-import type { Hono } from 'hono';
+import { LangGraphAgent } from '@copilotkit/runtime/langgraph';
 import {
   CopilotRuntime,
   InMemoryAgentRunner,
   createCopilotHonoHandler,
 } from '@copilotkit/runtime/v2';
-import { LangGraphAgent } from '@copilotkit/runtime/langgraph';
 import type { Assistant } from '@langchain/langgraph-sdk';
+import type { Hono } from 'hono';
+
+// Api
+import { createCopilotKitHooks } from './hooks';
 
 // Constants
 import { LANGGRAPH_DEPLOYMENT_URL } from '@/constants';
-
-// API
-import { createCopilotKitHooks } from './hooks';
 
 // Resolve assistants by graph ID, then fall back to the default lookup.
 class BridgedLangGraphAgent extends LangGraphAgent {

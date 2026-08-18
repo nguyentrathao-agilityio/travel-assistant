@@ -1,6 +1,3 @@
-// Schemas
-import { TOOL_ERROR_CODES, ToolErrorSchema, type ToolError, type ToolErrorCode } from '@/schemas';
-
 // Constants
 import {
   AUTHENTICATION_STATUS_PATTERN,
@@ -9,6 +6,9 @@ import {
   SERVER_ERROR_STATUS_PATTERN,
   TOOL_TIMEOUT_MS,
 } from '@/constants';
+
+// Schemas
+import { TOOL_ERROR_CODES, ToolErrorSchema, type ToolError, type ToolErrorCode } from '@/schemas';
 
 export interface ToolErrorClassification {
   code: ToolErrorCode;

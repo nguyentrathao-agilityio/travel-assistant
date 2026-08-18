@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+// Schemas
 import { FlightInputSchema } from '@/schemas/flights';
 import { HotelInputSchema } from '@/schemas/hotel';
 import { PlacesInputSchema } from '@/schemas/places';

@@ -1,8 +1,5 @@
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
-// Schemas
-import type { KnowledgeDocument, KnowledgeSource } from '@/schemas';
-
 // Constants
 import {
   KNOWLEDGE_CHUNK_OVERLAP,
@@ -10,6 +7,10 @@ import {
   KNOWLEDGE_FETCH_TIMEOUT_MS,
 } from '@/constants';
 
+// Schemas
+import type { KnowledgeDocument, KnowledgeSource } from '@/schemas';
+
+// Utils
 import { sanitizeSourceContent } from '@/utils/html';
 
 export { sanitizeSourceContent } from '@/utils/html';

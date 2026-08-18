@@ -1,13 +1,14 @@
-import { describe, expect, it } from 'vitest';
-
 import {
   BOOKING_AGENT_TOOLS,
   EXPLORE_AGENT_TOOLS,
   GENERAL_AGENT_TOOLS,
   PLANNING_AGENT_TOOLS,
 } from '..';
-import { AGENT_CONFIGS } from '@/constants/agent-config';
+import { describe, expect, it } from 'vitest';
+
+// Constants
 import { isBookingToolName } from '@/constants';
+import { AGENT_CONFIGS } from '@/constants/agent-config';
 
 const nameOf = (tools: { name: string }[]) => tools.map((tool) => tool.name).sort();
 

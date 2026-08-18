@@ -1,4 +1,6 @@
 import { OpenAI } from 'openai';
+
+// Infrastructure
 import { currentOpenAiApiKey } from './request-api-key';
 
 export { OPENAI_CLIENT_MODEL } from '@/constants';

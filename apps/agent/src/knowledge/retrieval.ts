@@ -1,11 +1,3 @@
-// Schemas
-import {
-  KnowledgeDocumentSchema,
-  type KnowledgeDocument,
-  type KnowledgeSearchInput,
-  type KnowledgeSearchResult,
-} from '@/schemas';
-
 // Constants
 import {
   KNOWLEDGE_CANDIDATE_MULTIPLIER,
@@ -17,6 +9,14 @@ import {
 
 // Infrastructure
 import { knowledgeStore } from '@/infrastructure/persistence';
+
+// Schemas
+import {
+  KnowledgeDocumentSchema,
+  type KnowledgeDocument,
+  type KnowledgeSearchInput,
+  type KnowledgeSearchResult,
+} from '@/schemas';
 
 type KnowledgeStoreLike = Pick<typeof knowledgeStore, 'search'>;
 

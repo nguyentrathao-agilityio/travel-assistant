@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 
-// API
+// Api
 import { registerCopilotKit } from './copilotkit';
 import { registerOpenAiKeyRoutes } from './openai-key';
 

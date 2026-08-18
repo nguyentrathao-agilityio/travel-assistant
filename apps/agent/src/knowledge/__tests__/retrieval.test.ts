@@ -1,8 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 
+// Constants
 import { KNOWLEDGE_NAMESPACE, KNOWLEDGE_VECTOR_WEIGHT } from '@/constants';
-import type { KnowledgeDocument } from '@/schemas/knowledge';
+
+// Knowledge
 import { searchKnowledge } from '@/knowledge/retrieval';
+
+// Schemas
+import type { KnowledgeDocument } from '@/schemas/knowledge';
 
 const document = (overrides: Partial<KnowledgeDocument> = {}): KnowledgeDocument => ({
   id: 'jp-visa-official:chunk:0000',

@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+// Services
+import { getTripSummary } from '@/services/trip-summary';
+
 const createMock = vi.fn();
 
 vi.mock('@/infrastructure/llm', () => ({
@@ -18,8 +21,6 @@ vi.mock('@/services/hotel', () => ({
   searchHotels: (...args: unknown[]) => searchHotelsMock(...args),
 }));
 vi.mock('@/services/route', () => ({ getRoute: (...args: unknown[]) => getRouteMock(...args) }));
-
-import { getTripSummary } from '@/services/trip-summary';
 
 const flight = {
   id: 'FL1',

@@ -1,14 +1,3 @@
-// Schemas
-import {
-  PlacesResultSchema,
-  RouteLegApiSchema,
-  type RouteResult,
-  type LandmarkStop,
-  type TourLeg,
-  type TransportMode,
-  type RouteLegApi,
-} from '@/schemas';
-
 // Constants
 import {
   API_URL,
@@ -19,6 +8,17 @@ import {
   PLACES_SORT,
   ROUTE_MODE_MAP,
 } from '@/constants';
+
+// Schemas
+import {
+  PlacesResultSchema,
+  RouteLegApiSchema,
+  type RouteResult,
+  type LandmarkStop,
+  type TourLeg,
+  type TransportMode,
+  type RouteLegApi,
+} from '@/schemas';
 
 // Utils
 import { fetchAndValidate } from '@/utils/http';

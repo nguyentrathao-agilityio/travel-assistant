@@ -1,13 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+// Services
+import { getWeather } from '@/services/weather';
+
 const createMock = vi.fn();
 
 vi.mock('@/infrastructure/llm', () => ({
   getOpenAIClient: () => ({ responses: { create: createMock } }),
   OPENAI_CLIENT_MODEL: 'gpt-4o-mini',
 }));
-
-import { getWeather } from '@/services/weather';
 
 const apiResponse = {
   location: { name: 'Da Nang', country: 'Vietnam', latitude: 16.05, longitude: 108.2 },

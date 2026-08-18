@@ -1,10 +1,10 @@
 import { tool } from '@langchain/core/tools';
 
-// Schemas
-import { TipsInputSchema } from '@/schemas';
-
 // Constants
 import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_PROVIDERS, TOOL_RESPONSE_FORMAT } from '@/constants';
+
+// Schemas
+import { TipsInputSchema } from '@/schemas';
 
 // Services
 import { getLocalTips } from '@/services/tips';

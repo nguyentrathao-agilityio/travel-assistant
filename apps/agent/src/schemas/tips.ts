@@ -47,6 +47,18 @@ export const ApiTipsResponseSchema = z.object({
   tips: z.array(ApiTipSchema),
 });
 
+const LLMTipSchema = z.object({
+  id: z.string(),
+  category: TipCategorySchema,
+  scope: z.enum(['country', 'city']),
+  title: z.string(),
+  content: z.string(),
+  isEssential: z.boolean(),
+  location: z.string().nullable(),
+});
+
+export const LLMTipsResponseSchema = z.object({ tips: z.array(LLMTipSchema) });
+
 export type TipsInput = z.infer<typeof TipsInputSchema>;
 export type ApiTip = z.infer<typeof ApiTipSchema>;
 export type ApiTipsResponse = z.infer<typeof ApiTipsResponseSchema>;

@@ -1,5 +1,3 @@
-import { z } from 'zod';
-
 // Constants
 import { API_URL, ENDPOINTS, LLM_TIPS_COUNT, LLM_ESSENTIAL_TIPS_COUNT } from '@/constants';
 
@@ -11,27 +9,15 @@ import {
   TipCategorySchema,
   TipsInputSchema,
   ApiTipsResponseSchema,
+  LLMTipsResponseSchema,
   type TipsResult,
+  type TipsInput,
   type TipItem,
   type ApiTip,
 } from '@/schemas';
 
 // Utils
 import { fetchAndValidate } from '@/utils/http';
-
-const LLMTipSchema = z.object({
-  id: z.string(),
-  category: TipCategorySchema,
-  scope: z.enum(['country', 'city']),
-  title: z.string(),
-  content: z.string(),
-  isEssential: z.boolean(),
-  location: z.string().nullable(),
-});
-
-const LLMTipsResponseSchema = z.object({
-  tips: z.array(LLMTipSchema),
-});
 
 /** Maps a raw API tip to the shared TipItem shape. */
 const mapTip = (tip: ApiTip): TipItem => ({
@@ -108,7 +94,7 @@ export const generateTipsFromLLM = async (
  * Fetches local travel tips for a city or country.
  * Falls back to LLM-generated tips when the API returns none.
  */
-export const getLocalTips = async (input: z.infer<typeof TipsInputSchema>): Promise<TipsResult> => {
+export const getLocalTips = async (input: TipsInput): Promise<TipsResult> => {
   const params = Object.fromEntries(
     Object.entries({
       city: input.city,

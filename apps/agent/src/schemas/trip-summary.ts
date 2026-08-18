@@ -59,6 +59,14 @@ export const TripSummaryInputSchema = TripSummaryInputShape.superRefine(refineTr
 
 export type TripSummaryInput = z.infer<typeof TripSummaryInputSchema>;
 
+export const DailyRatesSchema = z.object({
+  food: z.number(),
+  activities: z.number(),
+  transport: z.number(),
+});
+
+export type DailyRates = z.infer<typeof DailyRatesSchema>;
+
 const CostItemSchema = z.object({
   label: z.string(),
   amount: z.number(),

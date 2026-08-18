@@ -7,7 +7,13 @@ import { FLIGHT_SORT, MAX_STOPS_LIMIT } from '@/constants';
 import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
 
 // Schemas
-import { TripCostEstimateSchema, TripSummaryInputSchema, TripSummaryResultSchema } from '@/schemas';
+import {
+  DailyRatesSchema,
+  TripCostEstimateSchema,
+  TripSummaryInputSchema,
+  TripSummaryResultSchema,
+  type DailyRates,
+} from '@/schemas';
 
 // Services
 import { searchFlights } from './flights';
@@ -16,14 +22,6 @@ import { getRoute } from './route';
 
 // Utils
 import { daysBetween, todayIso } from '@/utils/date';
-
-type DailyRates = { food: number; activities: number; transport: number };
-
-const DailyRatesSchema = z.object({
-  food: z.number(),
-  activities: z.number(),
-  transport: z.number(),
-});
 
 const FALLBACK_RATES: DailyRates = { food: 35, activities: 40, transport: 12 };
 

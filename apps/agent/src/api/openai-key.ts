@@ -1,9 +1,11 @@
 import type { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import OpenAI from 'openai';
 
 // Constants
-import { OPENAI_API_KEY_HEADER, OPENAI_CLIENT_MODEL } from '@/constants';
+import { OPENAI_API_KEY_HEADER } from '@/constants';
+
+// Infrastructure
+import { verifyOpenAiApiKey } from '@/infrastructure/llm';
 
 type VerificationErrorCode =
   | 'missing_key'
@@ -18,10 +20,7 @@ interface OpenAiKeyRouteDependencies {
 }
 
 const defaultDependencies: OpenAiKeyRouteDependencies = {
-  verify: async (apiKey) => {
-    const client = new OpenAI({ apiKey });
-    await client.models.retrieve(OPENAI_CLIENT_MODEL);
-  },
+  verify: verifyOpenAiApiKey,
 };
 
 const jsonResponse = (status: number, valid: boolean, error?: VerificationErrorCode) =>

@@ -4,11 +4,11 @@ import { KNOWLEDGE_NAMESPACE, KNOWLEDGE_STALE_CHUNK_SEARCH_LIMIT } from '@/const
 // Infrastructure
 import { knowledgeStore } from '@/infrastructure/persistence';
 
-// Knowledge
-import { loadKnowledgeSource, splitKnowledgeSource } from './loader';
-
 // Schemas
 import type { KnowledgeSource } from '@/schemas';
+
+// Knowledge
+import { loadKnowledgeSource, splitKnowledgeSource } from './loader';
 
 type KnowledgeIngestionStore = Pick<typeof knowledgeStore, 'delete' | 'put' | 'search'>;
 type SourceLoader = typeof loadKnowledgeSource;

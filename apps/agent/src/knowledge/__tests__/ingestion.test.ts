@@ -3,11 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 // Constants
 import { KNOWLEDGE_NAMESPACE } from '@/constants';
 
-// Knowledge
-import { ingestKnowledgeSource } from '@/knowledge/ingestion';
-
 // Schemas
 import type { KnowledgeSource } from '@/schemas/knowledge';
+
+// Knowledge
+import { ingestKnowledgeSource } from '@/knowledge/ingestion';
 
 const source: KnowledgeSource = {
   id: 'official-guide',

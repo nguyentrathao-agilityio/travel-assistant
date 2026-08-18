@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-// Knowledge
-import { sanitizeSourceContent, splitKnowledgeSource } from '@/knowledge/loader';
-
 // Schemas
 import type { KnowledgeSource } from '@/schemas/knowledge';
+
+// Knowledge
+import { sanitizeSourceContent, splitKnowledgeSource } from '@/knowledge/loader';
 
 const source: KnowledgeSource = {
   id: 'official-guide',

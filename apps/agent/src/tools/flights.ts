@@ -10,25 +10,16 @@ import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
 import { searchFlights } from '@/services/flights';
 
 // Utils
+import { parseToolInput } from '@/utils';
 import { executeReadTool } from '@/utils/tool-contract';
-
-const validateAndSearchFlights = (
-  input: unknown
-): Promise<Awaited<ReturnType<typeof searchFlights>>> => {
-  const parsed = FlightInputSchema.safeParse(input);
-
-  if (!parsed.success) {
-    const details = parsed.error.issues.map((issue) => issue.message).join('; ');
-
-    return Promise.reject(new Error(`Validation error: ${details}`));
-  }
-
-  return searchFlights(parsed.data);
-};
 
 export const flightsTool = tool(
   async (input) =>
-    executeReadTool(validateAndSearchFlights(input), 'travel-api', TOOL_ERROR_MESSAGES.FLIGHTS),
+    executeReadTool(
+      parseToolInput(FlightInputSchema, input).then(searchFlights),
+      'travel-api',
+      TOOL_ERROR_MESSAGES.FLIGHTS
+    ),
   {
     name: TOOL_NAMES.FLIGHTS,
     description: `Search available flights between two airports on a given date.

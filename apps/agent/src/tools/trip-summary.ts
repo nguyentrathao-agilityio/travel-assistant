@@ -10,26 +10,13 @@ import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
 import { getTripSummary } from '@/services/trip-summary';
 
 // Utils
+import { parseToolInput } from '@/utils';
 import { executeReadTool } from '@/utils/tool-contract';
-
-const validateAndGetTripSummary = (
-  input: unknown
-): Promise<Awaited<ReturnType<typeof getTripSummary>>> => {
-  const parsed = TripSummaryInputSchema.safeParse(input);
-
-  if (!parsed.success) {
-    const details = parsed.error.issues.map((issue) => issue.message).join('; ');
-
-    return Promise.reject(new Error(`Validation error: ${details}`));
-  }
-
-  return getTripSummary(parsed.data);
-};
 
 export const tripSummaryTool = tool(
   async (input) =>
     executeReadTool(
-      validateAndGetTripSummary(input),
+      parseToolInput(TripSummaryInputSchema, input).then(getTripSummary),
       'travel-api',
       TOOL_ERROR_MESSAGES.TRIP_SUMMARY
     ),

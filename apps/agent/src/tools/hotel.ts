@@ -10,25 +10,16 @@ import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
 import { searchHotels } from '@/services/hotel';
 
 // Utils
+import { parseToolInput } from '@/utils';
 import { executeReadTool } from '@/utils/tool-contract';
-
-const validateAndSearchHotels = (
-  input: unknown
-): Promise<Awaited<ReturnType<typeof searchHotels>>> => {
-  const parsed = HotelInputSchema.safeParse(input);
-
-  if (!parsed.success) {
-    const details = parsed.error.issues.map((issue) => issue.message).join('; ');
-
-    return Promise.reject(new Error(`Validation error: ${details}`));
-  }
-
-  return searchHotels(parsed.data);
-};
 
 export const hotelTool = tool(
   async (input) =>
-    executeReadTool(validateAndSearchHotels(input), 'travel-api', TOOL_ERROR_MESSAGES.HOTELS),
+    executeReadTool(
+      parseToolInput(HotelInputSchema, input).then(searchHotels),
+      'travel-api',
+      TOOL_ERROR_MESSAGES.HOTELS
+    ),
   {
     name: TOOL_NAMES.HOTEL,
     description: `Search available hotels for a destination with flexible filters.

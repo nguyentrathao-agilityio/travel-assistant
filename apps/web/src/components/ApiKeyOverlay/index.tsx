@@ -1,16 +1,18 @@
 import { useState, useCallback, useId } from 'react';
-import type { ChangeEvent, FormEvent, KeyboardEvent } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import { KeyRound, Eye, EyeOff } from 'lucide-react';
 
 import { cn } from '@/utils';
 import { Button } from '@/components/common';
 import { useApiKeyStore } from '@/stores';
+import { verifyOpenAiApiKey } from '@/services/openaiApiKey';
 
 const ApiKeyOverlay = () => {
-  const setApiKey = useApiKeyStore((state) => state.setApiKey);
+  const setVerifiedApiKey = useApiKeyStore((state) => state.setVerifiedApiKey);
   const [value, setValue] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [error, setError] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
   const inputId = useId();
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +25,7 @@ const ApiKeyOverlay = () => {
   }, []);
 
   const handleSubmit = useCallback(
-    (e: FormEvent<HTMLFormElement>) => {
+    async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const trimmed = value.trim();
 
@@ -33,24 +35,23 @@ const ApiKeyOverlay = () => {
         return;
       }
 
-      setApiKey(trimmed);
-    },
-    [value, setApiKey]
-  );
+      setIsVerifying(true);
+      setError('');
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        const trimmed = value.trim();
-
-        if (!trimmed.startsWith('sk-')) {
-          setError('Key must start with "sk-"');
-        } else {
-          setApiKey(trimmed);
-        }
+      try {
+        await verifyOpenAiApiKey(trimmed);
+        setVerifiedApiKey(trimmed);
+      } catch (verificationError) {
+        setError(
+          verificationError instanceof Error
+            ? verificationError.message
+            : 'Could not verify the key right now. Please try again.'
+        );
+      } finally {
+        setIsVerifying(false);
       }
     },
-    [value, setApiKey]
+    [value, setVerifiedApiKey]
   );
 
   return (
@@ -62,7 +63,8 @@ const ApiKeyOverlay = () => {
             <p className="text-card-title text-text-primary font-medium">OpenAI API key</p>
           </div>
           <p className="text-body font-regular text-text-secondary">
-            Your key is stored locally in your browser and never sent to our servers.
+            Your key is stored locally in this browser and sent securely to OpenAI through the local
+            agent runtime. It is not persisted by the runtime.
           </p>
         </div>
 
@@ -88,7 +90,7 @@ const ApiKeyOverlay = () => {
                 type={showKey ? 'text' : 'password'}
                 value={value}
                 onChange={handleChange}
-                onKeyDown={handleKeyDown}
+                disabled={isVerifying}
                 placeholder="sk-..."
                 autoComplete="off"
                 spellCheck={false}
@@ -97,6 +99,7 @@ const ApiKeyOverlay = () => {
               <button
                 type="button"
                 onClick={handleToggleVisibility}
+                disabled={isVerifying}
                 className="text-text-tertiary flex-shrink-0 cursor-pointer outline-none"
                 aria-label={showKey ? 'Hide API key' : 'Show API key'}
               >
@@ -111,9 +114,9 @@ const ApiKeyOverlay = () => {
             variant="primary"
             size="md"
             className="w-full"
-            disabled={!value.trim()}
+            disabled={!value.trim() || isVerifying}
           >
-            Continue
+            {isVerifying ? 'Verifying…' : 'Continue'}
           </Button>
         </form>
 

@@ -1,12 +1,20 @@
 import { describe, expect, it, vi } from 'vitest';
 import { HumanMessage } from '@langchain/core/messages';
 
-const { invokeMock } = vi.hoisted(() => ({ invokeMock: vi.fn() }));
+const { createChatModelMock, invokeMock } = vi.hoisted(() => {
+  const invoke = vi.fn();
+
+  return {
+    invokeMock: invoke,
+    createChatModelMock: vi.fn(() => ({
+      withStructuredOutput: () => ({ invoke }),
+    })),
+  };
+});
 
 vi.mock('@/infrastructure/llm', () => ({
-  createChatModel: () => ({
-    withStructuredOutput: () => ({ invoke: invokeMock }),
-  }),
+  openAiApiKeyFromConfig: vi.fn(() => 'sk-request'),
+  createChatModel: createChatModelMock,
 }));
 
 import { classifyNode } from '@/nodes/classify';
@@ -55,6 +63,14 @@ const updateOf = (result: Awaited<ReturnType<typeof classifyNode>>): GraphStateU
   result.update as GraphStateUpdate;
 
 describe('classifyNode', () => {
+  it('creates the classifier with the request-scoped API key', async () => {
+    invokeMock.mockResolvedValueOnce(classification('general'));
+
+    await classifyNode(state(), { configurable: {} });
+
+    expect(createChatModelMock).toHaveBeenLastCalledWith({ apiKey: 'sk-request' });
+  });
+
   it.each(['switch to dark mode', 'change to light theme', 'toggle theme'])(
     'routes the UI request "%s" to general without invoking the travel classifier',
     async (message) => {

@@ -1,4 +1,5 @@
 export * from './agent';
+export * from './api-key';
 export * from './booking';
 export * from './theme';
 export * from './chat';

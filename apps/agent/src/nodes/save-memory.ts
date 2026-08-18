@@ -1,16 +1,17 @@
 import { SystemMessage, ToolMessage } from '@langchain/core/messages';
+import type { RunnableConfig } from '@langchain/core/runnables';
 
 // Schemas
 import { MemoryExtractionSchema } from '@/schemas';
 
 // Constants
-import { isBookingToolName, MAX_EXTRACT_MEMORY_MESSAGES, OPENAI_API_KEY } from '@/constants';
+import { isBookingToolName, MAX_EXTRACT_MEMORY_MESSAGES } from '@/constants';
 
 // Services
 import { saveMemory } from '@/services/memory';
 
 // Infrastructure
-import { createChatModel } from '@/infrastructure/llm';
+import { createChatModel, openAiApiKeyFromConfig } from '@/infrastructure/llm';
 import { memoryStore } from '@/infrastructure/persistence';
 
 // Prompts
@@ -22,10 +23,6 @@ import type { GraphStateType } from '@/state';
 // Utils
 import { takeRecentMessages } from '@/utils';
 
-const extractionModel = createChatModel({ apiKey: OPENAI_API_KEY! }).withStructuredOutput(
-  MemoryExtractionSchema
-);
-
 const isBookingToolMessage = (message: GraphStateType['messages'][number]): boolean =>
   message instanceof ToolMessage && isBookingToolName(message.name ?? '');
 
@@ -34,11 +31,18 @@ const isBookingToolMessage = (message: GraphStateType['messages'][number]): bool
  * Best-effort: runs after the branch has already produced its response, so a failure
  * here must never surface to the user — it only affects what gets remembered next time.
  */
-export const saveMemoryNode = async (state: GraphStateType): Promise<Partial<GraphStateType>> => {
+export const saveMemoryNode = async (
+  state: GraphStateType,
+  config?: RunnableConfig
+): Promise<Partial<GraphStateType>> => {
   try {
     const recentMessages = takeRecentMessages(state.messages, MAX_EXTRACT_MEMORY_MESSAGES);
 
     if (recentMessages.some(isBookingToolMessage)) return {};
+
+    const extractionModel = createChatModel({
+      apiKey: openAiApiKeyFromConfig(config),
+    }).withStructuredOutput(MemoryExtractionSchema);
 
     const result = await extractionModel.invoke(
       [new SystemMessage({ content: EXTRACT_MEMORY_SYSTEM_PROMPT }), ...recentMessages],

@@ -21,6 +21,7 @@ export const Providers = ({ children }: ProvidersProps) => {
   const sessionId = useThreadStore((state) => state.activeThreadId);
   const sessionRevision = useThreadStore((state) => state.activeThreadRevision);
   const apiKey = useApiKeyStore((state) => state.apiKey);
+  const clearApiKey = useApiKeyStore((state) => state.clearApiKey);
 
   const headers = useMemo(
     () => ({
@@ -31,9 +32,18 @@ export const Providers = ({ children }: ProvidersProps) => {
     [apiKey, sessionId]
   );
 
-  const handleError = useCallback((errorEvent: { error?: Error }) => {
-    toast.error(errorEvent.error?.message || ERROR_MESSAGES.STREAM);
-  }, []);
+  const handleError = useCallback(
+    (errorEvent: { error?: Error }) => {
+      const message = errorEvent.error?.message || ERROR_MESSAGES.STREAM;
+
+      if (/\b401\b|incorrect api key|invalid api key|openai api key is required/i.test(message)) {
+        clearApiKey();
+      }
+
+      toast.error(message);
+    },
+    [clearApiKey]
+  );
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">

@@ -1,13 +1,17 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { CopilotKit } from '@copilotkit/react-core';
 import { Providers } from '../providers';
+
+const clearApiKeyMock = jest.fn();
 
 jest.mock('@/stores/threadStore', () => ({
   useThreadStore: (sel: (s: object) => unknown) => sel({ activeThreadId: 'thread-1' }),
 }));
 
 jest.mock('@/stores/apiKeyStore', () => ({
-  useApiKeyStore: (sel: (s: object) => unknown) => sel({ apiKey: 'sk-test' }),
+  useApiKeyStore: (sel: (s: object) => unknown) =>
+    sel({ apiKey: 'sk-test', clearApiKey: clearApiKeyMock }),
 }));
 
 jest.mock('@/utils', () => ({
@@ -15,7 +19,7 @@ jest.mock('@/utils', () => ({
   clientTimezone: () => 'Asia/Ho_Chi_Minh',
 }));
 
-jest.mock('sonner', () => ({ Toaster: () => null }));
+jest.mock('sonner', () => ({ Toaster: () => null, toast: { error: jest.fn() } }));
 
 jest.mock('@/constants', () => ({
   AGENT_NAME: 'travelAgent',
@@ -26,6 +30,10 @@ jest.mock('@/constants', () => ({
 }));
 
 describe('Providers', () => {
+  beforeEach(() => {
+    clearApiKeyMock.mockClear();
+  });
+
   it('renders children', () => {
     render(
       <Providers>
@@ -51,5 +59,27 @@ describe('Providers', () => {
     const { container } = render(<Providers>{null}</Providers>);
 
     expect(container).toBeDefined();
+  });
+
+  it('clears the verified key after an OpenAI authentication error', () => {
+    render(<Providers>{null}</Providers>);
+    const props = jest.mocked(CopilotKit).mock.calls.at(-1)?.[0] as {
+      onError?: (event: { error?: Error }) => void;
+    };
+
+    props.onError?.({ error: new Error('401 Incorrect API key provided') });
+
+    expect(clearApiKeyMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the key after a transient stream error', () => {
+    render(<Providers>{null}</Providers>);
+    const props = jest.mocked(CopilotKit).mock.calls.at(-1)?.[0] as {
+      onError?: (event: { error?: Error }) => void;
+    };
+
+    props.onError?.({ error: new Error('Network request failed') });
+
+    expect(clearApiKeyMock).not.toHaveBeenCalled();
   });
 });

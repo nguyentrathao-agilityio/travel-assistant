@@ -1,15 +1,24 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ApiKeyOverlay } from '../index';
 
-const mockSetApiKey = jest.fn();
+const mockSetVerifiedApiKey = jest.fn();
+const mockVerifyOpenAiApiKey = jest.fn();
 
 jest.mock('@/stores', () => ({
-  useApiKeyStore: (selector: (s: { setApiKey: jest.Mock }) => unknown) =>
-    selector({ setApiKey: mockSetApiKey }),
+  useApiKeyStore: (selector: (s: { setVerifiedApiKey: jest.Mock }) => unknown) =>
+    selector({ setVerifiedApiKey: mockSetVerifiedApiKey }),
 }));
 
-beforeEach(() => mockSetApiKey.mockClear());
+jest.mock('@/services/openaiApiKey', () => ({
+  verifyOpenAiApiKey: (...args: unknown[]) => mockVerifyOpenAiApiKey(...args),
+}));
+
+beforeEach(() => {
+  mockSetVerifiedApiKey.mockClear();
+  mockVerifyOpenAiApiKey.mockReset();
+  mockVerifyOpenAiApiKey.mockResolvedValue(undefined);
+});
 
 describe('ApiKeyOverlay', () => {
   describe('rendering', () => {
@@ -31,6 +40,16 @@ describe('ApiKeyOverlay', () => {
     it('renders the OpenAI link', () => {
       render(<ApiKeyOverlay />);
       expect(screen.getByRole('link', { name: /get one from openai/i })).toBeInTheDocument();
+    });
+
+    it('explains that the runtime forwards but does not persist the key', () => {
+      render(<ApiKeyOverlay />);
+
+      expect(
+        screen.getByText(
+          'Your key is stored locally in this browser and sent securely to OpenAI through the local agent runtime. It is not persisted by the runtime.'
+        )
+      ).toBeInTheDocument();
     });
   });
 
@@ -89,29 +108,69 @@ describe('ApiKeyOverlay', () => {
   });
 
   describe('submission', () => {
-    it('calls setApiKey with trimmed valid key on form submit', async () => {
+    it('verifies and persists the trimmed key on form submit', async () => {
       const user = userEvent.setup();
 
       render(<ApiKeyOverlay />);
       await user.type(screen.getByPlaceholderText('sk-...'), 'sk-abc123');
       await user.click(screen.getByRole('button', { name: /continue/i }));
-      expect(mockSetApiKey).toHaveBeenCalledWith('sk-abc123');
+      expect(mockVerifyOpenAiApiKey).toHaveBeenCalledWith('sk-abc123');
+      expect(mockSetVerifiedApiKey).toHaveBeenCalledWith('sk-abc123');
     });
 
-    it('calls setApiKey when Enter key is pressed with valid key', async () => {
+    it('submits exactly once when Enter is pressed with a valid key', async () => {
       const user = userEvent.setup();
 
       render(<ApiKeyOverlay />);
       await user.type(screen.getByPlaceholderText('sk-...'), 'sk-abc123{Enter}');
-      expect(mockSetApiKey).toHaveBeenCalledWith('sk-abc123');
+      expect(mockVerifyOpenAiApiKey).toHaveBeenCalledTimes(1);
+      expect(mockSetVerifiedApiKey).toHaveBeenCalledWith('sk-abc123');
     });
 
-    it('does not call setApiKey when Enter key is pressed with invalid key', async () => {
+    it('does not verify or persist when Enter is pressed with an invalid key', async () => {
       const user = userEvent.setup();
 
       render(<ApiKeyOverlay />);
       await user.type(screen.getByPlaceholderText('sk-...'), 'bad-key{Enter}');
-      expect(mockSetApiKey).not.toHaveBeenCalled();
+      expect(mockVerifyOpenAiApiKey).not.toHaveBeenCalled();
+      expect(mockSetVerifiedApiKey).not.toHaveBeenCalled();
+    });
+
+    it('shows verification progress and does not persist before verification succeeds', async () => {
+      const user = userEvent.setup();
+      let resolveVerification!: () => void;
+      mockVerifyOpenAiApiKey.mockReturnValueOnce(
+        new Promise<void>((resolve) => {
+          resolveVerification = resolve;
+        })
+      );
+
+      render(<ApiKeyOverlay />);
+      await user.type(screen.getByPlaceholderText('sk-...'), 'sk-pending');
+      await user.click(screen.getByRole('button', { name: /continue/i }));
+
+      expect(screen.getByRole('button', { name: 'Verifying…' })).toBeDisabled();
+      expect(screen.getByPlaceholderText('sk-...')).toBeDisabled();
+      expect(mockSetVerifiedApiKey).not.toHaveBeenCalled();
+
+      await act(async () => resolveVerification());
+      expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
+    });
+
+    it('shows a safe verification error and keeps the key unpersisted', async () => {
+      const user = userEvent.setup();
+      mockVerifyOpenAiApiKey.mockRejectedValueOnce(
+        new Error('This API key is invalid or has been revoked.')
+      );
+
+      render(<ApiKeyOverlay />);
+      await user.type(screen.getByPlaceholderText('sk-...'), 'sk-invalid');
+      await user.click(screen.getByRole('button', { name: /continue/i }));
+
+      expect(
+        await screen.findByText('This API key is invalid or has been revoked.')
+      ).toBeInTheDocument();
+      expect(mockSetVerifiedApiKey).not.toHaveBeenCalled();
     });
   });
 });

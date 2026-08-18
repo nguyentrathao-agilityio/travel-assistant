@@ -5,6 +5,7 @@ const { invokeMock } = vi.hoisted(() => ({ invokeMock: vi.fn() }));
 const saveMemoryMock = vi.fn();
 
 vi.mock('@/infrastructure/llm', () => ({
+  openAiApiKeyFromConfig: vi.fn(() => 'sk-request'),
   createChatModel: () => ({
     withStructuredOutput: () => ({ invoke: invokeMock }),
   }),

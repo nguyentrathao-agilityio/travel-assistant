@@ -61,10 +61,6 @@ vi.mock('@/utils/domain-state-middleware', () => ({
   createDomainStateMiddleware: createDomainStateMiddlewareMock,
 }));
 
-vi.mock('@/constants', () => ({
-  OPENAI_API_KEY: 'test-api-key',
-}));
-
 vi.mock('@/state', () => ({
   GraphState: 'fake-graph-state',
 }));
@@ -91,7 +87,7 @@ afterEach(() => {
 
 describe('createSpecializedAgent', () => {
   it('wires the model, tools, state schema, and middleware stack into createAgent', () => {
-    const graph = createSpecializedAgent(config());
+    const graph = createSpecializedAgent(config(), 'sk-request');
 
     expect(graph).toBe(FAKE_GRAPH);
     expect(createAgentMock).toHaveBeenCalledTimes(1);
@@ -99,6 +95,7 @@ describe('createSpecializedAgent', () => {
     const call = createAgentMock.mock.calls[0][0];
 
     expect(call.model).toBe('fake-model');
+    expect(createChatModelMock).toHaveBeenCalledWith({ apiKey: 'sk-request' });
     expect(call.tools).toBe(tools);
     expect(call.stateSchema).toBe('fake-graph-state');
     expect(call.middleware).toEqual([
@@ -113,7 +110,8 @@ describe('createSpecializedAgent', () => {
     searchMemoriesMock.mockResolvedValueOnce(['likes window seats']);
 
     createSpecializedAgent(
-      config({ name: 'plan', prompt: { ...sections, includeMemoryContext: true } })
+      config({ name: 'plan', prompt: { ...sections, includeMemoryContext: true } }),
+      'sk-request'
     );
     const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[3].fn;
 
@@ -134,7 +132,8 @@ describe('createSpecializedAgent', () => {
       config({
         name: 'booking',
         approvalTools: ['bookFlightTool', 'bookHotelTool', 'cancelBookingTool'],
-      })
+      }),
+      'sk-request'
     );
 
     expect(humanInTheLoopMiddlewareMock).toHaveBeenCalledWith({
@@ -157,7 +156,7 @@ describe('createSpecializedAgent', () => {
   });
 
   it('skips memory lookup and passes an empty memories list when includeMemoryContext is not set', async () => {
-    createSpecializedAgent(config());
+    createSpecializedAgent(config(), 'sk-request');
     const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[3].fn;
 
     const fakeState = { messages: [] };

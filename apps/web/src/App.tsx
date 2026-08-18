@@ -3,9 +3,9 @@ import { Providers } from './app/providers';
 import { useApiKeyStore } from '@/stores';
 
 const App = () => {
-  const apiKey = useApiKeyStore((state) => state.apiKey);
+  const hasVerifiedApiKey = useApiKeyStore((state) => state.hasVerifiedApiKey());
 
-  if (!apiKey) {
+  if (!hasVerifiedApiKey) {
     return (
       <div className="bg-background-primary flex h-screen overflow-hidden">
         <ApiKeyOverlay />

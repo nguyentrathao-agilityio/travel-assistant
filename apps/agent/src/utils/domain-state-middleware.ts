@@ -5,10 +5,15 @@ import { StateSchema } from '@langchain/langgraph';
 import { BookingSchema } from '@/schemas/booking';
 
 // Constants
-import { isBookingToolName, type DomainAgentNodeName } from '@/constants';
+import {
+  BOOKING_STATUSES,
+  BOOKING_TYPES,
+  isBookingToolName,
+  type DomainAgentNodeName,
+} from '@/constants';
 
 // State
-import { GraphState, type GraphError, type SearchResults } from '@/state';
+import { GraphState, SELECTION_STATUSES, type GraphError, type SearchResults } from '@/state';
 
 import { graphErrorFromTool } from './domain-state/tool-errors';
 import { parseSearchArtifact } from './domain-state/search-artifacts';
@@ -47,13 +52,33 @@ export const buildDomainStateUpdate = (
       }
       continue;
     }
-    if (booking.data.status === 'confirmed' && booking.data.type === 'flight') {
-      update.flightSelectionStatus = 'booked';
+    if (
+      booking.data.status === BOOKING_STATUSES.CONFIRMED &&
+      booking.data.type === BOOKING_TYPES.FLIGHT
+    ) {
+      update.flightSelectionStatus = SELECTION_STATUSES.BOOKED;
       update.selectedOptions = { flightId: booking.data.referenceId };
       update.flightBooking = booking.data;
-    } else if (booking.data.status === 'confirmed' && booking.data.type === 'hotel') {
-      update.hotelSelectionStatus = 'booked';
+    } else if (
+      booking.data.status === BOOKING_STATUSES.CONFIRMED &&
+      booking.data.type === BOOKING_TYPES.HOTEL
+    ) {
+      update.hotelSelectionStatus = SELECTION_STATUSES.BOOKED;
       update.selectedOptions = { hotelId: booking.data.referenceId };
+      update.hotelBooking = booking.data;
+    } else if (
+      booking.data.status === BOOKING_STATUSES.CANCELLED &&
+      booking.data.type === BOOKING_TYPES.FLIGHT
+    ) {
+      update.flightSelectionStatus = SELECTION_STATUSES.CANCELLED;
+      update.selectedOptions = { flightId: undefined };
+      update.flightBooking = booking.data;
+    } else if (
+      booking.data.status === BOOKING_STATUSES.CANCELLED &&
+      booking.data.type === BOOKING_TYPES.HOTEL
+    ) {
+      update.hotelSelectionStatus = SELECTION_STATUSES.CANCELLED;
+      update.selectedOptions = { hotelId: undefined };
       update.hotelBooking = booking.data;
     }
   }

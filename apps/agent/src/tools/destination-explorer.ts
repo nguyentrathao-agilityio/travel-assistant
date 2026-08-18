@@ -4,7 +4,7 @@ import { tool } from '@langchain/core/tools';
 import { DestinationExplorerInputSchema } from '@/schemas';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_PROVIDERS, TOOL_RESPONSE_FORMAT } from '@/constants';
 
 // Services
 import { getDestinationExplorer } from '@/services/destination-explorer';
@@ -16,7 +16,7 @@ export const destinationExplorerTool = tool(
   async (input) =>
     executeReadTool(
       getDestinationExplorer(input),
-      'travel-api',
+      TOOL_PROVIDERS.TRAVEL_API,
       TOOL_ERROR_MESSAGES.DESTINATION_EXPLORER
     ),
   {
@@ -33,6 +33,6 @@ export const destinationExplorerTool = tool(
 
     Only call when city is known.`,
     schema: DestinationExplorerInputSchema,
-    responseFormat: 'content_and_artifact',
+    responseFormat: TOOL_RESPONSE_FORMAT.CONTENT_AND_ARTIFACT,
   }
 );

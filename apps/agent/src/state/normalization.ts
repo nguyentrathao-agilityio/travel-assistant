@@ -1,5 +1,6 @@
 // State
 import type { GraphStateType } from './graph-state';
+import { SUPERVISOR_STATUSES } from './supervisor';
 
 /** Fills fields absent from checkpoints created before explicit business state was introduced. */
 export const normalizeGraphState = (state: Partial<GraphStateType>): Partial<GraphStateType> => ({
@@ -22,5 +23,5 @@ export const normalizeGraphState = (state: Partial<GraphStateType>): Partial<Gra
     requiredOperations: [],
     ...(state.execution ?? {}),
   },
-  supervisor: state.supervisor ?? { status: 'pending' },
+  supervisor: state.supervisor ?? { status: SUPERVISOR_STATUSES.PENDING },
 });

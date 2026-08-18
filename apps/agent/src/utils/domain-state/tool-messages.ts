@@ -1,5 +1,18 @@
 import { HumanMessage, ToolMessage } from '@langchain/core/messages';
 
+const BOOKING_EDIT_REJECTION_PREFIX = 'The user requested changes.';
+const CANCELLATION_REJECTION_PREFIX = 'The user rejected the cancellation.';
+
+/** Distinguishes a deliberate HITL rejection from a provider/tool failure. */
+export const isIntentionalBookingRejection = (message: ToolMessage): boolean => {
+  if (message.status !== 'error' || typeof message.content !== 'string') return false;
+
+  return (
+    message.content.startsWith(BOOKING_EDIT_REJECTION_PREFIX) ||
+    message.content.startsWith(CANCELLATION_REJECTION_PREFIX)
+  );
+};
+
 /** Returns only tool results produced after the latest user message. */
 export const latestTurnToolMessages = (messages: readonly unknown[]): ToolMessage[] => {
   let lastHumanIndex = -1;

@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { TripCostEstimateSchema, TripSummaryInputSchema, TripSummaryResultSchema } from '@/schemas';
 
 // Constants
-import { MAX_STOPS_LIMIT } from '@/constants';
+import { FLIGHT_SORT, MAX_STOPS_LIMIT } from '@/constants';
 
 // Services
 import { searchFlights } from './flights';
@@ -92,7 +92,7 @@ export const getTripSummary = async (
           destination,
           departure_date: resolvedStart,
           adults: travelers,
-          sort: 'price_asc',
+          sort: FLIGHT_SORT.PRICE_ASC,
         })
       : Promise.resolve(null),
     !skipHotel

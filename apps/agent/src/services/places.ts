@@ -10,7 +10,7 @@ import {
 } from '@/schemas';
 
 // Constants
-import { API_URL, ENDPOINTS } from '@/constants';
+import { API_URL, ENDPOINTS, PLACES_SORT } from '@/constants';
 
 // Utils
 import { fetchAndValidate } from '@/utils/http';
@@ -48,7 +48,7 @@ export const getPlaces = async (
       min_rating: input.min_rating?.toString(),
       price_level: input.price_level?.toString(),
       recommended: input.recommended ? 'true' : undefined,
-      sort: input.sort ?? 'rating_desc',
+      sort: input.sort ?? PLACES_SORT.RATING_DESC,
       limit: String(input.limit ?? 20),
       offset: String(input.offset ?? 0),
     }).filter((entry): entry is [string, string] => !!entry[1])

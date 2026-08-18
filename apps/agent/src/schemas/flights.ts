@@ -1,16 +1,19 @@
 import { z } from 'zod';
 
+// Constants
+import { FLIGHT_SORT } from '@/constants';
+
 // Utils
 import { isValidIsoDate, todayIso } from '@/utils/date';
 import { stripNulls } from '@/utils/schema';
 
 export const FlightSortSchema = z.enum([
-  'departure_asc',
-  'departure_desc',
-  'price_asc',
-  'price_desc',
-  'duration_asc',
-  'duration_desc',
+  FLIGHT_SORT.DEPARTURE_ASC,
+  FLIGHT_SORT.DEPARTURE_DESC,
+  FLIGHT_SORT.PRICE_ASC,
+  FLIGHT_SORT.PRICE_DESC,
+  FLIGHT_SORT.DURATION_ASC,
+  FLIGHT_SORT.DURATION_DESC,
 ]);
 
 const FlightInputShape = z.object({

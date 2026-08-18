@@ -7,7 +7,7 @@ import { Command } from '@langchain/langgraph';
 import { FlightBookingInputSchema, HotelBookingInputSchema } from '@/schemas';
 
 // Constants
-import { BOOKING_OPERATIONS } from '@/constants';
+import { BOOKING_OPERATIONS, DOMAIN_NODE_NAME } from '@/constants';
 
 // State
 import type { GraphStateType } from '@/state';
@@ -32,7 +32,7 @@ export const transferToBookFlightTool = tool(
     new Command({
       update: {
         bookingOperation: BOOKING_OPERATIONS.FLIGHT,
-        handoffTarget: 'booking',
+        handoffTarget: DOMAIN_NODE_NAME.BOOKING,
         messages: buildHandoffMessages(
           runtime,
           `Transferred to the booking agent for a flight. Call bookFlightTool now with exactly these ` +
@@ -59,7 +59,7 @@ export const transferToBookHotelTool = tool(
     new Command({
       update: {
         bookingOperation: BOOKING_OPERATIONS.HOTEL,
-        handoffTarget: 'booking',
+        handoffTarget: DOMAIN_NODE_NAME.BOOKING,
         messages: buildHandoffMessages(
           runtime,
           `Transferred to the booking agent for a hotel. Call bookHotelTool now with exactly these ` +

@@ -16,6 +16,7 @@ import {
   VISIT_DURATION_MIN,
   DEFAULT_STOPS,
   MAX_STOPS_LIMIT,
+  PLACES_SORT,
   ROUTE_MODE_MAP,
 } from '@/constants';
 
@@ -49,7 +50,7 @@ export const getRoute = async (inputData: {
   const placesUrl = `${API_URL}${ENDPOINTS.PLACES_SEARCH}?${new URLSearchParams({
     city,
     recommended: 'true',
-    sort: 'rating_desc',
+    sort: PLACES_SORT.RATING_DESC,
     limit: String(Math.min(maxStops, MAX_STOPS_LIMIT)),
   })}`;
 

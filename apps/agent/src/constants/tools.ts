@@ -14,6 +14,14 @@ export const TOOL_NAMES = {
   CANCEL_BOOKING: 'cancelBookingTool',
 } as const;
 
+export const TOOL_PROVIDERS = {
+  TRAVEL_API: 'travel-api',
+} as const;
+
+export const TOOL_RESPONSE_FORMAT = {
+  CONTENT_AND_ARTIFACT: 'content_and_artifact',
+} as const;
+
 export const BOOKING_TOOL_NAMES = [
   TOOL_NAMES.BOOK_FLIGHT,
   TOOL_NAMES.BOOK_HOTEL,

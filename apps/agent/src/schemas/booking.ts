@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+// Constants
+import { BOOKING_STATUSES, BOOKING_TYPES } from '@/constants';
+
 // Utils
 import { isValidIsoDate } from '@/utils/date';
 import { stripNulls } from '@/utils/schema';
@@ -42,13 +45,13 @@ export const CancelBookingInputSchema = z.object({
 export const ApiBookingSchema = z.object({
   id: z.string(),
   confirmation_code: z.string(),
-  type: z.enum(['flight', 'hotel']),
+  type: z.enum([BOOKING_TYPES.FLIGHT, BOOKING_TYPES.HOTEL]),
   reference_id: z.string(),
   customer_name: z.string(),
   customer_email: z.string(),
   total_price: z.number(),
   currency: z.string(),
-  status: z.enum(['confirmed', 'cancelled']),
+  status: z.enum([BOOKING_STATUSES.CONFIRMED, BOOKING_STATUSES.CANCELLED]),
   created_at: z.string(),
   details: z.record(z.unknown()).optional(),
   notes: z.string().nullish(),
@@ -58,13 +61,13 @@ export const ApiBookingSchema = z.object({
 export const BookingSchema = z.object({
   id: z.string(),
   confirmationCode: z.string(),
-  type: z.enum(['flight', 'hotel']),
+  type: z.enum([BOOKING_TYPES.FLIGHT, BOOKING_TYPES.HOTEL]),
   referenceId: z.string(),
   customerName: z.string(),
   customerEmail: z.string(),
   totalPrice: z.number(),
   currency: z.string(),
-  status: z.enum(['confirmed', 'cancelled']),
+  status: z.enum([BOOKING_STATUSES.CONFIRMED, BOOKING_STATUSES.CANCELLED]),
   createdAt: z.string(),
   details: z.record(z.unknown()).optional(),
   notes: z.string().optional(),

@@ -4,7 +4,7 @@ import { tool } from '@langchain/core/tools';
 import { RouteInputSchema } from '@/schemas';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_PROVIDERS, TOOL_RESPONSE_FORMAT } from '@/constants';
 
 // Services
 import { getRoute } from '@/services/route';
@@ -13,7 +13,8 @@ import { getRoute } from '@/services/route';
 import { executeReadTool } from '@/utils/tool-contract';
 
 export const routeTool = tool(
-  async (input) => executeReadTool(getRoute(input), 'travel-api', TOOL_ERROR_MESSAGES.ROUTE),
+  async (input) =>
+    executeReadTool(getRoute(input), TOOL_PROVIDERS.TRAVEL_API, TOOL_ERROR_MESSAGES.ROUTE),
   {
     name: TOOL_NAMES.ROUTE,
     description: `Build a landmark tour itinerary for a city — ordered stops with travel times and transport modes.
@@ -22,6 +23,6 @@ export const routeTool = tool(
     
     Only call this tool when city is available.`,
     schema: RouteInputSchema,
-    responseFormat: 'content_and_artifact',
+    responseFormat: TOOL_RESPONSE_FORMAT.CONTENT_AND_ARTIFACT,
   }
 );

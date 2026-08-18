@@ -4,7 +4,7 @@ import { tool } from '@langchain/core/tools';
 import { TripSummaryInputSchema, TripSummaryToolSchema } from '@/schemas';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_PROVIDERS, TOOL_RESPONSE_FORMAT } from '@/constants';
 
 // Services
 import { getTripSummary } from '@/services/trip-summary';
@@ -17,7 +17,7 @@ export const tripSummaryTool = tool(
   async (input) =>
     executeReadTool(
       parseToolInput(TripSummaryInputSchema, input).then(getTripSummary),
-      'travel-api',
+      TOOL_PROVIDERS.TRAVEL_API,
       TOOL_ERROR_MESSAGES.TRIP_SUMMARY
     ),
   {
@@ -41,6 +41,6 @@ export const tripSummaryTool = tool(
     Once destination and (flightOrigin or skipFlights) are known, call immediately — missing
     optional fields are not a reason to ask another question first.`,
     schema: TripSummaryToolSchema,
-    responseFormat: 'content_and_artifact',
+    responseFormat: TOOL_RESPONSE_FORMAT.CONTENT_AND_ARTIFACT,
   }
 );

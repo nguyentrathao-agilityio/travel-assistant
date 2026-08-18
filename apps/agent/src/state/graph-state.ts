@@ -28,13 +28,14 @@ const SelectedFlightSchema = z.object({
   return: FlightSchema.optional(),
 });
 
-export const SelectionStatusSchema = z.enum(['selected', 'confirmed', 'booked']);
+export const SelectionStatusSchema = z.enum(['selected', 'confirmed', 'booked', 'cancelled']);
 export type SelectionStatus = z.infer<typeof SelectionStatusSchema>;
 
 export const SELECTION_STATUSES = {
   SELECTED: 'selected',
   CONFIRMED: 'confirmed',
   BOOKED: 'booked',
+  CANCELLED: 'cancelled',
 } as const satisfies Record<string, SelectionStatus>;
 
 export const GraphState = new StateSchema({

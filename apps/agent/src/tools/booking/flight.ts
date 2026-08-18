@@ -4,7 +4,7 @@ import { tool } from '@langchain/core/tools';
 import { FlightBookingInputSchema } from '@/schemas';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_RESPONSE_FORMAT } from '@/constants';
 
 // Services
 import { getFlight, submitFlightBooking } from '@/services';
@@ -51,6 +51,6 @@ export const bookFlightTool = tool(
     Human approval is enforced by agent middleware before this tool executes. This tool revalidates
     price and availability immediately before booking and stops if the selected flight changed.`,
     schema: FlightBookingInputSchema,
-    responseFormat: 'content_and_artifact',
+    responseFormat: TOOL_RESPONSE_FORMAT.CONTENT_AND_ARTIFACT,
   }
 );

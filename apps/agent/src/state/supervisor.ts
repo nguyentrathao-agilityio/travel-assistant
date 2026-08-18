@@ -11,13 +11,27 @@ export const SUPERVISOR_NEXT_NODE_NAMES = [
   FINALIZATION_NODE_NAME,
 ] as const;
 
+export const SUPERVISOR_STATUSES = {
+  PENDING: 'pending',
+  COMPLETE: 'complete',
+  INCOMPLETE: 'incomplete',
+  FAILED: 'failed',
+} as const;
+
+const SupervisorStatusSchema = z.enum([
+  SUPERVISOR_STATUSES.PENDING,
+  SUPERVISOR_STATUSES.COMPLETE,
+  SUPERVISOR_STATUSES.INCOMPLETE,
+  SUPERVISOR_STATUSES.FAILED,
+]);
+
 export const SupervisorStateSchema = z
   .object({
-    status: z.enum(['pending', 'complete', 'incomplete', 'failed']).default('pending'),
+    status: SupervisorStatusSchema.default(SUPERVISOR_STATUSES.PENDING),
     nextNode: z.enum(SUPERVISOR_NEXT_NODE_NAMES).optional(),
     reason: z.string().optional(),
   })
-  .default(() => ({ status: 'pending' as const }));
+  .default(() => ({ status: SUPERVISOR_STATUSES.PENDING }));
 
 export type SupervisorState = z.infer<typeof SupervisorStateSchema>;
 

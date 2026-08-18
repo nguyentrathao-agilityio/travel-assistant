@@ -114,6 +114,36 @@ describe('domain state persistence', () => {
     expect(update.hotelBooking).toEqual(booking);
   });
 
+  it.each(['flight', 'hotel'] as const)(
+    'persists a cancelled %s booking and marks its selection cancelled',
+    (type) => {
+      const booking = {
+        id: `booking-cancelled-${type}`,
+        confirmationCode: `CANCEL-${type}`,
+        type,
+        referenceId: `${type}-1`,
+        customerName: 'Nguyen Van A',
+        customerEmail: 'a@example.com',
+        totalPrice: 100,
+        currency: 'USD',
+        status: 'cancelled' as const,
+        createdAt: '2026-08-05T10:00:00Z',
+        summary: `${type} cancelled`,
+      };
+
+      const update = buildDomainStateUpdate('booking', [
+        new HumanMessage('Cancel it'),
+        toolResult('cancelBookingTool', booking),
+      ]);
+
+      expect(update).toMatchObject({
+        [`${type}Booking`]: booking,
+        [`${type}SelectionStatus`]: 'cancelled',
+        selectedOptions: { [`${type}Id`]: undefined },
+      });
+    }
+  );
+
   it('warns instead of silently dropping an invalid booking tool artifact', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 

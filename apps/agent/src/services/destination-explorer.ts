@@ -3,6 +3,9 @@ import { z } from 'zod';
 // Schemas
 import { DestinationExplorerInputSchema, DestinationExplorerResultSchema } from '@/schemas';
 
+// Constants
+import { PLACES_SORT } from '@/constants';
+
 // Services
 import { getWeather } from './weather';
 import { getLocalTips } from './tips';
@@ -23,7 +26,12 @@ export const getDestinationExplorer = async (
 
   const tips = await getLocalTips({ city, country: resolvedCountry });
 
-  const places = await getPlaces({ city, recommended: true, sort: 'rating_desc', limit: 3 });
+  const places = await getPlaces({
+    city,
+    recommended: true,
+    sort: PLACES_SORT.RATING_DESC,
+    limit: 3,
+  });
 
   const parsed = DestinationExplorerResultSchema.safeParse({ city, places, tips, weather });
 

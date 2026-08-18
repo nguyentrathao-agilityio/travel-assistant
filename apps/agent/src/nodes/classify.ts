@@ -7,7 +7,13 @@ import { z } from 'zod';
 import { IntentClassificationSchema, type IntentClassification } from '@/schemas';
 
 // Constants
-import { FALLBACK_INTENT, MAX_CLASSIFY_MESSAGES, OPENAI_API_KEY } from '@/constants';
+import {
+  DOMAIN_NODE_NAME,
+  FALLBACK_INTENT,
+  INFRASTRUCTURE_NODE_NAME,
+  MAX_CLASSIFY_MESSAGES,
+  OPENAI_API_KEY,
+} from '@/constants';
 
 // Infrastructure
 import { createChatModel } from '@/infrastructure/llm';
@@ -172,8 +178,8 @@ const toCommand = (state: GraphStateType, result: IntentClassification): Classif
         ...fields,
       },
       execution: {
-        currentNode: 'classify',
-        completedTasks: ['classify'],
+        currentNode: INFRASTRUCTURE_NODE_NAME.CLASSIFY,
+        completedTasks: [INFRASTRUCTURE_NODE_NAME.CLASSIFY],
         requiredOperations: result.requiredOperations,
       },
       handoffTarget: undefined,
@@ -209,7 +215,7 @@ const isThemeControlRequest = (state: GraphStateType): boolean => {
 export const classifyNode = async (state: GraphStateType): Promise<ClassifyCommand> => {
   if (isThemeControlRequest(state)) {
     return toCommand(state, {
-      intent: 'general',
+      intent: DOMAIN_NODE_NAME.GENERAL,
       confidence: 1,
       requiredOperations: [],
       refusalMessage: null,

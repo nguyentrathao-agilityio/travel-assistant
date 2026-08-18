@@ -4,7 +4,7 @@ import { tool } from '@langchain/core/tools';
 import { HotelInputSchema, HotelToolSchema } from '@/schemas';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_PROVIDERS, TOOL_RESPONSE_FORMAT } from '@/constants';
 
 // Services
 import { searchHotels } from '@/services/hotel';
@@ -17,7 +17,7 @@ export const hotelTool = tool(
   async (input) =>
     executeReadTool(
       parseToolInput(HotelInputSchema, input).then(searchHotels),
-      'travel-api',
+      TOOL_PROVIDERS.TRAVEL_API,
       TOOL_ERROR_MESSAGES.HOTELS
     ),
   {
@@ -42,6 +42,6 @@ export const hotelTool = tool(
       - Always pass availableOnly: true unless the user explicitly wants unavailable options too.
       - Only call when city, checkIn, and checkOut are known.`,
     schema: HotelToolSchema,
-    responseFormat: 'content_and_artifact',
+    responseFormat: TOOL_RESPONSE_FORMAT.CONTENT_AND_ARTIFACT,
   }
 );

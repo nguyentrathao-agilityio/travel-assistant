@@ -4,7 +4,7 @@ import { tool } from '@langchain/core/tools';
 import { PlacesInputSchema } from '@/schemas';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_PROVIDERS, TOOL_RESPONSE_FORMAT } from '@/constants';
 
 // Services
 import { getPlaces } from '@/services/places';
@@ -13,7 +13,8 @@ import { getPlaces } from '@/services/places';
 import { executeReadTool } from '@/utils/tool-contract';
 
 export const placesTool = tool(
-  async (input) => executeReadTool(getPlaces(input), 'travel-api', TOOL_ERROR_MESSAGES.PLACES),
+  async (input) =>
+    executeReadTool(getPlaces(input), TOOL_PROVIDERS.TRAVEL_API, TOOL_ERROR_MESSAGES.PLACES),
   {
     name: TOOL_NAMES.PLACES,
     description: `Search places of interest in a city — attractions, restaurants, cafes, activities, nightlife, and shopping.
@@ -33,6 +34,6 @@ export const placesTool = tool(
       - Do not call this tool more than once per request.
       - Only call when city is available.`,
     schema: PlacesInputSchema,
-    responseFormat: 'content_and_artifact',
+    responseFormat: TOOL_RESPONSE_FORMAT.CONTENT_AND_ARTIFACT,
   }
 );

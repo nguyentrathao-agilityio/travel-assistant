@@ -349,13 +349,68 @@ describe('supervisor validation', () => {
   it.each([
     ['flight', { flightSelectionStatus: 'booked' }],
     ['hotel', { hotelSelectionStatus: 'booked' }],
-    ['cancel', { messages: [new HumanMessage('Cancel it'), toolResult('cancelBookingTool', {})] }],
+    [
+      'cancel',
+      {
+        messages: [
+          new HumanMessage('Cancel it'),
+          toolResult('cancelBookingTool', {
+            id: 'booking-1',
+            confirmationCode: 'ABC123',
+            type: 'flight',
+            referenceId: 'flight-1',
+            customerName: 'Nguyen Van A',
+            customerEmail: 'a@example.com',
+            totalPrice: 100,
+            currency: 'USD',
+            status: 'cancelled',
+            createdAt: '2026-08-05T10:00:00Z',
+            summary: 'Flight cancelled',
+          }),
+        ],
+      },
+    ],
   ] as const)('validates the %s operation through the booking agent', (bookingOperation, data) => {
     const result = validateUnifiedBookingResult(
       state({ bookingOperation, ...data } as Partial<GraphStateType>)
     );
 
     expect(result.status).toBe('complete');
+  });
+
+  it('does not treat an empty cancellation tool result as success', () => {
+    const result = validateUnifiedBookingResult(
+      state({
+        bookingOperation: 'cancel',
+        messages: [new HumanMessage('Cancel it'), toolResult('cancelBookingTool', {})],
+      })
+    );
+
+    expect(result).toMatchObject({ status: 'incomplete' });
+  });
+
+  it('treats an intentional cancellation rejection as a completed user decision', () => {
+    const rejection = new ToolMessage({
+      name: 'cancelBookingTool',
+      content:
+        'The user rejected the cancellation. Booking ABC123 remains active and was NOT cancelled.',
+      tool_call_id: 'call-cancel',
+      status: 'error',
+    });
+    const current = state({
+      bookingOperation: 'cancel',
+      messages: [new HumanMessage('Cancel it'), rejection],
+      execution: { ...state().execution, currentNode: 'booking' },
+    });
+
+    expect(validateUnifiedBookingResult(current)).toMatchObject({
+      status: 'complete',
+      reason: 'Cancellation was rejected by the user.',
+    });
+    expect(supervisorNode(current)).toMatchObject({
+      supervisor: { status: 'complete', nextNode: 'saveMemory' },
+      execution: { errors: undefined },
+    });
   });
 
   it('requires an operation before validating the booking agent result', () => {

@@ -1,5 +1,5 @@
 // Constants
-import { contentAndArtifact } from '@/constants';
+import { contentAndArtifact, TOOL_PROVIDERS } from '@/constants';
 
 // Utils
 import { mapToolError } from './tool-contract';
@@ -8,7 +8,7 @@ export const formatBookingToolResult = (result: unknown): [string, unknown] =>
   contentAndArtifact(result);
 
 export const bookingToolError = (error: unknown, fallbackMessage: string) => ({
-  ...mapToolError(error, 'travel-api', fallbackMessage),
+  ...mapToolError(error, TOOL_PROVIDERS.TRAVEL_API, fallbackMessage),
   retryable: false,
 });
 

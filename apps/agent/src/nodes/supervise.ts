@@ -2,10 +2,12 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 
 // Constants
 import {
-  BOOKING_TYPES,
   BOOKING_OPERATIONS,
+  BOOKING_STATUSES,
+  BOOKING_TYPES,
   DOMAIN_NODE_NAME,
   FINALIZATION_NODE_NAME,
+  INFRASTRUCTURE_NODE_NAME,
   MAX_RETRIES_PER_NODE,
   RETRYABLE_DOMAIN_NODE_NAMES,
   TOOL_NAMES,
@@ -16,17 +18,24 @@ import {
 
 // Utils
 import { failureValidation, writeFailureResult } from '@/utils/domain-state/tool-failures';
-import { latestTurnToolMessages as latestTurnToolMessagesFromList } from '@/utils/domain-state/tool-messages';
+import {
+  isIntentionalBookingRejection,
+  latestTurnToolMessages as latestTurnToolMessagesFromList,
+} from '@/utils/domain-state/tool-messages';
 import {
   missingOperationsResult,
   missingRequiredOperations,
 } from '@/utils/domain-state/required-operations';
+
+// Schemas
+import { BookingSchema } from '@/schemas/booking';
 
 // State
 import {
   GRAPH_ERROR_CODES,
   SELECTION_STATUSES,
   SUPERVISOR_NEXT_NODE_NAMES,
+  SUPERVISOR_STATUSES,
   type GraphError,
   type GraphStateType,
   type GraphStateUpdate,
@@ -62,7 +71,7 @@ const searchPreconditionFailure = (
 
   if (!requestDestination(state) && latestTurnToolMessages(state).length === 0) {
     return {
-      status: 'incomplete',
+      status: SUPERVISOR_STATUSES.INCOMPLETE,
       reason: labels.destinationReason,
       missingFields: ['destination'],
     };
@@ -100,9 +109,9 @@ export const validateExploreResult = (state: GraphStateType): ValidationResult =
   );
 
   return hasResult
-    ? { status: 'complete', reason: 'Explore result is available.' }
+    ? { status: SUPERVISOR_STATUSES.COMPLETE, reason: 'Explore result is available.' }
     : {
-        status: 'incomplete',
+        status: SUPERVISOR_STATUSES.INCOMPLETE,
         reason: 'Explore completed without a structured result.',
         retryable: true,
       };
@@ -116,7 +125,7 @@ export const validatePlanningResult = (state: GraphStateType): ValidationResult 
   // Honor an explicit booking handoff before assessing ordinary planning output.
   if (state.handoffTarget) {
     return {
-      status: 'complete',
+      status: SUPERVISOR_STATUSES.COMPLETE,
       reason: `Planning requested the ${state.handoffTarget} handoff.`,
       nextNode: state.handoffTarget,
     };
@@ -146,14 +155,14 @@ export const validatePlanningResult = (state: GraphStateType): ValidationResult 
 
   return hasResult
     ? {
-        status: 'complete',
+        status: SUPERVISOR_STATUSES.COMPLETE,
         reason:
           results.hotels?.results.length === 0
             ? 'Hotel search completed with no matching results.'
             : 'Planning result is available.',
       }
     : {
-        status: 'incomplete',
+        status: SUPERVISOR_STATUSES.INCOMPLETE,
         reason: 'Planning completed without a structured result.',
         retryable: true,
       };
@@ -188,16 +197,18 @@ const validateBookingResult = (state: GraphStateType, type: BookingType): Valida
 
   const { isBooked, hasDraft, missingField } = BOOKING_STATE_ACCESSORS[type];
 
-  if (isBooked(state)) return { status: 'complete', reason: `${type} booking is confirmed.` };
+  if (isBooked(state)) {
+    return { status: SUPERVISOR_STATUSES.COMPLETE, reason: `${type} booking is confirmed.` };
+  }
   if (hasDraft(state)) {
     return {
-      status: 'incomplete',
+      status: SUPERVISOR_STATUSES.INCOMPLETE,
       reason: `${type} booking remains a draft or requires user input/approval.`,
     };
   }
 
   return {
-    status: 'incomplete',
+    status: SUPERVISOR_STATUSES.INCOMPLETE,
     reason: `${type} booking requires an exact selected option.`,
     missingFields: [missingField],
   };
@@ -211,19 +222,32 @@ export const validateFlightResult = (state: GraphStateType): ValidationResult =>
 export const validateHotelResult = (state: GraphStateType): ValidationResult =>
   validateBookingResult(state, BOOKING_TYPES.HOTEL);
 
-/** Checks a cancellation operation for tool failures or a completed interaction. */
+/** Checks a cancellation operation for a confirmed cancellation or a deliberate rejection. */
 export const validateCancellationResult = (state: GraphStateType): ValidationResult => {
+  const cancellationMessage = [...latestTurnToolMessages(state)]
+    .reverse()
+    .find(({ name }) => name === TOOL_NAMES.CANCEL_BOOKING);
+
+  if (cancellationMessage && isIntentionalBookingRejection(cancellationMessage)) {
+    return {
+      status: SUPERVISOR_STATUSES.COMPLETE,
+      reason: 'Cancellation was rejected by the user.',
+    };
+  }
+
   const failure = failureValidation(state, 'Cancellation');
 
   if (failure) return writeFailureResult(failure, 'cancellation');
 
-  const hasInteraction = latestTurnToolMessages(state).length > 0;
+  const booking = BookingSchema.safeParse(cancellationMessage?.artifact);
+
+  if (booking.success && booking.data.status === BOOKING_STATUSES.CANCELLED) {
+    return { status: SUPERVISOR_STATUSES.COMPLETE, reason: 'Cancellation is confirmed.' };
+  }
 
   return {
-    status: hasInteraction ? 'complete' : 'incomplete',
-    reason: hasInteraction
-      ? 'Cancellation interaction completed.'
-      : 'Cancellation requires a booking identifier or user confirmation.',
+    status: SUPERVISOR_STATUSES.INCOMPLETE,
+    reason: 'Cancellation requires a confirmed cancellation result or user rejection.',
   };
 };
 
@@ -238,7 +262,7 @@ export const validateUnifiedBookingResult = (state: GraphStateType): ValidationR
 
   if (!operation) {
     return {
-      status: 'incomplete',
+      status: SUPERVISOR_STATUSES.INCOMPLETE,
       reason: 'Booking requires an operation.',
       missingFields: ['bookingOperation'],
     };
@@ -252,7 +276,10 @@ const VALIDATOR_BY_NODE: Record<DomainNode, (state: GraphStateType) => Validatio
   [DOMAIN_NODE_NAME.EXPLORE]: validateExploreResult,
   [DOMAIN_NODE_NAME.PLAN]: validatePlanningResult,
   [DOMAIN_NODE_NAME.BOOKING]: validateUnifiedBookingResult,
-  [DOMAIN_NODE_NAME.GENERAL]: () => ({ status: 'complete', reason: 'General response completed.' }),
+  [DOMAIN_NODE_NAME.GENERAL]: () => ({
+    status: SUPERVISOR_STATUSES.COMPLETE,
+    reason: 'General response completed.',
+  }),
 };
 
 /** Runs the validator registered for the given domain node. */
@@ -297,15 +324,15 @@ export const supervisorNode = (
   if (!isDomainNode(node)) {
     return {
       supervisor: {
-        status: 'failed',
-        nextNode: 'saveMemory',
+        status: SUPERVISOR_STATUSES.FAILED,
+        nextNode: FINALIZATION_NODE_NAME,
         reason: `Unknown supervisor source node: ${node ?? 'missing'}.`,
       },
       execution: {
         missingFields: [],
         errors: [
           {
-            node: 'supervisor',
+            node: INFRASTRUCTURE_NODE_NAME.SUPERVISOR,
             code: GRAPH_ERROR_CODES.PROVIDER_ERROR,
             message: 'Unknown supervisor source node.',
             retryable: false,
@@ -346,8 +373,8 @@ export const supervisorNode = (
 
     return {
       supervisor: {
-        status: 'failed',
-        nextNode: 'saveMemory',
+        status: SUPERVISOR_STATUSES.FAILED,
+        nextNode: FINALIZATION_NODE_NAME,
         reason: `${validation.reason} Maximum retries reached.`,
       },
       execution: {
@@ -366,7 +393,11 @@ export const supervisorNode = (
 
   // Finalize completed or non-retryable outcomes with their collected diagnostics.
   return {
-    supervisor: { status: validation.status, nextNode: 'saveMemory', reason: validation.reason },
+    supervisor: {
+      status: validation.status,
+      nextNode: FINALIZATION_NODE_NAME,
+      reason: validation.reason,
+    },
     execution: {
       missingFields: validation.missingFields ?? [],
       errors: validation.missingFields?.length
@@ -382,7 +413,7 @@ export const supervisorNode = (
         : validation.error
           ? [validation.error]
           : undefined,
-      retryCount: validation.status === 'complete' ? { [node]: 0 } : undefined,
+      retryCount: validation.status === SUPERVISOR_STATUSES.COMPLETE ? { [node]: 0 } : undefined,
     },
   };
 };
@@ -391,5 +422,5 @@ export const supervisorNode = (
 export const routeAfterSupervisor = (state: GraphStateType): SupervisorRoute => {
   const route = state.supervisor.nextNode;
 
-  return route && SUPERVISOR_ROUTES.includes(route) ? route : 'saveMemory';
+  return route && SUPERVISOR_ROUTES.includes(route) ? route : FINALIZATION_NODE_NAME;
 };

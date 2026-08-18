@@ -4,7 +4,7 @@ import { tool } from '@langchain/core/tools';
 import { TipsInputSchema } from '@/schemas';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_PROVIDERS, TOOL_RESPONSE_FORMAT } from '@/constants';
 
 // Services
 import { getLocalTips } from '@/services/tips';
@@ -14,7 +14,7 @@ import { executeReadTool } from '@/utils/tool-contract';
 
 export const tipsTool = tool(
   async (input) =>
-    executeReadTool(getLocalTips(input), 'travel-api', TOOL_ERROR_MESSAGES.LOCAL_TIPS),
+    executeReadTool(getLocalTips(input), TOOL_PROVIDERS.TRAVEL_API, TOOL_ERROR_MESSAGES.LOCAL_TIPS),
   {
     name: TOOL_NAMES.LOCAL_TIPS,
     description: `Get informal, practical local tips for a city or country — covering transport, money, street safety, culture, food, connectivity, health, etiquette, best time to visit, and language.
@@ -30,6 +30,6 @@ export const tipsTool = tool(
 
     Only call when country is known.`,
     schema: TipsInputSchema,
-    responseFormat: 'content_and_artifact',
+    responseFormat: TOOL_RESPONSE_FORMAT.CONTENT_AND_ARTIFACT,
   }
 );

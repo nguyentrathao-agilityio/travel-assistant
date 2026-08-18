@@ -1,5 +1,8 @@
 import { AIMessage } from '@langchain/core/messages';
 
+// Constants
+import { INFRASTRUCTURE_NODE_NAME } from '@/constants';
+
 // State
 import type { GraphStateType, GraphStateUpdate } from '@/state';
 
@@ -14,7 +17,7 @@ const DEFAULT_OUT_OF_SCOPE_RESPONSE =
 export const refusalNode = (state: GraphStateType): GraphStateUpdate => ({
   messages: [new AIMessage(state.refusalMessage ?? DEFAULT_OUT_OF_SCOPE_RESPONSE)],
   execution: {
-    currentNode: 'refusal',
-    completedTasks: ['refusal'],
+    currentNode: INFRASTRUCTURE_NODE_NAME.REFUSAL,
+    completedTasks: [INFRASTRUCTURE_NODE_NAME.REFUSAL],
   },
 });

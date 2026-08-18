@@ -8,22 +8,23 @@ import { ToolErrorSchema } from '@/schemas';
 import {
   GRAPH_ERROR_CODE_BY_TOOL_ERROR_CODE,
   GRAPH_ERROR_CODES,
+  SUPERVISOR_STATUSES,
   type GraphError,
   type GraphStateType,
   type ValidationResult,
 } from '@/state';
 
 // Utils
-import { latestResultPerTool } from './tool-messages';
-
-const isErrorArtifact = (artifact: unknown): boolean =>
-  typeof artifact === 'object' && artifact !== null && 'error' in artifact;
+import { isIntentionalBookingRejection, latestResultPerTool } from './tool-messages';
+import { isErrorArtifact } from '../artifact';
 
 type ToolFailure = { name: string; error: GraphError };
 
 /** Extracts a structured error for each failed tool call in the current turn. */
 const toolFailures = (state: GraphStateType): ToolFailure[] =>
   latestResultPerTool(state.messages).flatMap((message): ToolFailure[] => {
+    if (isIntentionalBookingRejection(message)) return [];
+
     // Convert both structured and legacy failures into one graph error contract.
     if (message.status !== 'error' && !isErrorArtifact(message.artifact)) return [];
     const name = message.name ?? 'unknownTool';
@@ -76,7 +77,7 @@ export const failureValidation = (
   const retryable = failures.every(({ error }) => error.retryable);
 
   return {
-    status: 'failed',
+    status: SUPERVISOR_STATUSES.FAILED,
     reason: `${label} failed: ${failures.map(({ name }) => name).join(', ')}`,
     retryable,
     error: failures[0].error,
@@ -89,7 +90,7 @@ export const writeFailureResult = (failure: ValidationResult, label: string): Va
   const isUnknownOutcome = failure.error?.code === GRAPH_ERROR_CODES.TIMEOUT;
 
   return {
-    status: 'failed',
+    status: SUPERVISOR_STATUSES.FAILED,
     reason: isUnknownOutcome
       ? `The ${label} status is unknown and must be verified before retrying.`
       : failure.reason,

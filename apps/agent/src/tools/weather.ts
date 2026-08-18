@@ -4,7 +4,7 @@ import { tool } from '@langchain/core/tools';
 import { WeatherInputSchema } from '@/schemas';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_RESPONSE_FORMAT } from '@/constants';
 
 // Services
 import { getWeather } from '@/services/weather';
@@ -29,6 +29,6 @@ export const weatherTool = tool(
 
     Only call this tool when city is available.`,
     schema: WeatherInputSchema,
-    responseFormat: 'content_and_artifact',
+    responseFormat: TOOL_RESPONSE_FORMAT.CONTENT_AND_ARTIFACT,
   }
 );

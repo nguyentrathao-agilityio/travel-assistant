@@ -10,3 +10,4 @@ export * from './knowledge';
 export * from './tools';
 export * from './agents';
 export * from './tips';
+export * from './search';

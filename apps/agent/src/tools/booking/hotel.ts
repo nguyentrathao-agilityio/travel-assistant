@@ -4,7 +4,7 @@ import { tool } from '@langchain/core/tools';
 import { HotelBookingInputSchema } from '@/schemas';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_RESPONSE_FORMAT } from '@/constants';
 
 // Services
 import { revalidateHotel, submitHotelBooking } from '@/services';
@@ -51,6 +51,6 @@ export const bookHotelTool = tool(
     and phone. Human approval is enforced by agent middleware before this tool executes. This tool
     revalidates availability immediately before booking and stops if the hotel details changed.`,
     schema: HotelBookingInputSchema,
-    responseFormat: 'content_and_artifact',
+    responseFormat: TOOL_RESPONSE_FORMAT.CONTENT_AND_ARTIFACT,
   }
 );

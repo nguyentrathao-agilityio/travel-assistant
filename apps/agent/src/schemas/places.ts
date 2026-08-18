@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+// Constants
+import { PLACES_SORT } from '@/constants';
+
 export const PlacesCategorySchema = z.enum([
   'attraction',
   'restaurant',
@@ -10,12 +13,12 @@ export const PlacesCategorySchema = z.enum([
 ]);
 
 export const PlacesSortSchema = z.enum([
-  'rating_desc',
-  'rating_asc',
-  'name',
-  'price_asc',
-  'price_desc',
-  'reviews_desc',
+  PLACES_SORT.RATING_DESC,
+  PLACES_SORT.RATING_ASC,
+  PLACES_SORT.NAME,
+  PLACES_SORT.PRICE_ASC,
+  PLACES_SORT.PRICE_DESC,
+  PLACES_SORT.REVIEWS_DESC,
 ]);
 
 export const PlacesInputSchema = z.object({

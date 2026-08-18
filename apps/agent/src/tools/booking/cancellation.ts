@@ -4,7 +4,7 @@ import { tool } from '@langchain/core/tools';
 import { CancelBookingInputSchema } from '@/schemas';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_RESPONSE_FORMAT } from '@/constants';
 
 // Services
 import { cancelBooking, getBooking } from '@/services';
@@ -32,6 +32,6 @@ export const cancelBookingTool = tool(
     description: `Cancel an existing flight or hotel booking by booking ID or confirmation code.
     Human approval is enforced by agent middleware before this tool executes.`,
     schema: CancelBookingInputSchema,
-    responseFormat: 'content_and_artifact',
+    responseFormat: TOOL_RESPONSE_FORMAT.CONTENT_AND_ARTIFACT,
   }
 );

@@ -9,6 +9,12 @@ export const DOMAIN_NODE_NAME = {
   GENERAL: 'general',
 } as const satisfies Record<string, DomainAgentNodeName>;
 
+export const INFRASTRUCTURE_NODE_NAME = {
+  CLASSIFY: 'classify',
+  REFUSAL: 'refusal',
+  SUPERVISOR: 'supervisor',
+} as const;
+
 /** Domain nodes whose turn can be safely retried on a transient failure. */
 export const RETRYABLE_DOMAIN_NODE_NAMES: ReadonlySet<string> = new Set([
   DOMAIN_NODE_NAME.EXPLORE,
@@ -17,6 +23,11 @@ export const RETRYABLE_DOMAIN_NODE_NAMES: ReadonlySet<string> = new Set([
 
 export const BOOKING_TYPES = { FLIGHT: 'flight', HOTEL: 'hotel' } as const;
 export type BookingType = (typeof BOOKING_TYPES)[keyof typeof BOOKING_TYPES];
+
+export const BOOKING_STATUSES = {
+  CONFIRMED: 'confirmed',
+  CANCELLED: 'cancelled',
+} as const;
 
 export const BOOKING_OPERATIONS = {
   FLIGHT: 'flight',

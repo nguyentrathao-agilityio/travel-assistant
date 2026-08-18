@@ -1,4 +1,5 @@
 export * from './date';
+export * from './artifact';
 export * from './http';
 export * from './schema';
 export * from './create-agent';

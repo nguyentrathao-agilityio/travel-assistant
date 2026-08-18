@@ -5,7 +5,7 @@ import { TOOL_NAMES } from '@/constants';
 import { PLANNING_OPERATIONS, type PlanningOperation } from '@/schemas';
 
 // State
-import type { GraphStateType, ValidationResult } from '@/state';
+import { SUPERVISOR_STATUSES, type GraphStateType, type ValidationResult } from '@/state';
 
 // Utils
 import { latestTurnToolMessages } from './tool-messages';
@@ -47,6 +47,6 @@ export const missingOperationsResult = (
   const madeProgress = missingOperations.length < requiredOperations.length;
 
   return madeProgress
-    ? { status: 'incomplete', reason, retryable: true }
-    : { status: 'incomplete', reason, missingFields: missingOperations };
+    ? { status: SUPERVISOR_STATUSES.INCOMPLETE, reason, retryable: true }
+    : { status: SUPERVISOR_STATUSES.INCOMPLETE, reason, missingFields: missingOperations };
 };

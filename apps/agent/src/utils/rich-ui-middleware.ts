@@ -7,8 +7,8 @@ import { ToolErrorSchema } from '@/schemas';
 // Constants
 import { TOOL_NAMES, TOOL_READY_OUTPUT, WRITE_TOOL_NAMES } from '@/constants';
 
-const isErrorArtifact = (artifact: unknown): boolean =>
-  typeof artifact === 'object' && artifact !== null && 'error' in artifact;
+// Utils
+import { isErrorArtifact } from '@/utils/artifact';
 
 const recordOf = (artifact: unknown): Record<string, unknown> | undefined =>
   typeof artifact === 'object' && artifact !== null

@@ -4,7 +4,7 @@ import { tool } from '@langchain/core/tools';
 import { FlightInputSchema, FlightToolSchema } from '@/schemas';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_PROVIDERS, TOOL_RESPONSE_FORMAT } from '@/constants';
 
 // Services
 import { searchFlights } from '@/services/flights';
@@ -17,7 +17,7 @@ export const flightsTool = tool(
   async (input) =>
     executeReadTool(
       parseToolInput(FlightInputSchema, input).then(searchFlights),
-      'travel-api',
+      TOOL_PROVIDERS.TRAVEL_API,
       TOOL_ERROR_MESSAGES.FLIGHTS
     ),
   {
@@ -41,6 +41,6 @@ export const flightsTool = tool(
       - If unsure of the correct IATA code, ask the user which airport they prefer.
       - Only call when all required fields are present.`,
     schema: FlightToolSchema,
-    responseFormat: 'content_and_artifact',
+    responseFormat: TOOL_RESPONSE_FORMAT.CONTENT_AND_ARTIFACT,
   }
 );

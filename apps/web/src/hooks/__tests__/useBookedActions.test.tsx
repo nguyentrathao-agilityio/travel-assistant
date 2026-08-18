@@ -5,7 +5,9 @@ import { useBookedActions } from '@/hooks/useBookedActions';
 
 const mockState: {
   flights?: { departure?: object; return?: object } | null;
+  flightBooking?: object | null;
   hotel?: object | null;
+  hotelBooking?: object | null;
 } = {};
 
 jest.mock('@/hooks/useTripState', () => ({
@@ -27,6 +29,9 @@ jest.mock('@/components', () => ({
   HotelOptionItem: ({ hotel }: { hotel: { name: string } }) => (
     <div data-testid="hotel-option-item">{hotel.name}</div>
   ),
+  BookingResultCard: ({ booking }: { booking: { confirmationCode: string } }) => (
+    <div data-testid="booking-result-card">{booking.confirmationCode}</div>
+  ),
 }));
 
 jest.mock('@/utils', () => ({ isToolPending: (s: string) => s === 'inProgress' }));
@@ -34,7 +39,9 @@ jest.mock('@/utils', () => ({ isToolPending: (s: string) => s === 'inProgress' }
 beforeEach(() => {
   jest.mocked(useFrontendTool).mockClear();
   mockState.flights = undefined;
+  mockState.flightBooking = undefined;
   mockState.hotel = undefined;
+  mockState.hotelBooking = undefined;
 });
 
 type RenderFn = (props: { status: string; args?: unknown; result?: unknown }) => React.ReactElement;
@@ -118,6 +125,18 @@ describe('useBookedActions', () => {
       expect(result.type).not.toBe(React.Fragment);
     });
 
+    it('renders the confirmed booking once the flight is booked', () => {
+      mockState.flights = { departure: { id: 'f1' } };
+      mockState.flightBooking = { id: 'b1', confirmationCode: 'TRIP-1' };
+      renderHook(() => useBookedActions());
+      const render = getFlightsRender();
+      const result = render({ status: 'complete', args: {} }) as React.ReactElement<{
+        booking: unknown;
+      }>;
+
+      expect(result.props.booking).toEqual({ id: 'b1', confirmationCode: 'TRIP-1' });
+    });
+
     it('renders both departure and return flights when both are set', () => {
       const makeFlight = (id: string, num: string) => ({
         id,
@@ -192,6 +211,18 @@ describe('useBookedActions', () => {
 
       expect(result).not.toBeNull();
       expect(result.type).not.toBe(React.Fragment);
+    });
+
+    it('renders the confirmed booking once the hotel is booked', () => {
+      mockState.hotel = { id: 'h1' };
+      mockState.hotelBooking = { id: 'b2', confirmationCode: 'TRIP-2' };
+      renderHook(() => useBookedActions());
+      const render = getHotelRender();
+      const result = render({ status: 'complete', args: {} }) as React.ReactElement<{
+        booking: unknown;
+      }>;
+
+      expect(result.props.booking).toEqual({ id: 'b2', confirmationCode: 'TRIP-2' });
     });
   });
 });

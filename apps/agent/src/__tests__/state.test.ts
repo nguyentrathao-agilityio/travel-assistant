@@ -29,6 +29,13 @@ describe('GraphState', () => {
     }
   );
 
+  it('declares state channels for confirmed booking records', () => {
+    const channels = GraphState.getChannels();
+
+    expect(channels).toHaveProperty('flightBooking');
+    expect(channels).toHaveProperty('hotelBooking');
+  });
+
   it('uses independent safe defaults for collection state', async () => {
     const first = normalizeGraphState({});
     const second = normalizeGraphState({});

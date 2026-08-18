@@ -3,7 +3,7 @@ import { CopilotKitStateSchema, zodState } from '@copilotkit/sdk-js/langgraph';
 import { z } from 'zod';
 
 // Schemas
-import { FlightSchema, HotelAvailabilitySchema, IntentSchema } from '@/schemas';
+import { BookingSchema, FlightSchema, HotelAvailabilitySchema, IntentSchema } from '@/schemas';
 
 // Constants
 import { BOOKING_OPERATIONS } from '@/constants';
@@ -43,8 +43,10 @@ export const GraphState = new StateSchema({
   // Existing UI-owned booking selection fields. Retained for checkpoint and CopilotKit compatibility.
   flights: zodState(SelectedFlightSchema.optional()),
   flightSelectionStatus: zodState(SelectionStatusSchema.optional()),
+  flightBooking: zodState(BookingSchema.optional()),
   hotel: zodState(HotelAvailabilitySchema.optional()),
   hotelSelectionStatus: zodState(SelectionStatusSchema.optional()),
+  hotelBooking: zodState(BookingSchema.optional()),
   destination: zodState(z.string().optional()),
   startDate: zodState(z.string().optional()),
   endDate: zodState(z.string().optional()),

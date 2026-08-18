@@ -9,7 +9,7 @@ import { isToolPending } from '@/utils';
 
 // Components
 import { useTripState } from './useTripState';
-import { LoadingCard, FlightOptionItem, HotelOptionItem } from '@/components';
+import { BookingResultCard, LoadingCard, FlightOptionItem, HotelOptionItem } from '@/components';
 
 export const useBookedActions = () => {
   const { state } = useTripState();
@@ -23,6 +23,8 @@ export const useBookedActions = () => {
       handler: async () => 'Flights displayed',
       render: ({ status }) => {
         if (isToolPending(status)) return <LoadingCard lines={3} />;
+
+        if (state.flightBooking) return <BookingResultCard booking={state.flightBooking} />;
 
         const departure = state.flights?.departure;
         const returnFlight = state.flights?.return;
@@ -42,7 +44,7 @@ export const useBookedActions = () => {
         );
       },
     },
-    [state.flights]
+    [state.flights, state.flightBooking]
   );
 
   useFrontendTool(
@@ -55,6 +57,8 @@ export const useBookedActions = () => {
       render: ({ status }) => {
         if (isToolPending(status)) return <LoadingCard lines={3} />;
 
+        if (state.hotelBooking) return <BookingResultCard booking={state.hotelBooking} />;
+
         const hotel = state.hotel;
 
         if (!hotel) return <>You have not selected a hotel yet.</>;
@@ -66,6 +70,6 @@ export const useBookedActions = () => {
         );
       },
     },
-    [state.hotel]
+    [state.hotel, state.hotelBooking]
   );
 };

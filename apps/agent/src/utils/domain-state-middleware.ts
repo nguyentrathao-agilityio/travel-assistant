@@ -5,7 +5,7 @@ import { StateSchema } from '@langchain/langgraph';
 import { BookingSchema } from '@/schemas/booking';
 
 // Constants
-import type { DomainAgentNodeName } from '@/constants';
+import { BOOKING_TOOL_NAMES, type DomainAgentNodeName } from '@/constants';
 
 // State
 import { GraphState, type GraphError, type SearchResults } from '@/state';
@@ -38,13 +38,23 @@ export const buildDomainStateUpdate = (
 
     const booking = BookingSchema.safeParse(message.artifact);
 
-    if (!booking.success) continue;
+    if (!booking.success) {
+      if (BOOKING_TOOL_NAMES.includes(message.name ?? '')) {
+        console.warn(`[${taskName}] Booking tool artifact failed validation, booking not saved`, {
+          tool: message.name,
+          error: booking.error.message,
+        });
+      }
+      continue;
+    }
     if (booking.data.status === 'confirmed' && booking.data.type === 'flight') {
       update.flightSelectionStatus = 'booked';
       update.selectedOptions = { flightId: booking.data.referenceId };
+      update.flightBooking = booking.data;
     } else if (booking.data.status === 'confirmed' && booking.data.type === 'hotel') {
       update.hotelSelectionStatus = 'booked';
       update.selectedOptions = { hotelId: booking.data.referenceId };
+      update.hotelBooking = booking.data;
     }
   }
 

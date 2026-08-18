@@ -71,8 +71,10 @@ export const useTripState = () => {
       ...(state ?? {}),
       flights: state?.flights ?? savedState.flights,
       flightSelectionStatus: state?.flightSelectionStatus ?? savedState.flightSelectionStatus,
+      flightBooking: state?.flightBooking ?? savedState.flightBooking,
       hotel: state?.hotel ?? savedState.hotel,
       hotelSelectionStatus: state?.hotelSelectionStatus ?? savedState.hotelSelectionStatus,
+      hotelBooking: state?.hotelBooking ?? savedState.hotelBooking,
     }),
     [state, savedState]
   );

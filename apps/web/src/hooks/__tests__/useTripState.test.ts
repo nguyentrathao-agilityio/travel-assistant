@@ -131,6 +131,16 @@ describe('useTripState', () => {
     );
   });
 
+  it('surfaces a confirmed booking streamed back from the agent', () => {
+    const flightBooking = { id: 'b1', confirmationCode: 'TRIP-1', status: 'confirmed' };
+
+    mockUseCoAgent.mockReturnValueOnce({ state: { flightBooking }, setState: mockSetState });
+
+    const { result } = renderHook(() => useTripState());
+
+    expect(result.current.state.flightBooking).toEqual(flightBooking);
+  });
+
   it('clearTrip calls setState with empty object', () => {
     const { result } = renderHook(() => useTripState());
 

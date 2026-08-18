@@ -1,5 +1,5 @@
 import { HumanMessage, ToolMessage } from '@langchain/core/messages';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { buildDomainStateUpdate } from '@/utils/domain-state-middleware';
 
@@ -86,6 +86,49 @@ describe('domain state persistence', () => {
 
     expect(update.flightSelectionStatus).toBe('booked');
     expect(update.selectedOptions).toEqual({ flightId: 'flight-1' });
+    expect(update.flightBooking).toEqual(booking);
+  });
+
+  it('persists the confirmed hotel booking record for later recall', () => {
+    const booking = {
+      id: 'booking-2',
+      confirmationCode: 'TRIP-456',
+      type: 'hotel',
+      referenceId: 'hotel-1',
+      customerName: 'Nguyen Van A',
+      customerEmail: 'a@example.com',
+      totalPrice: 300,
+      currency: 'USD',
+      status: 'confirmed',
+      createdAt: '2026-08-05T10:00:00Z',
+      summary: 'Test Hotel, Da Nang',
+    };
+
+    const update = buildDomainStateUpdate('booking', [
+      new HumanMessage('Book it'),
+      toolResult('bookHotelTool', booking),
+    ]);
+
+    expect(update.hotelSelectionStatus).toBe('booked');
+    expect(update.selectedOptions).toEqual({ hotelId: 'hotel-1' });
+    expect(update.hotelBooking).toEqual(booking);
+  });
+
+  it('warns instead of silently dropping an invalid booking tool artifact', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const update = buildDomainStateUpdate('booking', [
+      new HumanMessage('Book it'),
+      toolResult('bookFlightTool', { unexpected: true }),
+    ]);
+
+    expect(update).not.toHaveProperty('flightBooking');
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Booking tool artifact failed validation'),
+      expect.objectContaining({ tool: 'bookFlightTool' })
+    );
+
+    warnSpy.mockRestore();
   });
 
   it('persists serializable provider recovery metadata without sensitive input', () => {

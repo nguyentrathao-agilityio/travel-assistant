@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-// Utils
+// Tools
 import {
   bookingToolError,
   formatBookingToolFailure,
   formatBookingToolResult,
-} from '@/utils/booking-approval';
+} from '@/tools/booking/response';
 
 describe('bookingToolError', () => {
   it('uses the Error message when the caught value is an Error', () => {

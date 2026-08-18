@@ -10,7 +10,7 @@ import { DestinationExplorerInputSchema } from '@/schemas';
 import { getDestinationExplorer } from '@/services/destination-explorer';
 
 // Utils
-import { executeReadTool } from '@/utils/tool-contract';
+import { executeReadTool } from '@/utils/tool';
 
 export const destinationExplorerTool = tool(
   async (input) =>

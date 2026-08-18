@@ -2,7 +2,7 @@ import { SystemMessage, ToolMessage } from '@langchain/core/messages';
 import type { RunnableConfig } from '@langchain/core/runnables';
 
 // Constants
-import { isBookingToolName, MAX_EXTRACT_MEMORY_MESSAGES } from '@/constants';
+import { MAX_EXTRACT_MEMORY_MESSAGES } from '@/constants';
 
 // Infrastructure
 import { createChatModel, openAiApiKeyFromConfig } from '@/infrastructure/llm';
@@ -22,6 +22,7 @@ import type { GraphStateType } from '@/state';
 
 // Utils
 import { takeRecentMessages } from '@/utils';
+import { isBookingToolName } from '@/utils/tool';
 
 const isBookingToolMessage = (message: GraphStateType['messages'][number]): boolean =>
   message instanceof ToolMessage && isBookingToolName(message.name ?? '');

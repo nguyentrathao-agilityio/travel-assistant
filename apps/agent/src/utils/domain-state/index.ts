@@ -2,12 +2,12 @@ import { StateSchema } from '@langchain/langgraph';
 import { createMiddleware } from 'langchain';
 
 // Constants
-import {
-  BOOKING_STATUSES,
-  BOOKING_TYPES,
-  isBookingToolName,
-  type DomainAgentNodeName,
-} from '@/constants';
+import { BOOKING_STATUSES, BOOKING_TYPES, type DomainAgentNodeName } from '@/constants';
+
+// Utils
+import { parseSearchArtifact } from './search-artifacts';
+import { graphErrorFromTool } from './tool-errors';
+import { latestTurnToolMessages } from './tool-messages';
 
 // Schemas
 import { BookingSchema } from '@/schemas/booking';
@@ -15,10 +15,7 @@ import { BookingSchema } from '@/schemas/booking';
 // State
 import { GraphState, SELECTION_STATUSES, type GraphError, type SearchResults } from '@/state';
 
-// Utils
-import { parseSearchArtifact } from './domain-state/search-artifacts';
-import { graphErrorFromTool } from './domain-state/tool-errors';
-import { latestTurnToolMessages } from './domain-state/tool-messages';
+import { isBookingToolName } from '../tool';
 
 const { messages: _messages, copilotkit: _copilotkit, ...domainStateFields } = GraphState.fields;
 const DomainStateSchema = new StateSchema(domainStateFields);

@@ -18,8 +18,8 @@ import { searchMemories } from '@/services/memory';
 import { GraphState, type GraphStateType } from '@/state';
 
 // Utils
-import { createDomainStateMiddleware } from './domain-state-middleware';
-import { richUiModelMiddleware } from './rich-ui-middleware';
+import { createDomainStateMiddleware } from '@/utils/domain-state';
+import { richUiModelMiddleware } from '@/utils/rich-ui';
 
 /** Builds a specialized agent with shared middleware and a dynamic system prompt. */
 export const createSpecializedAgent = (config: SpecializedAgentConfig, apiKey: string) =>

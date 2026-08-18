@@ -1,8 +1,8 @@
 // Constants
-import { contentAndArtifact, TOOL_PROVIDERS } from '@/constants';
+import { TOOL_PROVIDERS } from '@/constants';
 
 // Utils
-import { mapToolError } from './tool-contract';
+import { contentAndArtifact, mapToolError } from '@/utils/tool';
 
 export const formatBookingToolResult = (result: unknown): [string, unknown] =>
   contentAndArtifact(result);

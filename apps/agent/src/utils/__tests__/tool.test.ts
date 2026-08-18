@@ -4,12 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { TOOL_ERROR_CODES } from '@/schemas';
 
 // Utils
-import {
-  classifyToolError,
-  mapToolError,
-  ToolTimeoutError,
-  withToolTimeout,
-} from '@/utils/tool-contract';
+import { classifyToolError, mapToolError, ToolTimeoutError, withToolTimeout } from '@/utils/tool';
 
 describe('classifyToolError', () => {
   it.each([

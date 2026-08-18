@@ -11,7 +11,7 @@ import { searchHotels } from '@/services/hotel';
 
 // Utils
 import { parseToolInput } from '@/utils';
-import { executeReadTool } from '@/utils/tool-contract';
+import { executeReadTool } from '@/utils/tool';
 
 export const hotelTool = tool(
   async (input) =>

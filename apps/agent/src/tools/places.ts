@@ -10,7 +10,7 @@ import { PlacesInputSchema } from '@/schemas';
 import { getPlaces } from '@/services/places';
 
 // Utils
-import { executeReadTool } from '@/utils/tool-contract';
+import { executeReadTool } from '@/utils/tool';
 
 export const placesTool = tool(
   async (input) =>

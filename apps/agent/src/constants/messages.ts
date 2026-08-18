@@ -19,15 +19,8 @@ export const TOOL_ERROR_MESSAGES = {
 export const TOOL_READY_OUTPUT =
   'A structured UI card displays the result details. Give one concise summary sentence and, when useful, one brief next-step question. Do not repeat item names, prices, addresses, schedules, amenities, or other card details.';
 
-export const contentAndArtifact = <T>(artifact: T): [string, T] => [
-  JSON.stringify(artifact),
-  artifact,
-];
-
 export const ERROR_MESSAGES = {
   NO_API_URL: 'API_URL environment variable is not set',
-  SEARCH_FAILED: (status: number, statusText: string) =>
-    `Flight search failed: ${status} ${statusText}`,
   INVALID_RESPONSE: 'Invalid flight search response shape',
   UNKNOWN: 'An unexpected error occurred during flight search',
 } as const;

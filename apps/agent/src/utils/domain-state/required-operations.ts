@@ -1,14 +1,14 @@
 // Constants
 import { TOOL_NAMES } from '@/constants';
 
+// Utils
+import { latestTurnToolMessages } from './tool-messages';
+
 // Schemas
 import { PLANNING_OPERATIONS, type PlanningOperation } from '@/schemas';
 
 // State
 import { SUPERVISOR_STATUSES, type GraphStateType, type ValidationResult } from '@/state';
-
-// Utils
-import { latestTurnToolMessages } from './tool-messages';
 
 type OperationMissingCheck = (
   results: GraphStateType['searchResults'],

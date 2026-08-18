@@ -30,8 +30,6 @@ export const BOOKING_TOOL_NAMES = [
 
 export const WRITE_TOOL_NAMES: ReadonlySet<string> = new Set(BOOKING_TOOL_NAMES);
 
-export const isBookingToolName = (name: string): boolean => WRITE_TOOL_NAMES.has(name);
-
 export const TOOL_TIMEOUT_MS = 15_000;
 
 export const AUTHENTICATION_STATUS_PATTERN = /\b(401|403)\b/;

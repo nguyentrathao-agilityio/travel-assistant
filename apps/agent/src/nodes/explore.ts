@@ -4,13 +4,11 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import { AGENT_CONFIGS } from '@/constants/agent-config';
 
 // Infrastructure
+import { createSpecializedAgent } from '@/infrastructure/agent';
 import { openAiApiKeyFromConfig, withOpenAiApiKey } from '@/infrastructure/llm';
 
 // State
 import type { GraphStateType } from '@/state';
-
-// Utils
-import { createSpecializedAgent } from '@/utils';
 
 export const EXPLORE_AGENT_TOOLS = AGENT_CONFIGS.explore.tools;
 

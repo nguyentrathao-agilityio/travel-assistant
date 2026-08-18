@@ -11,7 +11,7 @@ import { getTripSummary } from '@/services/trip-summary';
 
 // Utils
 import { parseToolInput } from '@/utils';
-import { executeReadTool } from '@/utils/tool-contract';
+import { executeReadTool } from '@/utils/tool';
 
 export const tripSummaryTool = tool(
   async (input) =>

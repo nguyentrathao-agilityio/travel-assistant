@@ -10,7 +10,7 @@ import { RouteInputSchema } from '@/schemas';
 import { getRoute } from '@/services/route';
 
 // Utils
-import { executeReadTool } from '@/utils/tool-contract';
+import { executeReadTool } from '@/utils/tool';
 
 export const routeTool = tool(
   async (input) =>

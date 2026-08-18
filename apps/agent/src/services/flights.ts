@@ -14,6 +14,9 @@ import {
 
 const FLIGHTS_DEFAULT_ADULTS = 1;
 
+const flightSearchFailure = (status: number, statusText: string): string =>
+  `Flight search failed: ${status} ${statusText}`;
+
 const mapFlight = (flight: z.infer<typeof ApiFlightSchema>): z.infer<typeof FlightSchema> => ({
   id: flight.id,
   airline: flight.airline,
@@ -60,7 +63,7 @@ export const searchFlights = async (
       `${API_URL}${ENDPOINTS.FLIGHTS}/search?${buildSearchParams(input).toString()}`
     );
 
-    if (!res.ok) throw new Error(ERROR_MESSAGES.SEARCH_FAILED(res.status, res.statusText));
+    if (!res.ok) throw new Error(flightSearchFailure(res.status, res.statusText));
 
     const raw: unknown = await res.json();
     const parsed = ApiFlightSearchResponseSchema.safeParse(raw);

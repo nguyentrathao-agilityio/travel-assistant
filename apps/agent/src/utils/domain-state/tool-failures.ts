@@ -1,6 +1,9 @@
 // Constants
 import { RETRYABLE_DOMAIN_NODE_NAMES } from '@/constants';
 
+// Utils
+import { isIntentionalBookingRejection, latestResultPerTool } from './tool-messages';
+
 // Schemas
 import { ToolErrorSchema } from '@/schemas';
 
@@ -15,8 +18,7 @@ import {
 } from '@/state';
 
 // Utils
-import { isErrorArtifact } from '../artifact';
-import { isIntentionalBookingRejection, latestResultPerTool } from './tool-messages';
+import { isErrorArtifact } from '@/utils/artifact';
 
 type ToolFailure = { name: string; error: GraphError };
 

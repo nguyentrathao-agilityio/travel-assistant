@@ -10,7 +10,7 @@ import { TipsInputSchema } from '@/schemas';
 import { getLocalTips } from '@/services/tips';
 
 // Utils
-import { executeReadTool } from '@/utils/tool-contract';
+import { executeReadTool } from '@/utils/tool';
 
 export const tipsTool = tool(
   async (input) =>

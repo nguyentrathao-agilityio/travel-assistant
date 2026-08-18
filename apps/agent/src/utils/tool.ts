@@ -1,10 +1,10 @@
 // Constants
 import {
   AUTHENTICATION_STATUS_PATTERN,
-  contentAndArtifact,
   RATE_LIMIT_STATUS_PATTERN,
   SERVER_ERROR_STATUS_PATTERN,
   TOOL_TIMEOUT_MS,
+  WRITE_TOOL_NAMES,
 } from '@/constants';
 
 // Schemas
@@ -21,6 +21,15 @@ export class ToolTimeoutError extends Error {
     this.name = 'ToolTimeoutError';
   }
 }
+
+/** Converts a tool artifact into LangChain's content-and-artifact response tuple. */
+export const contentAndArtifact = <T>(artifact: T): [string, T] => [
+  JSON.stringify(artifact),
+  artifact,
+];
+
+/** Returns whether a tool performs a booking write operation. */
+export const isBookingToolName = (name: string): boolean => WRITE_TOOL_NAMES.has(name);
 
 export const withToolTimeout = async <T>(
   operation: Promise<T>,
@@ -81,7 +90,6 @@ export const classifyToolError = (error: unknown, message: string): ToolErrorCla
     return { code: TOOL_ERROR_CODES.VALIDATION_ERROR, retryable: false };
   }
 
-  // Treat unmatched provider failures as non-retryable until explicitly classified.
   return { code: TOOL_ERROR_CODES.UNKNOWN_PROVIDER_ERROR, retryable: false };
 };
 

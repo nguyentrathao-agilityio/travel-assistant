@@ -10,7 +10,7 @@ import { WeatherInputSchema } from '@/schemas';
 import { getWeather } from '@/services/weather';
 
 // Utils
-import { executeReadTool } from '@/utils/tool-contract';
+import { executeReadTool } from '@/utils/tool';
 
 export const weatherTool = tool(
   async ({ city, days }) =>

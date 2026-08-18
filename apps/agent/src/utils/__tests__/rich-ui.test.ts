@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { TOOL_READY_OUTPUT } from '@/constants';
 
 // Utils
-import { buildRichUiToolSummary, richUiModelMiddleware } from '@/utils/rich-ui-middleware';
+import { buildRichUiToolSummary, richUiModelMiddleware } from '@/utils/rich-ui';
 
 const invokeMiddleware = async (messages: unknown[]) => {
   let captured: { messages: unknown[] } | undefined;

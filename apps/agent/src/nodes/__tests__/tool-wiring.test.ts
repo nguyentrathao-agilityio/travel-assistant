@@ -7,8 +7,10 @@ import {
 import { describe, expect, it } from 'vitest';
 
 // Constants
-import { isBookingToolName } from '@/constants';
 import { AGENT_CONFIGS } from '@/constants/agent-config';
+
+// Utils
+import { isBookingToolName } from '@/utils/tool';
 
 const nameOf = (tools: { name: string }[]) => tools.map((tool) => tool.name).sort();
 

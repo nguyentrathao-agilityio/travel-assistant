@@ -3,14 +3,14 @@ import { tool } from '@langchain/core/tools';
 // Constants
 import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
 
-// Knowledge
-import { searchKnowledge } from '@/knowledge';
-
 // Schemas
 import { KnowledgeSearchInputSchema } from '@/schemas';
 
+// Knowledge
+import { searchKnowledge } from '@/knowledge';
+
 // Utils
-import { mapToolError, withToolTimeout } from '@/utils/tool-contract';
+import { mapToolError, withToolTimeout } from '@/utils/tool';
 
 export const knowledgeSearchTool = tool(
   async (input) => {

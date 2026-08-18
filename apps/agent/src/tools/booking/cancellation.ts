@@ -9,9 +9,11 @@ import { CancelBookingInputSchema } from '@/schemas';
 // Services
 import { cancelBooking, getBooking } from '@/services';
 
+// Tools
+import { formatBookingToolFailure, formatBookingToolResult } from './response';
+
 // Utils
-import { formatBookingToolFailure, formatBookingToolResult } from '@/utils/booking-approval';
-import { withToolTimeout } from '@/utils/tool-contract';
+import { withToolTimeout } from '@/utils/tool';
 
 export const cancelBookingTool = tool(
   async (input) => {

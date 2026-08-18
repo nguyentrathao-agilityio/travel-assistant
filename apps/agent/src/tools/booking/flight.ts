@@ -9,9 +9,11 @@ import { FlightBookingInputSchema } from '@/schemas';
 // Services
 import { getFlight, submitFlightBooking } from '@/services';
 
+// Tools
+import { formatBookingToolFailure, formatBookingToolResult } from './response';
+
 // Utils
-import { formatBookingToolFailure, formatBookingToolResult } from '@/utils/booking-approval';
-import { withToolTimeout } from '@/utils/tool-contract';
+import { withToolTimeout } from '@/utils/tool';
 
 type Flight = Awaited<ReturnType<typeof getFlight>>;
 

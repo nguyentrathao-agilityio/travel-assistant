@@ -5,13 +5,13 @@ import { z } from 'zod';
 import { BookingApprovalCard, BookingResultCard, ErrorCard, ToolLoading } from '@/components';
 
 // Constants
-import { TOOL_NAMES, TOOL_STATUS } from '@/constants';
+import { BOOKING_EDIT_REJECTION, TOOL_NAMES, TOOL_STATUS } from '@/constants';
 
 // Types
 import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
 
 // Utils
-import { parseToolResult } from '@/utils';
+import { cancellationRejection, isIntentionalRejectionResult, parseToolResult } from '@/utils';
 import { useInterruptElement } from './useInterruptElement';
 
 const bookingResultSchema = z.object({
@@ -139,6 +139,9 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
 
       // Render validated successes and surface structured provider failures safely.
       const parsedResult = parseToolResult(result);
+
+      if (isIntentionalRejectionResult(parsedResult)) return <></>;
+
       const bookingResult = bookingResultSchema.safeParse(parsedResult);
 
       if (bookingResult.success) {
@@ -166,11 +169,15 @@ export const useBookingAction = () => {
       if (!approvalRequest) return <></>;
 
       const handleDecision = (decision: BookingDecision) => {
+        const rejectionMessage =
+          approvalRequest.action === 'cancel_booking'
+            ? cancellationRejection(approvalRequest.referenceId)
+            : BOOKING_EDIT_REJECTION;
         const hitlResponse = {
           decisions: [
             decision === 'approve'
               ? { type: 'approve' }
-              : { type: 'reject', message: 'User cancelled or requested changes.' },
+              : { type: 'reject', message: rejectionMessage },
           ],
         };
 

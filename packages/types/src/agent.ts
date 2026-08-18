@@ -7,7 +7,7 @@ export interface SelectedFlight {
   return?: Flight;
 }
 
-export type SelectionStatus = 'selected' | 'confirmed' | 'booked';
+export type SelectionStatus = 'selected' | 'confirmed' | 'booked' | 'cancelled';
 
 export interface TripState {
   flights?: SelectedFlight;

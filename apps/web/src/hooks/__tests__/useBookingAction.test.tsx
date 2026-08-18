@@ -41,7 +41,7 @@ describe('useBookingAction', () => {
     expect(resolve).toHaveBeenCalledWith({ decisions: [{ type: 'approve' }] });
   });
 
-  it('resolves edit as a rejected tool execution so the agent can refine', () => {
+  it('tells the agent an edit request did not create the booking', () => {
     renderHook(() => useBookingAction());
     const registration = jest.mocked(useLangGraphInterrupt).mock.calls[0][0];
     const value = {
@@ -62,8 +62,63 @@ describe('useBookingAction', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
 
     expect(resolve).toHaveBeenCalledWith({
-      decisions: [{ type: 'reject', message: 'User cancelled or requested changes.' }],
+      decisions: [
+        {
+          type: 'reject',
+          message:
+            'The user requested changes. The booking was NOT created. Ask what they want to change before proposing a new booking.',
+        },
+      ],
     });
+  });
+
+  it('tells the agent a rejected cancellation leaves the booking active', () => {
+    renderHook(() => useBookingAction());
+    const registration = jest.mocked(useLangGraphInterrupt).mock.calls[0][0];
+    const value = {
+      actionRequests: [
+        {
+          name: TOOL_NAMES.CANCEL_BOOKING,
+          args: { bookingId: 'ABC123' },
+          description: 'Tool execution requires approval',
+        },
+      ],
+      reviewConfigs: [
+        { actionName: TOOL_NAMES.CANCEL_BOOKING, allowedDecisions: ['approve', 'reject'] },
+      ],
+    };
+    const resolve = jest.fn();
+
+    render(registration.render?.({ event: { value }, resolve } as never) as ReactElement);
+    fireEvent.click(screen.getByRole('button', { name: 'Keep booking' }));
+
+    expect(resolve).toHaveBeenCalledWith({
+      decisions: [
+        {
+          type: 'reject',
+          message:
+            'The user rejected the cancellation. Booking ABC123 remains active and was NOT cancelled.',
+        },
+      ],
+    });
+  });
+
+  it('does not render an error card for an intentional HITL rejection result', () => {
+    renderHook(() => useBookingAction());
+    const registration = jest
+      .mocked(useRenderToolCall)
+      .mock.calls.find((call) => call[0].name === TOOL_NAMES.CANCEL_BOOKING)?.[0];
+
+    const { container } = render(
+      registration!.render({
+        status: 'complete',
+        result:
+          'The user rejected the cancellation. Booking ABC123 remains active and was NOT cancelled.',
+      } as never) as ReactElement
+    );
+
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByText('Received an unexpected booking result.')).not.toBeInTheDocument();
   });
 
   it('shows an error card when the completed result matches neither the booking nor error schema', () => {

@@ -67,8 +67,9 @@ const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCardProps) 
       )}
 
       <Typography variant="meta" color="tertiary">
-        Verify these details before continuing. To change them, reject this request and update your
-        selection or traveler information.
+        {isCancellation
+          ? 'Choose Keep booking to reject this cancellation and leave the booking active.'
+          : 'Choose Edit to change details in chat without creating this booking.'}
       </Typography>
 
       <div className="flex justify-end gap-2">

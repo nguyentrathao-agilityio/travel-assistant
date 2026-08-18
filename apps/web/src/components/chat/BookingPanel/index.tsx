@@ -12,9 +12,11 @@ import { formatTime } from '@/utils';
 const BookingPanel = () => {
   const { state } = useTripState();
 
-  const departure = state?.flights?.departure;
-  const returnFlight = state?.flights?.return;
-  const hotel = state?.hotel;
+  const departure =
+    state?.flightSelectionStatus === 'cancelled' ? undefined : state?.flights?.departure;
+  const returnFlight =
+    state?.flightSelectionStatus === 'cancelled' ? undefined : state?.flights?.return;
+  const hotel = state?.hotelSelectionStatus === 'cancelled' ? undefined : state?.hotel;
 
   if (!departure && !hotel) return null;
 

@@ -80,4 +80,50 @@ describe('BookingApprovalCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
     expect(onDecision).toHaveBeenCalledWith('edit');
   });
+
+  it('explains that changes continue in chat without creating the booking', () => {
+    render(
+      <BookingApprovalCard
+        request={{
+          type: 'booking_approval',
+          approvalId: 'approval-copy',
+          action: 'create_flight_booking',
+          title: 'Confirm flight booking',
+          description: 'Flight One',
+          referenceId: 'flight-1',
+          details: { adults: 1 },
+          allowedDecisions: ['approve', 'reject'],
+        }}
+        onDecision={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText('Choose Edit to change details in chat without creating this booking.')
+    ).toBeInTheDocument();
+  });
+
+  it('explains that keeping a booking rejects cancellation', () => {
+    render(
+      <BookingApprovalCard
+        request={{
+          type: 'booking_approval',
+          approvalId: 'approval-cancel-copy',
+          action: 'cancel_booking',
+          title: 'Confirm booking cancellation',
+          description: 'Cancel ABC123',
+          referenceId: 'ABC123',
+          details: { bookingId: 'ABC123' },
+          allowedDecisions: ['approve', 'reject'],
+        }}
+        onDecision={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        'Choose Keep booking to reject this cancellation and leave the booking active.'
+      )
+    ).toBeInTheDocument();
+  });
 });

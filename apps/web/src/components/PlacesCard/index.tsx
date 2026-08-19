@@ -60,4 +60,3 @@ const PlacesCard = ({ data, className }: PlacesCardProps) => {
 
 export { PlacesCard };
 export { PlaceItem } from './PlaceItem';
-export { PlacesConfirmCard } from './PlacesConfirmCard';

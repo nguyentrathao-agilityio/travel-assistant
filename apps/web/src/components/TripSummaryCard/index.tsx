@@ -107,4 +107,3 @@ const TripSummaryCard = ({ data, bookedFlight, bookedHotel, className }: TripSum
 };
 
 export { TripSummaryCard };
-export { TripSummaryConfirmCard } from './TripSummaryConfirmCard';

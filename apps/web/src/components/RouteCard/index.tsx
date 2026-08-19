@@ -59,4 +59,3 @@ const RouteCard = ({ data, className }: RouteCardProps) => {
 };
 
 export { RouteCard };
-export { RouteConfirmCard } from './RouteConfirmCard';

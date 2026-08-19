@@ -86,4 +86,3 @@ const LocalTipsCard = ({ data, className }: LocalTipsCardProps) => {
 };
 
 export { LocalTipsCard };
-export { LocalTipsConfirmCard } from './LocalTipsConfirmCard';

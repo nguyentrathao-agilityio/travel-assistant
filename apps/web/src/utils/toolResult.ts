@@ -21,6 +21,18 @@ export const safeParseToolResult = <Output>(
 
 export type ToolErrorResult = { error: string; code?: string; retryable?: boolean };
 
+const TOOL_ERROR_MESSAGES: Record<string, string> = {
+  TIMEOUT: 'The provider took too long to respond.',
+  RATE_LIMITED: 'The provider is temporarily rate limited.',
+  AUTHENTICATION_FAILED: 'The provider is not configured correctly.',
+  INVALID_PROVIDER_RESPONSE: 'The provider returned an unexpected response.',
+  PROVIDER_UNAVAILABLE: 'The provider is temporarily unavailable.',
+  UNKNOWN_PROVIDER_ERROR: 'The provider operation could not be completed.',
+};
+
+export const getToolErrorMessage = ({ code, error }: ToolErrorResult): string =>
+  (code && TOOL_ERROR_MESSAGES[code]) ?? error;
+
 export const getToolError = (result: unknown): ToolErrorResult | undefined => {
   const parsed = parseToolResult(result);
 

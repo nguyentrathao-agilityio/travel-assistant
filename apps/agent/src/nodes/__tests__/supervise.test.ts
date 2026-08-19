@@ -108,6 +108,35 @@ describe('supervisor validation', () => {
     expect(result).toMatchObject({ status: 'complete' });
   });
 
+  it('treats a trip summary as satisfying its included flight, hotel, and route operations', () => {
+    const messages = [
+      new HumanMessage(
+        'Plan a trip to Da Nang from 2026-09-15 to 2026-09-18, departing from Hanoi'
+      ),
+      toolResult(TOOL_NAMES.TRIP_SUMMARY, {
+        destination: 'Da Nang',
+        suggestedFlight: { id: 'flight-1' },
+        suggestedHotel: { id: 'hotel-1' },
+        route: { city: 'Da Nang', stops: [] },
+      }),
+    ];
+    const current = state({
+      messages,
+      request: { destination: 'Da Nang' },
+      execution: {
+        ...state().execution,
+        currentNode: 'plan',
+        requiredOperations: ['flights', 'hotels', 'route'],
+      },
+    });
+
+    expect(validatePlanningResult(current)).toMatchObject({ status: 'complete' });
+    expect(supervisorUpdate(supervisorNode(current))).toMatchObject({
+      status: 'complete',
+      nextNode: 'saveMemory',
+    });
+  });
+
   it('finishes the invocation when destination input is missing', () => {
     const update = supervisorNode(
       state({ execution: { ...state().execution, currentNode: 'explore' } })

@@ -27,14 +27,25 @@ const IS_OPERATION_MISSING: Record<PlanningOperation, OperationMissingCheck> = {
     !toolNames.has(TOOL_NAMES.KNOWLEDGE_SEARCH),
 };
 
+const TRIP_SUMMARY_OPERATIONS = new Set<PlanningOperation>([
+  PLANNING_OPERATIONS.FLIGHTS,
+  PLANNING_OPERATIONS.HOTELS,
+  PLANNING_OPERATIONS.ROUTE,
+  PLANNING_OPERATIONS.TRIP_SUMMARY,
+]);
+
 /** Returns the required planning operations that don't yet have a usable result this turn. */
 export const missingRequiredOperations = (state: GraphStateType): string[] => {
   const results = state.searchResults;
   const toolNames = new Set(latestTurnToolMessages(state.messages).map(({ name }) => name));
 
-  return (state.execution.requiredOperations ?? []).filter((operation) =>
-    IS_OPERATION_MISSING[operation](results, toolNames)
-  );
+  return (state.execution.requiredOperations ?? []).filter((operation) => {
+    if (toolNames.has(TOOL_NAMES.TRIP_SUMMARY) && TRIP_SUMMARY_OPERATIONS.has(operation)) {
+      return false;
+    }
+
+    return IS_OPERATION_MISSING[operation](results, toolNames);
+  });
 };
 
 /** Builds the incomplete-status result for a turn that's still missing required operations. */

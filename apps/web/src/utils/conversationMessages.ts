@@ -62,6 +62,49 @@ const isResolvedToolCardMessage = (
   message.hasResolvedToolCard === true &&
   Boolean(message.toolCalls?.length);
 
+const stabilizeResolvedCardOrder = (
+  messages: ConversationChatMessage[],
+  previousTurn: ConversationChatMessage[]
+): ConversationChatMessage[] => {
+  let result = [...messages];
+  const currentUserIndex = findLastUserMessageIndex(result);
+
+  for (const previousMessage of previousTurn.filter(isResolvedToolCardMessage)) {
+    const toolCallIds = new Set(previousMessage.toolCalls?.map(({ id }) => id));
+    const cardIndex = result.findIndex(
+      (message) =>
+        message.role === CHAT_ROLE.ASSISTANT &&
+        message.toolCalls?.some(({ id }) => toolCallIds.has(id))
+    );
+
+    if (cardIndex === -1) continue;
+
+    const responseIndex = result.findIndex(
+      (message, index) =>
+        index > currentUserIndex && index < cardIndex && isVisibleAssistantMessage(message)
+    );
+
+    if (responseIndex === -1) continue;
+
+    const relatedIndexes = new Set<number>([cardIndex]);
+    result.forEach((message, index) => {
+      if (message.role === CHAT_ROLE.TOOL && toolCallIds.has(message.toolCallId)) {
+        relatedIndexes.add(index);
+      }
+    });
+
+    const cardBlock = result.filter((_, index) => relatedIndexes.has(index));
+    const remaining = result.filter((_, index) => !relatedIndexes.has(index));
+    result = [
+      ...remaining.slice(0, responseIndex),
+      ...cardBlock,
+      ...remaining.slice(responseIndex),
+    ];
+  }
+
+  return result;
+};
+
 /**
  * Deduplicates replayed messages while preserving the newest live representation.
  */
@@ -217,43 +260,7 @@ const mergeMissingCardCalls = (
     ];
   }
 
-  // A live AG-UI snapshot can temporarily place the final assistant response
-  // before the tool call that produced its card. Keep the causal UI order stable.
-  const currentUserIndex = findLastUserMessageIndex(result);
-  for (const previousMessage of previousTurn.filter(isResolvedToolCardMessage)) {
-    const toolCallIds = new Set(previousMessage.toolCalls?.map(({ id }) => id));
-    const cardIndex = result.findIndex(
-      (message) =>
-        message.role === CHAT_ROLE.ASSISTANT &&
-        message.toolCalls?.some(({ id }) => toolCallIds.has(id))
-    );
-
-    if (cardIndex === -1) continue;
-
-    const responseIndex = result.findIndex(
-      (message, index) =>
-        index > currentUserIndex && index < cardIndex && isVisibleAssistantMessage(message)
-    );
-
-    if (responseIndex === -1) continue;
-
-    const relatedIndexes = new Set<number>([cardIndex]);
-    result.forEach((message, index) => {
-      if (message.role === CHAT_ROLE.TOOL && toolCallIds.has(message.toolCallId)) {
-        relatedIndexes.add(index);
-      }
-    });
-
-    const cardBlock = result.filter((_, index) => relatedIndexes.has(index));
-    const remaining = result.filter((_, index) => !relatedIndexes.has(index));
-    result = [
-      ...remaining.slice(0, responseIndex),
-      ...cardBlock,
-      ...remaining.slice(responseIndex),
-    ];
-  }
-
-  return result;
+  return stabilizeResolvedCardOrder(result, previousTurn);
 };
 
 /**
@@ -313,7 +320,7 @@ export const reconcileConversationMessages = (
 
   if (retainedToolResults.length) reconciled = [...reconciled, ...retainedToolResults];
 
-  if (!inProgress) return reconciled;
+  if (!inProgress) return stabilizeResolvedCardOrder(reconciled, previousTurn);
 
   return mergeMissingCardCalls(reconciled, previousTurn, currentToolCallIds);
 };

@@ -72,44 +72,52 @@ describe('reconcileConversationMessages', () => {
     expect(result).toEqual(previousMessages);
   });
 
-  it('keeps a resolved booking card before the agent confirmation while streaming', () => {
-    const bookingCall: ConversationChatMessage = {
-      id: 'a-booking',
-      role: 'assistant',
-      content: '',
-      hasResolvedToolCard: true,
-      toolCalls: [
-        {
-          id: 'call-booking',
-          type: 'function',
-          function: { name: 'bookFlight', arguments: '{"flightId":"VN123"}' },
-        },
-      ],
-    };
-    const bookingResult: ConversationChatMessage = {
-      id: 't-booking',
-      role: 'tool',
-      toolCallId: 'call-booking',
-      content: '{"status":"confirmed"}',
-    };
-    const confirmation: ConversationChatMessage = {
-      id: 'a-confirmation',
-      role: 'assistant',
-      content: 'Your flight booking has been confirmed.',
-    };
-    const userMessage: ConversationChatMessage = {
-      id: 'u1',
-      role: 'user',
-      content: 'Confirm my booking',
-    };
-    const previousMessages = [userMessage, bookingCall, bookingResult, confirmation];
-    const reorderedSnapshot = [userMessage, confirmation, bookingCall, bookingResult];
+  it.each([true, false])(
+    'keeps a resolved booking card before the agent confirmation when inProgress=%s',
+    (inProgress) => {
+      const bookingCall: ConversationChatMessage = {
+        id: 'a-booking',
+        role: 'assistant',
+        content: '',
+        hasResolvedToolCard: true,
+        toolCalls: [
+          {
+            id: 'call-booking',
+            type: 'function',
+            function: { name: 'bookFlight', arguments: '{"flightId":"VN123"}' },
+          },
+        ],
+      };
+      const bookingResult: ConversationChatMessage = {
+        id: 't-booking',
+        role: 'tool',
+        toolCallId: 'call-booking',
+        content: '{"status":"confirmed"}',
+      };
+      const confirmation: ConversationChatMessage = {
+        id: 'a-confirmation',
+        role: 'assistant',
+        content: 'Your flight booking has been confirmed.',
+      };
+      const userMessage: ConversationChatMessage = {
+        id: 'u1',
+        role: 'user',
+        content: 'Confirm my booking',
+      };
+      const previousMessages = [userMessage, bookingCall, bookingResult, confirmation];
+      const reorderedSnapshot = [userMessage, confirmation, bookingCall, bookingResult];
 
-    const result = reconcileConversationMessages(reorderedSnapshot, {
-      previousMessages,
-      inProgress: true,
-    });
+      const result = reconcileConversationMessages(reorderedSnapshot, {
+        previousMessages,
+        inProgress,
+      });
 
-    expect(result.map(({ id }) => id)).toEqual(['u1', 'a-booking', 't-booking', 'a-confirmation']);
-  });
+      expect(result.map(({ id }) => id)).toEqual([
+        'u1',
+        'a-booking',
+        't-booking',
+        'a-confirmation',
+      ]);
+    }
+  );
 });

@@ -14,3 +14,4 @@ export * from './ToolResultFeedback';
 export * from './SetLastTool';
 export * from './ToolLoading';
 export * from './ToolCompletedCard';
+export * from './ToolResultBoundary';

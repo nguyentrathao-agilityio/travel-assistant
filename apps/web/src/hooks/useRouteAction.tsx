@@ -5,20 +5,11 @@ import { z } from 'zod';
 import { RouteResultSchema } from '@repo/schemas';
 
 // Components
-import {
-  RouteCard,
-  SetLastTool,
-  ToolEmptyCard,
-  ToolErrorCard,
-  ToolInvalidResultCard,
-  ToolLoading,
-} from '@/components';
+import { RouteCard, SetLastTool, ToolLoading } from '@/components';
+import { renderToolResult } from '@/components/common/ToolResultBoundary';
 
 // Constants
 import { TOOL_NAMES } from '@/constants';
-
-// Utils
-import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 
 const routeParameters = z.object({
   city: z.string().optional(),
@@ -30,24 +21,21 @@ export const useRouteAction = () => {
     name: TOOL_NAMES.ROUTE,
     parameters: routeParameters,
     render: ({ status, result, parameters: args }) => {
-      if (isToolPending(status)) return <ToolLoading target={`a route in ${args.city}`} />;
-
-      if (getToolError(result)) return <ToolErrorCard result={result} />;
-
-      const parsed = safeParseToolResult(RouteResultSchema, result);
-
-      if (!parsed.success)
-        return <ToolInvalidResultCard message="Received an unexpected route result." />;
-
-      if (parsed.data.stops.length === 0)
-        return <ToolEmptyCard message="No route stops were available for this destination." />;
-
-      return (
-        <>
-          <SetLastTool toolName={TOOL_NAMES.ROUTE} />
-          <RouteCard data={parsed.data} />
-        </>
-      );
+      return renderToolResult({
+        status,
+        result,
+        schema: RouteResultSchema,
+        loading: <ToolLoading target={`a route in ${args.city}`} />,
+        invalidMessage: 'Received an unexpected route result.',
+        isEmpty: (data) => data.stops.length === 0,
+        emptyMessage: 'No route stops were available for this destination.',
+        render: (data) => (
+          <>
+            <SetLastTool toolName={TOOL_NAMES.ROUTE} />
+            <RouteCard data={data} />
+          </>
+        ),
+      });
     },
   });
 };

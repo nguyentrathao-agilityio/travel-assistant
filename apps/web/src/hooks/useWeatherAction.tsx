@@ -5,19 +5,12 @@ import { z } from 'zod';
 import { TOOL_NAMES } from '@/constants';
 
 // Utils
-import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
-
 // Schemas
 import { WeatherResultSchema } from '@repo/schemas';
 
 // Components
-import {
-  SetLastTool,
-  ToolErrorCard,
-  ToolInvalidResultCard,
-  WeatherCard,
-  ToolLoading,
-} from '@/components';
+import { SetLastTool, WeatherCard, ToolLoading } from '@/components';
+import { renderToolResult } from '@/components/common/ToolResultBoundary';
 
 const weatherParameters = z.object({
   city: z.string().optional(),
@@ -29,22 +22,19 @@ export const useWeatherAction = () => {
     name: TOOL_NAMES.WEATHER,
     parameters: weatherParameters,
     render: ({ status, result, parameters: args }) => {
-      if (isToolPending(status))
-        return <ToolLoading target={`weather in ${args.city} for ${args.days || 5} days`} />;
-
-      if (getToolError(result)) return <ToolErrorCard result={result} />;
-
-      const parsed = safeParseToolResult(WeatherResultSchema, result);
-
-      if (!parsed.success)
-        return <ToolInvalidResultCard message="Received an unexpected weather result." />;
-
-      return (
-        <>
-          <SetLastTool toolName={TOOL_NAMES.WEATHER} />
-          <WeatherCard data={parsed.data} />
-        </>
-      );
+      return renderToolResult({
+        status,
+        result,
+        schema: WeatherResultSchema,
+        loading: <ToolLoading target={`weather in ${args.city} for ${args.days || 5} days`} />,
+        invalidMessage: 'Received an unexpected weather result.',
+        render: (data) => (
+          <>
+            <SetLastTool toolName={TOOL_NAMES.WEATHER} />
+            <WeatherCard data={data} />
+          </>
+        ),
+      });
     },
   });
 };

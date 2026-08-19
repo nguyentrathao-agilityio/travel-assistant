@@ -3,20 +3,11 @@ import { useRenderTool } from '@copilotkit/react-core/v2';
 import { z } from 'zod';
 
 // Constants
-import { TOOL_NAMES, TOOL_STATUS } from '@/constants';
+import { TOOL_NAMES } from '@/constants';
 
 // Components
-import {
-  HotelCard,
-  SetLastTool,
-  ToolEmptyCard,
-  ToolErrorCard,
-  ToolInvalidResultCard,
-  ToolLoading,
-} from '@/components';
-
-// Utils
-import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
+import { HotelCard, SetLastTool, ToolLoading } from '@/components';
+import { renderToolResult } from '@/components/common/ToolResultBoundary';
 
 // Hooks
 import { useTripState } from '@/hooks';
@@ -52,46 +43,39 @@ export const useHotelAction = () => {
       name: TOOL_NAMES.HOTEL,
       parameters: hotelSearchParameters,
       render: ({ status, result, parameters: args }) => {
-        if (isToolPending(status))
-          return (
+        return renderToolResult({
+          status,
+          result,
+          schema: HotelSearchResultSchema,
+          loading: (
             <ToolLoading
               target={`hotels in ${args.city} from ${args.checkIn} to ${args.checkOut}`}
             />
-          );
+          ),
+          invalidMessage: 'Received an unexpected hotel result.',
+          isEmpty: (data) => data.results.length === 0,
+          emptyMessage: 'No hotels matched these dates and filters.',
+          render: (data) => {
+            const selectedHotel =
+              data.results.find((hotel: HotelAvailability) => hotel.id === state.hotel?.id) ?? null;
 
-        if (getToolError(result)) return <ToolErrorCard result={result} />;
-
-        if (status === TOOL_STATUS.COMPLETE && result) {
-          const parsed = safeParseToolResult(HotelSearchResultSchema, result);
-
-          if (!parsed.success)
-            return <ToolInvalidResultCard message="Received an unexpected hotel result." />;
-
-          if (parsed.data.results.length === 0)
-            return <ToolEmptyCard message="No hotels matched these dates and filters." />;
-
-          const selectedHotel =
-            parsed.data.results.find((hotel: HotelAvailability) => hotel.id === state.hotel?.id) ??
-            null;
-
-          return (
-            <>
-              <SetLastTool toolName={TOOL_NAMES.HOTEL} />
-              <HotelCard
-                data={parsed.data}
-                city={args.city}
-                checkIn={args.checkIn}
-                checkOut={args.checkOut}
-                onSelect={selectHotel}
-                onContinueBooking={handleContinueBooking}
-                isConfirmed={!!state.hotel}
-                initialHotel={selectedHotel}
-              />
-            </>
-          );
-        }
-
-        return <></>;
+            return (
+              <>
+                <SetLastTool toolName={TOOL_NAMES.HOTEL} />
+                <HotelCard
+                  data={data}
+                  city={args.city}
+                  checkIn={args.checkIn}
+                  checkOut={args.checkOut}
+                  onSelect={selectHotel}
+                  onContinueBooking={handleContinueBooking}
+                  isConfirmed={!!state.hotel}
+                  initialHotel={selectedHotel}
+                />
+              </>
+            );
+          },
+        });
       },
     },
     [state]

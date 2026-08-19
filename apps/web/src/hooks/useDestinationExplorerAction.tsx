@@ -5,19 +5,11 @@ import { z } from 'zod';
 import { DestinationExplorerResultSchema } from '@repo/schemas';
 
 // Components
-import {
-  DestinationExplorerCard,
-  SetLastTool,
-  ToolErrorCard,
-  ToolInvalidResultCard,
-  ToolLoading,
-} from '@/components';
+import { DestinationExplorerCard, SetLastTool, ToolLoading } from '@/components';
+import { renderToolResult } from '@/components/common/ToolResultBoundary';
 
 // Constants
 import { TOOL_NAMES } from '@/constants';
-
-// Utils
-import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 
 const destinationExplorerParameters = z.object({
   city: z.string().optional(),
@@ -30,24 +22,19 @@ export const useDestinationExplorerAction = () => {
     name: TOOL_NAMES.DESTINATION_EXPLORER,
     parameters: destinationExplorerParameters,
     render: ({ status, result, parameters: args }) => {
-      if (isToolPending(status))
-        return <ToolLoading action="Exploring" target={args.city || 'destination'} />;
-
-      if (getToolError(result)) return <ToolErrorCard result={result} />;
-
-      const parsed = safeParseToolResult(DestinationExplorerResultSchema, result);
-
-      if (!parsed.success)
-        return (
-          <ToolInvalidResultCard message="Received an unexpected destination explorer result." />
-        );
-
-      return (
-        <>
-          <SetLastTool toolName={TOOL_NAMES.DESTINATION_EXPLORER} />
-          <DestinationExplorerCard data={parsed.data} />
-        </>
-      );
+      return renderToolResult({
+        status,
+        result,
+        schema: DestinationExplorerResultSchema,
+        loading: <ToolLoading action="Exploring" target={args.city || 'destination'} />,
+        invalidMessage: 'Received an unexpected destination explorer result.',
+        render: (data) => (
+          <>
+            <SetLastTool toolName={TOOL_NAMES.DESTINATION_EXPLORER} />
+            <DestinationExplorerCard data={data} />
+          </>
+        ),
+      });
     },
   });
 };

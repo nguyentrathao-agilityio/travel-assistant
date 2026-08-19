@@ -12,7 +12,12 @@ import { BOOKING_EDIT_REJECTION, TOOL_NAMES, TOOL_STATUS } from '@/constants';
 import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
 
 // Utils
-import { cancellationRejection, isIntentionalRejectionResult, parseToolResult } from '@/utils';
+import {
+  cancellationRejection,
+  isIntentionalRejectionResult,
+  isToolPending,
+  parseToolResult,
+} from '@/utils';
 import { useInterruptElement } from './useInterruptElement';
 
 const bookingResultSchema = z.object({
@@ -96,7 +101,7 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
       parameters: z.record(z.unknown()),
       render: ({ status, result }) => {
         // Keep approval UI authoritative while a booking tool is paused.
-        if (status === 'inProgress' || status === 'executing') {
+        if (isToolPending(status)) {
           if (isAwaitingApproval) return <></>;
 
           return <ToolLoading action="Completing" target="your booking" />;

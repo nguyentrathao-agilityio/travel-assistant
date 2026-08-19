@@ -9,16 +9,8 @@ import { TripSummaryResultSchema } from '@repo/schemas';
 import { useTripState } from './useTripState';
 
 // Components
-import {
-  SetLastTool,
-  ToolErrorCard,
-  ToolInvalidResultCard,
-  ToolLoading,
-  TripSummaryCard,
-} from '@/components';
-
-// Utils
-import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
+import { SetLastTool, ToolLoading, TripSummaryCard } from '@/components';
+import { renderToolResult } from '@/components/common/ToolResultBoundary';
 
 const tripSummaryParameters = z.object({
   destination: z.string().optional(),
@@ -38,28 +30,21 @@ export const useTripSummaryAction = () => {
       name: TOOL_NAMES.TRIP_SUMMARY,
       parameters: tripSummaryParameters,
       render: ({ result, status, parameters: args }) => {
-        if (isToolPending(status))
-          return (
+        return renderToolResult({
+          status,
+          result,
+          schema: TripSummaryResultSchema,
+          loading: (
             <ToolLoading action="Generating" target={`trip plan summary in ${args.destination}`} />
-          );
-
-        if (getToolError(result)) return <ToolErrorCard result={result} />;
-
-        const parsed = safeParseToolResult(TripSummaryResultSchema, result);
-
-        if (!parsed.success)
-          return <ToolInvalidResultCard message="Received an unexpected trip summary result." />;
-
-        return (
-          <>
-            <SetLastTool toolName={TOOL_NAMES.TRIP_SUMMARY} />
-            <TripSummaryCard
-              data={parsed.data}
-              bookedFlight={state.flights}
-              bookedHotel={state.hotel}
-            />
-          </>
-        );
+          ),
+          invalidMessage: 'Received an unexpected trip summary result.',
+          render: (data) => (
+            <>
+              <SetLastTool toolName={TOOL_NAMES.TRIP_SUMMARY} />
+              <TripSummaryCard data={data} bookedFlight={state.flights} bookedHotel={state.hotel} />
+            </>
+          ),
+        });
       },
     },
     [state]

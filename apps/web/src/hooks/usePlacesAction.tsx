@@ -5,20 +5,11 @@ import { z } from 'zod';
 import { PlacesSearchResultSchema } from '@repo/schemas';
 
 // Components
-import {
-  PlacesCard,
-  SetLastTool,
-  ToolEmptyCard,
-  ToolErrorCard,
-  ToolInvalidResultCard,
-  ToolLoading,
-} from '@/components';
+import { PlacesCard, SetLastTool, ToolLoading } from '@/components';
+import { renderToolResult } from '@/components/common/ToolResultBoundary';
 
 // Constants
 import { TOOL_NAMES } from '@/constants';
-
-// Utils
-import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 
 const placesParameters = z.object({
   city: z.string().optional(),
@@ -31,24 +22,21 @@ export const usePlacesAction = () => {
     name: TOOL_NAMES.PLACES,
     parameters: placesParameters,
     render: ({ status, result, parameters: args }) => {
-      if (isToolPending(status)) return <ToolLoading target={`places in ${args.city}`} />;
-
-      if (getToolError(result)) return <ToolErrorCard result={result} />;
-
-      const parsed = safeParseToolResult(PlacesSearchResultSchema, result);
-
-      if (!parsed.success)
-        return <ToolInvalidResultCard message="Received an unexpected places result." />;
-
-      if (parsed.data.total === 0)
-        return <ToolEmptyCard message="No places matched this search." />;
-
-      return (
-        <>
-          <SetLastTool toolName={TOOL_NAMES.PLACES} />
-          <PlacesCard data={parsed.data} />
-        </>
-      );
+      return renderToolResult({
+        status,
+        result,
+        schema: PlacesSearchResultSchema,
+        loading: <ToolLoading target={`places in ${args.city}`} />,
+        invalidMessage: 'Received an unexpected places result.',
+        isEmpty: (data) => data.total === 0,
+        emptyMessage: 'No places matched this search.',
+        render: (data) => (
+          <>
+            <SetLastTool toolName={TOOL_NAMES.PLACES} />
+            <PlacesCard data={data} />
+          </>
+        ),
+      });
     },
   });
 };

@@ -140,13 +140,13 @@ describe('useHotelAction', () => {
     expect(card).not.toBeNull();
   });
 
-  it('render returns empty fragment when status is not complete', () => {
+  it('render returns an explicit invalid state when a completed result is missing', () => {
     renderHook(() => useHotelAction());
     const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
       props: Record<string, unknown>
     ) => React.ReactElement;
     const result = render({ status: 'complete', result: undefined, parameters: {} });
 
-    expect(result.type).toBe(React.Fragment);
+    expect(result.type).not.toBe(React.Fragment);
   });
 });

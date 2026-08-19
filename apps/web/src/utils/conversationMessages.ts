@@ -260,6 +260,35 @@ const mergeMissingCardCalls = (
     ];
   }
 
+  const currentToolResultIds = new Set(
+    result.flatMap((message) => (message.role === CHAT_ROLE.TOOL ? [message.toolCallId] : []))
+  );
+
+  for (const previousResult of previousTurn) {
+    if (
+      previousResult.role !== CHAT_ROLE.TOOL ||
+      currentToolResultIds.has(previousResult.toolCallId)
+    ) {
+      continue;
+    }
+
+    const cardIndex = result.findIndex(
+      (message) =>
+        message.role === CHAT_ROLE.ASSISTANT &&
+        message.toolCalls?.some(({ id }) => id === previousResult.toolCallId)
+    );
+
+    if (cardIndex === -1) continue;
+
+    let insertionIndex = cardIndex + 1;
+    while (insertionIndex < result.length && result[insertionIndex].role === CHAT_ROLE.TOOL) {
+      insertionIndex += 1;
+    }
+
+    result.splice(insertionIndex, 0, previousResult);
+    currentToolResultIds.add(previousResult.toolCallId);
+  }
+
   return stabilizeResolvedCardOrder(result, previousTurn);
 };
 

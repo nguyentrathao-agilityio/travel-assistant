@@ -72,6 +72,47 @@ describe('reconcileConversationMessages', () => {
     expect(result).toEqual(previousMessages);
   });
 
+  it('keeps a resolved card and its result when an active snapshot drops both', () => {
+    const userMessage: ConversationChatMessage = {
+      id: 'u1',
+      role: 'user',
+      content: 'Show places in Da Nang',
+    };
+    const cardCall: ConversationChatMessage = {
+      id: 'a-card',
+      role: 'assistant',
+      content: '',
+      hasResolvedToolCard: true,
+      toolCalls: [
+        {
+          id: 'call-places',
+          type: 'function',
+          function: { name: 'placesTool', arguments: '{"city":"Da Nang"}' },
+        },
+      ],
+    };
+    const cardResult: ConversationChatMessage = {
+      id: 't-card',
+      role: 'tool',
+      toolCallId: 'call-places',
+      content: '{"total":8}',
+    };
+    const response: ConversationChatMessage = {
+      id: 'a-response',
+      role: 'assistant',
+      content: 'Here are the top places in Da Nang.',
+    };
+    const previousMessages = [userMessage, cardCall, cardResult, response];
+    const regressedSnapshot = [userMessage, response];
+
+    const result = reconcileConversationMessages(regressedSnapshot, {
+      previousMessages,
+      inProgress: true,
+    });
+
+    expect(result.map(({ id }) => id)).toEqual(['u1', 'a-card', 't-card', 'a-response']);
+  });
+
   it.each([true, false])(
     'keeps a resolved booking card before the agent confirmation when inProgress=%s',
     (inProgress) => {

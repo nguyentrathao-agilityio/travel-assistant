@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useRenderTool } from '@copilotkit/react-core/v2';
 import { useWeatherAction } from '@/hooks/useWeatherAction';
 
 jest.mock('@/constants', () => ({ TOOL_NAMES: { WEATHER: 'weatherTool' } }));
@@ -28,32 +28,34 @@ jest.mock('@repo/schemas', () => ({
 const getRender = () => {
   renderHook(() => useWeatherAction());
 
-  return jest.mocked(useRenderToolCall).mock.calls[0][0].render;
+  return jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+    props: Record<string, unknown>
+  ) => React.ReactElement;
 };
 
 beforeEach(() => {
-  jest.mocked(useRenderToolCall).mockClear();
+  jest.mocked(useRenderTool).mockClear();
   mockSafeParse.mockReturnValue({ success: false });
 });
 
 describe('useWeatherAction', () => {
   it('registers with the weatherTool name', () => {
     renderHook(() => useWeatherAction());
-    expect(jest.mocked(useRenderToolCall)).toHaveBeenCalledWith(
+    expect(jest.mocked(useRenderTool)).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'weatherTool' })
     );
   });
 
   it('render returns ToolLoading when status is pending', () => {
     const render = getRender();
-    const result = render({ status: 'inProgress', args: {}, result: undefined });
+    const result = render({ status: 'inProgress', parameters: {}, result: undefined });
 
     expect(result).not.toBeNull();
   });
 
   it('render returns ToolInvalidResultCard when safeParse fails', () => {
     const render = getRender();
-    const result = render({ status: 'complete', args: {}, result: {} });
+    const result = render({ status: 'complete', parameters: {}, result: {} });
 
     expect(result.type).not.toBe(React.Fragment);
   });
@@ -63,7 +65,7 @@ describe('useWeatherAction', () => {
 
     mockSafeParse.mockReturnValue({ success: true, data: fakeData });
     const render = getRender();
-    const result = render({ status: 'complete', args: {}, result: fakeData });
+    const result = render({ status: 'complete', parameters: {}, result: fakeData });
     const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;
 
     expect(card).not.toBeNull();

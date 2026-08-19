@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useRenderTool } from '@copilotkit/react-core/v2';
+import { z } from 'zod';
 
 // Components
 import {
@@ -15,7 +16,7 @@ import {
 import { getToolError, isToolPending, parseToolResult } from '@/utils';
 
 // Constants
-import { FLIGHT_BASE_PARAMS, TOOL_NAMES } from '@/constants';
+import { TOOL_NAMES } from '@/constants';
 
 // Hooks
 import { useTripState } from '@/hooks';
@@ -24,12 +25,17 @@ import { useConversationRendererStore } from '@/stores';
 // Types
 import type { Flight, FlightSearchResult } from '@repo/types';
 
-const FLIGHT_SEARCH_REQUIRED = ['origin', 'destination', 'departure_date'];
-
-const searchParams = FLIGHT_BASE_PARAMS.map((p) => ({
-  ...p,
-  required: FLIGHT_SEARCH_REQUIRED.includes(p.name),
-}));
+const flightSearchParameters = z.object({
+  origin: z.string().optional(),
+  destination: z.string().optional(),
+  departure_date: z.string().optional(),
+  adults: z.number().optional(),
+  return_date: z.string().optional(),
+  airline: z.string().optional(),
+  max_price: z.number().optional(),
+  max_stops: z.number().optional(),
+  sort: z.string().optional(),
+});
 
 export const useFlightAction = () => {
   const { selectFlight, state } = useTripState();
@@ -48,52 +54,54 @@ export const useFlightAction = () => {
     [sendMessage]
   );
 
-  useRenderToolCall({
-    name: TOOL_NAMES.FLIGHTS,
-    description: `Search available flights. After this tool is called, the agent will ask user to select flights from the search results.`,
-    parameters: searchParams,
-    render: ({ status, result, args }) => {
-      if (isToolPending(status))
+  useRenderTool(
+    {
+      name: TOOL_NAMES.FLIGHTS,
+      parameters: flightSearchParameters,
+      render: ({ status, result, parameters: args }) => {
+        if (isToolPending(status))
+          return (
+            <ToolLoading
+              target={`flights from ${args.origin} to ${args.destination} on ${args.departure_date}`}
+            />
+          );
+
+        if (getToolError(result)) return <ToolErrorCard result={result} />;
+
+        const parsedResult = parseToolResult(result) as FlightSearchResult | undefined;
+
+        if (parsedResult?.results && parsedResult.results.length === 0)
+          return <ToolEmptyCard message="No flights matched this search." />;
+
+        if (!parsedResult?.results)
+          return <ToolInvalidResultCard message="Received an unexpected flight result." />;
+
+        const confirmedDeparture =
+          parsedResult.results.find(
+            (flight: Flight) => flight.id === state?.flights?.departure?.id
+          ) ?? null;
+        const confirmedReturn =
+          parsedResult.returnResults?.find(
+            (flight: Flight) => flight.id === state?.flights?.return?.id
+          ) ?? null;
+        const isConfirmed = !!confirmedDeparture;
+
         return (
-          <ToolLoading
-            target={`flights from ${args.origin} to ${args.destination} on ${args.departure_date}`}
-          />
+          <>
+            <SetLastTool toolName={TOOL_NAMES.FLIGHTS} />
+            <FlightCard
+              data={parsedResult}
+              {...args}
+              onSelect={selectFlight}
+              onContinueBooking={handleContinueBooking}
+              isConfirmed={isConfirmed}
+              initialDeparture={confirmedDeparture}
+              initialReturn={confirmedReturn}
+            />
+          </>
         );
-
-      if (getToolError(result)) return <ToolErrorCard result={result} />;
-
-      const parsedResult = parseToolResult(result) as FlightSearchResult | undefined;
-
-      if (parsedResult?.results && parsedResult.results.length === 0)
-        return <ToolEmptyCard message="No flights matched this search." />;
-
-      if (!parsedResult?.results)
-        return <ToolInvalidResultCard message="Received an unexpected flight result." />;
-
-      const confirmedDeparture =
-        parsedResult.results.find(
-          (flight: Flight) => flight.id === state?.flights?.departure?.id
-        ) ?? null;
-      const confirmedReturn =
-        parsedResult.returnResults?.find(
-          (flight: Flight) => flight.id === state?.flights?.return?.id
-        ) ?? null;
-      const isConfirmed = !!confirmedDeparture;
-
-      return (
-        <>
-          <SetLastTool toolName={TOOL_NAMES.FLIGHTS} />
-          <FlightCard
-            data={parsedResult}
-            {...args}
-            onSelect={selectFlight}
-            onContinueBooking={handleContinueBooking}
-            isConfirmed={isConfirmed}
-            initialDeparture={confirmedDeparture}
-            initialReturn={confirmedReturn}
-          />
-        </>
-      );
+      },
     },
-  });
+    [state]
+  );
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useRenderTool } from '@copilotkit/react-core/v2';
 import { useTripSummaryAction } from '@/hooks/useTripSummaryAction';
 
 jest.mock('@/hooks/useTripState', () => ({
@@ -30,22 +30,25 @@ jest.mock('@repo/schemas', () => ({
 }));
 
 beforeEach(() => {
-  jest.mocked(useRenderToolCall).mockClear();
+  jest.mocked(useRenderTool).mockClear();
   mockSafeParse.mockReturnValue({ success: false });
 });
 
 describe('useTripSummaryAction', () => {
   it('registers with the tripSummaryTool name', () => {
     renderHook(() => useTripSummaryAction());
-    expect(jest.mocked(useRenderToolCall)).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'tripSummaryTool' })
+    expect(jest.mocked(useRenderTool)).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'tripSummaryTool' }),
+      expect.any(Array)
     );
   });
 
   it('render returns LoadingCard when status is pending', () => {
     renderHook(() => useTripSummaryAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'inProgress', args: {}, result: undefined });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'inProgress', parameters: {}, result: undefined });
 
     expect(result).not.toBeNull();
   });
@@ -53,8 +56,10 @@ describe('useTripSummaryAction', () => {
   it('render returns ToolInvalidResultCard when safeParse fails', () => {
     mockSafeParse.mockReturnValue({ success: false });
     renderHook(() => useTripSummaryAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', args: {}, result: {} });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'complete', parameters: {}, result: {} });
 
     expect(result.type).not.toBe(React.Fragment);
   });
@@ -80,8 +85,10 @@ describe('useTripSummaryAction', () => {
 
     mockSafeParse.mockReturnValue({ success: true, data: summaryData });
     renderHook(() => useTripSummaryAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', args: {}, result: summaryData });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'complete', parameters: {}, result: summaryData });
 
     expect(result).not.toBeNull();
     const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;

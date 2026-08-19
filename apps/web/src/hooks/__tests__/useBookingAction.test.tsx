@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { fireEvent, render, renderHook, screen } from '@testing-library/react';
-import { useLangGraphInterrupt, useRenderToolCall } from '@copilotkit/react-core';
+import { useLangGraphInterrupt } from '@copilotkit/react-core';
+import { useRenderTool } from '@copilotkit/react-core/v2';
 
 import { TOOL_NAMES } from '@/constants';
 import { useBookingAction } from '../useBookingAction';
@@ -8,7 +9,7 @@ import { useBookingAction } from '../useBookingAction';
 describe('useBookingAction', () => {
   beforeEach(() => {
     jest.mocked(useLangGraphInterrupt).mockClear();
-    jest.mocked(useRenderToolCall).mockClear();
+    jest.mocked(useRenderTool).mockClear();
   });
 
   it('renders LangChain HITL requests and resolves approval with a structured decision', () => {
@@ -106,7 +107,7 @@ describe('useBookingAction', () => {
   it('does not render an error card for an intentional HITL rejection result', () => {
     renderHook(() => useBookingAction());
     const registration = jest
-      .mocked(useRenderToolCall)
+      .mocked(useRenderTool)
       .mock.calls.find((call) => call[0].name === TOOL_NAMES.CANCEL_BOOKING)?.[0];
 
     const { container } = render(
@@ -124,7 +125,7 @@ describe('useBookingAction', () => {
   it('shows an error card when the completed result matches neither the booking nor error schema', () => {
     renderHook(() => useBookingAction());
     const registration = jest
-      .mocked(useRenderToolCall)
+      .mocked(useRenderTool)
       .mock.calls.find((call) => call[0].name === TOOL_NAMES.BOOK_FLIGHT)?.[0];
 
     render(

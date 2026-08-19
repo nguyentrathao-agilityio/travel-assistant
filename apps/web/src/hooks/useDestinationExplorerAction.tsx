@@ -1,4 +1,5 @@
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useRenderTool } from '@copilotkit/react-core/v2';
+import { z } from 'zod';
 
 // Schemas
 import { DestinationExplorerResultSchema } from '@repo/schemas';
@@ -18,21 +19,17 @@ import { TOOL_NAMES } from '@/constants';
 // Utils
 import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 
+const destinationExplorerParameters = z.object({
+  city: z.string().optional(),
+  country: z.string().optional(),
+  forecastDays: z.number().optional(),
+});
+
 export const useDestinationExplorerAction = () => {
-  useRenderToolCall({
+  useRenderTool({
     name: TOOL_NAMES.DESTINATION_EXPLORER,
-    description: 'Render the unified destination explorer card with places, tips, and weather',
-    parameters: [
-      { name: 'city', type: 'string', description: 'Destination city', required: true },
-      { name: 'country', type: 'string', description: 'Country name', required: false },
-      {
-        name: 'forecastDays',
-        type: 'number',
-        description: 'Number of forecast days (1-16)',
-        required: false,
-      },
-    ],
-    render: ({ status, result, args }) => {
+    parameters: destinationExplorerParameters,
+    render: ({ status, result, parameters: args }) => {
       if (isToolPending(status))
         return <ToolLoading action="Exploring" target={args.city || 'destination'} />;
 

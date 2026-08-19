@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useRenderTool } from '@copilotkit/react-core/v2';
 import { useLocalTipsAction } from '@/hooks/useLocalTipsAction';
 
 jest.mock('@/constants', () => ({ TOOL_NAMES: { LOCAL_TIPS: 'localTipsTool' } }));
@@ -26,22 +26,24 @@ jest.mock('@repo/schemas', () => ({
 }));
 
 beforeEach(() => {
-  jest.mocked(useRenderToolCall).mockClear();
+  jest.mocked(useRenderTool).mockClear();
   mockSafeParse.mockReturnValue({ success: false });
 });
 
 describe('useLocalTipsAction', () => {
   it('registers with the localTipsTool name', () => {
     renderHook(() => useLocalTipsAction());
-    expect(jest.mocked(useRenderToolCall)).toHaveBeenCalledWith(
+    expect(jest.mocked(useRenderTool)).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'localTipsTool' })
     );
   });
 
   it('render returns LocalTipsCard (loading) when status is pending', () => {
     renderHook(() => useLocalTipsAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'inProgress', args: {}, result: undefined });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'inProgress', parameters: {}, result: undefined });
 
     expect(result).not.toBeNull();
   });
@@ -49,8 +51,10 @@ describe('useLocalTipsAction', () => {
   it('render returns ToolInvalidResultCard when safeParse fails', () => {
     mockSafeParse.mockReturnValue({ success: false });
     renderHook(() => useLocalTipsAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', args: {}, result: {} });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'complete', parameters: {}, result: {} });
 
     expect(result.type).not.toBe(React.Fragment);
   });
@@ -61,8 +65,10 @@ describe('useLocalTipsAction', () => {
       data: { count: 0, tips: [], country: 'Vietnam', summary: '' },
     });
     renderHook(() => useLocalTipsAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', args: {}, result: { count: 0 } });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'complete', parameters: {}, result: { count: 0 } });
 
     expect(result.type).not.toBe(React.Fragment);
   });
@@ -87,8 +93,10 @@ describe('useLocalTipsAction', () => {
 
     mockSafeParse.mockReturnValue({ success: true, data: tipsData });
     renderHook(() => useLocalTipsAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', args: {}, result: tipsData });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'complete', parameters: {}, result: tipsData });
 
     expect(result).not.toBeNull();
   });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useRenderTool } from '@copilotkit/react-core/v2';
 import { useHotelAction } from '@/hooks/useHotelAction';
 
 jest.mock('@/hooks', () => ({
@@ -37,27 +37,30 @@ jest.mock('@repo/schemas', () => ({
 }));
 
 beforeEach(() => {
-  jest.mocked(useRenderToolCall).mockClear();
+  jest.mocked(useRenderTool).mockClear();
   mockHotelSafeParse.mockReturnValue({ success: false });
 });
 
 describe('useHotelAction', () => {
-  it('registers useRenderToolCall on mount', () => {
+  it('registers useRenderTool on mount', () => {
     renderHook(() => useHotelAction());
-    expect(jest.mocked(useRenderToolCall)).toHaveBeenCalledTimes(1);
+    expect(jest.mocked(useRenderTool)).toHaveBeenCalledTimes(1);
   });
 
   it('registers with the hotelTool name', () => {
     renderHook(() => useHotelAction());
-    expect(jest.mocked(useRenderToolCall)).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'hotelTool' })
+    expect(jest.mocked(useRenderTool)).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'hotelTool' }),
+      expect.any(Array)
     );
   });
 
   it('render returns LoadingCard when status is inProgress', () => {
     renderHook(() => useHotelAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'inProgress', result: undefined, args: {} });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'inProgress', result: undefined, parameters: {} });
 
     expect(result).not.toBeNull();
   });
@@ -65,8 +68,14 @@ describe('useHotelAction', () => {
   it('render returns ToolInvalidResultCard when status is complete and safeParse fails', () => {
     mockHotelSafeParse.mockReturnValue({ success: false });
     renderHook(() => useHotelAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', result: { total: 1, results: [] }, args: {} });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({
+      status: 'complete',
+      result: { total: 1, results: [] },
+      parameters: {},
+    });
 
     expect(result.type).not.toBe(React.Fragment);
   });
@@ -74,8 +83,14 @@ describe('useHotelAction', () => {
   it('render returns an explicit empty state when total is 0', () => {
     mockHotelSafeParse.mockReturnValue({ success: true, data: { total: 0, results: [] } });
     renderHook(() => useHotelAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', result: { total: 0, results: [] }, args: {} });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({
+      status: 'complete',
+      result: { total: 0, results: [] },
+      parameters: {},
+    });
 
     expect(result.type).not.toBe(React.Fragment);
   });
@@ -110,11 +125,13 @@ describe('useHotelAction', () => {
 
     mockHotelSafeParse.mockReturnValue({ success: true, data: hotelData });
     renderHook(() => useHotelAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
     const result = render({
       status: 'complete',
       result: hotelData,
-      args: { city: 'Da Nang', checkIn: '2026-07-01', checkOut: '2026-07-04' },
+      parameters: { city: 'Da Nang', checkIn: '2026-07-01', checkOut: '2026-07-04' },
     });
 
     expect(result).not.toBeNull();
@@ -125,8 +142,10 @@ describe('useHotelAction', () => {
 
   it('render returns empty fragment when status is not complete', () => {
     renderHook(() => useHotelAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', result: undefined, args: {} });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'complete', result: undefined, parameters: {} });
 
     expect(result.type).toBe(React.Fragment);
   });

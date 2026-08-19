@@ -1,4 +1,5 @@
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useRenderTool } from '@copilotkit/react-core/v2';
+import { z } from 'zod';
 
 // Schemas
 import { PlacesSearchResultSchema } from '@repo/schemas';
@@ -19,16 +20,17 @@ import { TOOL_NAMES } from '@/constants';
 // Utils
 import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 
+const placesParameters = z.object({
+  city: z.string().optional(),
+  category: z.string().optional(),
+  price_level: z.number().optional(),
+});
+
 export const usePlacesAction = () => {
-  useRenderToolCall({
+  useRenderTool({
     name: TOOL_NAMES.PLACES,
-    description: 'Search places of interest in a city',
-    parameters: [
-      { name: 'city', type: 'string', description: 'City name', required: false },
-      { name: 'category', type: 'string', description: 'Place category', required: false },
-      { name: 'price_level', type: 'number', description: 'Price level 1-4', required: false },
-    ],
-    render: ({ status, result, args }) => {
+    parameters: placesParameters,
+    render: ({ status, result, parameters: args }) => {
       if (isToolPending(status)) return <ToolLoading target={`places in ${args.city}`} />;
 
       if (getToolError(result)) return <ToolErrorCard result={result} />;

@@ -1,4 +1,5 @@
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useRenderTool } from '@copilotkit/react-core/v2';
+import { z } from 'zod';
 
 // Constants
 import { TOOL_NAMES } from '@/constants';
@@ -18,15 +19,16 @@ import {
   ToolLoading,
 } from '@/components';
 
+const weatherParameters = z.object({
+  city: z.string().optional(),
+  days: z.number().optional(),
+});
+
 export const useWeatherAction = () => {
-  useRenderToolCall({
+  useRenderTool({
     name: TOOL_NAMES.WEATHER,
-    description: 'Show current weather and forecast for a destination',
-    parameters: [
-      { name: 'city', type: 'string', description: 'City name', required: true },
-      { name: 'days', type: 'number', description: 'Number of forecast days', required: false },
-    ],
-    render: ({ status, result, args }) => {
+    parameters: weatherParameters,
+    render: ({ status, result, parameters: args }) => {
       if (isToolPending(status))
         return <ToolLoading target={`weather in ${args.city} for ${args.days || 5} days`} />;
 

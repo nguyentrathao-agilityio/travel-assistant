@@ -1,6 +1,9 @@
 import type { MessagesProps } from '@copilotkit/react-ui';
 
-import { reconcileConversationMessages } from '@/utils/conversationMessages';
+import {
+  type ConversationChatMessage,
+  reconcileConversationMessages,
+} from '@/utils/conversationMessages';
 
 type ChatMessage = MessagesProps['messages'][number];
 
@@ -67,5 +70,46 @@ describe('reconcileConversationMessages', () => {
     });
 
     expect(result).toEqual(previousMessages);
+  });
+
+  it('keeps a resolved booking card before the agent confirmation while streaming', () => {
+    const bookingCall: ConversationChatMessage = {
+      id: 'a-booking',
+      role: 'assistant',
+      content: '',
+      hasResolvedToolCard: true,
+      toolCalls: [
+        {
+          id: 'call-booking',
+          type: 'function',
+          function: { name: 'bookFlight', arguments: '{"flightId":"VN123"}' },
+        },
+      ],
+    };
+    const bookingResult: ConversationChatMessage = {
+      id: 't-booking',
+      role: 'tool',
+      toolCallId: 'call-booking',
+      content: '{"status":"confirmed"}',
+    };
+    const confirmation: ConversationChatMessage = {
+      id: 'a-confirmation',
+      role: 'assistant',
+      content: 'Your flight booking has been confirmed.',
+    };
+    const userMessage: ConversationChatMessage = {
+      id: 'u1',
+      role: 'user',
+      content: 'Confirm my booking',
+    };
+    const previousMessages = [userMessage, bookingCall, bookingResult, confirmation];
+    const reorderedSnapshot = [userMessage, confirmation, bookingCall, bookingResult];
+
+    const result = reconcileConversationMessages(reorderedSnapshot, {
+      previousMessages,
+      inProgress: true,
+    });
+
+    expect(result.map(({ id }) => id)).toEqual(['u1', 'a-booking', 't-booking', 'a-confirmation']);
   });
 });

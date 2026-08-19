@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useRenderTool } from '@copilotkit/react-core/v2';
 import { usePlacesAction } from '@/hooks/usePlacesAction';
 
 jest.mock('@/constants', () => ({
@@ -30,22 +30,24 @@ jest.mock('@repo/schemas', () => ({
 }));
 
 beforeEach(() => {
-  jest.mocked(useRenderToolCall).mockClear();
+  jest.mocked(useRenderTool).mockClear();
   mockSafeParse.mockReturnValue({ success: false });
 });
 
 describe('usePlacesAction', () => {
   it('registers with the placesTool name', () => {
     renderHook(() => usePlacesAction());
-    expect(jest.mocked(useRenderToolCall)).toHaveBeenCalledWith(
+    expect(jest.mocked(useRenderTool)).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'placesTool' })
     );
   });
 
   it('render returns LoadingCard when status is pending', () => {
     renderHook(() => usePlacesAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'inProgress', args: {}, result: undefined });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'inProgress', parameters: {}, result: undefined });
 
     expect(result).not.toBeNull();
   });
@@ -53,8 +55,10 @@ describe('usePlacesAction', () => {
   it('render returns ToolInvalidResultCard when safeParse fails', () => {
     mockSafeParse.mockReturnValue({ success: false });
     renderHook(() => usePlacesAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', args: {}, result: {} });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'complete', parameters: {}, result: {} });
 
     expect(result.type).not.toBe(React.Fragment);
   });
@@ -62,8 +66,14 @@ describe('usePlacesAction', () => {
   it('render returns an explicit empty state when total is 0', () => {
     mockSafeParse.mockReturnValue({ success: true, data: { total: 0, results: [] } });
     renderHook(() => usePlacesAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', args: {}, result: { total: 0, results: [] } });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({
+      status: 'complete',
+      parameters: {},
+      result: { total: 0, results: [] },
+    });
 
     expect(result.type).not.toBe(React.Fragment);
   });
@@ -93,8 +103,10 @@ describe('usePlacesAction', () => {
 
     mockSafeParse.mockReturnValue({ success: true, data: placesData });
     renderHook(() => usePlacesAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', args: {}, result: placesData });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'complete', parameters: {}, result: placesData });
 
     expect(result).not.toBeNull();
     const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;
@@ -107,9 +119,11 @@ describe('usePlacesAction', () => {
 
     mockSafeParse.mockReturnValue({ success: true, data: placesData });
     renderHook(() => usePlacesAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
 
-    render({ status: 'complete', args: {}, result: JSON.stringify(placesData) });
+    render({ status: 'complete', parameters: {}, result: JSON.stringify(placesData) });
 
     expect(mockSafeParse).toHaveBeenCalledWith(placesData);
   });

@@ -1,4 +1,5 @@
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useRenderTool } from '@copilotkit/react-core/v2';
+import { z } from 'zod';
 
 // Schemas
 import { TipsResultSchema } from '@repo/schemas';
@@ -19,22 +20,18 @@ import { TOOL_NAMES } from '@/constants';
 // Utils
 import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
 
+const localTipsParameters = z.object({
+  city: z.string().optional(),
+  country: z.string().optional(),
+  category: z.string().optional(),
+  essential_only: z.boolean().optional(),
+});
+
 export const useLocalTipsAction = () => {
-  useRenderToolCall({
+  useRenderTool({
     name: TOOL_NAMES.LOCAL_TIPS,
-    description: 'Get local travel tips for a city or country',
-    parameters: [
-      { name: 'city', type: 'string', description: 'City name', required: false },
-      { name: 'country', type: 'string', description: 'Country name', required: false },
-      { name: 'category', type: 'string', description: 'Tip category', required: false },
-      {
-        name: 'essential_only',
-        type: 'boolean',
-        description: 'Essential tips only',
-        required: false,
-      },
-    ],
-    render: ({ result, status, args }) => {
+    parameters: localTipsParameters,
+    render: ({ result, status, parameters: args }) => {
       if (isToolPending(status))
         return <ToolLoading target={`local tips in ${args.city || args.country}`} />;
 

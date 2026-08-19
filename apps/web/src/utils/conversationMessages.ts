@@ -181,7 +181,7 @@ const mergeMissingCardCalls = (
   previousTurn: ConversationChatMessage[],
   currentToolCallIds: Set<string>
 ): ConversationChatMessage[] => {
-  const result = [...messages];
+  let result = [...messages];
   const retainedMessages: ResolvedToolCardMessage[] = [];
 
   for (const previousMessage of previousTurn.filter(isResolvedToolCardMessage)) {
@@ -208,14 +208,52 @@ const mergeMissingCardCalls = (
     };
   }
 
-  if (!retainedMessages.length) return result;
+  if (retainedMessages.length) {
+    const currentUserIndex = findLastUserMessageIndex(result);
+    result = [
+      ...result.slice(0, currentUserIndex + 1),
+      ...retainedMessages,
+      ...result.slice(currentUserIndex + 1),
+    ];
+  }
 
+  // A live AG-UI snapshot can temporarily place the final assistant response
+  // before the tool call that produced its card. Keep the causal UI order stable.
   const currentUserIndex = findLastUserMessageIndex(result);
-  return [
-    ...result.slice(0, currentUserIndex + 1),
-    ...retainedMessages,
-    ...result.slice(currentUserIndex + 1),
-  ];
+  for (const previousMessage of previousTurn.filter(isResolvedToolCardMessage)) {
+    const toolCallIds = new Set(previousMessage.toolCalls?.map(({ id }) => id));
+    const cardIndex = result.findIndex(
+      (message) =>
+        message.role === CHAT_ROLE.ASSISTANT &&
+        message.toolCalls?.some(({ id }) => toolCallIds.has(id))
+    );
+
+    if (cardIndex === -1) continue;
+
+    const responseIndex = result.findIndex(
+      (message, index) =>
+        index > currentUserIndex && index < cardIndex && isVisibleAssistantMessage(message)
+    );
+
+    if (responseIndex === -1) continue;
+
+    const relatedIndexes = new Set<number>([cardIndex]);
+    result.forEach((message, index) => {
+      if (message.role === CHAT_ROLE.TOOL && toolCallIds.has(message.toolCallId)) {
+        relatedIndexes.add(index);
+      }
+    });
+
+    const cardBlock = result.filter((_, index) => relatedIndexes.has(index));
+    const remaining = result.filter((_, index) => !relatedIndexes.has(index));
+    result = [
+      ...remaining.slice(0, responseIndex),
+      ...cardBlock,
+      ...remaining.slice(responseIndex),
+    ];
+  }
+
+  return result;
 };
 
 /**

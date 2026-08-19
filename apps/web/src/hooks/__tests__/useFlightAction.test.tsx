@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { useRenderToolCall } from '@copilotkit/react-core';
+import { useRenderTool } from '@copilotkit/react-core/v2';
 import { useFlightAction } from '@/hooks/useFlightAction';
 
 jest.mock('@/hooks', () => ({
@@ -28,56 +28,67 @@ jest.mock('@/utils', () => ({
   isToolPending: (status: string) => status === 'inProgress' || status === 'executing',
 }));
 
-beforeEach(() => jest.mocked(useRenderToolCall).mockClear());
+beforeEach(() => jest.mocked(useRenderTool).mockClear());
 
 describe('useFlightAction', () => {
-  it('registers useRenderToolCall on mount', () => {
+  it('registers the renderer through the stable v2 registry', () => {
     renderHook(() => useFlightAction());
-    expect(jest.mocked(useRenderToolCall)).toHaveBeenCalledTimes(1);
+    expect(jest.mocked(useRenderTool)).toHaveBeenCalledTimes(1);
   });
 
   it('registers with the flightsTool name', () => {
     renderHook(() => useFlightAction());
-    expect(jest.mocked(useRenderToolCall)).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'flightsTool' })
+    expect(jest.mocked(useRenderTool)).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'flightsTool' }),
+      expect.any(Array)
     );
   });
 
   it('render returns LoadingCard when status is inProgress', () => {
     renderHook(() => useFlightAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'inProgress', result: undefined, args: {} });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'inProgress', result: undefined, parameters: {} });
 
     expect(result).not.toBeNull();
   });
 
   it('render returns an explicit empty state when result has no results', () => {
     renderHook(() => useFlightAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', result: { results: [] }, args: {} });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'complete', result: { results: [] }, parameters: {} });
 
     expect(result.type).not.toBe(React.Fragment);
   });
 
   it('render returns ToolInvalidResultCard when result is null', () => {
     renderHook(() => useFlightAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', result: undefined, args: {} });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'complete', result: undefined, parameters: {} });
 
     expect(result.type).not.toBe(React.Fragment);
   });
 
   it('render returns ToolInvalidResultCard when result has no results property', () => {
     renderHook(() => useFlightAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
-    const result = render({ status: 'complete', result: {}, args: {} });
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
+    const result = render({ status: 'complete', result: {}, parameters: {} });
 
     expect(result.type).not.toBe(React.Fragment);
   });
 
   it('render returns FlightCard when results are non-empty', () => {
     renderHook(() => useFlightAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
     const flight = {
       id: 'f1',
       airline: { code: 'VN', name: 'Vietnam Airlines' },
@@ -95,7 +106,7 @@ describe('useFlightAction', () => {
     const result = render({
       status: 'complete',
       result: { results: [flight], count: 1 },
-      args: { origin: 'HAN', destination: 'SGN' },
+      parameters: { origin: 'HAN', destination: 'SGN' },
     });
 
     expect(result).not.toBeNull();
@@ -106,13 +117,15 @@ describe('useFlightAction', () => {
 
   it('renders a persisted flight result serialized as JSON', () => {
     renderHook(() => useFlightAction());
-    const { render } = jest.mocked(useRenderToolCall).mock.calls[0][0];
+    const render = jest.mocked(useRenderTool).mock.calls[0][0].render as unknown as (
+      props: Record<string, unknown>
+    ) => React.ReactElement;
     const serializedResult = JSON.stringify({
       count: 1,
       results: [{ id: 'f1', flightNumber: 'VN100' }],
     });
 
-    const result = render({ status: 'complete', result: serializedResult, args: {} });
+    const result = render({ status: 'complete', result: serializedResult, parameters: {} });
 
     const [card] = (result as React.ReactElement<{ children: React.ReactNode[] }>).props.children;
 

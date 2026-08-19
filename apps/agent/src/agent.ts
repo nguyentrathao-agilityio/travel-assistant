@@ -2,11 +2,10 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 
 // Constants
-import { EXTERNAL_API_RETRY_POLICY, POSTGRES_URL } from './constants';
+import { BRANCH_NAMES, EXTERNAL_API_RETRY_POLICY, POSTGRES_URL } from './constants';
 
 // Nodes
 import {
-  BRANCH_NAMES,
   SUPERVISOR_ROUTES,
   bookingAgent,
   classifyNode,

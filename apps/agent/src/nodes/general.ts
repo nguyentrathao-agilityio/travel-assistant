@@ -10,8 +10,6 @@ import { openAiApiKeyFromConfig, withOpenAiApiKey } from '@/infrastructure/llm';
 // State
 import type { GraphStateType } from '@/state';
 
-export const GENERAL_AGENT_TOOLS = AGENT_CONFIGS.general.tools;
-
 export const createGeneralAgent = (apiKey: string) =>
   createSpecializedAgent(AGENT_CONFIGS.general, apiKey);
 

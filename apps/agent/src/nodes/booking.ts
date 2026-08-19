@@ -10,8 +10,6 @@ import { openAiApiKeyFromConfig, withOpenAiApiKey } from '@/infrastructure/llm';
 // State
 import type { GraphStateType } from '@/state';
 
-export const BOOKING_AGENT_TOOLS = AGENT_CONFIGS.booking.tools;
-
 export const createBookingAgent = (apiKey: string) =>
   createSpecializedAgent(AGENT_CONFIGS.booking, apiKey);
 

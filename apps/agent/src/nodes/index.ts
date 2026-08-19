@@ -1,5 +1,4 @@
 export * from './classify';
-export * from './routing';
 export * from './save-memory';
 export * from './supervise';
 export * from './explore';

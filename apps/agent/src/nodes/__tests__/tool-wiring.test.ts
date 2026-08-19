@@ -1,9 +1,3 @@
-import {
-  BOOKING_AGENT_TOOLS,
-  EXPLORE_AGENT_TOOLS,
-  GENERAL_AGENT_TOOLS,
-  PLANNING_AGENT_TOOLS,
-} from '..';
 import { describe, expect, it } from 'vitest';
 
 // Constants
@@ -26,10 +20,10 @@ describe('specialized agent tool wiring', () => {
   });
 
   it('binds discovery tools to explore and multi-domain search tools to planning', () => {
-    expect(nameOf(EXPLORE_AGENT_TOOLS)).toEqual(
+    expect(nameOf(AGENT_CONFIGS.explore.tools)).toEqual(
       ['destinationExplorerTool', 'knowledgeSearchTool', 'localTipsTool', 'placesTool'].sort()
     );
-    expect(nameOf(PLANNING_AGENT_TOOLS)).toEqual(
+    expect(nameOf(AGENT_CONFIGS.plan.tools)).toEqual(
       [
         'flightsTool',
         'hotelTool',
@@ -42,7 +36,7 @@ describe('specialized agent tool wiring', () => {
         'weatherTool',
       ].sort()
     );
-    expect(nameOf(BOOKING_AGENT_TOOLS)).toEqual(
+    expect(nameOf(AGENT_CONFIGS.booking.tools)).toEqual(
       ['bookFlightTool', 'bookHotelTool', 'cancelBookingTool'].sort()
     );
     expect(AGENT_CONFIGS.booking.approvalTools).toEqual([
@@ -50,9 +44,13 @@ describe('specialized agent tool wiring', () => {
       'bookHotelTool',
       'cancelBookingTool',
     ]);
-    expect(GENERAL_AGENT_TOOLS).toEqual([]);
+    expect(AGENT_CONFIGS.general.tools).toEqual([]);
 
-    const allNamedTools = [...EXPLORE_AGENT_TOOLS, ...PLANNING_AGENT_TOOLS, ...BOOKING_AGENT_TOOLS];
+    const allNamedTools = [
+      ...AGENT_CONFIGS.explore.tools,
+      ...AGENT_CONFIGS.plan.tools,
+      ...AGENT_CONFIGS.booking.tools,
+    ];
     const occurrences = allNamedTools.reduce<Record<string, number>>((counts, item) => {
       counts[item.name] = (counts[item.name] ?? 0) + 1;
 

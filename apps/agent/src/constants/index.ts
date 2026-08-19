@@ -12,3 +12,4 @@ export * from './tools';
 export * from './agents';
 export * from './tips';
 export * from './search';
+export * from './routing';

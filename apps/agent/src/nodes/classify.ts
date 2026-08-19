@@ -6,17 +6,18 @@ import { z } from 'zod';
 
 // Constants
 import {
+  BOOKING_OPERATION_BY_INTENT,
   DOMAIN_NODE_NAME,
   FALLBACK_INTENT,
   INFRASTRUCTURE_NODE_NAME,
+  INTENT_TO_BRANCH,
   MAX_CLASSIFY_MESSAGES,
+  type BookingOperation,
+  type BranchName,
 } from '@/constants';
 
 // Infrastructure
 import { createChatModel, openAiApiKeyFromConfig } from '@/infrastructure/llm';
-
-// Nodes
-import { bookingOperationByIntent, routeByIntent, type BranchName } from './routing';
 
 // Prompts
 import { CLASSIFY_SYSTEM_PROMPT } from '@/prompts';
@@ -31,6 +32,15 @@ import type { GraphStateType, GraphStateUpdate, TravelRequest } from '@/state';
 import { takeRecentMessages } from '@/utils';
 
 type ClassifyCommand = Command<never, GraphStateUpdate, BranchName>;
+
+/** Maps intent to a graph branch, defaulting to `general`. */
+export const routeByIntent = (intent: IntentClassification['intent'] | undefined): BranchName =>
+  intent ? INTENT_TO_BRANCH[intent] : 'general';
+
+/** Resolves direct booking intents to the operation handled by the unified booking agent. */
+const bookingOperationByIntent = (
+  intent: IntentClassification['intent']
+): BookingOperation | undefined => BOOKING_OPERATION_BY_INTENT[intent];
 
 const THEME_CONTROL_PATTERN =
   /\b(?:switch|change|set|toggle|turn)\b[\s\S]*\b(?:theme|dark mode|light mode)\b/i;

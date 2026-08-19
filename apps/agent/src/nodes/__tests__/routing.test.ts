@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 // Nodes
-import { routeAfterPlanning, routeByIntent } from '@/nodes/routing';
-
-// State
-import type { GraphStateType } from '@/state';
+import { routeByIntent } from '@/nodes/classify';
 
 describe('routeByIntent', () => {
   it.each([
@@ -21,16 +18,5 @@ describe('routeByIntent', () => {
 
   it('falls back to the general branch when intent is missing', () => {
     expect(routeByIntent(undefined)).toBe('general');
-  });
-});
-
-describe('routeAfterPlanning', () => {
-  it.each([
-    ['booking', 'booking'],
-    [undefined, 'saveMemory'],
-  ] as const)('routes handoff target %s to %s', (handoffTarget, expected) => {
-    const state = { handoffTarget } as GraphStateType;
-
-    expect(routeAfterPlanning(state)).toBe(expected);
   });
 });

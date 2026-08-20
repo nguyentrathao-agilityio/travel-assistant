@@ -35,6 +35,7 @@ export const createSpecializedAgent = (config: SpecializedAgentConfig, apiKey: s
     model,
     tools: config.tools,
     stateSchema: GraphState,
+    checkpointer: config.approvalTools?.length ? true : undefined,
     middleware: [
       createCopilotkitMiddleware(),
       openAIModerationMiddleware({

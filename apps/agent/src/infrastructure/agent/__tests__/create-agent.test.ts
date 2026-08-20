@@ -127,7 +127,7 @@ describe('createSpecializedAgent', () => {
       checkOutput: true,
       checkToolResults: false,
       exitBehavior: 'end',
-      violationMessage: 'I can’t help with that request.',
+      violationMessage: "I can't help with that request.",
     });
   });
 
@@ -178,6 +178,7 @@ describe('createSpecializedAgent', () => {
         },
       },
     });
+    expect(createAgentMock.mock.calls[0][0].checkpointer).toBe(true);
   });
 
   it('skips memory lookup and passes an empty memories list when includeMemoryContext is not set', async () => {

@@ -57,7 +57,7 @@ describe('BookingApprovalCard', () => {
     expect(onDecision).toHaveBeenCalledWith('approve');
   });
 
-  it('submits edit rather than disguising it as rejection', () => {
+  it('cancels the pending booking', () => {
     const onDecision = jest.fn();
 
     render(
@@ -77,11 +77,11 @@ describe('BookingApprovalCard', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
-    expect(onDecision).toHaveBeenCalledWith('edit');
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(onDecision).toHaveBeenCalledWith('reject');
   });
 
-  it('explains that changes continue in chat without creating the booking', () => {
+  it('explains that cancelling does not create the booking', () => {
     render(
       <BookingApprovalCard
         request={{
@@ -99,7 +99,7 @@ describe('BookingApprovalCard', () => {
     );
 
     expect(
-      screen.getByText('Choose Edit to change details in chat without creating this booking.')
+      screen.getByText('Choose Cancel to stop without creating this booking.')
     ).toBeInTheDocument();
   });
 

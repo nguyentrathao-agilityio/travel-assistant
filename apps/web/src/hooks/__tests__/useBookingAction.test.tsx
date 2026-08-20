@@ -42,7 +42,7 @@ describe('useBookingAction', () => {
     expect(resolve).toHaveBeenCalledWith({ decisions: [{ type: 'approve' }] });
   });
 
-  it('tells the agent an edit request did not create the booking', () => {
+  it('tells the agent a cancelled request did not create the booking', () => {
     renderHook(() => useBookingAction());
     const registration = jest.mocked(useLangGraphInterrupt).mock.calls[0][0];
     const value = {
@@ -60,14 +60,13 @@ describe('useBookingAction', () => {
     const resolve = jest.fn();
 
     render(registration.render?.({ event: { value }, resolve } as never) as ReactElement);
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(resolve).toHaveBeenCalledWith({
       decisions: [
         {
           type: 'reject',
-          message:
-            'The user requested changes. The booking was NOT created. Ask what they want to change before proposing a new booking.',
+          message: 'The user cancelled the booking request. The booking was NOT created.',
         },
       ],
     });

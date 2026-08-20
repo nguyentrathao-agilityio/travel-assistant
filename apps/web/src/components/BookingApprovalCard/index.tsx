@@ -28,8 +28,8 @@ const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCardProps) 
 
   const handleReject = useCallback(() => {
     setSubmitted(true);
-    onDecision(isCancellation ? 'reject' : 'edit');
-  }, [isCancellation, onDecision]);
+    onDecision('reject');
+  }, [onDecision]);
 
   return (
     <section className="card-typography border-border-tertiary bg-background-primary flex w-full max-w-2xl flex-col gap-3 rounded-lg border p-4">
@@ -69,12 +69,12 @@ const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCardProps) 
       <Typography variant="meta" color="tertiary">
         {isCancellation
           ? 'Choose Keep booking to reject this cancellation and leave the booking active.'
-          : 'Choose Edit to change details in chat without creating this booking.'}
+          : 'Choose Cancel to stop without creating this booking.'}
       </Typography>
 
       <div className="flex justify-end gap-2">
         <Button size="sm" variant="secondary" disabled={submitted} onClick={handleReject}>
-          {isCancellation ? 'Keep booking' : 'Edit'}
+          {isCancellation ? 'Keep booking' : 'Cancel'}
         </Button>
         <Button size="sm" variant="primary" disabled={submitted} onClick={handleApprove}>
           {submitted ? 'Submitting…' : isCancellation ? 'Cancel booking ↗' : 'Confirm booking ↗'}

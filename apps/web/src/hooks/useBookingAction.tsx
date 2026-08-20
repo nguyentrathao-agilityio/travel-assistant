@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { BookingApprovalCard, BookingResultCard, ErrorCard, ToolLoading } from '@/components';
 
 // Constants
-import { BOOKING_EDIT_REJECTION, TOOL_NAMES, TOOL_STATUS } from '@/constants';
+import { BOOKING_CREATION_DECLINED_MESSAGE, TOOL_NAMES, TOOL_STATUS } from '@/constants';
 
 // Types
 import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
@@ -146,7 +146,7 @@ export const useBookingAction = () => {
         const rejectionMessage =
           approvalRequest.action === 'cancel_booking'
             ? cancellationRejection(approvalRequest.referenceId)
-            : BOOKING_EDIT_REJECTION;
+            : BOOKING_CREATION_DECLINED_MESSAGE;
         const hitlResponse = {
           decisions: [
             decision === 'approve'

@@ -32,9 +32,14 @@ jest.mock('@/components', () => ({
   BookingResultCard: ({ booking }: { booking: { confirmationCode: string } }) => (
     <div data-testid="booking-result-card">{booking.confirmationCode}</div>
   ),
+  ToolEmptyCard: ({ message }: { message: string }) => (
+    <div data-testid="tool-empty-card">{message}</div>
+  ),
 }));
 
-jest.mock('@/utils', () => ({ isToolPending: (s: string) => s === 'inProgress' }));
+jest.mock('@/utils', () => ({
+  isToolPending: (s: string) => s === 'inProgress',
+}));
 
 beforeEach(() => {
   jest.mocked(useFrontendTool).mockClear();
@@ -97,7 +102,8 @@ describe('useBookedActions', () => {
       const render = getFlightsRender();
       const result = render({ status: 'complete', args: {} });
 
-      expect(result.type).toBe(React.Fragment);
+      expect(result.type).not.toBe(React.Fragment);
+      expect(result.props).toEqual({ message: 'You have not selected any flights yet.' });
     });
 
     it('renders departure flight when departure is set', () => {
@@ -181,7 +187,8 @@ describe('useBookedActions', () => {
       const render = getHotelRender();
       const result = render({ status: 'complete', args: {} });
 
-      expect(result.type).toBe(React.Fragment);
+      expect(result.type).not.toBe(React.Fragment);
+      expect(result.props).toEqual({ message: 'You have not selected a hotel yet.' });
     });
 
     it('renders hotel when hotel is set', () => {

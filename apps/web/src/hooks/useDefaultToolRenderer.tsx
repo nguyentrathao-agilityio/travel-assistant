@@ -19,10 +19,7 @@ export const useDefaultToolRenderer = () => {
     render: ({ name, status, result }) => {
       const label = toolLabel(name);
 
-      if (isToolPending(status)) {
-        return <ToolLoading action="Running" target={label} />;
-      }
-
+      if (isToolPending(status)) return <ToolLoading action="Running" target={label} />;
       if (getToolError(result)) return <ToolErrorCard result={result} />;
 
       const completedTool = label.charAt(0).toUpperCase() + label.slice(1);

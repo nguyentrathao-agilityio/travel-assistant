@@ -1,6 +1,6 @@
-import { createElement, useMemo, useRef } from 'react';
+import { createElement, Fragment, useMemo, useRef } from 'react';
 import type { MessagesProps } from '@copilotkit/react-ui';
-import { useLazyToolRenderer } from '@copilotkit/react-core';
+import { useToolCallRenderer } from './useToolCallRenderer';
 
 import { CHAT_ROLE } from '@/constants';
 import {
@@ -21,7 +21,7 @@ type ChatMessage = MessagesProps['messages'][number];
 
 const attachGenerativeUi = (
   messages: ChatMessage[],
-  lazyToolRendered: ReturnType<typeof useLazyToolRenderer>
+  renderToolCall: ReturnType<typeof useToolCallRenderer>
 ): ChatMessage[] =>
   messages.map((message) => {
     if (message.role !== CHAT_ROLE.ASSISTANT) return message;
@@ -31,7 +31,13 @@ const attachGenerativeUi = (
     if (toolCalls.length === 0) return message;
 
     const renderedNodes = toolCalls
-      .map((toolCall) => lazyToolRendered({ ...message, toolCalls: [toolCall] }, messages)?.())
+      .map((toolCall) => {
+        const rendered = renderToolCall({ ...message, toolCalls: [toolCall] }, messages)?.();
+
+        return rendered === null || rendered === undefined
+          ? rendered
+          : createElement(Fragment, { key: toolCall.id }, rendered);
+      })
       .filter((node) => node !== null && node !== undefined);
 
     if (renderedNodes.length === 0) return message;
@@ -50,7 +56,7 @@ export const useConversationMessages = (
   conversationId?: string | null,
   inProgress = false
 ): ChatMessage[] => {
-  const lazyToolRendered = useLazyToolRenderer();
+  const renderToolCall = useToolCallRenderer();
   const previousMessagesRef = useRef<ConversationChatMessage[]>([]);
   const conversationIdRef = useRef(conversationId);
 
@@ -67,10 +73,10 @@ export const useConversationMessages = (
     });
 
     // Attach resolved tool cards only after message content and ordering are stable.
-    const messagesWithGenerativeUi = attachGenerativeUi(reconciled, lazyToolRendered);
+    const messagesWithGenerativeUi = attachGenerativeUi(reconciled, renderToolCall);
 
     previousMessagesRef.current = messagesWithGenerativeUi;
 
     return messagesWithGenerativeUi;
-  }, [conversationId, inProgress, messages, lazyToolRendered]);
+  }, [conversationId, inProgress, messages, renderToolCall]);
 };

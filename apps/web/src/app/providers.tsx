@@ -1,6 +1,7 @@
 import { type ReactNode, useCallback, useMemo } from 'react';
-import { CopilotKit } from '@copilotkit/react-core';
+import { CopilotKit } from '@copilotkit/react-core/v2';
 import { Toaster, toast } from 'sonner';
+import { CopilotErrorBoundary } from '@/components';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 import {
@@ -47,18 +48,20 @@ export const Providers = ({ children }: ProvidersProps) => {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <CopilotKit
-        publicLicenseKey={COPILOTKIT_PUBLIC_LICENSE_KEY}
-        key={`${sessionId}:${sessionRevision}`}
-        runtimeUrl={RUNTIME_URL}
-        agent={AGENT_NAME}
-        threadId={sessionId}
-        headers={headers}
-        onError={handleError}
-      >
-        {children}
-        <Toaster richColors position="bottom-center" offset="80px" />
-      </CopilotKit>
+      <CopilotErrorBoundary resetKey={`${sessionId}:${sessionRevision}`}>
+        <CopilotKit
+          publicLicenseKey={COPILOTKIT_PUBLIC_LICENSE_KEY}
+          key={`${sessionId}:${sessionRevision}`}
+          runtimeUrl={RUNTIME_URL}
+          agent={AGENT_NAME}
+          threadId={sessionId}
+          headers={headers}
+          onError={handleError}
+        >
+          {children}
+          <Toaster richColors position="bottom-center" offset="80px" />
+        </CopilotKit>
+      </CopilotErrorBoundary>
     </ThemeProvider>
   );
 };

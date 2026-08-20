@@ -12,24 +12,7 @@ import { useShallow } from 'zustand/shallow';
 import { useConversationRendererStore, useThreadStore } from '@/stores';
 
 // Hooks
-import {
-  useBookedActions,
-  useBookingAction,
-  useBookingContext,
-  useDestinationExplorerAction,
-  useDefaultToolRenderer,
-  useFlightAction,
-  useThemeAction,
-  useHotelAction,
-  useThreadHistory,
-  useSeedAgentHistory,
-  useLocalTipsAction,
-  usePlacesAction,
-  useRouteAction,
-  useTitleSync,
-  useTripSummaryAction,
-  useWeatherAction,
-} from '@/hooks';
+import { useThreadHistory, useSeedAgentHistory, useTravelCopilot } from '@/hooks';
 
 // Components
 import { BookingPanel } from './BookingPanel';
@@ -45,10 +28,6 @@ const ConversationInput = (props: InputProps) => {
 
   onSendRef.current = props.onSend;
 
-  // CopilotChat creates a new onSend function during some internal renders.
-  // Publishing that changing identity to Zustand would re-render the custom
-  // renderers, create another onSend, and loop. Publish one stable bridge and
-  // keep only its implementation current via the ref above.
   const sendMessage = useCallback((text: string) => onSendRef.current(text), []);
 
   useEffect(() => {
@@ -82,20 +61,7 @@ export const TravelChat = () => {
     setHistoryStatus(activeThreadId, isHistoryLoading);
   }, [activeThreadId, isHistoryLoading, setHistoryStatus]);
 
-  useBookingContext();
-  useDefaultToolRenderer();
-  useBookingAction();
-  useFlightAction();
-  useHotelAction();
-  useWeatherAction();
-  usePlacesAction();
-  useRouteAction();
-  useLocalTipsAction();
-  useTripSummaryAction();
-  useDestinationExplorerAction();
-  useTitleSync();
-  useBookedActions();
-  useThemeAction();
+  useTravelCopilot();
 
   return (
     <div className="flex h-full flex-col overflow-hidden">

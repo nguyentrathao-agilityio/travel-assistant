@@ -1,4 +1,4 @@
-import { useCoAgent } from '@copilotkit/react-core';
+import { useAgent } from '@copilotkit/react-core/v2';
 import { useEffect, useCallback, useMemo, useRef } from 'react';
 
 // Constants
@@ -26,14 +26,8 @@ export const useTripState = () => {
     }))
   );
 
-  const { state, setState } = useCoAgent<TripState>({
-    name: AGENT_NAME,
-    initialState: (): TripState => ({
-      ...(useTripStateStore.getState().tripStates[sessionId] ?? {}),
-      clientDate: todayClientIso(),
-      clientTimezone: getClientTimezone(),
-    }),
-  });
+  const { agent } = useAgent({ agentId: AGENT_NAME });
+  const state = agent.state as TripState;
 
   const hasRestoredRef = useRef(false);
 
@@ -43,18 +37,15 @@ export const useTripState = () => {
     const saved = useTripStateStore.getState().tripStates[sessionId];
     const clientDate = { clientDate: todayClientIso(), clientTimezone: getClientTimezone() };
 
-    setState(() =>
+    agent.setState(
       saved && Object.keys(saved).length > 0 ? { ...saved, ...clientDate } : clientDate
     );
-  }, []);
+  }, [agent, sessionId]);
 
   useEffect(() => {
     if (!hasRestoredRef.current) return;
     if (!state || Object.keys(state).length === 0) return;
 
-    // A new backend snapshot may omit UI-owned booking selections. Merge
-    // defined remote fields into the per-thread cache instead of replacing
-    // the confirmed hotel/flight with undefined.
     const definedState = Object.fromEntries(
       Object.entries(state).filter(([, value]) => value !== undefined)
     ) as TripState;
@@ -88,13 +79,14 @@ export const useTripState = () => {
         flights: { ...(current.flights ?? {}), [type]: flight },
         flightSelectionStatus: 'confirmed',
       });
-      setState((prev) => ({
-        ...(prev ?? {}),
-        flights: { ...(prev?.flights ?? {}), [type]: flight },
+      const currentAgentState = (agent.state as TripState) ?? {};
+      agent.setState({
+        ...currentAgentState,
+        flights: { ...(currentAgentState.flights ?? {}), [type]: flight },
         flightSelectionStatus: 'confirmed',
-      }));
+      });
     },
-    [sessionId, setState, setTripState]
+    [agent, sessionId, setTripState]
   );
 
   const selectHotel = useCallback(
@@ -106,20 +98,20 @@ export const useTripState = () => {
         hotel,
         hotelSelectionStatus: 'confirmed',
       });
-      setState((prev) => ({
-        ...(prev ?? {}),
+      agent.setState({
+        ...((agent.state as TripState) ?? {}),
         hotel,
         hotelSelectionStatus: 'confirmed',
-      }));
+      });
     },
-    [sessionId, setState, setTripState]
+    [agent, sessionId, setTripState]
   );
 
   const clearTrip = useCallback(() => {
     hasRestoredRef.current = false;
-    setState(() => ({}));
+    agent.setState({});
     clearTripState(sessionId);
-  }, [setState, sessionId, clearTripState]);
+  }, [agent, sessionId, clearTripState]);
 
   return { state: effectiveState, selectFlight, selectHotel, clearTrip };
 };

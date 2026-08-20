@@ -22,6 +22,7 @@ jest.mock('@/stores', () => ({
 jest.mock('zustand/shallow', () => ({ useShallow: (fn: unknown) => fn }));
 
 jest.mock('@/hooks', () => ({
+  useTravelCopilot: jest.fn(),
   useTitleSync: jest.fn(),
   useWeatherAction: jest.fn(),
   useRouteAction: jest.fn(),

@@ -1,16 +1,66 @@
 import { render, renderHook } from '@testing-library/react';
-import { useLazyToolRenderer } from '@copilotkit/react-core';
+import { useToolCallRenderer } from '@/hooks/useToolCallRenderer';
 
 import { useConversationMessages } from '@/hooks/useConversationMessages';
+
+jest.mock('@/hooks/useToolCallRenderer', () => ({ useToolCallRenderer: jest.fn() }));
 
 type TestMessages = Parameters<typeof useConversationMessages>[0];
 
 describe('useConversationMessages', () => {
+  it('renders multiple persisted tool cards without React key warnings', () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const toolRenderer = jest.fn((message: { toolCalls?: { id: string }[] }) => {
+      const toolCall = message.toolCalls?.[0];
+
+      return toolCall ? () => <div>{toolCall.id}-card</div> : null;
+    });
+
+    jest
+      .mocked(useToolCallRenderer)
+      .mockReturnValue(toolRenderer as unknown as ReturnType<typeof useToolCallRenderer>);
+
+    const persistedMessages: TestMessages = [
+      {
+        id: 'a1',
+        role: 'assistant',
+        toolCalls: [
+          {
+            id: 'call-1',
+            type: 'function',
+            function: { name: 'weatherTool', arguments: '{}' },
+          },
+          {
+            id: 'call-2',
+            type: 'function',
+            function: { name: 'hotelsTool', arguments: '{}' },
+          },
+        ],
+      },
+    ];
+
+    const { result } = renderHook(() => useConversationMessages(persistedMessages));
+    const assistantMessage = result.current[0];
+
+    if (assistantMessage.role !== 'assistant') throw new Error('Expected assistant message');
+
+    const { container } = render(assistantMessage.generativeUI?.() as React.ReactElement);
+
+    expect(container.textContent).toBe('call-1-cardcall-2-card');
+    expect(consoleError).not.toHaveBeenCalledWith(
+      expect.stringContaining('Each child in a list should have a unique "key" prop'),
+      expect.anything(),
+      expect.anything()
+    );
+
+    consoleError.mockRestore();
+  });
+
   it('attaches generativeUI to a persisted assistant message with tool calls', () => {
     const rendered = <div key="call-1">weather-card</div>;
     const lazyRenderer = jest.fn(() => rendered);
 
-    jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => lazyRenderer));
+    jest.mocked(useToolCallRenderer).mockReturnValue(jest.fn(() => lazyRenderer));
 
     const persistedMessages = [
       {
@@ -41,7 +91,7 @@ describe('useConversationMessages', () => {
   });
 
   it('leaves a message untouched when there is no matching renderer', () => {
-    jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => null));
+    jest.mocked(useToolCallRenderer).mockReturnValue(jest.fn(() => null));
 
     const persistedMessages = [{ id: 'a1', role: 'assistant' as const, content: 'hello' }];
 
@@ -56,7 +106,7 @@ describe('useConversationMessages', () => {
     const liveRenderer = jest.fn(() => <div>live</div>);
     const lazyToolRendered = jest.fn();
 
-    jest.mocked(useLazyToolRenderer).mockReturnValue(lazyToolRendered);
+    jest.mocked(useToolCallRenderer).mockReturnValue(lazyToolRendered);
 
     const liveMessages = [
       { id: 'a1', role: 'assistant' as const, content: 'hi', generativeUI: liveRenderer },
@@ -71,7 +121,7 @@ describe('useConversationMessages', () => {
   });
 
   it('preserves streamed assistant text when a later snapshot replaces it with an empty tool-call message', () => {
-    jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => null));
+    jest.mocked(useToolCallRenderer).mockReturnValue(jest.fn(() => null));
 
     const streamedMessages = [
       { id: 'a1', role: 'assistant' as const, content: 'I found a flight for you.' },
@@ -108,7 +158,7 @@ describe('useConversationMessages', () => {
   });
 
   it('does not reuse cached assistant text after switching conversations', () => {
-    jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => null));
+    jest.mocked(useToolCallRenderer).mockReturnValue(jest.fn(() => null));
     const streamedMessages = [
       { id: 'a1', role: 'assistant' as const, content: 'Text from the previous thread.' },
     ];
@@ -140,7 +190,7 @@ describe('useConversationMessages', () => {
   });
 
   it('keeps a visible current-turn assistant message when an in-progress tool snapshot omits it', () => {
-    jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => null));
+    jest.mocked(useToolCallRenderer).mockReturnValue(jest.fn(() => null));
     const streamedMessages = [
       { id: 'u1', role: 'user' as const, content: 'Find a flight' },
       { id: 'a-text', role: 'assistant' as const, content: 'I found an option for you.' },
@@ -180,8 +230,8 @@ describe('useConversationMessages', () => {
     });
 
     jest
-      .mocked(useLazyToolRenderer)
-      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useLazyToolRenderer>);
+      .mocked(useToolCallRenderer)
+      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useToolCallRenderer>);
 
     const cardSnapshot: TestMessages = [
       { id: 'u1', role: 'user' as const, content: 'Check the weather' },
@@ -240,8 +290,8 @@ describe('useConversationMessages', () => {
     );
 
     jest
-      .mocked(useLazyToolRenderer)
-      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useLazyToolRenderer>);
+      .mocked(useToolCallRenderer)
+      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useToolCallRenderer>);
 
     const completedSnapshot: TestMessages = [
       { id: 'u1', role: 'user' as const, content: 'Find places in Da Nang' },
@@ -295,8 +345,8 @@ describe('useConversationMessages', () => {
     });
 
     jest
-      .mocked(useLazyToolRenderer)
-      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useLazyToolRenderer>);
+      .mocked(useToolCallRenderer)
+      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useToolCallRenderer>);
 
     const cardSnapshot: TestMessages = [
       { id: 'u1', role: 'user' as const, content: 'Find a hotel' },
@@ -333,7 +383,7 @@ describe('useConversationMessages', () => {
   });
 
   it('does not replay cached text when the current in-progress snapshot already has new assistant text', () => {
-    jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => null));
+    jest.mocked(useToolCallRenderer).mockReturnValue(jest.fn(() => null));
     const firstSnapshot = [
       { id: 'u1', role: 'user' as const, content: 'Find a flight' },
       { id: 'a-first', role: 'assistant' as const, content: 'I found an option for you.' },
@@ -357,7 +407,7 @@ describe('useConversationMessages', () => {
   });
 
   it('returns to the completed snapshot once the run finishes', () => {
-    jest.mocked(useLazyToolRenderer).mockReturnValue(jest.fn(() => null));
+    jest.mocked(useToolCallRenderer).mockReturnValue(jest.fn(() => null));
     const streamedMessages = [
       { id: 'u1', role: 'user' as const, content: 'Find a flight' },
       { id: 'a-text', role: 'assistant' as const, content: 'I found an option for you.' },
@@ -385,8 +435,8 @@ describe('useConversationMessages', () => {
     });
 
     jest
-      .mocked(useLazyToolRenderer)
-      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useLazyToolRenderer>);
+      .mocked(useToolCallRenderer)
+      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useToolCallRenderer>);
 
     const tripSummaryCall = {
       id: 'call-trip-summary',
@@ -429,7 +479,7 @@ describe('useConversationMessages', () => {
   });
 
   it('renders every tool call in a multi-tool message, overriding CopilotKit single-tool-call generativeUI', () => {
-    // CopilotKit's own useLazyToolRenderer only ever resolves toolCalls[0]; this
+    // CopilotKit's own useToolCallRenderer only ever resolves toolCalls[0]; this
     // simulates that upstream behavior by rendering per single-toolCall message.
     const lazyToolRendered = jest.fn((message: { toolCalls?: { id: string }[] }) => {
       const toolCall = message.toolCalls?.[0];
@@ -440,8 +490,8 @@ describe('useConversationMessages', () => {
     });
 
     jest
-      .mocked(useLazyToolRenderer)
-      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useLazyToolRenderer>);
+      .mocked(useToolCallRenderer)
+      .mockReturnValue(lazyToolRendered as unknown as ReturnType<typeof useToolCallRenderer>);
 
     const flightCall = {
       id: 'call-flights',

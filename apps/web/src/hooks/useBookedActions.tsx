@@ -4,12 +4,18 @@ import { z } from 'zod';
 // Constants
 import { ACTIONS } from '@/constants';
 
-// Utils
-import { isToolPending } from '@/utils';
-
 // Components
 import { useTripState } from './useTripState';
-import { BookingResultCard, LoadingCard, FlightOptionItem, HotelOptionItem } from '@/components';
+import {
+  BookingResultCard,
+  FlightOptionItem,
+  HotelOptionItem,
+  LoadingCard,
+  ToolEmptyCard,
+} from '@/components';
+
+// Utils
+import { isToolPending } from '@/utils';
 
 export const useBookedActions = () => {
   const { state } = useTripState();
@@ -23,13 +29,14 @@ export const useBookedActions = () => {
       handler: async () => 'Flights displayed',
       render: ({ status }) => {
         if (isToolPending(status)) return <LoadingCard lines={3} />;
-
         if (state.flightBooking) return <BookingResultCard booking={state.flightBooking} />;
 
         const departure = state.flights?.departure;
         const returnFlight = state.flights?.return;
 
-        if (!departure && !returnFlight) return <>You have not selected any flights yet.</>;
+        if (!departure && !returnFlight) {
+          return <ToolEmptyCard message="You have not selected any flights yet." />;
+        }
 
         return (
           <div className="border-border-secondary flex w-full max-w-2xl flex-col overflow-hidden rounded-lg border">
@@ -56,12 +63,13 @@ export const useBookedActions = () => {
       handler: async () => 'Hotel displayed',
       render: ({ status }) => {
         if (isToolPending(status)) return <LoadingCard lines={3} />;
-
         if (state.hotelBooking) return <BookingResultCard booking={state.hotelBooking} />;
 
         const hotel = state.hotel;
 
-        if (!hotel) return <>You have not selected a hotel yet.</>;
+        if (!hotel) {
+          return <ToolEmptyCard message="You have not selected a hotel yet." />;
+        }
 
         return (
           <div className="border-border-secondary flex w-full max-w-2xl flex-col overflow-hidden rounded-lg border">

@@ -27,13 +27,11 @@ export const renderToolResult = <Output,>({
   render,
 }: RenderToolResultOptions<Output>): ReactElement => {
   if (isToolPending(status)) return loading;
-
   if (getToolError(result)) return <ToolErrorCard result={result} />;
 
   const parsed = safeParseToolResult(schema, result);
 
   if (!parsed.success) return <ToolInvalidResultCard message={invalidMessage} />;
-
   if (isEmpty?.(parsed.data) && emptyMessage) return <ToolEmptyCard message={emptyMessage} />;
 
   return render(parsed.data);

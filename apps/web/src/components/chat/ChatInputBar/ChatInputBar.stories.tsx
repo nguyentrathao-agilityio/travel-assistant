@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { CopilotKit } from '@copilotkit/react-core';
+import { CopilotKit } from '@copilotkit/react-core/v2';
 
 import { ChatInputBar } from './index';
 import { Message } from '@copilotkit/react-core/v2';

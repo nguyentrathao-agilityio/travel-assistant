@@ -1,12 +1,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { CopilotKit } from '@copilotkit/react-core';
+import { CopilotKit } from '@copilotkit/react-core/v2';
 import { Providers } from '../providers';
 
 const clearApiKeyMock = jest.fn();
+let activeThreadId = 'thread-1';
+let activeThreadRevision = 0;
 
 jest.mock('@/stores/threadStore', () => ({
-  useThreadStore: (sel: (s: object) => unknown) => sel({ activeThreadId: 'thread-1' }),
+  useThreadStore: (sel: (s: object) => unknown) => sel({ activeThreadId, activeThreadRevision }),
 }));
 
 jest.mock('@/stores/apiKeyStore', () => ({
@@ -32,6 +34,11 @@ jest.mock('@/constants', () => ({
 describe('Providers', () => {
   beforeEach(() => {
     clearApiKeyMock.mockClear();
+    activeThreadId = 'thread-1';
+    activeThreadRevision = 0;
+    jest
+      .mocked(CopilotKit)
+      .mockImplementation(({ children }: { children?: React.ReactNode }) => <>{children}</>);
   });
 
   it('renders children', () => {
@@ -81,5 +88,30 @@ describe('Providers', () => {
     props.onError?.({ error: new Error('Network request failed') });
 
     expect(clearApiKeyMock).not.toHaveBeenCalled();
+  });
+
+  it('remounts CopilotKit when the active thread changes or is reset', () => {
+    const mounted = jest.fn();
+    const unmounted = jest.fn();
+
+    jest.mocked(CopilotKit).mockImplementation(({ children }: { children?: React.ReactNode }) => {
+      React.useEffect(() => {
+        mounted();
+
+        return unmounted;
+      }, []);
+
+      return <>{children}</>;
+    });
+
+    const { rerender } = render(<Providers>chat</Providers>);
+
+    activeThreadId = 'thread-2';
+    rerender(<Providers>chat</Providers>);
+    activeThreadRevision = 1;
+    rerender(<Providers>chat</Providers>);
+
+    expect(mounted).toHaveBeenCalledTimes(3);
+    expect(unmounted).toHaveBeenCalledTimes(2);
   });
 });

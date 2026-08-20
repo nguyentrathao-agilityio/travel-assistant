@@ -18,3 +18,5 @@ export * from './useThemeAction';
 export * from './useBookingAction';
 export * from './useInterruptElement';
 export * from './useDefaultToolRenderer';
+export * from './useToolCallRenderer';
+export * from './useTravelCopilot';

@@ -1,9 +1,13 @@
-import { useLangGraphInterrupt } from '@copilotkit/react-core';
-import { useRenderTool } from '@copilotkit/react-core/v2';
+import { useInterrupt, useRenderTool } from '@copilotkit/react-core/v2';
 import { z } from 'zod';
 
 // Components
-import { BookingApprovalCard, BookingResultCard, ErrorCard, ToolLoading } from '@/components';
+import {
+  BookingApprovalCard,
+  BookingResultCard,
+  renderToolResult,
+  ToolLoading,
+} from '@/components';
 
 // Constants
 import { BOOKING_CREATION_DECLINED_MESSAGE, TOOL_NAMES, TOOL_STATUS } from '@/constants';
@@ -53,7 +57,7 @@ const hitlRequestSchema = z.object({
 
 const bookingApprovalRequest = (value: unknown): BookingApprovalRequest | null => {
   // Accept only a single well-formed interrupt that maps to a supported booking action.
-  const parsed = hitlRequestSchema.safeParse(value);
+  const parsed = hitlRequestSchema.safeParse(parseToolResult(value));
 
   if (!parsed.success || parsed.data.actionRequests.length !== 1) return null;
 
@@ -100,31 +104,23 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
       name: toolName,
       parameters: z.record(z.unknown()),
       render: ({ status, result }) => {
-        // Keep approval UI authoritative while a booking tool is paused.
-        if (isToolPending(status)) {
-          if (isAwaitingApproval) return <></>;
+        const pending = isToolPending(status);
 
-          return <ToolLoading action="Completing" target="your booking" />;
-        }
+        if (pending && isAwaitingApproval) return <></>;
+        if (!pending && status !== TOOL_STATUS.COMPLETE) return <></>;
 
-        if (status !== TOOL_STATUS.COMPLETE) return <></>;
-
-        // Render validated successes and surface structured provider failures safely.
         const parsedResult = parseToolResult(result);
 
         if (isIntentionalRejectionResult(parsedResult)) return <></>;
 
-        const bookingResult = bookingResultSchema.safeParse(parsedResult);
-
-        if (bookingResult.success) {
-          return <BookingResultCard booking={bookingResult.data} />;
-        }
-
-        const errorResult = z.object({ error: z.string() }).safeParse(parsedResult);
-
-        if (errorResult.success) return <ErrorCard message={errorResult.data.error} />;
-
-        return <ErrorCard message="Received an unexpected booking result." />;
+        return renderToolResult({
+          status,
+          result,
+          schema: bookingResultSchema,
+          loading: <ToolLoading action="Completing" target="your booking" />,
+          invalidMessage: 'Received an unexpected booking result.',
+          render: (booking) => <BookingResultCard booking={booking} />,
+        });
       },
     },
     [isAwaitingApproval]
@@ -135,8 +131,8 @@ export const useBookingAction = () => {
   // Register the human approval gate shared by booking and cancellation tools.
   const interrupt = useInterruptElement();
 
-  useLangGraphInterrupt({
-    enabled: ({ eventValue }) => bookingApprovalRequest(eventValue) !== null,
+  useInterrupt({
+    enabled: ({ value }) => bookingApprovalRequest(value) !== null,
     render: ({ event, resolve }) => {
       const approvalRequest = bookingApprovalRequest(event.value);
 
@@ -155,7 +151,7 @@ export const useBookingAction = () => {
           ],
         };
 
-        (resolve as unknown as (value: typeof hitlResponse) => void)(hitlResponse);
+        (resolve as (value: typeof hitlResponse) => void)(hitlResponse);
       };
 
       return <BookingApprovalCard request={approvalRequest} onDecision={handleDecision} />;

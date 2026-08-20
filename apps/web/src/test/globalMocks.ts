@@ -20,17 +20,21 @@ jest.mock('@copilotkit/react-core', () => ({
 }));
 
 jest.mock('@copilotkit/react-core/v2', () => ({
+  CopilotKit: jest.fn(({ children }: { children: React.ReactNode }) => children),
   useAgent: jest.fn(() => ({
     agent: { messages: [], setMessages: jest.fn() },
   })),
   useCopilotKit: jest.fn(() => ({
     copilotkit: {
       interruptElement: null,
+      renderToolCalls: [],
       subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
     },
   })),
   useAgentContext: jest.fn(),
   useFrontendTool: jest.fn(),
+  useInterrupt: jest.fn(),
+  useDefaultRenderTool: jest.fn(),
   useRenderTool: jest.fn(),
 }));
 

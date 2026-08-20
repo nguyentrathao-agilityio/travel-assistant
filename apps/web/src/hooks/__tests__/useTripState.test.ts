@@ -3,13 +3,11 @@ import { useTripState } from '@/hooks/useTripState';
 import type { Flight, HotelAvailability } from '@repo/types';
 
 const mockSetState = jest.fn();
-const mockUseCoAgent = jest.fn((_opts: { name: string }) => ({
-  state: {},
-  setState: mockSetState,
-}));
+const mockAgent = { state: {} as Record<string, unknown>, setState: mockSetState };
+const mockUseAgent = jest.fn((_opts: { agentId: string }) => ({ agent: mockAgent }));
 
-jest.mock('@copilotkit/react-core', () => ({
-  useCoAgent: (opts: { name: string }) => mockUseCoAgent(opts),
+jest.mock('@copilotkit/react-core/v2', () => ({
+  useAgent: (opts: { agentId: string }) => mockUseAgent(opts),
 }));
 
 jest.mock('@/constants', () => ({ AGENT_NAME: 'travelAgent' }));
@@ -80,14 +78,15 @@ const makeHotel = (): HotelAvailability => ({
 
 beforeEach(() => {
   mockSetState.mockClear();
-  mockUseCoAgent.mockClear();
+  mockUseAgent.mockClear();
+  mockAgent.state = {};
   mockSetTripState.mockClear();
 });
 
 describe('useTripState', () => {
-  it('initializes useCoAgent with the agent name', () => {
+  it('binds useAgent to the configured V2 agent', () => {
     renderHook(() => useTripState());
-    expect(mockUseCoAgent).toHaveBeenCalledWith(expect.objectContaining({ name: 'travelAgent' }));
+    expect(mockUseAgent).toHaveBeenCalledWith(expect.objectContaining({ agentId: 'travelAgent' }));
   });
 
   it('selectFlight calls setState with the flight under the correct type key', () => {
@@ -98,8 +97,7 @@ describe('useTripState', () => {
       result.current.selectFlight(makeFlight(), 'departure');
     });
     expect(mockSetState).toHaveBeenCalled();
-    const updater = mockSetState.mock.calls[0][0];
-    const newState = updater({});
+    const newState = mockSetState.mock.calls[0][0];
 
     expect(newState.flights?.departure?.id).toBe('f1');
     expect(newState.flightSelectionStatus).toBe('confirmed');
@@ -117,8 +115,7 @@ describe('useTripState', () => {
       result.current.selectHotel(makeHotel());
     });
     expect(mockSetState).toHaveBeenCalled();
-    const updater = mockSetState.mock.calls[0][0];
-    const newState = updater({});
+    const newState = mockSetState.mock.calls[0][0];
 
     expect(newState.hotel?.id).toBe('h1');
     expect(newState.hotelSelectionStatus).toBe('confirmed');
@@ -134,7 +131,7 @@ describe('useTripState', () => {
   it('surfaces a confirmed booking streamed back from the agent', () => {
     const flightBooking = { id: 'b1', confirmationCode: 'TRIP-1', status: 'confirmed' };
 
-    mockUseCoAgent.mockReturnValueOnce({ state: { flightBooking }, setState: mockSetState });
+    mockAgent.state = { flightBooking };
 
     const { result } = renderHook(() => useTripState());
 
@@ -149,9 +146,6 @@ describe('useTripState', () => {
       result.current.clearTrip();
     });
     expect(mockSetState).toHaveBeenCalled();
-    const updater = mockSetState.mock.calls[0][0];
-    const newState = updater({ flights: { departure: makeFlight() } });
-
-    expect(newState).toEqual({});
+    expect(mockSetState).toHaveBeenCalledWith({});
   });
 });

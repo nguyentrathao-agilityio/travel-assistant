@@ -1,5 +1,10 @@
 import { createCopilotkitMiddleware } from '@copilotkit/sdk-js/langgraph';
-import { createAgent, dynamicSystemPromptMiddleware, humanInTheLoopMiddleware } from 'langchain';
+import {
+  createAgent,
+  dynamicSystemPromptMiddleware,
+  humanInTheLoopMiddleware,
+  openAIModerationMiddleware,
+} from 'langchain';
 
 // Constants
 import type { SpecializedAgentConfig } from '@/constants/agent-config';
@@ -7,6 +12,7 @@ import type { SpecializedAgentConfig } from '@/constants/agent-config';
 // Infrastructure
 import { createChatModel } from '@/infrastructure/llm';
 import { memoryStore } from '@/infrastructure/persistence';
+import { createObservabilityMiddleware } from './observability';
 
 // Prompts
 import { buildAgentSystemPrompt } from '@/prompts';
@@ -22,13 +28,24 @@ import { createDomainStateMiddleware } from '@/utils/domain-state';
 import { richUiModelMiddleware } from '@/utils/rich-ui';
 
 /** Builds a specialized agent with shared middleware and a dynamic system prompt. */
-export const createSpecializedAgent = (config: SpecializedAgentConfig, apiKey: string) =>
-  createAgent({
-    model: createChatModel({ apiKey }),
+export const createSpecializedAgent = (config: SpecializedAgentConfig, apiKey: string) => {
+  const model = createChatModel({ apiKey });
+
+  return createAgent({
+    model,
     tools: config.tools,
     stateSchema: GraphState,
     middleware: [
       createCopilotkitMiddleware({ exposeState: false }),
+      openAIModerationMiddleware({
+        model,
+        moderationModel: 'omni-moderation-latest',
+        checkInput: true,
+        checkOutput: true,
+        checkToolResults: false,
+        exitBehavior: 'end',
+        violationMessage: "I can't help with that request.",
+      }),
       ...(config.approvalTools?.length
         ? [
             humanInTheLoopMiddleware({
@@ -41,6 +58,7 @@ export const createSpecializedAgent = (config: SpecializedAgentConfig, apiKey: s
             }),
           ]
         : []),
+      createObservabilityMiddleware(config.name),
       richUiModelMiddleware,
       createDomainStateMiddleware(config.name),
       dynamicSystemPromptMiddleware(async (state) => {
@@ -52,3 +70,4 @@ export const createSpecializedAgent = (config: SpecializedAgentConfig, apiKey: s
       }),
     ],
   }).graph;
+};

@@ -14,6 +14,8 @@ const {
   createCopilotkitMiddlewareMock,
   createChatModelMock,
   createDomainStateMiddlewareMock,
+  openAIModerationMiddlewareMock,
+  createObservabilityMiddlewareMock,
 } = vi.hoisted(() => ({
   createAgentMock: vi.fn(),
   dynamicSystemPromptMiddlewareMock: vi.fn((fn: unknown) => ({
@@ -26,12 +28,17 @@ const {
   createDomainStateMiddlewareMock: vi.fn(
     (taskName: string) => `domain-state-middleware:${taskName}`
   ),
+  openAIModerationMiddlewareMock: vi.fn(() => 'moderation-middleware'),
+  createObservabilityMiddlewareMock: vi.fn(
+    (taskName: string) => `observability-middleware:${taskName}`
+  ),
 }));
 
 vi.mock('langchain', () => ({
   createAgent: createAgentMock,
   dynamicSystemPromptMiddleware: dynamicSystemPromptMiddlewareMock,
   humanInTheLoopMiddleware: humanInTheLoopMiddlewareMock,
+  openAIModerationMiddleware: openAIModerationMiddlewareMock,
 }));
 
 vi.mock('@copilotkit/sdk-js/langgraph', () => ({
@@ -64,6 +71,10 @@ vi.mock('@/utils/domain-state', () => ({
 
 vi.mock('@/utils/rich-ui', () => ({
   richUiModelMiddleware: 'rich-ui-middleware',
+}));
+
+vi.mock('@/infrastructure/agent/observability', () => ({
+  createObservabilityMiddleware: createObservabilityMiddlewareMock,
 }));
 
 vi.mock('@/state', () => ({
@@ -103,10 +114,21 @@ describe('createSpecializedAgent', () => {
     expect(call.stateSchema).toBe('fake-graph-state');
     expect(call.middleware).toEqual([
       'copilotkit-middleware',
+      'moderation-middleware',
+      'observability-middleware:general',
       'rich-ui-middleware',
       'domain-state-middleware:general',
       { __type: 'dynamicSystemPromptMiddleware', fn: expect.any(Function) },
     ]);
+    expect(openAIModerationMiddlewareMock).toHaveBeenCalledWith({
+      model: 'fake-model',
+      moderationModel: 'omni-moderation-latest',
+      checkInput: true,
+      checkOutput: true,
+      checkToolResults: false,
+      exitBehavior: 'end',
+      violationMessage: 'I can’t help with that request.',
+    });
   });
 
   it('includes remembered preferences in the system prompt when includeMemoryContext is set', async () => {
@@ -116,7 +138,7 @@ describe('createSpecializedAgent', () => {
       config({ name: 'plan', prompt: { ...sections, includeMemoryContext: true } }),
       'sk-request'
     );
-    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[3].fn;
+    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[5].fn;
 
     const fakeState = { messages: [] };
 
@@ -160,7 +182,7 @@ describe('createSpecializedAgent', () => {
 
   it('skips memory lookup and passes an empty memories list when includeMemoryContext is not set', async () => {
     createSpecializedAgent(config(), 'sk-request');
-    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[3].fn;
+    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[5].fn;
 
     const fakeState = { messages: [] };
 

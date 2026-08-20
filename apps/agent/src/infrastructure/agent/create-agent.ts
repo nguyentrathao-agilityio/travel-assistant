@@ -36,7 +36,7 @@ export const createSpecializedAgent = (config: SpecializedAgentConfig, apiKey: s
     tools: config.tools,
     stateSchema: GraphState,
     middleware: [
-      createCopilotkitMiddleware({ exposeState: false }),
+      createCopilotkitMiddleware(),
       openAIModerationMiddleware({
         model,
         moderationModel: 'omni-moderation-latest',

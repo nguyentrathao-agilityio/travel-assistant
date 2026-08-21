@@ -11,6 +11,7 @@ describe('ThreadItem', () => {
           title="Trip to Da Nang"
           isActive={false}
           onSelect={jest.fn()}
+          onReset={jest.fn()}
           onDelete={jest.fn()}
         />
       );
@@ -24,10 +25,53 @@ describe('ThreadItem', () => {
           title={null}
           isActive={false}
           onSelect={jest.fn()}
+          onReset={jest.fn()}
           onDelete={jest.fn()}
         />
       );
       expect(screen.getByText('New chat')).toBeInTheDocument();
+    });
+
+    it('renders the reset button', () => {
+      render(
+        <ThreadItem
+          id="t1"
+          title="Trip"
+          isActive={false}
+          onSelect={jest.fn()}
+          onReset={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+      expect(screen.getByLabelText('Reset conversation')).toBeInTheDocument();
+    });
+
+    it('does not render the reset button for a thread with no conversation yet', () => {
+      render(
+        <ThreadItem
+          id="t1"
+          title={null}
+          isActive={false}
+          onSelect={jest.fn()}
+          onReset={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+      expect(screen.queryByLabelText('Reset conversation')).not.toBeInTheDocument();
+    });
+
+    it('still renders the delete button for a thread with no conversation yet', () => {
+      render(
+        <ThreadItem
+          id="t1"
+          title={null}
+          isActive={false}
+          onSelect={jest.fn()}
+          onReset={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+      expect(screen.getByLabelText('Delete conversation')).toBeInTheDocument();
     });
 
     it('renders the delete button', () => {
@@ -37,6 +81,7 @@ describe('ThreadItem', () => {
           title="Trip"
           isActive={false}
           onSelect={jest.fn()}
+          onReset={jest.fn()}
           onDelete={jest.fn()}
         />
       );
@@ -50,6 +95,7 @@ describe('ThreadItem', () => {
           title="Trip"
           isActive={false}
           onSelect={jest.fn()}
+          onReset={jest.fn()}
           onDelete={jest.fn()}
         />
       );
@@ -61,7 +107,14 @@ describe('ThreadItem', () => {
   describe('active state', () => {
     it('applies active classes when isActive is true', () => {
       const { container } = render(
-        <ThreadItem id="t1" title="Trip" isActive onSelect={jest.fn()} onDelete={jest.fn()} />
+        <ThreadItem
+          id="t1"
+          title="Trip"
+          isActive
+          onSelect={jest.fn()}
+          onReset={jest.fn()}
+          onDelete={jest.fn()}
+        />
       );
 
       expect(container.querySelector('.bg-sidebar-item-active')).toBeInTheDocument();
@@ -79,6 +132,7 @@ describe('ThreadItem', () => {
           title="Trip"
           isActive={false}
           onSelect={onSelect}
+          onReset={jest.fn()}
           onDelete={jest.fn()}
         />
       );
@@ -95,6 +149,7 @@ describe('ThreadItem', () => {
           title="Trip"
           isActive={false}
           onSelect={onSelect}
+          onReset={jest.fn()}
           onDelete={jest.fn()}
         />
       );
@@ -103,6 +158,42 @@ describe('ThreadItem', () => {
       (container.firstChild as HTMLElement).focus();
       await user.keyboard('{Enter}');
       expect(onSelect).toHaveBeenCalledWith('thread-7');
+    });
+
+    it('calls onReset with the thread id when reset button is clicked', async () => {
+      const onReset = jest.fn();
+      const user = userEvent.setup();
+
+      render(
+        <ThreadItem
+          id="thread-7"
+          title="Trip"
+          isActive={false}
+          onSelect={jest.fn()}
+          onReset={onReset}
+          onDelete={jest.fn()}
+        />
+      );
+      await user.click(screen.getByLabelText('Reset conversation'));
+      expect(onReset).toHaveBeenCalledWith('thread-7');
+    });
+
+    it('does not call onSelect when reset button is clicked', async () => {
+      const onSelect = jest.fn();
+      const user = userEvent.setup();
+
+      render(
+        <ThreadItem
+          id="t1"
+          title="Trip"
+          isActive={false}
+          onSelect={onSelect}
+          onReset={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+      await user.click(screen.getByLabelText('Reset conversation'));
+      expect(onSelect).not.toHaveBeenCalled();
     });
 
     it('calls onDelete with the thread id when delete button is clicked', async () => {
@@ -115,6 +206,7 @@ describe('ThreadItem', () => {
           title="Trip"
           isActive={false}
           onSelect={jest.fn()}
+          onReset={jest.fn()}
           onDelete={onDelete}
         />
       );
@@ -132,6 +224,7 @@ describe('ThreadItem', () => {
           title="Trip"
           isActive={false}
           onSelect={onSelect}
+          onReset={jest.fn()}
           onDelete={jest.fn()}
         />
       );

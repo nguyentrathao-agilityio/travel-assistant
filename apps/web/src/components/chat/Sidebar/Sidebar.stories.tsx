@@ -26,6 +26,7 @@ const mockActions = {
   fetchMoreThreads: () => Promise.resolve(undefined),
   createThread: () => Promise.resolve(undefined),
   deleteThread: () => Promise.resolve(undefined),
+  resetThread: () => Promise.resolve(undefined),
   selectThread: () => {},
   refreshActiveThread: () => {},
 };

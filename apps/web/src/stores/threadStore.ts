@@ -76,6 +76,7 @@ interface ThreadStore {
   fetchMoreThreads: () => Promise<void>;
   createThread: () => Promise<void>;
   deleteThread: (threadId: string) => Promise<void>;
+  resetThread: (threadId: string) => Promise<void>;
   selectThread: (threadId: string) => void;
   refreshActiveThread: () => void;
 }
@@ -248,6 +249,31 @@ export const useThreadStore = create<ThreadStore>()(
         } catch {
           set({ threads: threadsSnapshot });
           toast.error(ERROR_MESSAGES.DELETE_THREAD);
+        }
+      },
+
+      resetThread: async (threadId: string) => {
+        const newThreadId = crypto.randomUUID();
+        const isActive = threadId === get().activeThreadId;
+
+        try {
+          await langgraphClient.threads.delete(threadId);
+          await langgraphClient.threads.create({
+            threadId: newThreadId,
+            graphId: GRAPH_ID,
+            ifExists: 'do_nothing',
+            metadata: { resourceId: AGENT_NAME },
+          });
+
+          useTripStateStore.getState().clearTripState(threadId);
+          set((state) => ({
+            threads: state.threads.map((thread) =>
+              thread.id === threadId ? { ...thread, id: newThreadId, title: null } : thread
+            ),
+            ...(isActive ? { activeThreadId: newThreadId, isResumed: true } : null),
+          }));
+        } catch {
+          toast.error(ERROR_MESSAGES.RESET_THREAD);
         }
       },
 

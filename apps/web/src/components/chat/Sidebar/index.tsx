@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/shallow';
 
 import { Button, Divider } from '@/components';
 import { DeleteThreadModal } from './DeleteThreadModal';
+import { ResetThreadModal } from './ResetThreadModal';
 import { ThreadItem } from './ThreadItem';
 
 import {
@@ -20,6 +21,7 @@ export const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [pendingResetId, setPendingResetId] = useState<string | null>(null);
 
   const {
     activeThreadId,
@@ -32,6 +34,7 @@ export const Sidebar = () => {
     fetchMoreThreads,
     createThread,
     deleteThread,
+    resetThread,
     selectThread,
   } = useThreadStore(
     useShallow((state) => ({
@@ -45,6 +48,7 @@ export const Sidebar = () => {
       fetchMoreThreads: state.fetchMoreThreads,
       createThread: state.createThread,
       deleteThread: state.deleteThread,
+      resetThread: state.resetThread,
       selectThread: state.selectThread,
     }))
   );
@@ -67,6 +71,14 @@ export const Sidebar = () => {
   }, [pendingDeleteId, deleteThread]);
 
   const handleCancelDelete = useCallback(() => setPendingDeleteId(null), []);
+
+  const handleConfirmReset = useCallback(() => {
+    if (pendingResetId === null) return;
+    resetThread(pendingResetId);
+    setPendingResetId(null);
+  }, [pendingResetId, resetThread]);
+
+  const handleCancelReset = useCallback(() => setPendingResetId(null), []);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const loadMoreSentinelRef = useRef<HTMLDivElement>(null);
@@ -237,6 +249,7 @@ export const Sidebar = () => {
                     date={new Date(thread.createdAt).toLocaleDateString('en-CA')}
                     isActive={thread.id === activeThreadId}
                     onSelect={selectThread}
+                    onReset={setPendingResetId}
                     onDelete={setPendingDeleteId}
                   />
                 ))}
@@ -264,6 +277,14 @@ export const Sidebar = () => {
           threadTitle={threads.find((thread) => thread.id === pendingDeleteId)?.title ?? null}
           onConfirm={handleConfirmDelete}
           onCancel={handleCancelDelete}
+        />
+      )}
+
+      {pendingResetId && (
+        <ResetThreadModal
+          threadTitle={threads.find((thread) => thread.id === pendingResetId)?.title ?? null}
+          onConfirm={handleConfirmReset}
+          onCancel={handleCancelReset}
         />
       )}
     </aside>

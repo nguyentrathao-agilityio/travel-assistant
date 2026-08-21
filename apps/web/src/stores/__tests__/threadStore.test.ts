@@ -12,6 +12,7 @@ jest.mock('@/constants/messages', () => ({
     LOAD_THREADS: 'Failed to load threads.',
     CREATE_THREAD: 'Failed to create thread.',
     DELETE_THREAD: 'Failed to delete thread.',
+    RESET_THREAD: 'Failed to reset thread.',
   },
 }));
 
@@ -30,9 +31,11 @@ jest.mock('@/lib/langgraphClient', () => ({
   },
 }));
 
+const mockClearTripState = jest.fn();
+
 jest.mock('@/stores/tripStateStore', () => ({
   useTripStateStore: {
-    getState: () => ({ clearTripState: jest.fn() }),
+    getState: () => ({ clearTripState: mockClearTripState }),
   },
 }));
 
@@ -387,5 +390,88 @@ describe('useThreadStore — deleteThread', () => {
     mockLanggraphClient.threads.delete.mockRejectedValueOnce(new Error('Server error'));
     await useThreadStore.getState().deleteThread('t1');
     expect(useThreadStore.getState().threads).toHaveLength(1);
+  });
+});
+
+describe('useThreadStore — resetThread', () => {
+  it('deletes the old thread then creates a brand-new thread id, in order', async () => {
+    mockLanggraphClient.threads.delete.mockResolvedValueOnce(undefined);
+    mockLanggraphClient.threads.create.mockResolvedValueOnce(makeThread('new-id'));
+
+    await useThreadStore.getState().resetThread('t1');
+
+    expect(mockLanggraphClient.threads.delete).toHaveBeenCalledWith('t1');
+    expect(mockLanggraphClient.threads.create).toHaveBeenCalledWith(
+      expect.objectContaining({ ifExists: 'do_nothing' })
+    );
+    const createdId = mockLanggraphClient.threads.create.mock.calls[0][0].threadId;
+
+    expect(createdId).not.toBe('t1');
+    expect(mockLanggraphClient.threads.delete.mock.invocationCallOrder[0]).toBeLessThan(
+      mockLanggraphClient.threads.create.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('keeps the thread in the same list position under a new id, title cleared', async () => {
+    const thread = { id: 't1', title: 'Trip to Da Nang', createdAt: new Date().toISOString() };
+
+    useThreadStore.setState({ threads: [thread], activeThreadId: 'other' });
+    mockLanggraphClient.threads.delete.mockResolvedValueOnce(undefined);
+    mockLanggraphClient.threads.create.mockResolvedValueOnce(makeThread('new-id'));
+    await useThreadStore.getState().resetThread('t1');
+
+    const [resultThread] = useThreadStore.getState().threads;
+
+    expect(resultThread.id).not.toBe('t1');
+    expect(resultThread.title).toBeNull();
+    expect(resultThread.createdAt).toBe(thread.createdAt);
+  });
+
+  it('switches activeThreadId to the new id when resetting the currently active thread', async () => {
+    useThreadStore.setState({ activeThreadId: 't1' });
+
+    mockLanggraphClient.threads.delete.mockResolvedValueOnce(undefined);
+    mockLanggraphClient.threads.create.mockResolvedValueOnce(makeThread('new-id'));
+    await useThreadStore.getState().resetThread('t1');
+
+    const newActiveId = useThreadStore.getState().activeThreadId;
+
+    expect(newActiveId).not.toBe('t1');
+    expect(useThreadStore.getState().isResumed).toBe(true);
+  });
+
+  it('leaves activeThreadId untouched when resetting an inactive thread', async () => {
+    useThreadStore.setState({ activeThreadId: 'other' });
+
+    mockLanggraphClient.threads.delete.mockResolvedValueOnce(undefined);
+    mockLanggraphClient.threads.create.mockResolvedValueOnce(makeThread('new-id'));
+    await useThreadStore.getState().resetThread('t1');
+
+    expect(useThreadStore.getState().activeThreadId).toBe('other');
+  });
+
+  it('shows a toast and leaves the thread list untouched when the delete call fails', async () => {
+    const { toast } = jest.requireMock('sonner');
+    const thread = { id: 't1', title: 'Trip to Da Nang', createdAt: new Date().toISOString() };
+
+    useThreadStore.setState({ threads: [thread] });
+    mockLanggraphClient.threads.delete.mockRejectedValueOnce(new Error('Server error'));
+    await useThreadStore.getState().resetThread('t1');
+
+    expect(toast.error).toHaveBeenCalledWith('Failed to reset thread.');
+    expect(useThreadStore.getState().threads).toEqual([thread]);
+    expect(mockLanggraphClient.threads.create).not.toHaveBeenCalled();
+  });
+
+  it('shows a toast when recreation fails after the thread was already deleted', async () => {
+    const { toast } = jest.requireMock('sonner');
+
+    // Reset (not just clear) to discard any stale queued resolutions left behind by
+    // earlier tests' unconsumed `mockResolvedValueOnce` calls elsewhere in this file.
+    mockLanggraphClient.threads.delete.mockReset().mockResolvedValueOnce(undefined);
+    mockLanggraphClient.threads.create.mockReset().mockRejectedValueOnce(new Error('Server error'));
+    await useThreadStore.getState().resetThread('t1');
+
+    expect(toast.error).toHaveBeenCalledWith('Failed to reset thread.');
   });
 });

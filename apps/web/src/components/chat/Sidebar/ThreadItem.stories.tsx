@@ -15,6 +15,7 @@ const meta: Meta<typeof ThreadItem> = {
     title: 'Trip to Tokyo',
     isActive: false,
     onSelect: () => {},
+    onReset: () => {},
     onDelete: () => {},
   },
 };

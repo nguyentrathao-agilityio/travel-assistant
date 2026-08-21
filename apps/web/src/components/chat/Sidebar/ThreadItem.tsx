@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Trash2 } from 'lucide-react';
+import { RotateCcw, Trash2 } from 'lucide-react';
 import type { KeyboardEvent, MouseEvent } from 'react';
 
 import { cn } from '@/utils';
@@ -11,10 +11,18 @@ export interface ThreadItemProps {
   date?: string;
   isActive: boolean;
   onSelect: (id: string) => void;
+  onReset: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-export const ThreadItem = ({ id, title, isActive, onSelect, onDelete }: ThreadItemProps) => {
+export const ThreadItem = ({
+  id,
+  title,
+  isActive,
+  onSelect,
+  onReset,
+  onDelete,
+}: ThreadItemProps) => {
   const handleSelect = useCallback(() => onSelect(id), [id, onSelect]);
 
   const handleKeyDown = useCallback(
@@ -22,6 +30,14 @@ export const ThreadItem = ({ id, title, isActive, onSelect, onDelete }: ThreadIt
       if (e.key === 'Enter') onSelect(id);
     },
     [id, onSelect]
+  );
+
+  const handleReset = useCallback(
+    (e: MouseEvent) => {
+      e.stopPropagation();
+      onReset(id);
+    },
+    [id, onReset]
   );
 
   const handleDelete = useCallback(
@@ -55,14 +71,26 @@ export const ThreadItem = ({ id, title, isActive, onSelect, onDelete }: ThreadIt
           {title || 'New chat'}
         </p>
       </div>
-      <Button
-        variant="ghost"
-        aria-label="Delete conversation"
-        onClick={handleDelete}
-        className="text-sidebar-text-muted hover:text-sidebar-text hidden shrink-0 p-0.5 hover:bg-transparent group-hover:flex"
-      >
-        <Trash2 size={12} />
-      </Button>
+      <div className="hidden shrink-0 items-center gap-1 group-hover:flex">
+        {title && (
+          <Button
+            variant="ghost"
+            aria-label="Reset conversation"
+            onClick={handleReset}
+            className="text-sidebar-text-muted hover:text-sidebar-text p-0.5 hover:bg-transparent"
+          >
+            <RotateCcw size={12} />
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          aria-label="Delete conversation"
+          onClick={handleDelete}
+          className="text-sidebar-text-muted hover:text-sidebar-text p-0.5 hover:bg-transparent"
+        >
+          <Trash2 size={12} />
+        </Button>
+      </div>
     </div>
   );
 };

@@ -10,7 +10,9 @@ jest.mock('@copilotkit/react-core/v2', () => ({
   useAgent: (opts: { agentId: string }) => mockUseAgent(opts),
 }));
 
-jest.mock('@/constants', () => ({ AGENT_NAME: 'travelAgent' }));
+jest.mock('@/constants', () => ({
+  AGENT_NAME: 'travelAgent',
+}));
 
 const mockClearTripState = jest.fn();
 const mockSetTripState = jest.fn();

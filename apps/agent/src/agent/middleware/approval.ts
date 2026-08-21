@@ -1,4 +1,5 @@
 import { humanInTheLoopMiddleware } from 'langchain';
+import { BOOKING_APPROVAL_DECISIONS } from '@repo/constants';
 
 export const createApprovalMiddleware = (approvalTools?: readonly string[]) =>
   approvalTools?.length
@@ -7,7 +8,7 @@ export const createApprovalMiddleware = (approvalTools?: readonly string[]) =>
           interruptOn: Object.fromEntries(
             approvalTools.map((toolName) => [
               toolName,
-              { allowedDecisions: ['approve', 'reject'] as const },
+              { allowedDecisions: [...BOOKING_APPROVAL_DECISIONS] },
             ])
           ),
         }),

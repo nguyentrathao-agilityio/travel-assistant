@@ -1,3 +1,5 @@
+import { SELECTION_STATUSES } from '@repo/constants';
+
 import { Booking } from './booking';
 import { Flight } from './flight';
 import { HotelAvailability } from './hotel';
@@ -7,7 +9,7 @@ export interface SelectedFlight {
   return?: Flight;
 }
 
-export type SelectionStatus = 'selected' | 'confirmed' | 'booked' | 'cancelled';
+export type SelectionStatus = (typeof SELECTION_STATUSES)[keyof typeof SELECTION_STATUSES];
 
 export interface TripState {
   flights?: SelectedFlight;

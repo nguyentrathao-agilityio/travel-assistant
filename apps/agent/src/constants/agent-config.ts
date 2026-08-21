@@ -1,8 +1,8 @@
 import type { StructuredToolInterface } from '@langchain/core/tools';
 
 // Constants
+import { BOOKING_TOOL_NAMES } from '@repo/constants';
 import type { DomainAgentNodeName } from './agents';
-import { BOOKING_TOOL_NAMES } from './tools';
 
 // Prompts
 import {

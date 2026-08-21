@@ -1,4 +1,4 @@
-import { BOOKING_CREATION_DECLINED_MESSAGE, CANCELLATION_DECLINED_PREFIX } from '@/constants';
+import { BOOKING_CREATION_DECLINED_MESSAGE, CANCELLATION_DECLINED_PREFIX } from '@repo/constants';
 
 export const cancellationRejection = (bookingId: string) =>
   `${CANCELLATION_DECLINED_PREFIX}${bookingId} remains active and was NOT cancelled.`;

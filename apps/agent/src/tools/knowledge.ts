@@ -1,7 +1,8 @@
 import { tool } from '@langchain/core/tools';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES } from '@/constants';
+import { TOOL_NAMES } from '@repo/constants';
+import { TOOL_ERROR_MESSAGES } from '@/constants';
 
 // Schemas
 import { KnowledgeSearchInputSchema } from '@/schemas';

@@ -1,5 +1,13 @@
-export type BookingType = 'flight' | 'hotel';
-export type BookingStatus = 'confirmed' | 'cancelled';
+import {
+  BOOKING_ACTIONS,
+  BOOKING_APPROVAL_REQUEST_TYPE,
+  BOOKING_DECISIONS,
+  BOOKING_STATUSES,
+  BOOKING_TYPES,
+} from '@repo/constants';
+
+export type BookingType = (typeof BOOKING_TYPES)[keyof typeof BOOKING_TYPES];
+export type BookingStatus = (typeof BOOKING_STATUSES)[keyof typeof BOOKING_STATUSES];
 
 export interface Booking {
   id: string;
@@ -16,14 +24,15 @@ export interface Booking {
   summary: string;
 }
 
-export type BookingDecision = 'approve' | 'edit' | 'reject';
+export type BookingDecision = (typeof BOOKING_DECISIONS)[keyof typeof BOOKING_DECISIONS];
+export type BookingAction = (typeof BOOKING_ACTIONS)[keyof typeof BOOKING_ACTIONS];
 
 export interface BookingApprovalRequest {
-  type: 'booking_approval';
+  type: typeof BOOKING_APPROVAL_REQUEST_TYPE;
   approvalId: string;
   /** Stable draft identifier. Optional only for checkpoints created before HITL draft IDs. */
   draftId?: string;
-  action: 'create_flight_booking' | 'create_hotel_booking' | 'cancel_booking';
+  action: BookingAction;
   title: string;
   description: string;
   referenceId: string;

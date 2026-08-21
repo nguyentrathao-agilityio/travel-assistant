@@ -2,7 +2,8 @@ import { ToolMessage } from 'langchain';
 import { createMiddleware } from 'langchain';
 
 // Constants
-import { TOOL_NAMES, TOOL_READY_OUTPUT, WRITE_TOOL_NAMES } from '@/constants';
+import { TOOL_NAMES, WRITE_TOOL_NAMES } from '@repo/constants';
+import { RICH_UI_MIDDLEWARE_NAME, TOOL_READY_OUTPUT } from '@/constants';
 
 // Schemas
 import { ToolErrorSchema } from '@/schemas';
@@ -74,7 +75,7 @@ const safeErrorContent = (artifact: unknown): string | undefined => {
 // Collapse fresh rich-card content to avoid duplicate text responses.
 // Preserve artifacts, older results, and errors for later agent steps.
 export const richUiModelMiddleware = createMiddleware({
-  name: 'RichUiModelContent',
+  name: RICH_UI_MIDDLEWARE_NAME,
   wrapModelCall: (request, handler) => {
     // Restrict rewriting to tool messages produced in the current model turn.
     const cutoff = freshToolMessageCutoff(request.messages);

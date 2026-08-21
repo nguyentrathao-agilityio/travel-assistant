@@ -2,7 +2,8 @@ import { HumanMessage, ToolMessage } from '@langchain/core/messages';
 import { describe, expect, it } from 'vitest';
 
 // Constants
-import { MAX_RETRIES_PER_NODE, TOOL_NAMES } from '@/constants';
+import { TOOL_NAMES } from '@repo/constants';
+import { MAX_RETRIES_PER_NODE } from '@/constants';
 
 // Nodes
 import {

@@ -1,8 +1,9 @@
 // Constants
-import { RETRYABLE_DOMAIN_NODE_NAMES } from '@/constants';
+import { RETRYABLE_DOMAIN_NODE_NAMES, UNKNOWN_TOOL_NAME } from '@/constants';
 
 // Utils
 import { isIntentionalBookingRejection, latestResultPerTool } from './tool-messages';
+import { isErrorArtifact } from '@/utils/artifact';
 
 // Schemas
 import { ToolErrorSchema } from '@/schemas';
@@ -17,9 +18,6 @@ import {
   type ValidationResult,
 } from '@/state';
 
-// Utils
-import { isErrorArtifact } from '@/utils/artifact';
-
 type ToolFailure = { name: string; error: GraphError };
 
 /** Extracts a structured error for each failed tool call in the current turn. */
@@ -29,7 +27,7 @@ const toolFailures = (state: GraphStateType): ToolFailure[] =>
 
     // Convert both structured and legacy failures into one graph error contract.
     if (message.status !== 'error' && !isErrorArtifact(message.artifact)) return [];
-    const name = message.name ?? 'unknownTool';
+    const name = message.name ?? UNKNOWN_TOOL_NAME;
     const parsed = ToolErrorSchema.safeParse(message.artifact);
 
     if (!parsed.success) {

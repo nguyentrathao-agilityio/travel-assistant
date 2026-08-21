@@ -6,6 +6,9 @@ import { Typography } from '@/components';
 // Hooks
 import { useTripState } from '@/hooks';
 
+// Constants
+import { SELECTION_STATUSES } from '@repo/constants';
+
 // Utils
 import { formatTime } from '@/utils';
 
@@ -13,10 +16,15 @@ const BookingPanel = () => {
   const { state } = useTripState();
 
   const departure =
-    state?.flightSelectionStatus === 'cancelled' ? undefined : state?.flights?.departure;
+    state?.flightSelectionStatus === SELECTION_STATUSES.CANCELLED
+      ? undefined
+      : state?.flights?.departure;
   const returnFlight =
-    state?.flightSelectionStatus === 'cancelled' ? undefined : state?.flights?.return;
-  const hotel = state?.hotelSelectionStatus === 'cancelled' ? undefined : state?.hotel;
+    state?.flightSelectionStatus === SELECTION_STATUSES.CANCELLED
+      ? undefined
+      : state?.flights?.return;
+  const hotel =
+    state?.hotelSelectionStatus === SELECTION_STATUSES.CANCELLED ? undefined : state?.hotel;
 
   if (!departure && !hotel) return null;
 

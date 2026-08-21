@@ -1,7 +1,8 @@
 import { tool } from '@langchain/core/tools';
 
 // Constants
-import { TOOL_ERROR_MESSAGES, TOOL_NAMES, TOOL_PROVIDERS, TOOL_RESPONSE_FORMAT } from '@/constants';
+import { TOOL_NAMES } from '@repo/constants';
+import { TOOL_ERROR_MESSAGES, TOOL_PROVIDERS, TOOL_RESPONSE_FORMAT } from '@/constants';
 
 // Schemas
 import { HotelInputSchema, HotelToolSchema } from '@/schemas';

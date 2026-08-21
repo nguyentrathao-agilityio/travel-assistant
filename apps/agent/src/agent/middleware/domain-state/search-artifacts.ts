@@ -2,7 +2,7 @@ import type { ToolMessage } from '@langchain/core/messages';
 import type { z } from 'zod';
 
 // Constants
-import { TOOL_NAMES } from '@/constants';
+import { TOOL_NAMES } from '@repo/constants';
 
 // Schemas
 import {

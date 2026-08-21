@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Constants
-import { BOOKING_STATUSES, BOOKING_TYPES } from '@/constants';
+import { BOOKING_STATUSES, BOOKING_TYPES } from '@repo/constants';
 
 // Utils
 import { isValidIsoDate } from '@/utils/date';

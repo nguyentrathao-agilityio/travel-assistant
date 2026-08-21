@@ -2,10 +2,12 @@
   "name": "@repo/types",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@repo/constants": "workspace:*",
     "@repo/schemas": "workspace:*"
   },
   "devDependencies": {

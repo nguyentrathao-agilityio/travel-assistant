@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { z } from 'zod';
 
 // Constants
+import { BOOKING_TYPES } from '@repo/constants';
 import { API_URL, ENDPOINTS, ERROR_MESSAGES } from '@/constants';
 
 // Schemas
@@ -133,7 +134,7 @@ export const submitFlightBooking = async (
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      'Idempotency-Key': createIdempotencyKey('flight', payload),
+      'Idempotency-Key': createIdempotencyKey(BOOKING_TYPES.FLIGHT, payload),
     },
     body: JSON.stringify(payload),
   });
@@ -162,7 +163,7 @@ export const submitHotelBooking = async (input: HotelBookingInput): Promise<Book
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      'Idempotency-Key': createIdempotencyKey('hotel', payload),
+      'Idempotency-Key': createIdempotencyKey(BOOKING_TYPES.HOTEL, payload),
     },
     body: JSON.stringify(payload),
   });

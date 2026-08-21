@@ -1,5 +1,5 @@
 // Constants
-import { TOOL_NAMES } from '@/constants';
+import { TOOL_NAMES } from '@repo/constants';
 
 // Utils
 import { latestTurnToolMessages } from './tool-messages';

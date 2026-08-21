@@ -10,6 +10,7 @@ export * from './memory';
 export * from './knowledge';
 export * from './tools';
 export * from './agents';
+export * from './middleware';
 export * from './tips';
 export * from './search';
 export * from './routing';

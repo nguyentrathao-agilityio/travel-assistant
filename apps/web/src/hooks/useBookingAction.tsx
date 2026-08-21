@@ -10,7 +10,16 @@ import {
 } from '@/components';
 
 // Constants
-import { BOOKING_CREATION_DECLINED_MESSAGE, TOOL_NAMES, TOOL_STATUS } from '@/constants';
+import { TOOL_NAMES, TOOL_STATUS } from '@/constants';
+import {
+  BOOKING_ACTIONS,
+  BOOKING_APPROVAL_DECISIONS,
+  BOOKING_APPROVAL_REQUEST_TYPE,
+  BOOKING_CREATION_DECLINED_MESSAGE,
+  BOOKING_DECISIONS,
+  BOOKING_STATUSES,
+  BOOKING_TYPES,
+} from '@repo/constants';
 
 // Types
 import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
@@ -27,13 +36,13 @@ import { useInterruptElement } from './useInterruptElement';
 const bookingResultSchema = z.object({
   id: z.string(),
   confirmationCode: z.string(),
-  type: z.enum(['flight', 'hotel']),
+  type: z.enum([BOOKING_TYPES.FLIGHT, BOOKING_TYPES.HOTEL]),
   referenceId: z.string(),
   customerName: z.string(),
   customerEmail: z.string(),
   totalPrice: z.number(),
   currency: z.string(),
-  status: z.enum(['confirmed', 'cancelled']),
+  status: z.enum([BOOKING_STATUSES.CONFIRMED, BOOKING_STATUSES.CANCELLED]),
   createdAt: z.string(),
   notes: z.string().optional(),
   summary: z.string(),
@@ -50,7 +59,9 @@ const hitlRequestSchema = z.object({
   reviewConfigs: z.array(
     z.object({
       actionName: z.string(),
-      allowedDecisions: z.array(z.enum(['approve', 'edit', 'reject'])),
+      allowedDecisions: z.array(
+        z.enum([BOOKING_DECISIONS.APPROVE, BOOKING_DECISIONS.EDIT, BOOKING_DECISIONS.REJECT])
+      ),
     })
   ),
 });
@@ -65,9 +76,9 @@ const bookingApprovalRequest = (value: unknown): BookingApprovalRequest | null =
   const args = action.args;
   const config = parsed.data.reviewConfigs.find((item) => item.actionName === action.name);
   const actionByTool = {
-    [TOOL_NAMES.BOOK_FLIGHT]: 'create_flight_booking',
-    [TOOL_NAMES.BOOK_HOTEL]: 'create_hotel_booking',
-    [TOOL_NAMES.CANCEL_BOOKING]: 'cancel_booking',
+    [TOOL_NAMES.BOOK_FLIGHT]: BOOKING_ACTIONS.CREATE_FLIGHT,
+    [TOOL_NAMES.BOOK_HOTEL]: BOOKING_ACTIONS.CREATE_HOTEL,
+    [TOOL_NAMES.CANCEL_BOOKING]: BOOKING_ACTIONS.CANCEL,
   } as const;
   const approvalAction = actionByTool[action.name as keyof typeof actionByTool];
 
@@ -77,14 +88,14 @@ const bookingApprovalRequest = (value: unknown): BookingApprovalRequest | null =
   const referenceId = String(args.flightId ?? args.hotelId ?? args.bookingId ?? '');
 
   return {
-    type: 'booking_approval',
+    type: BOOKING_APPROVAL_REQUEST_TYPE,
     approvalId: `${action.name}:${referenceId}`,
     draftId: `${action.name}:${referenceId}`,
     action: approvalAction,
     title:
-      approvalAction === 'create_flight_booking'
+      approvalAction === BOOKING_ACTIONS.CREATE_FLIGHT
         ? 'Confirm flight booking'
-        : approvalAction === 'create_hotel_booking'
+        : approvalAction === BOOKING_ACTIONS.CREATE_HOTEL
           ? 'Confirm hotel booking'
           : 'Confirm booking cancellation',
     description: action.description,
@@ -94,7 +105,7 @@ const bookingApprovalRequest = (value: unknown): BookingApprovalRequest | null =
         ([key, item]) => key !== 'customerPhone' && item !== undefined && item !== null
       )
     ) as Record<string, string | number | boolean | null>,
-    allowedDecisions: config?.allowedDecisions ?? ['approve', 'reject'],
+    allowedDecisions: config?.allowedDecisions ?? [...BOOKING_APPROVAL_DECISIONS],
   };
 };
 
@@ -140,14 +151,14 @@ export const useBookingAction = () => {
 
       const handleDecision = (decision: BookingDecision) => {
         const rejectionMessage =
-          approvalRequest.action === 'cancel_booking'
+          approvalRequest.action === BOOKING_ACTIONS.CANCEL
             ? cancellationRejection(approvalRequest.referenceId)
             : BOOKING_CREATION_DECLINED_MESSAGE;
         const hitlResponse = {
           decisions: [
-            decision === 'approve'
-              ? { type: 'approve' }
-              : { type: 'reject', message: rejectionMessage },
+            decision === BOOKING_DECISIONS.APPROVE
+              ? { type: BOOKING_DECISIONS.APPROVE }
+              : { type: BOOKING_DECISIONS.REJECT, message: rejectionMessage },
           ],
         };
 

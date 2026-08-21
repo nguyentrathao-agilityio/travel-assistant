@@ -1,8 +1,12 @@
 import { HumanMessage, ToolMessage } from '@langchain/core/messages';
 
-const BOOKING_EDIT_REJECTION_PREFIX = 'The user requested changes.';
-const BOOKING_REQUEST_CANCELLATION_PREFIX = 'The user cancelled the booking request.';
-const CANCELLATION_REJECTION_PREFIX = 'The user rejected the cancellation.';
+// Constants
+import {
+  BOOKING_EDIT_REJECTION_PREFIX,
+  BOOKING_REQUEST_CANCELLATION_PREFIX,
+  CANCELLATION_REJECTION_PREFIX,
+} from '@repo/constants';
+import { UNKNOWN_TOOL_NAME } from '@/constants';
 
 /** Distinguishes a deliberate HITL rejection from a provider/tool failure. */
 export const isIntentionalBookingRejection = (message: ToolMessage): boolean => {
@@ -39,7 +43,7 @@ export const latestResultPerTool = (messages: readonly unknown[]): ToolMessage[]
 
   for (let index = turnMessages.length - 1; index >= 0; index -= 1) {
     const message = turnMessages[index];
-    const name = message.name ?? 'unknownTool';
+    const name = message.name ?? UNKNOWN_TOOL_NAME;
 
     if (seen.has(name)) continue;
     seen.add(name);

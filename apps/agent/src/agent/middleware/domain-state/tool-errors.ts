@@ -2,7 +2,7 @@ import type { ToolMessage } from '@langchain/core/messages';
 import type { z } from 'zod';
 
 // Constants
-import { WRITE_AGENT_NODE_NAMES, type DomainAgentNodeName } from '@/constants';
+import { UNKNOWN_TOOL_NAME, WRITE_AGENT_NODE_NAMES, type DomainAgentNodeName } from '@/constants';
 
 // Schemas
 import { TOOL_ERROR_CODES, ToolErrorSchema } from '@/schemas';
@@ -36,7 +36,7 @@ export const graphErrorFromTool = (
 
   return {
     node: taskName,
-    operation: message.name ?? 'unknownTool',
+    operation: message.name ?? UNKNOWN_TOOL_NAME,
     provider: parsed.data.provider,
     code: graphErrorCode(taskName, parsed.data.code),
     message:

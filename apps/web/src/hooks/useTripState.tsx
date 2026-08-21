@@ -1,15 +1,16 @@
 import { useAgent } from '@copilotkit/react-core/v2';
 import { useEffect, useCallback, useMemo, useRef } from 'react';
+import { useShallow } from 'zustand/shallow';
 
 // Constants
 import { AGENT_NAME } from '@/constants';
+import { SELECTION_STATUSES } from '@repo/constants';
 
 // Stores
 import { useThreadStore, useTripStateStore } from '@/stores';
 
 // Types
 import type { Flight, HotelAvailability, SelectedFlight, TripState } from '@repo/types';
-import { useShallow } from 'zustand/shallow';
 
 // Utils
 import { todayClientIso, clientTimezone as getClientTimezone } from '@/utils';
@@ -77,13 +78,13 @@ export const useTripState = () => {
       setTripState(sessionId, {
         ...current,
         flights: { ...(current.flights ?? {}), [type]: flight },
-        flightSelectionStatus: 'confirmed',
+        flightSelectionStatus: SELECTION_STATUSES.CONFIRMED,
       });
       const currentAgentState = (agent.state as TripState) ?? {};
       agent.setState({
         ...currentAgentState,
         flights: { ...(currentAgentState.flights ?? {}), [type]: flight },
-        flightSelectionStatus: 'confirmed',
+        flightSelectionStatus: SELECTION_STATUSES.CONFIRMED,
       });
     },
     [agent, sessionId, setTripState]
@@ -96,12 +97,12 @@ export const useTripState = () => {
       setTripState(sessionId, {
         ...current,
         hotel,
-        hotelSelectionStatus: 'confirmed',
+        hotelSelectionStatus: SELECTION_STATUSES.CONFIRMED,
       });
       agent.setState({
         ...((agent.state as TripState) ?? {}),
         hotel,
-        hotelSelectionStatus: 'confirmed',
+        hotelSelectionStatus: SELECTION_STATUSES.CONFIRMED,
       });
     },
     [agent, sessionId, setTripState]

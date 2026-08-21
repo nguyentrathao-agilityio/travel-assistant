@@ -7,6 +7,9 @@ import { Button, Typography } from '@/components';
 // Utils
 import { formatPrice } from '@/utils';
 
+// Constants
+import { BOOKING_ACTIONS, BOOKING_DECISIONS } from '@repo/constants';
+
 // Types
 import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
 
@@ -17,18 +20,18 @@ interface BookingApprovalCardProps {
 
 const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCardProps) => {
   const [submitted, setSubmitted] = useState(false);
-  const isFlight = request.action === 'create_flight_booking';
-  const isCancellation = request.action === 'cancel_booking';
+  const isFlight = request.action === BOOKING_ACTIONS.CREATE_FLIGHT;
+  const isCancellation = request.action === BOOKING_ACTIONS.CANCEL;
   const BookingIcon = isFlight ? Plane : isCancellation ? AlertCircle : Building2;
 
   const handleApprove = useCallback(() => {
     setSubmitted(true);
-    onDecision('approve');
+    onDecision(BOOKING_DECISIONS.APPROVE);
   }, [onDecision]);
 
   const handleReject = useCallback(() => {
     setSubmitted(true);
-    onDecision('reject');
+    onDecision(BOOKING_DECISIONS.REJECT);
   }, [onDecision]);
 
   return (

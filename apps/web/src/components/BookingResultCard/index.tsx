@@ -6,6 +6,9 @@ import { Typography } from '@/components';
 // Utils
 import { formatPrice } from '@/utils';
 
+// Constants
+import { BOOKING_STATUSES } from '@repo/constants';
+
 // Types
 import type { Booking } from '@repo/types';
 
@@ -14,7 +17,7 @@ interface BookingResultCardProps {
 }
 
 const BookingResultCard = ({ booking }: BookingResultCardProps) => {
-  const isCancelled = booking.status === 'cancelled';
+  const isCancelled = booking.status === BOOKING_STATUSES.CANCELLED;
   const StatusIcon = isCancelled ? XCircle : CheckCircle;
 
   return (

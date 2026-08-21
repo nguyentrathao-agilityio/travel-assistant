@@ -1,5 +1,13 @@
 import { createMiddleware } from 'langchain';
 
+// Constants
+import {
+  OBSERVABILITY_EVENT,
+  OBSERVABILITY_OPERATIONS,
+  OBSERVABILITY_STATUSES,
+  UNKNOWN_ERROR_TYPE,
+} from '@/constants';
+
 interface ObservabilityLogger {
   info: (message: string, metadata: Record<string, unknown>) => void;
   error: (message: string, metadata: Record<string, unknown>) => void;
@@ -8,7 +16,7 @@ interface ObservabilityLogger {
 const elapsedMs = (startedAt: number): number => Date.now() - startedAt;
 
 const errorType = (error: unknown): string =>
-  error instanceof Error ? error.name : 'UnknownError';
+  error instanceof Error ? error.name : UNKNOWN_ERROR_TYPE;
 
 /** Records model and tool timings without logging prompts, arguments, results, or raw errors. */
 export const createObservabilityMiddleware = (
@@ -23,19 +31,19 @@ export const createObservabilityMiddleware = (
       try {
         const response = await handler(request);
 
-        logger.info('[agent-observability]', {
+        logger.info(OBSERVABILITY_EVENT, {
           agent: agentName,
-          operation: 'model',
-          status: 'success',
+          operation: OBSERVABILITY_OPERATIONS.MODEL,
+          status: OBSERVABILITY_STATUSES.SUCCESS,
           durationMs: elapsedMs(startedAt),
         });
 
         return response;
       } catch (error) {
-        logger.error('[agent-observability]', {
+        logger.error(OBSERVABILITY_EVENT, {
           agent: agentName,
-          operation: 'model',
-          status: 'error',
+          operation: OBSERVABILITY_OPERATIONS.MODEL,
+          status: OBSERVABILITY_STATUSES.ERROR,
           durationMs: elapsedMs(startedAt),
           errorType: errorType(error),
         });
@@ -50,21 +58,21 @@ export const createObservabilityMiddleware = (
       try {
         const response = await handler(request);
 
-        logger.info('[agent-observability]', {
+        logger.info(OBSERVABILITY_EVENT, {
           agent: agentName,
-          operation: 'tool',
+          operation: OBSERVABILITY_OPERATIONS.TOOL,
           tool,
-          status: 'success',
+          status: OBSERVABILITY_STATUSES.SUCCESS,
           durationMs: elapsedMs(startedAt),
         });
 
         return response;
       } catch (error) {
-        logger.error('[agent-observability]', {
+        logger.error(OBSERVABILITY_EVENT, {
           agent: agentName,
-          operation: 'tool',
+          operation: OBSERVABILITY_OPERATIONS.TOOL,
           tool,
-          status: 'error',
+          status: OBSERVABILITY_STATUSES.ERROR,
           durationMs: elapsedMs(startedAt),
           errorType: errorType(error),
         });

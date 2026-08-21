@@ -1,5 +1,5 @@
+import { TripCostEstimate } from '@repo/schemas';
 import { Hotel, SelectedFlight } from '@repo/types';
-import { TripCostEstimate } from '../../../../packages/schemas/src/trip-summary';
 
 /**
  * Adjusts a trip's cost estimate to reflect actual booked prices for flights and hotels.

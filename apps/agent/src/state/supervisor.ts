@@ -33,7 +33,7 @@ export const SupervisorStateSchema = z
   })
   .default(() => ({ status: SUPERVISOR_STATUSES.PENDING }));
 
-export type SupervisorState = z.infer<typeof SupervisorStateSchema>;
+type SupervisorState = z.infer<typeof SupervisorStateSchema>;
 
 export type SupervisorRoute = NonNullable<SupervisorState['nextNode']>;
 

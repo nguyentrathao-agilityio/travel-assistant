@@ -1,5 +1,7 @@
 // State
+import { createDefaultExecutionState } from './execution';
 import type { GraphStateType } from './graph-state';
+import { createDefaultSelectedOptions } from './selection';
 import { SUPERVISOR_STATUSES } from './supervisor';
 
 /** Fills fields absent from checkpoints created before explicit business state was introduced. */
@@ -14,13 +16,9 @@ export const normalizeGraphState = (state: Partial<GraphStateType>): Partial<Gra
     ...(state.request ?? {}),
   },
   searchResults: state.searchResults ?? {},
-  selectedOptions: state.selectedOptions ?? { placeIds: [] },
+  selectedOptions: state.selectedOptions ?? createDefaultSelectedOptions(),
   execution: {
-    completedTasks: [],
-    missingFields: [],
-    errors: [],
-    retryCount: {},
-    requiredOperations: [],
+    ...createDefaultExecutionState(),
     ...(state.execution ?? {}),
   },
   supervisor: state.supervisor ?? { status: SUPERVISOR_STATUSES.PENDING },

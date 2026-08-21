@@ -3,7 +3,8 @@ import { ReducedValue, StateSchema } from '@langchain/langgraph';
 import { z } from 'zod';
 
 // Constants
-import { BOOKING_OPERATIONS } from '@/constants';
+import { SELECTION_STATUSES } from '@repo/constants';
+import { BOOKING_OPERATIONS, DOMAIN_NODE_NAME } from '@/constants';
 
 // Schemas
 import { BookingSchema, FlightSchema, HotelAvailabilitySchema, IntentSchema } from '@/schemas';
@@ -28,15 +29,12 @@ const SelectedFlightSchema = z.object({
   return: FlightSchema.optional(),
 });
 
-export const SelectionStatusSchema = z.enum(['selected', 'confirmed', 'booked', 'cancelled']);
-export type SelectionStatus = z.infer<typeof SelectionStatusSchema>;
-
-export const SELECTION_STATUSES = {
-  SELECTED: 'selected',
-  CONFIRMED: 'confirmed',
-  BOOKED: 'booked',
-  CANCELLED: 'cancelled',
-} as const satisfies Record<string, SelectionStatus>;
+const SelectionStatusSchema = z.enum([
+  SELECTION_STATUSES.SELECTED,
+  SELECTION_STATUSES.CONFIRMED,
+  SELECTION_STATUSES.BOOKED,
+  SELECTION_STATUSES.CANCELLED,
+]);
 
 export const GraphState = new StateSchema({
   ...CopilotKitStateSchema.fields,
@@ -61,7 +59,7 @@ export const GraphState = new StateSchema({
       .enum([BOOKING_OPERATIONS.FLIGHT, BOOKING_OPERATIONS.HOTEL, BOOKING_OPERATIONS.CANCEL])
       .optional()
   ),
-  handoffTarget: zodState(z.literal('booking').optional()),
+  handoffTarget: zodState(z.literal(DOMAIN_NODE_NAME.BOOKING).optional()),
 
   // Explicit, serializable business state for node-to-node coordination.
   request: new ReducedValue(zodState(TravelRequestSchema.default(() => ({}))), {

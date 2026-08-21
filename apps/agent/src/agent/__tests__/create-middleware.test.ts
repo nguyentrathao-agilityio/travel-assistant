@@ -2,7 +2,7 @@ import type { StructuredToolInterface } from '@langchain/core/tools';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { SpecializedAgentConfig } from '@/constants/agent-config';
-import { createAgentMiddleware } from '@/agent/middleware/create-agent-middleware';
+import { createAgentMiddleware } from '@/agent/middleware/create-middleware';
 
 const {
   createCopilotkitMiddlewareMock,

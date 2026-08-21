@@ -28,6 +28,7 @@
     "@langchain/langgraph-sdk": "^1.9.27",
     "@langchain/openai": "^1.4.7",
     "@langchain/textsplitters": "^1.0.1",
+    "@repo/constants": "workspace:*",
     "agentevals": "^0.0.7",
     "hono": "^4.12.30",
     "langchain": "^1.4.0",
@@ -44,7 +45,7 @@
     "@vitest/ui": "^4.1.9",
     "dotenv-cli": "^11.0.0",
     "tsc-alias": "^1.9.1",
-    "tsx": "^4.16.2",
+    "tsx": "^4.23.12",
     "typescript": "6.0.3",
     "vitest": "^4.1.9"
   }

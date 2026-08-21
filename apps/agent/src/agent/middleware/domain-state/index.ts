@@ -15,7 +15,7 @@ import { BookingSchema } from '@/schemas/booking';
 // State
 import { GraphState, SELECTION_STATUSES, type GraphError, type SearchResults } from '@/state';
 
-import { isBookingToolName } from '../tool';
+import { isBookingToolName } from '@/utils/tool';
 
 const { messages: _messages, copilotkit: _copilotkit, ...domainStateFields } = GraphState.fields;
 const DomainStateSchema = new StateSchema(domainStateFields);
@@ -50,6 +50,7 @@ export const buildDomainStateUpdate = (
       }
       continue;
     }
+
     const { data } = booking;
     const isConfirmed = data.status === BOOKING_STATUSES.CONFIRMED;
     const selectionStatus = isConfirmed ? SELECTION_STATUSES.BOOKED : SELECTION_STATUSES.CANCELLED;

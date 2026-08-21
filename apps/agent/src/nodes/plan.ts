@@ -4,7 +4,7 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import { AGENT_CONFIGS } from '@/constants/agent-config';
 
 // Infrastructure
-import { createSpecializedAgent } from '@/infrastructure/agent';
+import { createSpecializedAgent } from '@/agent/create-agent';
 import { openAiApiKeyFromConfig, withOpenAiApiKey } from '@/infrastructure/llm';
 
 // State

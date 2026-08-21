@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createObservabilityMiddleware } from '@/infrastructure/agent/observability';
+import { createObservabilityMiddleware } from '@/agent/middleware/observability';
 
 const createMiddlewareMock = vi.hoisted(() => vi.fn((config: unknown) => config));
 

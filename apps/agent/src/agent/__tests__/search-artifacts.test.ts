@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest';
 // State
 import type { SearchResults } from '@/state';
 
-// Utils
-import { parseSearchArtifact } from '@/utils/domain-state/search-artifacts';
+// Agent middleware
+import { parseSearchArtifact } from '@/agent/middleware/domain-state/search-artifacts';
 
 const toolResult = (name: string, artifact: unknown, status?: 'success' | 'error') =>
   new ToolMessage({

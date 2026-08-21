@@ -36,12 +36,15 @@ import {
 import {
   missingOperationsResult,
   missingRequiredOperations,
-} from '@/utils/domain-state/required-operations';
-import { failureValidation, writeFailureResult } from '@/utils/domain-state/tool-failures';
+} from '@/agent/middleware/domain-state/required-operations';
+import {
+  failureValidation,
+  writeFailureResult,
+} from '@/agent/middleware/domain-state/tool-failures';
 import {
   isIntentionalBookingRejection,
   latestTurnToolMessages as latestTurnToolMessagesFromList,
-} from '@/utils/domain-state/tool-messages';
+} from '@/agent/middleware/domain-state/tool-messages';
 
 export type { SupervisorRoute };
 export const SUPERVISOR_ROUTES: SupervisorRoute[] = [...SUPERVISOR_NEXT_NODE_NAMES];

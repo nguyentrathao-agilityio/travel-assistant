@@ -4,8 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // Constants
 import type { SpecializedAgentConfig } from '@/constants/agent-config';
 
-// Infrastructure
-import { createSpecializedAgent } from '@/infrastructure/agent/create-agent';
+// Agent
+import { createSpecializedAgent } from '@/agent/create-agent';
 
 const {
   createAgentMock,
@@ -65,15 +65,15 @@ vi.mock('@/prompts', () => ({
   buildAgentSystemPrompt: (...args: unknown[]) => buildAgentSystemPromptMock(...args),
 }));
 
-vi.mock('@/utils/domain-state', () => ({
+vi.mock('@/agent/middleware/domain-state', () => ({
   createDomainStateMiddleware: createDomainStateMiddlewareMock,
 }));
 
-vi.mock('@/utils/rich-ui', () => ({
+vi.mock('@/agent/middleware/rich-ui', () => ({
   richUiModelMiddleware: 'rich-ui-middleware',
 }));
 
-vi.mock('@/infrastructure/agent/observability', () => ({
+vi.mock('@/agent/middleware/observability', () => ({
   createObservabilityMiddleware: createObservabilityMiddlewareMock,
 }));
 

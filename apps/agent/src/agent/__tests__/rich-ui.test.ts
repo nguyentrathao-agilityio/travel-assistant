@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest';
 // Constants
 import { TOOL_READY_OUTPUT } from '@/constants';
 
-// Utils
-import { buildRichUiToolSummary, richUiModelMiddleware } from '@/utils/rich-ui';
+// Agent middleware
+import { buildRichUiToolSummary, richUiModelMiddleware } from '@/agent/middleware/rich-ui';
 
 const invokeMiddleware = async (messages: unknown[]) => {
   let captured: { messages: unknown[] } | undefined;

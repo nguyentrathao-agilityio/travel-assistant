@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
-
 import { ArrowRight } from 'lucide-react';
 
+// Constants
 import { DESTINATION_PILLS, PRIMARY_SUGGESTION, SECONDARY_SUGGESTIONS } from '@/constants';
 
 // Components

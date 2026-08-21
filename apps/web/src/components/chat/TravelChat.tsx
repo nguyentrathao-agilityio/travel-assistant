@@ -1,5 +1,3 @@
-import { CustomAssistantMessage } from '@/components/chat/CustomAssistantMessage';
-import { CustomUserMessage } from '@/components/chat/CustomUserMessage';
 import type { InputProps } from '@copilotkit/react-ui';
 import { CopilotChat } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
@@ -15,6 +13,8 @@ import { useConversationRendererStore, useThreadStore } from '@/stores';
 import { useThreadHistory, useSeedAgentHistory, useTravelCopilot } from '@/hooks';
 
 // Components
+import { CustomAssistantMessage } from '@/components/chat/CustomAssistantMessage';
+import { CustomUserMessage } from '@/components/chat/CustomUserMessage';
 import { BookingPanel } from './BookingPanel';
 import { ChatInputBar } from './ChatInputBar';
 import { ConversationMessages } from './ConversationMessages';

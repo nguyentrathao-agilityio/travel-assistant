@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 // Components
 import { Divider } from '@/components';
 
@@ -14,7 +16,6 @@ import { TripSummaryResult } from '@repo/schemas';
 
 // Utils
 import { cn, replaceCostEstimateWithBookings } from '@/utils';
-import { useMemo } from 'react';
 
 interface TripSummaryCardProps {
   /** Full summary from the trip-summary-tool */

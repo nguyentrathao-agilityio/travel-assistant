@@ -11,6 +11,8 @@ import { TOOL_NAMES } from '@/constants';
 
 // Hooks
 import { useTripState } from '@/hooks';
+
+// Stores
 import { useConversationRendererStore } from '@/stores';
 
 // Types

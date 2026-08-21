@@ -11,6 +11,8 @@ import { renderToolResult } from '@/components/common/ToolResultBoundary';
 
 // Hooks
 import { useTripState } from '@/hooks';
+
+// Stores
 import { useConversationRendererStore } from '@/stores';
 
 // Schemas

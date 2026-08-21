@@ -8,7 +8,7 @@ import {
   Sun,
 } from 'lucide-react';
 
-// Utils
+// Types
 import type { DailyForecast } from '@repo/types';
 
 // Constants

@@ -5,6 +5,8 @@ import { cn, formatAmount } from '@/utils';
 
 // Components
 import { Divider, Typography } from '@/components';
+
+// Types
 import { TripCostEstimate } from '@repo/schemas';
 
 const COST_ICON_MAP: { keywords: string[]; icon: LucideIcon; colorClass: string }[] = [

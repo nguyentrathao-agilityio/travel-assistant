@@ -4,6 +4,7 @@ import type { KeyboardEvent, ChangeEvent } from 'react';
 import { cn } from '@/utils';
 import { Button } from '@/components';
 import { Send } from 'lucide-react';
+import { MAX_CHAT_TEXTAREA_HEIGHT } from '@/constants';
 
 const QUICK_PROMPTS = [
   'Plan a 7-day Vietnam trip',
@@ -52,7 +53,7 @@ const ChatInput = ({
     const el = e.target;
 
     el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+    el.style.height = `${Math.min(el.scrollHeight, MAX_CHAT_TEXTAREA_HEIGHT)}px`;
   }, []);
 
   const handleKeyDown = useCallback(

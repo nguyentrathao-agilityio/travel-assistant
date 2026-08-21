@@ -6,6 +6,9 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { Button } from '@/components';
 import { TypingIndicator } from '../TypingIndicator';
 
+// Constants
+import { COPY_FEEDBACK_DURATION_MS } from '@/constants';
+
 const hasRenderedContent = (node: Node): boolean => {
   if (node.nodeType === Node.TEXT_NODE) return Boolean(node.textContent?.trim());
   if (!(node instanceof HTMLElement || node instanceof SVGElement)) return false;
@@ -32,7 +35,7 @@ const CopyButton = ({
       setCopied(true);
       await navigator.clipboard.writeText(content);
       if (onCopyAction) onCopyAction(content);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION_MS);
     } catch (e) {
       // ignore clipboard errors silently
     }

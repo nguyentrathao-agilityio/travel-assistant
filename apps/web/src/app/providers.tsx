@@ -8,6 +8,7 @@ import {
   AGENT_NAME,
   COPILOTKIT_PUBLIC_LICENSE_KEY,
   ERROR_MESSAGES,
+  OPENAI_API_KEY_HEADER,
   RUNTIME_URL,
 } from '@/constants';
 import { useThreadStore } from '@/stores/threadStore';
@@ -26,7 +27,7 @@ export const Providers = ({ children }: ProvidersProps) => {
 
   const headers = useMemo(
     () => ({
-      'x-openai-api-key': apiKey,
+      [OPENAI_API_KEY_HEADER]: apiKey,
       'x-client-date': todayClientIso(),
       'x-client-timezone': clientTimezone(),
     }),

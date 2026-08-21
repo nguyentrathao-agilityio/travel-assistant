@@ -17,9 +17,7 @@ import { cn } from '@/utils';
 import { Button } from '@/components';
 
 // Constants
-import { AGENT_NAME, CHAT_ROLE } from '@/constants';
-
-const MAX_TEXTAREA_HEIGHT = 160;
+import { AGENT_NAME, CHAT_ROLE, MAX_CHAT_TEXTAREA_HEIGHT } from '@/constants';
 
 const ChatInputBar = ({ onSend, onStop, inProgress, hideStopButton = false }: InputProps) => {
   const [value, setValue] = useState('');
@@ -64,7 +62,7 @@ const ChatInputBar = ({ onSend, onStop, inProgress, hideStopButton = false }: In
     const el = e.target;
 
     el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`;
+    el.style.height = `${Math.min(el.scrollHeight, MAX_CHAT_TEXTAREA_HEIGHT)}px`;
   }, []);
 
   const handleKeyDown = useCallback(

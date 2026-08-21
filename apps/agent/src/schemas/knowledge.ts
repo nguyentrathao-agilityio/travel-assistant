@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+// Utils
+import { stripNulls } from '@/utils/schema';
+
 export const KnowledgeCategorySchema = z.enum([
   'entry',
   'safety',
@@ -8,13 +11,32 @@ export const KnowledgeCategorySchema = z.enum([
   'planning',
 ]);
 
-export const KnowledgeSearchInputSchema = z.object({
-  query: z.string().min(3).describe('A focused travel knowledge question'),
-  country: z.string().min(2).optional(),
-  city: z.string().min(2).optional(),
-  category: KnowledgeCategorySchema.optional(),
-  maxResults: z.number().int().min(1).max(8).default(5),
-});
+/** Treats a model-generated empty string the same as an omitted optional field. */
+const stripEmptyOptionalStrings = (raw: unknown): unknown => {
+  const withoutNulls = stripNulls(raw);
+
+  if (withoutNulls && typeof withoutNulls === 'object' && !Array.isArray(withoutNulls)) {
+    return Object.fromEntries(
+      Object.entries(withoutNulls as Record<string, unknown>).map(([k, v]) => [
+        k,
+        v === '' ? undefined : v,
+      ])
+    );
+  }
+
+  return withoutNulls;
+};
+
+export const KnowledgeSearchInputSchema = z.preprocess(
+  stripEmptyOptionalStrings,
+  z.object({
+    query: z.string().min(3).describe('A focused travel knowledge question'),
+    country: z.string().min(2).optional(),
+    city: z.string().min(2).optional(),
+    category: KnowledgeCategorySchema.optional(),
+    maxResults: z.number().int().min(1).max(8).default(5),
+  })
+);
 
 export type KnowledgeSearchInput = z.infer<typeof KnowledgeSearchInputSchema>;
 

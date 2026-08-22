@@ -42,3 +42,4 @@ export type DestinationPill = (typeof DESTINATION_PILLS)[number];
 
 export const MAX_CHAT_TEXTAREA_HEIGHT = 160;
 export const COPY_FEEDBACK_DURATION_MS = 2_000;
+export const STOP_GENERATION_RETRY_DELAY_MS = 1_200;

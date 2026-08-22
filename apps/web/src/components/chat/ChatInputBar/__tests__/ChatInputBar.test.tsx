@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useAgent, useCopilotKit } from '@copilotkit/react-core/v2';
+import { STOP_GENERATION_RETRY_DELAY_MS } from '@/constants';
 import { ChatInputBar } from '../index';
 
 const mockMessages: { role: string; toolCalls?: unknown[] }[] = [];
@@ -104,6 +105,43 @@ describe('ChatInputBar', () => {
       expect(onStop).toHaveBeenCalledTimes(1);
       expect(onSend).not.toHaveBeenCalled();
       expect(screen.getByLabelText('Chat message')).toHaveValue('Keep this draft');
+    });
+
+    describe('stop retry', () => {
+      beforeEach(() => jest.useFakeTimers());
+      afterEach(() => jest.useRealTimers());
+
+      it('retries stop once if generation is still in progress after the retry delay', async () => {
+        const onStop = jest.fn();
+        const user = userEvent.setup({ delay: null });
+
+        render(<ChatInputBar {...makeProps({ inProgress: true, onStop })} />);
+        await user.click(screen.getByLabelText('Stop generating'));
+
+        expect(onStop).toHaveBeenCalledTimes(1);
+
+        act(() => {
+          jest.advanceTimersByTime(STOP_GENERATION_RETRY_DELAY_MS);
+        });
+
+        expect(onStop).toHaveBeenCalledTimes(2);
+      });
+
+      it('does not retry once generation has actually stopped', async () => {
+        const onStop = jest.fn();
+        const user = userEvent.setup({ delay: null });
+
+        const { rerender } = render(<ChatInputBar {...makeProps({ inProgress: true, onStop })} />);
+        await user.click(screen.getByLabelText('Stop generating'));
+
+        rerender(<ChatInputBar {...makeProps({ inProgress: false, onStop })} />);
+
+        act(() => {
+          jest.advanceTimersByTime(STOP_GENERATION_RETRY_DELAY_MS);
+        });
+
+        expect(onStop).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('calls onSend with trimmed text when send button is clicked', async () => {

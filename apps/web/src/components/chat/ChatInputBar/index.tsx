@@ -17,11 +17,18 @@ import { cn } from '@/utils';
 import { Button } from '@/components';
 
 // Constants
-import { AGENT_NAME, CHAT_ROLE, MAX_CHAT_TEXTAREA_HEIGHT } from '@/constants';
+import {
+  AGENT_NAME,
+  CHAT_ROLE,
+  MAX_CHAT_TEXTAREA_HEIGHT,
+  STOP_GENERATION_RETRY_DELAY_MS,
+} from '@/constants';
 
 const ChatInputBar = ({ onSend, onStop, inProgress, hideStopButton = false }: InputProps) => {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const stopRetryTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const inProgressRef = useRef(inProgress);
   const { agent } = useAgent({ agentId: AGENT_NAME });
   const messages = agent.messages;
   const isAwaitingApproval = useInterruptElement() !== null;
@@ -29,9 +36,27 @@ const ChatInputBar = ({ onSend, onStop, inProgress, hideStopButton = false }: In
   const setOnSend = useSuggestionStore((s) => s.setOnSend);
   const setLastTool = useSuggestionStore((s) => s.setLastTool);
 
+  inProgressRef.current = inProgress;
+
   useEffect(() => {
     setOnSend(onSend);
   }, [onSend, setOnSend]);
+
+  useEffect(() => () => clearTimeout(stopRetryTimeoutRef.current), []);
+
+  /**
+   * The AG-UI LangGraph client can silently drop the cancel request if the server's real
+   * run id hasn't arrived yet when Stop is clicked — the client detaches its own stream
+   * regardless, so generation resumes and the button reappears. Retry once so a single
+   * click reliably stops the run instead of requiring a second manual click.
+   */
+  const handleStop = useCallback(() => {
+    onStop?.();
+    clearTimeout(stopRetryTimeoutRef.current);
+    stopRetryTimeoutRef.current = setTimeout(() => {
+      if (inProgressRef.current) onStop?.();
+    }, STOP_GENERATION_RETRY_DELAY_MS);
+  }, [onStop]);
 
   const lastAssistantIdx = messages.reduce(
     (lastIdx, msg, idx) => (msg.role === CHAT_ROLE.ASSISTANT ? idx : lastIdx),
@@ -90,7 +115,7 @@ const ChatInputBar = ({ onSend, onStop, inProgress, hideStopButton = false }: In
         />
         {inProgress && !hideStopButton ? (
           <Button
-            onClick={onStop}
+            onClick={handleStop}
             aria-label="Stop generating"
             className="bg-brand-500 mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-opacity"
             rightIcon={<Square size={14} className="fill-current text-white" />}

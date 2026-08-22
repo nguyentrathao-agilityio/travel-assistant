@@ -4,7 +4,70 @@
 
 Welcome to Travel Planner Assistant - an AI-powered travel planning application that simulates a real-world AI travel assistant, helping users plan complete travel experiences through a conversational chatbot interface — from checking the weather at a destination to generating a full multi-day trip schedule with flights, hotels, and local tips.
 
-The practice focuses primarily on building the agent logic and orchestration layer using **LangChainJS** and **LangGraph** — covering agent/tool/model interaction, schema-validated responses, context management, middleware, and graph-based multi-step orchestration with state persistence and interrupt handling. **CopilotKit** and **AG-UI** are used as the supporting frontend/streaming layer to connect this agent logic to a conversational chatbot interface with real-time streaming responses and generative UI.
+The practice focuses primarily on integrating an AI agent into a web application using **CopilotKit** and **AG-UI** — streaming messages and agent state between frontend and agent in real time, rendering tool results and agent interactions directly in the UI, and supporting Human-in-the-Loop interactions. **LangChainJS** and **LangGraph** power the underlying agent logic and orchestration layer — agent/tool/model interaction, schema-validated responses, context management, middleware, and graph-based multi-step orchestration with state persistence and interrupt handling.
+
+## Target
+
+The aim of this project is to build a realistic AI-powered travel planning assistant while helping developers understand modern agentic application architecture and collaborative development workflows.
+
+- Gain a general understanding of LangChain and LangGraph and how they are used to build and orchestrate AI agents.
+- Integrate the AI agent into the web application using CopilotKit and AG-UI.
+- Stream messages and agent state between the frontend and agent in real time.
+- Render tool results and agent interactions directly in the UI.
+- Support Human-in-the-Loop interactions between users and the agent.
+
+## Team Size
+
+- 1 Developer:
+  - Nguyen.TraThao
+
+## Prerequisite
+
+- **Visual Studio Code**
+- **Node.js** v24.15.0
+- **pnpm** v11.1.1
+- **PostgreSQL** (for agent persistence)
+- **Git** (for version control and Husky hooks)
+- **LLM**: gpt-4o mini
+
+## Development Tools
+
+- **Husky**
+- **Prettier**
+- **ESLint**
+- **CommitLint**
+
+## Technical Stacks
+
+- **TypeScript** v5.9.3
+- **React + Vite**
+- **TurboRepo**
+- **CopilotKit** v1.67.1
+- **AG-UI** v1.0.2
+- **LangChain** v1.1.48
+- **LangGraph** v1.3.4
+- **LangSmith**
+- **TailwindCSS** v4.3
+- **OpenAI GPT-4o Mini**
+- **PostgreSQL**
+
+## Features
+
+- **Weather Check** — Users can check the current weather, temperature, and travel forecast for any destination through a Generative UI weather card.
+
+- **Route Recommendation** — Users can request recommended travel routes with ordered landmarks, travel times, local tips, food suggestions, and transport options.
+
+- **Flight Booking** — Users can browse simulated flight options with airline, pricing, schedule, and duration information through interactive booking cards.
+
+- **Hotel Booking** — Users can explore simulated hotel recommendations based on budget and preferences, including ratings, amenities, and booking actions.
+
+- **Places To Check** — Users can discover attractions, landmarks, and hidden gems with descriptions, categories, and estimated visit durations.
+
+- **Local Tips** — Users can receive practical travel advice including etiquette, currency, transportation, and food recommendations.
+
+- **Full Travel Schedule Setup** — Users can generate a complete travel itinerary combining flights, hotels, attractions, local tips, and day-by-day travel schedules through a Generative UI experience.
+
+- **Smart Thread Management** — Empty threads are prevented from being created; users are redirected to existing empty threads when clicking "New Conversation" on another thread, eliminating clutter.
 
 ## Architecture
 
@@ -68,78 +131,6 @@ The main implementation entry points are:
 - [`apps/agent/src/tools/`](apps/agent/src/tools) — agent-facing tool contracts
 - [`apps/agent/src/services/`](apps/agent/src/services) — domain and external API logic
 - [`apps/web/src/hooks/`](apps/web/src/hooks) — CopilotKit tool renderers, state sync, and approval UI
-
-## Target
-
-The aim of this project is to build a realistic AI-powered travel planning assistant while helping developers understand modern agentic application architecture and collaborative development workflows.
-
-**LangChainJS**
-
-- Grasp how Agents, Models, and Tools interact to build intelligent workflows.
-- Design predictable responses using message templates and schema validation.
-- Manage conversational context effectively.
-- Apply prebuilt and custom middleware for enhanced control and extensibility.
-- Improve user experience through real-time event streaming.
-
-**LangGraph**
-
-- Orchestrate multi-step logic using graph-based execution.
-- Ensure long-running tasks and state recovery.
-- Handle interrupts and time travel — debug or rewind execution flows safely.
-- Build integrated AI systems — combine LangChainJS logic with LangGraph orchestration for scalable, maintainable AI solutions.
-
-## Team Size
-
-- 1 Developer:
-  - Nguyen.TraThao
-
-## Prerequisite
-
-- **Visual Studio Code**
-- **Node.js** v24.15.0
-- **pnpm** v11.1.1
-- **PostgreSQL** (for agent persistence)
-- **Git** (for version control and Husky hooks)
-- **LLM**: gpt-4o mini
-
-## Development Tools
-
-- **Husky**
-- **Prettier**
-- **ESLint**
-- **CommitLint**
-
-## Technical Stacks
-
-- **TypeScript** v5.9.3
-- **React + Vite**
-- **TurboRepo**
-- **CopilotKit** v1.67.1
-- **AG-UI** v1.0.2
-- **LangChain** v1.1.48
-- **LangGraph** v1.3.4
-- **LangSmith**
-- **TailwindCSS** v4.3
-- **OpenAI GPT-4o Mini**
-- **PostgreSQL**
-
-## Features
-
-- **Weather Check** — Users can check the current weather, temperature, and travel forecast for any destination through a Generative UI weather card.
-
-- **Route Recommendation** — Users can request recommended travel routes with ordered landmarks, travel times, local tips, food suggestions, and transport options.
-
-- **Flight Booking** — Users can browse simulated flight options with airline, pricing, schedule, and duration information through interactive booking cards.
-
-- **Hotel Booking** — Users can explore simulated hotel recommendations based on budget and preferences, including ratings, amenities, and booking actions.
-
-- **Places To Check** — Users can discover attractions, landmarks, and hidden gems with descriptions, categories, and estimated visit durations.
-
-- **Local Tips** — Users can receive practical travel advice including etiquette, currency, transportation, and food recommendations.
-
-- **Full Travel Schedule Setup** — Users can generate a complete travel itinerary combining flights, hotels, attractions, local tips, and day-by-day travel schedules through a Generative UI experience.
-
-- **Smart Thread Management** — Empty threads are prevented from being created; users are redirected to existing empty threads when clicking "New Conversation" on another thread, eliminating clutter.
 
 ## Step by Step to Run This App in Your Local
 

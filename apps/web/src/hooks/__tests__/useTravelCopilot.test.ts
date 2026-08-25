@@ -18,6 +18,10 @@ jest.mock('@/hooks/useRouteAction', () => ({ useRouteAction: jest.fn() }));
 jest.mock('@/hooks/useThemeAction', () => ({ useThemeAction: jest.fn() }));
 jest.mock('@/hooks/useTitleSync', () => ({ useTitleSync: jest.fn() }));
 jest.mock('@/hooks/useTripSummaryAction', () => ({ useTripSummaryAction: jest.fn() }));
+jest.mock('@/hooks/useTravelIdeaComponent', () => ({ useTravelIdeaComponent: jest.fn() }));
+jest.mock('@/hooks/usePackingChecklistComponent', () => ({
+  usePackingChecklistComponent: jest.fn(),
+}));
 jest.mock('@/hooks/useWeatherAction', () => ({ useWeatherAction: jest.fn() }));
 
 describe('useTravelCopilot', () => {
@@ -36,6 +40,8 @@ describe('useTravelCopilot', () => {
       hooks.useLocalTipsAction,
       hooks.useTripSummaryAction,
       hooks.useDestinationExplorerAction,
+      hooks.useTravelIdeaComponent,
+      hooks.usePackingChecklistComponent,
       hooks.useTitleSync,
       hooks.useBookedActions,
       hooks.useThemeAction,

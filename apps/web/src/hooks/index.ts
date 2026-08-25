@@ -14,6 +14,8 @@ export * from './useScrollToBottom';
 export * from './useTripSummaryAction';
 export * from './useWeatherAction';
 export * from './useDestinationExplorerAction';
+export * from './useTravelIdeaComponent';
+export * from './usePackingChecklistComponent';
 export * from './useThemeAction';
 export * from './useBookingAction';
 export * from './useInterruptElement';

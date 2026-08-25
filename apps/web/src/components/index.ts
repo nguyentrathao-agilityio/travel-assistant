@@ -12,6 +12,8 @@ export * from './StopCard';
 export * from './TripSummaryCard';
 export * from './WeatherCard';
 export * from './DestinationExplorerCard';
+export * from './DestinationIdeaCard';
+export * from './PackingChecklistCard';
 export * from './ThemeToggle';
 export * from './BookingApprovalCard';
 export * from './BookingResultCard';

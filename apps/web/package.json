@@ -13,9 +13,9 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@copilotkit/react-core": "1.67.1",
-    "@copilotkit/react-ui": "1.67.1",
-    "@copilotkit/runtime": "1.67.1",
+    "@copilotkit/react-core": "1.69.0",
+    "@copilotkit/react-ui": "1.69.0",
+    "@copilotkit/runtime": "1.69.0",
     "@langchain/langgraph-sdk": "^1.9.27",
     "@tailwindcss/postcss": "^4.3.0",
     "clsx": "^2.1.1",

@@ -32,6 +32,7 @@ jest.mock('@copilotkit/react-core/v2', () => ({
     },
   })),
   useAgentContext: jest.fn(),
+  useComponent: jest.fn(),
   useFrontendTool: jest.fn(),
   useInterrupt: jest.fn(),
   useDefaultRenderTool: jest.fn(),

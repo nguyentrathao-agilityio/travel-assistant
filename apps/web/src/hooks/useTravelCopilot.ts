@@ -6,11 +6,13 @@ import { useDestinationExplorerAction } from './useDestinationExplorerAction';
 import { useFlightAction } from './useFlightAction';
 import { useHotelAction } from './useHotelAction';
 import { useLocalTipsAction } from './useLocalTipsAction';
+import { usePackingChecklistComponent } from './usePackingChecklistComponent';
 import { usePlacesAction } from './usePlacesAction';
 import { useRouteAction } from './useRouteAction';
 import { useThemeAction } from './useThemeAction';
 import { useTitleSync } from './useTitleSync';
 import { useTripSummaryAction } from './useTripSummaryAction';
+import { useTravelIdeaComponent } from './useTravelIdeaComponent';
 import { useWeatherAction } from './useWeatherAction';
 
 /** Registers every CopilotKit integration used by the travel chat. */
@@ -26,6 +28,8 @@ export const useTravelCopilot = () => {
   useLocalTipsAction();
   useTripSummaryAction();
   useDestinationExplorerAction();
+  useTravelIdeaComponent();
+  usePackingChecklistComponent();
   useTitleSync();
   useBookedActions();
   useThemeAction();

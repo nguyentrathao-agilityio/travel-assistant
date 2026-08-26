@@ -83,7 +83,10 @@ const statusLabel = (status: Booking['status']): string =>
   status === BOOKING_STATUSES.CANCELLED ? 'Cancelled' : 'Confirmed';
 
 /** Builds a local (non-agent-emitted) A2UI surface listing already-known confirmed bookings. */
-export const buildBookingsSurface = (bookings: Booking[]): Record<string, unknown>[] => {
+export const buildBookingsSurface = (
+  bookings: Booking[],
+  surfaceId = BOOKINGS_SURFACE_ID
+): Record<string, unknown>[] => {
   if (bookings.length === 0) return [];
 
   const rootChildren = bookings.map((_, index) => `booking-${index}`);
@@ -103,9 +106,9 @@ export const buildBookingsSurface = (bookings: Booking[]): Record<string, unknow
   return [
     {
       version: 'v0.9',
-      createSurface: { surfaceId: BOOKINGS_SURFACE_ID, catalogId: basicCatalog.id },
+      createSurface: { surfaceId, catalogId: basicCatalog.id },
     },
-    { version: 'v0.9', updateComponents: { surfaceId: BOOKINGS_SURFACE_ID, components } },
-    { version: 'v0.9', updateDataModel: { surfaceId: BOOKINGS_SURFACE_ID, value: dataModel } },
+    { version: 'v0.9', updateComponents: { surfaceId, components } },
+    { version: 'v0.9', updateDataModel: { surfaceId, value: dataModel } },
   ];
 };

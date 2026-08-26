@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 
 import { BookingListPanel } from '../index';
 
@@ -18,7 +18,9 @@ jest.mock('@/stores', () => ({
 jest.mock('@copilotkit/a2ui-renderer', () => ({
   basicCatalog: { id: 'https://a2ui.org/specification/v0_9/basic_catalog.json' },
   A2UIProvider: ({ children }: { children: React.ReactNode }) => children,
-  A2UIRenderer: () => null,
+  A2UIRenderer: ({ surfaceId }: { surfaceId: string }) => (
+    <div data-testid={`a2ui-surface-${surfaceId}`} />
+  ),
   useA2UIActions: () => ({
     processMessages: mockProcessMessages,
     dispatch: jest.fn(),
@@ -111,6 +113,22 @@ describe('BookingListPanel', () => {
     expect(screen.getByText('Bookings')).toBeInTheDocument();
   });
 
+  it('places a compact cancel action inside the right side of its full-width A2UI ticket', () => {
+    mockUseTripState.mockReturnValue({ state: { flightBooking } });
+
+    render(<BookingListPanel open onClose={jest.fn()} />);
+
+    const row = screen.getByRole('group', { name: 'Booking ABC123' });
+    expect(row).toHaveClass('relative');
+    const surface = within(row).getByTestId('a2ui-surface-bookings-list-booking-1');
+    expect(surface.parentElement).toHaveClass('booking-ticket-surface');
+    const cancelButton = within(row).getByRole('button', { name: 'Cancel ABC123' });
+    expect(cancelButton).toHaveClass('absolute');
+    expect(cancelButton).not.toHaveTextContent('Cancel');
+    expect(cancelButton.querySelector('svg')).toHaveClass('lucide-circle-x');
+    expect(cancelButton).toHaveAttribute('title', 'Cancel booking');
+  });
+
   it('does not offer a cancel button for an already-cancelled booking', () => {
     mockUseTripState.mockReturnValue({ state: { hotelBooking: cancelledHotelBooking } });
 
@@ -151,5 +169,21 @@ describe('BookingListPanel', () => {
     rerender(<BookingListPanel open onClose={jest.fn()} />);
 
     expect(mockProcessMessages).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not offer an edit button for an already-cancelled booking', () => {
+    mockUseTripState.mockReturnValue({ state: { hotelBooking: cancelledHotelBooking } });
+
+    render(<BookingListPanel open onClose={jest.fn()} />);
+
+    expect(screen.queryByRole('button', { name: 'Edit XYZ789' })).not.toBeInTheDocument();
+  });
+
+  it('does not offer an edit button for a confirmed booking', () => {
+    mockUseTripState.mockReturnValue({ state: { flightBooking } });
+
+    render(<BookingListPanel open onClose={jest.fn()} />);
+
+    expect(screen.queryByRole('button', { name: 'Edit ABC123' })).not.toBeInTheDocument();
   });
 });

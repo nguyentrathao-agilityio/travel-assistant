@@ -11,27 +11,16 @@ describe('useBookingAction', () => {
     jest.mocked(useRenderTool).mockClear();
   });
 
-  it('renders LangChain HITL requests and resolves approval with a structured decision', () => {
+  it('resolves an unchanged booking as approval', () => {
     renderHook(() => useBookingAction());
     const registration = jest.mocked(useInterrupt).mock.calls[0][0];
-    const value = {
-      actionRequests: [
-        {
-          name: TOOL_NAMES.BOOK_FLIGHT,
-          args: {
-            flightId: 'FL1',
-            adults: 1,
-            customerName: 'Thao',
-            customerEmail: 'thao@example.com',
-            customerPhone: '0900000000',
-          },
-          description: 'Tool execution requires approval',
-        },
-      ],
-      reviewConfigs: [
-        { actionName: TOOL_NAMES.BOOK_FLIGHT, allowedDecisions: ['approve', 'reject'] },
-      ],
-    };
+    const value = bookingInterrupt(TOOL_NAMES.BOOK_FLIGHT, {
+      flightId: 'FL1',
+      adults: 1,
+      customerName: 'Thao',
+      customerEmail: 'thao@example.com',
+      customerPhone: '0900000000',
+    });
     const resolve = jest.fn();
 
     expect(registration.enabled?.({ name: 'on_interrupt', value })).toBe(true);
@@ -39,6 +28,23 @@ describe('useBookingAction', () => {
     fireEvent.click(screen.getByRole('button', { name: /confirm booking/i }));
 
     expect(resolve).toHaveBeenCalledWith({ decisions: [{ type: 'approve' }] });
+  });
+
+  it('surfaces the phone number as an editable field on the approval card', () => {
+    renderHook(() => useBookingAction());
+    const registration = jest.mocked(useInterrupt).mock.calls[0][0];
+    const value = bookingInterrupt(TOOL_NAMES.BOOK_FLIGHT, {
+      flightId: 'FL1',
+      customerName: 'Thao',
+      customerEmail: 'thao@example.com',
+      customerPhone: '0900000000',
+    });
+
+    render(
+      registration.render?.({ event: { value }, resolve: jest.fn() } as never) as ReactElement
+    );
+
+    expect(screen.getByText('0900000000')).toBeInTheDocument();
   });
 
   it('recognizes a HITL request when the interrupt value arrives JSON-stringified, matching the real AG-UI wire format', () => {
@@ -66,21 +72,47 @@ describe('useBookingAction', () => {
     expect(registration.enabled?.({ name: 'on_interrupt', value })).toBe(true);
   });
 
-  it('tells the agent a cancelled request did not create the booking', () => {
+  it('waits for confirmation before resuming with edited arguments', () => {
     renderHook(() => useBookingAction());
     const registration = jest.mocked(useInterrupt).mock.calls[0][0];
-    const value = {
-      actionRequests: [
+    const value = bookingInterrupt(TOOL_NAMES.BOOK_HOTEL, {
+      hotelId: 'H1',
+      rooms: 1,
+      customerName: 'Thao',
+      customerPhone: '0900000000',
+    });
+    const resolve = jest.fn();
+
+    render(registration.render?.({ event: { value }, resolve } as never) as ReactElement);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.change(screen.getByLabelText('rooms'), { target: { value: '2' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    expect(resolve).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm booking ↗' }));
+    expect(resolve).toHaveBeenCalledWith({
+      decisions: [
         {
-          name: TOOL_NAMES.BOOK_HOTEL,
-          args: { hotelId: 'H1', customerName: 'Thao' },
-          description: 'Tool execution requires approval',
+          type: 'edit',
+          editedAction: {
+            name: TOOL_NAMES.BOOK_HOTEL,
+            args: {
+              hotelId: 'H1',
+              rooms: 2,
+              customerName: 'Thao',
+              customerPhone: '0900000000',
+            },
+          },
         },
       ],
-      reviewConfigs: [
-        { actionName: TOOL_NAMES.BOOK_HOTEL, allowedDecisions: ['approve', 'reject'] },
-      ],
-    };
+    });
+  });
+
+  it('rejects a cancelled booking request', () => {
+    renderHook(() => useBookingAction());
+    const registration = jest.mocked(useInterrupt).mock.calls[0][0];
+    const value = bookingInterrupt(TOOL_NAMES.BOOK_HOTEL, { hotelId: 'H1' });
     const resolve = jest.fn();
 
     render(registration.render?.({ event: { value }, resolve } as never) as ReactElement);
@@ -99,18 +131,7 @@ describe('useBookingAction', () => {
   it('tells the agent a rejected cancellation leaves the booking active', () => {
     renderHook(() => useBookingAction());
     const registration = jest.mocked(useInterrupt).mock.calls[0][0];
-    const value = {
-      actionRequests: [
-        {
-          name: TOOL_NAMES.CANCEL_BOOKING,
-          args: { bookingId: 'ABC123' },
-          description: 'Tool execution requires approval',
-        },
-      ],
-      reviewConfigs: [
-        { actionName: TOOL_NAMES.CANCEL_BOOKING, allowedDecisions: ['approve', 'reject'] },
-      ],
-    };
+    const value = bookingInterrupt(TOOL_NAMES.CANCEL_BOOKING, { bookingId: 'ABC123' }, false);
     const resolve = jest.fn();
 
     render(registration.render?.({ event: { value }, resolve } as never) as ReactElement);
@@ -142,7 +163,6 @@ describe('useBookingAction', () => {
     );
 
     expect(container).toBeEmptyDOMElement();
-    expect(screen.queryByText('Received an unexpected booking result.')).not.toBeInTheDocument();
   });
 
   it('does not render an error card when a duplicate booking is blocked', () => {
@@ -178,4 +198,14 @@ describe('useBookingAction', () => {
 
     expect(screen.getByText('Received an unexpected booking result.')).toBeInTheDocument();
   });
+});
+
+const bookingInterrupt = (name: string, args: Record<string, unknown>, allowEdit = true) => ({
+  actionRequests: [{ name, args, description: 'Tool execution requires approval' }],
+  reviewConfigs: [
+    {
+      actionName: name,
+      allowedDecisions: allowEdit ? ['approve', 'edit', 'reject'] : ['approve', 'reject'],
+    },
+  ],
 });

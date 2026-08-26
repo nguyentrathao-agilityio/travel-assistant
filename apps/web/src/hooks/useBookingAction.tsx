@@ -102,9 +102,7 @@ const bookingApprovalRequest = (value: unknown): BookingApprovalRequest | null =
     description: action.description,
     referenceId,
     details: Object.fromEntries(
-      Object.entries(args).filter(
-        ([key, item]) => key !== 'customerPhone' && item !== undefined && item !== null
-      )
+      Object.entries(args).filter(([, item]) => item !== undefined && item !== null)
     ) as Record<string, string | number | boolean | null>,
     allowedDecisions: config?.allowedDecisions ?? [...BOOKING_APPROVAL_DECISIONS],
   };
@@ -152,18 +150,35 @@ export const useBookingAction = () => {
 
       if (!approvalRequest) return <></>;
 
-      const handleDecision = (decision: BookingDecision) => {
+      const handleDecision = (
+        decision: BookingDecision,
+        editedDetails?: Record<string, string | number | boolean | null>
+      ) => {
         const rejectionMessage =
           approvalRequest.action === BOOKING_ACTIONS.CANCEL
             ? cancellationRejection(approvalRequest.referenceId)
             : BOOKING_CREATION_DECLINED_MESSAGE;
-        const hitlResponse = {
-          decisions: [
-            decision === BOOKING_DECISIONS.APPROVE
-              ? { type: BOOKING_DECISIONS.APPROVE }
-              : { type: BOOKING_DECISIONS.REJECT, message: rejectionMessage },
-          ],
+        const parsedValue = parseToolResult(event.value) as {
+          actionRequests: Array<{ name: string; args: Record<string, unknown> }>;
         };
+        const hitlResponse =
+          decision === BOOKING_DECISIONS.APPROVE
+            ? { decisions: [{ type: BOOKING_DECISIONS.APPROVE }] }
+            : decision === BOOKING_DECISIONS.EDIT && editedDetails
+              ? {
+                  decisions: [
+                    {
+                      type: BOOKING_DECISIONS.EDIT,
+                      editedAction: {
+                        name: parsedValue.actionRequests[0].name,
+                        args: { ...parsedValue.actionRequests[0].args, ...editedDetails },
+                      },
+                    },
+                  ],
+                }
+              : {
+                  decisions: [{ type: BOOKING_DECISIONS.REJECT, message: rejectionMessage }],
+                };
 
         (resolve as (value: typeof hitlResponse) => void)(hitlResponse);
       };

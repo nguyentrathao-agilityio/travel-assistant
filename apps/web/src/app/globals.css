@@ -171,3 +171,11 @@
   font-size: var(--font-size-body);
   line-height: var(--line-height-body);
 }
+
+/* The confirmed-booking action overlays the A2UI card. Reserve its corner in
+ * the summary line without narrowing the card or its three-column details. */
+.booking-ticket-surface > .a2ui-surface > div > div > div > span:first-child {
+  box-sizing: border-box;
+  width: calc(100% - 16px);
+  padding-right: 6rem;
+}

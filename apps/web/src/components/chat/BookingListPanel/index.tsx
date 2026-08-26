@@ -1,5 +1,5 @@
 import { A2UIProvider, A2UIRenderer, useA2UIActions } from '@copilotkit/a2ui-renderer';
-import { X } from 'lucide-react';
+import { CircleX, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { Button, Typography } from '@/components/common';
@@ -16,14 +16,14 @@ interface BookingListPanelProps {
   onClose: () => void;
 }
 
-const BookingsSurface = ({ bookings }: { bookings: Booking[] }) => {
+const BookingsSurface = ({ booking, surfaceId }: { booking: Booking; surfaceId: string }) => {
   const { processMessages } = useA2UIActions();
 
   useEffect(() => {
-    processMessages(buildBookingsSurface(bookings));
-  }, [bookings, processMessages]);
+    processMessages(buildBookingsSurface([booking], surfaceId));
+  }, [booking, processMessages, surfaceId]);
 
-  return <A2UIRenderer surfaceId={BOOKINGS_SURFACE_ID} />;
+  return <A2UIRenderer surfaceId={surfaceId} />;
 };
 
 export const BookingListPanel = ({ open, onClose }: BookingListPanelProps) => {
@@ -49,12 +49,8 @@ export const BookingListPanel = ({ open, onClose }: BookingListPanelProps) => {
 
   if (!open) return null;
 
-  const cancellableBookings = bookings.filter(
-    (booking) => booking.status === BOOKING_STATUSES.CONFIRMED
-  );
-
   return (
-    <div className="bg-background-primary absolute right-4 top-16 z-[70] flex max-h-[calc(100vh-5rem)] w-[min(28rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border shadow-xl">
+    <div className="bg-background-primary absolute right-4 top-16 z-[70] flex max-h-[calc(100vh-5rem)] w-[min(30rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border shadow-xl">
       <div className="flex items-center justify-between border-b p-4">
         <Typography variant="body" className="font-semibold">
           Bookings
@@ -70,25 +66,44 @@ export const BookingListPanel = ({ open, onClose }: BookingListPanelProps) => {
             No confirmed bookings yet.
           </Typography>
         ) : (
-          <>
-            <A2UIProvider>
-              <BookingsSurface bookings={bookings} />
-            </A2UIProvider>
-            {cancellableBookings.length > 0 && (
-              <div className="mt-3 flex flex-col gap-2 border-t pt-3">
-                {cancellableBookings.map((booking) => (
-                  <Button
+          <A2UIProvider>
+            <div className="flex flex-col gap-3">
+              {bookings.map((booking) => {
+                const surfaceId = `${BOOKINGS_SURFACE_ID}-${booking.id}`;
+
+                return (
+                  <div
                     key={booking.id}
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleCancel(booking)}
+                    role="group"
+                    aria-label={`Booking ${booking.confirmationCode}`}
+                    className="relative"
                   >
-                    Cancel {booking.confirmationCode}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </>
+                    <div
+                      className={
+                        booking.status === BOOKING_STATUSES.CONFIRMED
+                          ? 'booking-ticket-surface min-w-0'
+                          : 'min-w-0'
+                      }
+                    >
+                      <BookingsSurface booking={booking} surfaceId={surfaceId} />
+                    </div>
+                    {booking.status === BOOKING_STATUSES.CONFIRMED && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Cancel ${booking.confirmationCode}`}
+                        title="Cancel booking"
+                        className="text-text-secondary bg-background-primary/90 absolute right-3 top-3 z-10 h-8 w-8 rounded-full p-0 shadow-sm backdrop-blur-sm hover:text-red-500"
+                        onClick={() => handleCancel(booking)}
+                      >
+                        <CircleX size={17} />
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </A2UIProvider>
         )}
       </div>
     </div>

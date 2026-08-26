@@ -163,8 +163,8 @@ describe('createSpecializedAgent', () => {
 
     expect(humanInTheLoopMiddlewareMock).toHaveBeenCalledWith({
       interruptOn: {
-        bookFlightTool: { allowedDecisions: ['approve', 'reject'] },
-        bookHotelTool: { allowedDecisions: ['approve', 'reject'] },
+        bookFlightTool: { allowedDecisions: ['approve', 'edit', 'reject'] },
+        bookHotelTool: { allowedDecisions: ['approve', 'edit', 'reject'] },
         cancelBookingTool: { allowedDecisions: ['approve', 'reject'] },
       },
     });
@@ -172,8 +172,8 @@ describe('createSpecializedAgent', () => {
       __type: 'hitl',
       options: {
         interruptOn: {
-          bookFlightTool: { allowedDecisions: ['approve', 'reject'] },
-          bookHotelTool: { allowedDecisions: ['approve', 'reject'] },
+          bookFlightTool: { allowedDecisions: ['approve', 'edit', 'reject'] },
+          bookHotelTool: { allowedDecisions: ['approve', 'edit', 'reject'] },
           cancelBookingTool: { allowedDecisions: ['approve', 'reject'] },
         },
       },

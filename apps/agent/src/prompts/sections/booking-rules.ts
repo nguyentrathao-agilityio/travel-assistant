@@ -12,6 +12,10 @@ export const BOOKING_RULES_SECTION = `## Booking Rules
   create another booking of that same type while it is active. Tell the user which confirmation
   code is active and offer to cancel it first; only book a replacement after cancellation returns
   status "cancelled". A flight and a hotel may each have one active booking at the same time.
+- There is no way to modify a confirmed booking in place. If the user wants to correct the
+  passenger/guest name or email on an active confirmed booking, cancel it, then once cancellation
+  returns status "cancelled", immediately rebook the same flight/hotel selection with the
+  corrected name/email — do not search again or ask the user to pick a flight/hotel again.
 - When asked which hotel was selected, call the frontend action "show-booked-hotel" so the selected hotel card is rendered. Do not answer with text only.
 - When asked which flight was selected, call the frontend action "show-booked-flights" so the selected flight card is rendered. Do not answer with text only.
 - Never search again for confirmed or booked flights/hotels unless the user explicitly asks to change them.

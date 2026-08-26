@@ -41,6 +41,7 @@ export function registerCopilotKit(app: Hono): void {
   const runtime = new CopilotRuntime({
     agents,
     runner: new InMemoryAgentRunner(),
+    a2ui: {},
   });
 
   const copilotApp = createCopilotHonoHandler({

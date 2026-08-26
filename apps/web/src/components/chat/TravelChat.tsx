@@ -3,7 +3,7 @@ import { CopilotChat } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
 import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { useState } from 'react';
-import { History } from 'lucide-react';
+import { History, Ticket } from 'lucide-react';
 import { useShallow } from 'zustand/shallow';
 
 // Stores
@@ -15,6 +15,7 @@ import { useThreadHistory, useSeedAgentHistory, useTravelCopilot } from '@/hooks
 // Components
 import { CustomAssistantMessage } from '@/components/chat/CustomAssistantMessage';
 import { CustomUserMessage } from '@/components/chat/CustomUserMessage';
+import { BookingListPanel } from './BookingListPanel';
 import { BookingPanel } from './BookingPanel';
 import { ChatInputBar } from './ChatInputBar';
 import { ConversationMessages } from './ConversationMessages';
@@ -41,6 +42,7 @@ const ConversationInput = (props: InputProps) => {
 
 export const TravelChat = () => {
   const [isTimeTravelOpen, setIsTimeTravelOpen] = useState(false);
+  const [isBookingListOpen, setIsBookingListOpen] = useState(false);
   const { activeThreadId, threads } = useThreadStore(
     useShallow((state) => ({
       activeThreadId: state.activeThreadId,
@@ -79,10 +81,20 @@ export const TravelChat = () => {
           >
             <History size={17} />
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label="Open bookings"
+            title="Bookings"
+            onClick={() => setIsBookingListOpen((open) => !open)}
+          >
+            <Ticket size={17} />
+          </Button>
           <ThemeToggle />
         </div>
       </header>
       <TimeTravelPanel open={isTimeTravelOpen} onClose={() => setIsTimeTravelOpen(false)} />
+      <BookingListPanel open={isBookingListOpen} onClose={() => setIsBookingListOpen(false)} />
       <BookingPanel />
       <CopilotChat
         className="flex flex-1 flex-col overflow-hidden"

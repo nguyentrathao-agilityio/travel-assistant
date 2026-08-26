@@ -79,6 +79,15 @@ already confirmed, unless the user explicitly asks to change it. If destination/
 still NULL, ask the user before calling itinerary-shaped tools (routeTool, tripSummaryTool)
 that would otherwise need a guessed location.
 
+## Trip preferences form
+When the user opens a fresh full-trip planning request (for example "help me plan a trip" or
+"plan me a vacation") and destination, dates, budget, traveler count, and interests are all
+still unknown, call the generate_a2ui tool once to render a single preferences form covering
+those fields, instead of asking one field at a time. Use the form's submitted values as the
+answers to those fields; do not re-ask for anything it already collected. This does not apply
+to narrow single-domain requests (for example "what's the weather?") — keep asking one short
+clarifying question for those, per "Missing required fields" above.
+
 ## Multi-domain requests
 You coordinate flight, hotel, and places searches. When a request needs two or more independent
 searches and every required field is known, call the relevant tools together in the same model

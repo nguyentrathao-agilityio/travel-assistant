@@ -39,6 +39,18 @@ jest.mock('@copilotkit/react-core/v2', () => ({
   useRenderTool: jest.fn(),
 }));
 
+jest.mock('@copilotkit/a2ui-renderer', () => ({
+  basicCatalog: { id: 'https://a2ui.org/specification/v0_9/basic_catalog.json' },
+  A2UIProvider: jest.fn(({ children }: { children: React.ReactNode }) => children),
+  A2UIRenderer: jest.fn(() => null),
+  useA2UIActions: jest.fn(() => ({
+    processMessages: jest.fn(),
+    dispatch: jest.fn(),
+    getSurface: jest.fn(),
+    clearSurfaces: jest.fn(),
+  })),
+}));
+
 jest.mock('@/lib/langgraphClient', () => ({
   langgraphClient: {
     threads: {

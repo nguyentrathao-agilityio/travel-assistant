@@ -58,6 +58,7 @@ export const Providers = ({ children }: ProvidersProps) => {
           threadId={sessionId}
           headers={headers}
           onError={handleError}
+          a2ui={{}}
         >
           {children}
           <Toaster richColors position="bottom-center" offset="80px" />

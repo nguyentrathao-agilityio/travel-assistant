@@ -20,6 +20,7 @@ interface HotelCardProps {
   onSelect?: (hotel: HotelAvailability) => void;
   onContinueBooking?: (hotel: HotelAvailability) => void;
   isConfirmed?: boolean;
+  isBookingLocked?: boolean;
   initialHotel?: HotelAvailability | null;
 }
 
@@ -32,15 +33,21 @@ const HotelCard = ({
   onSelect,
   onContinueBooking,
   isConfirmed = false,
+  isBookingLocked = false,
   initialHotel = null,
 }: HotelCardProps) => {
   const [selectedId, setSelectedId] = useState<string | null>(initialHotel?.id ?? null);
   const [confirmed, setConfirmed] = useState(isConfirmed);
 
-  const handleSelect = useCallback((id: string) => {
-    setSelectedId(id);
-    setConfirmed(false);
-  }, []);
+  const handleSelect = useCallback(
+    (id: string) => {
+      if (isBookingLocked) return;
+
+      setSelectedId(id);
+      setConfirmed(false);
+    },
+    [isBookingLocked]
+  );
 
   const handleChange = useCallback(() => {
     setSelectedId(null);
@@ -50,12 +57,12 @@ const HotelCard = ({
   const handleConfirm = useCallback(() => {
     const selectedHotel = data?.results.find((h) => h.id === selectedId);
 
-    if (selectedHotel) {
+    if (selectedHotel && !isBookingLocked) {
       onSelect?.(selectedHotel);
       onContinueBooking?.(selectedHotel);
       setConfirmed(true);
     }
-  }, [selectedId, data?.results, onSelect, onContinueBooking]);
+  }, [selectedId, data?.results, isBookingLocked, onSelect, onContinueBooking]);
 
   const badges = useMemo(() => computeHotelBadges(data?.results ?? []), [data?.results]);
   const selectedHotel = data?.results.find((h) => h.id === selectedId);
@@ -109,6 +116,7 @@ const HotelCard = ({
                 hotel={hotel}
                 isSelected={selectedId === hotel.id}
                 onSelect={handleSelect}
+                isBookingLocked={isBookingLocked}
                 badge={badge?.label}
                 badgeVariant={badge?.variant}
               />
@@ -124,6 +132,7 @@ const HotelCard = ({
           price={formatPrice(selectedHotel.totalPrice, selectedHotel.currency)}
           onChangeClick={handleChange}
           onConfirmClick={handleConfirm}
+          confirmDisabled={isBookingLocked}
         />
       )}
     </div>

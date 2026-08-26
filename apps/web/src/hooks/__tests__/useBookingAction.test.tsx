@@ -145,6 +145,24 @@ describe('useBookingAction', () => {
     expect(screen.queryByText('Received an unexpected booking result.')).not.toBeInTheDocument();
   });
 
+  it('does not render an error card when a duplicate booking is blocked', () => {
+    renderHook(() => useBookingAction());
+    const registration = jest
+      .mocked(useRenderTool)
+      .mock.calls.find((call) => call[0].name === TOOL_NAMES.BOOK_FLIGHT)?.[0];
+
+    const { container } = render(
+      registration!.render({
+        status: 'complete',
+        result:
+          'Booking blocked: GZG3M5 is still an active flight booking. Cancel the active booking before creating a replacement.',
+      } as never) as ReactElement
+    );
+
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByText('Received an unexpected booking result.')).not.toBeInTheDocument();
+  });
+
   it('shows an error card when the completed result matches neither the booking nor error schema', () => {
     renderHook(() => useBookingAction());
     const registration = jest

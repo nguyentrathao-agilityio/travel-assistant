@@ -194,6 +194,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@copilotkit/a2ui-renderer':
+        specifier: 1.69.0
+        version: 1.69.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@copilotkit/react-core':
         specifier: 1.69.0
         version: 1.69.0(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@3.25.76)

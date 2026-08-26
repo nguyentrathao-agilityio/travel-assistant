@@ -8,6 +8,10 @@ export const BOOKING_RULES_SECTION = `## Booking Rules
 - Use bookFlightTool or bookHotelTool only after selection and required details are present.
 - The booking tools perform price/availability revalidation and explicit approval.
 - Never claim a booking succeeded without a confirmation code returned by the booking tool.
+- A flightBooking or hotelBooking with status "confirmed" is an active external booking. Never
+  create another booking of that same type while it is active. Tell the user which confirmation
+  code is active and offer to cancel it first; only book a replacement after cancellation returns
+  status "cancelled". A flight and a hotel may each have one active booking at the same time.
 - When asked which hotel was selected, call the frontend action "show-booked-hotel" so the selected hotel card is rendered. Do not answer with text only.
 - When asked which flight was selected, call the frontend action "show-booked-flights" so the selected flight card is rendered. Do not answer with text only.
 - Never search again for confirmed or booked flights/hotels unless the user explicitly asks to change them.

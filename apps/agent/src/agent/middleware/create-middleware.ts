@@ -18,9 +18,9 @@ interface CreateAgentMiddlewareOptions {
 export const createAgentMiddleware = ({ config, model }: CreateAgentMiddlewareOptions) => [
   createCopilotkitMiddleware(),
   createModerationMiddleware(model),
+  createDomainStateMiddleware(config.name),
   ...createApprovalMiddleware(config.approvalTools),
   createObservabilityMiddleware(config.name),
   richUiModelMiddleware,
-  createDomainStateMiddleware(config.name),
   createSystemPromptMiddleware(config.prompt),
 ];

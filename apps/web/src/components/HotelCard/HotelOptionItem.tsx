@@ -18,6 +18,7 @@ interface HotelOptionItemProps {
   badge?: string;
   badgeVariant?: BadgeVariant;
   isInfo?: boolean;
+  isBookingLocked?: boolean;
 }
 
 const HotelOptionItem = ({
@@ -27,6 +28,7 @@ const HotelOptionItem = ({
   badge,
   badgeVariant = 'success',
   isInfo = false,
+  isBookingLocked = false,
 }: HotelOptionItemProps) => {
   const handleSelect = () => onSelect && onSelect(hotel.id);
   const ratingColor = getRatingColor(hotel.rating);
@@ -113,7 +115,7 @@ const HotelOptionItem = ({
                 Selected
               </Typography>
             ) : (
-              <Button size="sm" variant="primary" onClick={handleSelect}>
+              <Button size="sm" variant="primary" onClick={handleSelect} disabled={isBookingLocked}>
                 Select
               </Button>
             ))}

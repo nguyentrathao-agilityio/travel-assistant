@@ -13,6 +13,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@copilotkit/a2ui-renderer": "1.69.0",
     "@copilotkit/react-core": "1.69.0",
     "@copilotkit/react-ui": "1.69.0",
     "@copilotkit/runtime": "1.69.0",

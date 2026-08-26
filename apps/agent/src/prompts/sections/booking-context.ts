@@ -53,6 +53,22 @@ const describeFlights = (flights: GraphStateType['flights']): string => {
   return lines.join('\n');
 };
 
+const describeBooking = (
+  label: 'flightBooking' | 'hotelBooking',
+  booking: GraphStateType['flightBooking']
+): string => {
+  if (!booking) return `${label}: null`;
+
+  return [
+    `${label}:`,
+    `  id: ${booking.id}`,
+    `  confirmationCode: ${booking.confirmationCode}`,
+    `  referenceId: ${booking.referenceId}`,
+    `  status: ${booking.status}`,
+    `  summary: ${booking.summary}`,
+  ].join('\n');
+};
+
 /** Renders the current flight/hotel selection state as a YAML-like block for the system prompt. */
 export const buildBookingContext = (state: GraphStateType): string =>
   [
@@ -66,8 +82,10 @@ export const buildBookingContext = (state: GraphStateType): string =>
     `  travelers: ${yamlValue(state.travelers)}`,
     '',
     `hotelSelectionStatus: ${yamlValue(state.hotelSelectionStatus)}`,
+    describeBooking('hotelBooking', state.hotelBooking),
     describeHotel(state.hotel),
     '',
     `flightSelectionStatus: ${yamlValue(state.flightSelectionStatus)}`,
+    describeBooking('flightBooking', state.flightBooking),
     describeFlights(state.flights),
   ].join('\n');

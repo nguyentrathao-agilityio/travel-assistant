@@ -20,6 +20,7 @@ interface FlightOptionItemProps {
   badge?: string;
   badgeVariant?: BadgeVariant;
   isInfo?: boolean;
+  isBookingLocked?: boolean;
 }
 
 const FlightOptionItem = ({
@@ -29,6 +30,7 @@ const FlightOptionItem = ({
   badge,
   badgeVariant = 'success',
   isInfo = false,
+  isBookingLocked = false,
 }: FlightOptionItemProps) => {
   const handleSelect = () => onSelect?.(flight.id);
   const stopsLabel =
@@ -97,7 +99,7 @@ const FlightOptionItem = ({
               Selected
             </Typography>
           ) : (
-            <Button size="sm" variant="primary" onClick={handleSelect}>
+            <Button size="sm" variant="primary" onClick={handleSelect} disabled={isBookingLocked}>
               Select
             </Button>
           ))}

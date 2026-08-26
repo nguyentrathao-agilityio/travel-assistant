@@ -27,6 +27,7 @@ interface FlightCardProps {
   onSelect?: (flight: Flight, type: FlightTab) => void;
   onContinueBooking?: (departure: Flight, returnFlight?: Flight) => void;
   isConfirmed?: boolean;
+  isBookingLocked?: boolean;
   initialDeparture?: Flight | null;
   initialReturn?: Flight | null;
 }
@@ -42,6 +43,7 @@ const FlightCard = ({
   onSelect,
   onContinueBooking,
   isConfirmed = false,
+  isBookingLocked = false,
   initialDeparture = null,
   initialReturn = null,
 }: FlightCardProps) => {
@@ -52,6 +54,8 @@ const FlightCard = ({
 
   const handleSelectDeparture = useCallback(
     (id: string) => {
+      if (isBookingLocked) return;
+
       const flight = data?.results?.find((f) => f.id === id) ?? null;
 
       setSelectedDeparture(flight);
@@ -60,11 +64,13 @@ const FlightCard = ({
         setActiveTab(FLIGHT_TAB.RETURN);
       }
     },
-    [data?.results, data?.returnResults?.length, selectedReturn]
+    [data?.results, data?.returnResults?.length, isBookingLocked, selectedReturn]
   );
 
   const handleSelectReturn = useCallback(
     (id: string) => {
+      if (isBookingLocked) return;
+
       const flight = data?.returnResults?.find((f) => f.id === id) ?? null;
 
       setSelectedReturn(flight);
@@ -73,7 +79,7 @@ const FlightCard = ({
         setActiveTab(FLIGHT_TAB.DEPARTURE);
       }
     },
-    [data?.returnResults, data?.results?.length, selectedDeparture]
+    [data?.returnResults, data?.results?.length, isBookingLocked, selectedDeparture]
   );
 
   const handleTabChange = useCallback((v: string) => setActiveTab(v as FlightTab), []);
@@ -85,12 +91,12 @@ const FlightCard = ({
   }, []);
 
   const handleConfirm = useCallback(() => {
-    if (!selectedDeparture) return;
+    if (!selectedDeparture || isBookingLocked) return;
     onSelect?.(selectedDeparture, FLIGHT_TAB.DEPARTURE);
     if (selectedReturn) onSelect?.(selectedReturn, FLIGHT_TAB.RETURN);
     onContinueBooking?.(selectedDeparture, selectedReturn ?? undefined);
     setConfirmed(true);
-  }, [selectedDeparture, selectedReturn, onSelect, onContinueBooking]);
+  }, [selectedDeparture, selectedReturn, isBookingLocked, onSelect, onContinueBooking]);
 
   const outboundBadges = useMemo(() => computeBadges(data?.results ?? []), [data?.results]);
   const returnBadges = useMemo(
@@ -187,6 +193,7 @@ const FlightCard = ({
                   flight={flight}
                   isSelected={activeSelectedId === flight.id}
                   onSelect={onSelect ? activeOnSelect : undefined}
+                  isBookingLocked={isBookingLocked}
                   badge={badge?.label}
                   badgeVariant={badge?.variant}
                 />
@@ -203,6 +210,7 @@ const FlightCard = ({
           price={bannerPrice}
           onChangeClick={handleChange}
           onConfirmClick={handleConfirm}
+          confirmDisabled={isBookingLocked}
         />
       )}
     </div>

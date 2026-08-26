@@ -8,6 +8,7 @@ import { renderToolResult } from '@/components/common/ToolResultBoundary';
 
 // Constants
 import { TOOL_NAMES } from '@/constants';
+import { BOOKING_STATUSES } from '@repo/constants';
 
 // Hooks
 import { useTripState } from '@/hooks';
@@ -81,6 +82,7 @@ export const useFlightAction = () => {
                 (flight: Flight) => flight.id === state?.flights?.return?.id
               ) ?? null;
             const isConfirmed = !!confirmedDeparture;
+            const isBookingLocked = state?.flightBooking?.status === BOOKING_STATUSES.CONFIRMED;
 
             return (
               <>
@@ -91,6 +93,7 @@ export const useFlightAction = () => {
                   onSelect={selectFlight}
                   onContinueBooking={handleContinueBooking}
                   isConfirmed={isConfirmed}
+                  isBookingLocked={isBookingLocked}
                   initialDeparture={confirmedDeparture}
                   initialReturn={confirmedReturn}
                 />

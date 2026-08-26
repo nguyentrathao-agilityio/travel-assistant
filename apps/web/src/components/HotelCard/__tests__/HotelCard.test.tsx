@@ -8,14 +8,17 @@ jest.mock('../HotelOptionItem', () => ({
     hotel,
     isSelected,
     onSelect,
+    isBookingLocked,
   }: {
     hotel: HotelAvailability;
     isSelected: boolean;
     onSelect: (id: string) => void;
+    isBookingLocked?: boolean;
   }) => (
     <button
       data-testid="hotel-option"
       data-selected={isSelected}
+      disabled={isBookingLocked}
       onClick={() => onSelect(hotel.id)}
     >
       {hotel.name}
@@ -103,6 +106,18 @@ describe('HotelCard', () => {
   });
 
   describe('selection and confirm banner', () => {
+    it('disables all hotel selections when a hotel booking is active', async () => {
+      const user = userEvent.setup();
+
+      render(<HotelCard data={makeData()} onSelect={jest.fn()} isBookingLocked />);
+
+      const hotelOptions = screen.getAllByTestId('hotel-option');
+      hotelOptions.forEach((option) => expect(option).toBeDisabled());
+
+      await user.click(hotelOptions[0]);
+      expect(screen.queryByRole('button', { name: /confirm/i })).not.toBeInTheDocument();
+    });
+
     it('shows confirm banner after selecting a hotel', async () => {
       const user = userEvent.setup();
 

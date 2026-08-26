@@ -115,9 +115,9 @@ describe('createSpecializedAgent', () => {
     expect(call.middleware).toEqual([
       'copilotkit-middleware',
       'moderation-middleware',
+      'domain-state-middleware:general',
       'observability-middleware:general',
       'rich-ui-middleware',
-      'domain-state-middleware:general',
       { __type: 'dynamicSystemPromptMiddleware', fn: expect.any(Function) },
     ]);
     expect(openAIModerationMiddlewareMock).toHaveBeenCalledWith({
@@ -179,6 +179,24 @@ describe('createSpecializedAgent', () => {
       },
     });
     expect(createAgentMock.mock.calls[0][0].checkpointer).toBe(true);
+  });
+
+  it('runs the active-booking guard before requesting approval for a booking tool', () => {
+    createSpecializedAgent(
+      config({
+        name: 'booking',
+        approvalTools: ['bookFlightTool'],
+      }),
+      'sk-request'
+    );
+
+    const middleware = createAgentMock.mock.calls[0][0].middleware;
+    const guardIndex = middleware.indexOf('domain-state-middleware:booking');
+    const approvalIndex = middleware.findIndex(
+      (entry: { __type?: string }) => entry.__type === 'hitl'
+    );
+
+    expect(guardIndex).toBeLessThan(approvalIndex);
   });
 
   it('skips memory lookup and passes an empty memories list when includeMemoryContext is not set', async () => {

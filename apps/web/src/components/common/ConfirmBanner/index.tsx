@@ -13,6 +13,7 @@ interface ConfirmBannerProps {
   price?: string;
   onChangeClick: () => void;
   onConfirmClick: () => void;
+  confirmDisabled?: boolean;
   className?: string;
 }
 
@@ -22,6 +23,7 @@ const ConfirmBanner = ({
   price,
   onChangeClick,
   onConfirmClick,
+  confirmDisabled = false,
   className,
 }: ConfirmBannerProps) => (
   <div
@@ -52,7 +54,7 @@ const ConfirmBanner = ({
       <Button size="sm" variant="secondary" onClick={onChangeClick}>
         Change
       </Button>
-      <Button size="sm" variant="primary" onClick={onConfirmClick}>
+      <Button size="sm" variant="primary" onClick={onConfirmClick} disabled={confirmDisabled}>
         Confirm
       </Button>
     </div>

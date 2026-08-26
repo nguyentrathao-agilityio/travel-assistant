@@ -27,6 +27,7 @@ import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
 // Utils
 import {
   cancellationRejection,
+  isBookingBlockedResult,
   isIntentionalRejectionResult,
   isToolPending,
   parseToolResult,
@@ -122,7 +123,9 @@ const useBookingResultRenderer = (toolName: string, isAwaitingApproval: boolean)
 
         const parsedResult = parseToolResult(result);
 
-        if (isIntentionalRejectionResult(parsedResult)) return <></>;
+        if (isIntentionalRejectionResult(parsedResult) || isBookingBlockedResult(parsedResult)) {
+          return <></>;
+        }
 
         return renderToolResult({
           status,

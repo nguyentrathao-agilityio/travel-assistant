@@ -65,10 +65,10 @@ describe('createAgentMiddleware', () => {
     expect(createAgentMiddleware({ config, model })).toEqual([
       'copilotkit',
       'moderation',
+      'domain-state',
       'approval',
       'observability',
       'rich-ui',
-      'domain-state',
       'system-prompt',
     ]);
     expect(createModerationMiddlewareMock).toHaveBeenCalledWith(model);

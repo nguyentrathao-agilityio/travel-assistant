@@ -17,6 +17,7 @@ import { useConversationRendererStore } from '@/stores';
 
 // Schemas
 import { HotelAvailability, HotelSearchResultSchema } from '@repo/schemas';
+import { BOOKING_STATUSES } from '@repo/constants';
 
 const hotelSearchParameters = z.object({
   city: z.string().optional(),
@@ -60,6 +61,7 @@ export const useHotelAction = () => {
           render: (data) => {
             const selectedHotel =
               data.results.find((hotel: HotelAvailability) => hotel.id === state.hotel?.id) ?? null;
+            const isBookingLocked = state.hotelBooking?.status === BOOKING_STATUSES.CONFIRMED;
 
             return (
               <>
@@ -72,6 +74,7 @@ export const useHotelAction = () => {
                   onSelect={selectHotel}
                   onContinueBooking={handleContinueBooking}
                   isConfirmed={!!state.hotel}
+                  isBookingLocked={isBookingLocked}
                   initialHotel={selectedHotel}
                 />
               </>

@@ -1,8 +1,9 @@
 import { StateSchema } from '@langchain/langgraph';
 import { createMiddleware } from 'langchain';
+import { ToolMessage } from '@langchain/core/messages';
 
 // Constants
-import { BOOKING_STATUSES, BOOKING_TYPES, SELECTION_STATUSES } from '@repo/constants';
+import { BOOKING_STATUSES, BOOKING_TYPES, SELECTION_STATUSES, TOOL_NAMES } from '@repo/constants';
 import { type DomainAgentNodeName } from '@/constants';
 
 // Utils
@@ -15,12 +16,26 @@ import { isBookingToolName } from '@/utils/tool';
 import { BookingSchema } from '@/schemas/booking';
 
 // State
-import { GraphState, type GraphError, type SearchResults } from '@/state';
+import { GraphState, type GraphError, type GraphStateType, type SearchResults } from '@/state';
 
 const { messages: _messages, copilotkit: _copilotkit, ...domainStateFields } = GraphState.fields;
 const DomainStateSchema = new StateSchema(domainStateFields);
 
 type DomainStateUpdate = typeof DomainStateSchema.Update;
+
+const activeBookingForTool = (
+  toolName: string,
+  state: Pick<GraphStateType, 'flightBooking' | 'hotelBooking'>
+) => {
+  const booking =
+    toolName === TOOL_NAMES.BOOK_FLIGHT
+      ? state.flightBooking
+      : toolName === TOOL_NAMES.BOOK_HOTEL
+        ? state.hotelBooking
+        : undefined;
+
+  return booking?.status === BOOKING_STATUSES.CONFIRMED ? booking : undefined;
+};
 
 /** Persists validated rich-UI artifacts without changing their message/tool contracts. */
 export const buildDomainStateUpdate = (
@@ -77,5 +92,17 @@ export const createDomainStateMiddleware = (taskName: DomainAgentNodeName) =>
   createMiddleware<typeof DomainStateSchema>({
     name: `Persist${taskName}State`,
     stateSchema: DomainStateSchema,
+    wrapToolCall: async (request, handler) => {
+      const activeBooking = activeBookingForTool(request.toolCall.name, request.state);
+
+      if (!activeBooking) return handler(request);
+
+      return new ToolMessage({
+        tool_call_id: request.toolCall.id ?? '',
+        content:
+          `Booking blocked: ${activeBooking.confirmationCode} is still an active ${activeBooking.type} booking. ` +
+          'Cancel the active booking before creating a replacement.',
+      });
+    },
     afterAgent: (state): DomainStateUpdate => buildDomainStateUpdate(taskName, state.messages),
   });

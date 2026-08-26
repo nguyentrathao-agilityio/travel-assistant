@@ -8,14 +8,17 @@ jest.mock('../FlightOptionItem', () => ({
     flight,
     isSelected,
     onSelect,
+    isBookingLocked,
   }: {
     flight: Flight;
     isSelected: boolean;
     onSelect?: (id: string) => void;
+    isBookingLocked?: boolean;
   }) => (
     <button
       data-testid="flight-option"
       data-selected={isSelected}
+      disabled={isBookingLocked}
       onClick={() => onSelect?.(flight.id)}
     >
       {flight.flightNumber}
@@ -90,6 +93,18 @@ describe('FlightCard', () => {
   });
 
   describe('selection and confirm banner', () => {
+    it('disables all flight selections when a flight booking is active', async () => {
+      const user = userEvent.setup();
+
+      render(<FlightCard data={makeData()} onSelect={jest.fn()} isBookingLocked />);
+
+      const flightOptions = screen.getAllByTestId('flight-option');
+      flightOptions.forEach((option) => expect(option).toBeDisabled());
+
+      await user.click(flightOptions[0]);
+      expect(screen.queryByRole('button', { name: /confirm/i })).not.toBeInTheDocument();
+    });
+
     it('shows confirm banner after selecting a departure flight (one-way)', async () => {
       const user = userEvent.setup();
 

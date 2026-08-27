@@ -11,6 +11,7 @@ const {
   createObservabilityMiddlewareMock,
   createDomainStateMiddlewareMock,
   createSystemPromptMiddlewareMock,
+  modelFallbackMiddlewareMock,
 } = vi.hoisted(() => ({
   createCopilotkitMiddlewareMock: vi.fn(() => 'copilotkit'),
   createModerationMiddlewareMock: vi.fn(() => 'moderation'),
@@ -18,6 +19,11 @@ const {
   createObservabilityMiddlewareMock: vi.fn(() => 'observability'),
   createDomainStateMiddlewareMock: vi.fn(() => 'domain-state'),
   createSystemPromptMiddlewareMock: vi.fn(() => 'system-prompt'),
+  modelFallbackMiddlewareMock: vi.fn(() => 'model-fallback'),
+}));
+
+vi.mock('langchain', () => ({
+  modelFallbackMiddleware: modelFallbackMiddlewareMock,
 }));
 
 vi.mock('@copilotkit/sdk-js/langgraph', () => ({
@@ -61,8 +67,9 @@ describe('createAgentMiddleware', () => {
       prompt: { toolsSection: 'Booking tools.' },
     };
     const model = { id: 'model' } as never;
+    const fallbackModel = { id: 'fallback-model' } as never;
 
-    expect(createAgentMiddleware({ config, model })).toEqual([
+    expect(createAgentMiddleware({ config, model, fallbackModel })).toEqual([
       'copilotkit',
       'moderation',
       'domain-state',
@@ -70,9 +77,11 @@ describe('createAgentMiddleware', () => {
       'observability',
       'rich-ui',
       'system-prompt',
+      'model-fallback',
     ]);
     expect(createModerationMiddlewareMock).toHaveBeenCalledWith(model);
     expect(createApprovalMiddlewareMock).toHaveBeenCalledWith(config.approvalTools);
     expect(createSystemPromptMiddlewareMock).toHaveBeenCalledWith(config.prompt);
+    expect(modelFallbackMiddlewareMock).toHaveBeenCalledWith(fallbackModel);
   });
 });

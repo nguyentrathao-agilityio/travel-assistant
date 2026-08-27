@@ -1,4 +1,5 @@
 import { createCopilotkitMiddleware } from '@copilotkit/sdk-js/langgraph';
+import { modelFallbackMiddleware } from 'langchain';
 
 import type { SpecializedAgentConfig } from '@/constants/agent-config';
 import { createApprovalMiddleware } from './approval';
@@ -13,9 +14,14 @@ type AgentModel = Parameters<typeof createModerationMiddleware>[0];
 interface CreateAgentMiddlewareOptions {
   config: SpecializedAgentConfig;
   model: AgentModel;
+  fallbackModel: AgentModel;
 }
 
-export const createAgentMiddleware = ({ config, model }: CreateAgentMiddlewareOptions) => [
+export const createAgentMiddleware = ({
+  config,
+  model,
+  fallbackModel,
+}: CreateAgentMiddlewareOptions) => [
   createCopilotkitMiddleware(),
   createModerationMiddleware(model),
   createDomainStateMiddleware(config.name),
@@ -23,4 +29,5 @@ export const createAgentMiddleware = ({ config, model }: CreateAgentMiddlewareOp
   createObservabilityMiddleware(config.name),
   richUiModelMiddleware,
   createSystemPromptMiddleware(config.prompt),
+  modelFallbackMiddleware(fallbackModel),
 ];

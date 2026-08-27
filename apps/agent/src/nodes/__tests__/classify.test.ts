@@ -1,4 +1,5 @@
 import { HumanMessage } from '@langchain/core/messages';
+import { OutputParserException } from '@langchain/core/output_parsers';
 import { describe, expect, it, vi } from 'vitest';
 
 // Nodes
@@ -335,10 +336,35 @@ describe('classifyNode', () => {
     expect(result.goto).toEqual(['general']);
   });
 
-  it('lets transport failures bubble so the graph retry policy can handle them', async () => {
+  it('retries against the fallback model when the primary model call fails', async () => {
+    invokeMock.mockRejectedValueOnce(new Error('rate limited'));
+    invokeMock.mockResolvedValueOnce(classification('plan'));
+    const callsBefore = createChatModelMock.mock.calls.length;
+
+    const result = await classifyNode(state());
+
+    expect(updateOf(result).intent).toBe('plan');
+    expect(createChatModelMock.mock.calls.length).toBe(callsBefore + 2);
+    expect(createChatModelMock).toHaveBeenLastCalledWith({ apiKey: 'sk-request', model: 'gpt-4o' });
+  });
+
+  it('lets transport failures bubble when the fallback model also fails', async () => {
     invokeMock.mockRejectedValueOnce(new Error('network error'));
+    invokeMock.mockRejectedValueOnce(new Error('network error'));
+    const callsBefore = createChatModelMock.mock.calls.length;
 
     await expect(classifyNode(state())).rejects.toThrow('network error');
+    expect(createChatModelMock.mock.calls.length).toBe(callsBefore + 2);
+  });
+
+  it('does not retry the fallback model for a parsing/schema error', async () => {
+    invokeMock.mockRejectedValueOnce(new OutputParserException('bad output'));
+    const callsBefore = createChatModelMock.mock.calls.length;
+
+    const result = await classifyNode(state());
+
+    expect(updateOf(result).intent).toBe('general');
+    expect(createChatModelMock.mock.calls.length).toBe(callsBefore + 1);
   });
 
   it('sends only recent messages plus prompt and state context', async () => {

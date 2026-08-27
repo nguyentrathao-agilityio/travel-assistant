@@ -16,6 +16,7 @@ const {
   createDomainStateMiddlewareMock,
   openAIModerationMiddlewareMock,
   createObservabilityMiddlewareMock,
+  modelFallbackMiddlewareMock,
 } = vi.hoisted(() => ({
   createAgentMock: vi.fn(),
   dynamicSystemPromptMiddlewareMock: vi.fn((fn: unknown) => ({
@@ -32,6 +33,7 @@ const {
   createObservabilityMiddlewareMock: vi.fn(
     (taskName: string) => `observability-middleware:${taskName}`
   ),
+  modelFallbackMiddlewareMock: vi.fn(() => 'model-fallback-middleware'),
 }));
 
 vi.mock('langchain', () => ({
@@ -39,6 +41,7 @@ vi.mock('langchain', () => ({
   dynamicSystemPromptMiddleware: dynamicSystemPromptMiddlewareMock,
   humanInTheLoopMiddleware: humanInTheLoopMiddlewareMock,
   openAIModerationMiddleware: openAIModerationMiddlewareMock,
+  modelFallbackMiddleware: modelFallbackMiddlewareMock,
 }));
 
 vi.mock('@copilotkit/sdk-js/langgraph', () => ({
@@ -110,6 +113,7 @@ describe('createSpecializedAgent', () => {
 
     expect(call.model).toBe('fake-model');
     expect(createChatModelMock).toHaveBeenCalledWith({ apiKey: 'sk-request' });
+    expect(createChatModelMock).toHaveBeenCalledWith({ apiKey: 'sk-request', model: 'gpt-4o' });
     expect(call.tools).toBe(tools);
     expect(call.stateSchema).toBe('fake-graph-state');
     expect(call.middleware).toEqual([
@@ -119,7 +123,9 @@ describe('createSpecializedAgent', () => {
       'observability-middleware:general',
       'rich-ui-middleware',
       { __type: 'dynamicSystemPromptMiddleware', fn: expect.any(Function) },
+      'model-fallback-middleware',
     ]);
+    expect(modelFallbackMiddlewareMock).toHaveBeenCalledWith('fake-model');
     expect(openAIModerationMiddlewareMock).toHaveBeenCalledWith({
       model: 'fake-model',
       moderationModel: 'omni-moderation-latest',

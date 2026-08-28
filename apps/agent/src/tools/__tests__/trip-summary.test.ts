@@ -43,7 +43,7 @@ describe('tripSummaryTool', () => {
 
     const result = artifactOf(await tripSummaryTool.invoke(toolCall(tripSummaryTool.name, input)));
 
-    expect(getTripSummaryMock).toHaveBeenCalledWith(input);
+    expect(getTripSummaryMock).toHaveBeenCalledWith(input, { signal: undefined });
     expect(result).toEqual(tripSummaryResult);
   });
 

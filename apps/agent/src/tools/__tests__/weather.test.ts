@@ -47,8 +47,17 @@ describe('weatherTool', () => {
 
     const result = artifactOf(await weatherTool.invoke(toolCall(weatherTool.name, input)));
 
-    expect(getWeatherMock).toHaveBeenCalledWith(input);
+    expect(getWeatherMock).toHaveBeenCalledWith(input, { signal: undefined });
     expect(result).toEqual(weatherResult);
+  });
+
+  it('forwards the runtime abort signal to getWeather', async () => {
+    getWeatherMock.mockResolvedValueOnce({});
+    const controller = new AbortController();
+
+    await weatherTool.invoke(toolCall(weatherTool.name, input), { signal: controller.signal });
+
+    expect(getWeatherMock).toHaveBeenCalledWith(input, { signal: controller.signal });
   });
 
   it('returns an error artifact when getWeather throws an Error', async () => {

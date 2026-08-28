@@ -11,20 +11,23 @@ type HotelToolOutput = z.infer<typeof HotelSearchResultSchema>;
 /**
  * Searches available hotels for a destination with flexible filters.
  */
-export const searchHotels = async (inputData: {
-  city: string;
-  checkIn: string;
-  checkOut: string;
-  rooms?: number;
-  adults?: number;
-  children?: number;
-  availableOnly?: boolean;
-  minStars?: number;
-  maxPrice?: number;
-  amenities?: string[];
-  limit?: number;
-  offset?: number;
-}): Promise<HotelToolOutput> => {
+export const searchHotels = async (
+  inputData: {
+    city: string;
+    checkIn: string;
+    checkOut: string;
+    rooms?: number;
+    adults?: number;
+    children?: number;
+    availableOnly?: boolean;
+    minStars?: number;
+    maxPrice?: number;
+    amenities?: string[];
+    limit?: number;
+    offset?: number;
+  },
+  options?: { signal?: AbortSignal }
+): Promise<HotelToolOutput> => {
   const {
     city,
     checkIn,
@@ -61,7 +64,7 @@ export const searchHotels = async (inputData: {
   }
 
   try {
-    const res = await fetch(`${endpoint}?${params.toString()}`);
+    const res = await fetch(`${endpoint}?${params.toString()}`, { signal: options?.signal });
 
     if (!res.ok) {
       throw new Error(`Hotel API failed: ${res.status} ${res.statusText}`);

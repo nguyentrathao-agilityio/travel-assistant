@@ -56,7 +56,10 @@ describe('getDestinationExplorer', () => {
 
     await getDestinationExplorer({ city: 'Da Nang' });
 
-    expect(getLocalTipsMock).toHaveBeenCalledWith({ city: 'Da Nang', country: 'Vietnam' });
+    expect(getLocalTipsMock).toHaveBeenCalledWith(
+      { city: 'Da Nang', country: 'Vietnam' },
+      { signal: undefined }
+    );
   });
 
   it('propagates an error when the weather lookup fails', async () => {

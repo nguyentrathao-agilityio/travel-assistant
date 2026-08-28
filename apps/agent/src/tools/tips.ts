@@ -1,4 +1,5 @@
 import { tool } from '@langchain/core/tools';
+import type { ToolRuntime } from '@langchain/core/tools';
 
 // Constants
 import { TOOL_NAMES } from '@repo/constants';
@@ -14,8 +15,12 @@ import { getLocalTips } from '@/services/tips';
 import { executeReadTool } from '@/utils/tool';
 
 export const tipsTool = tool(
-  async (input) =>
-    executeReadTool(getLocalTips(input), TOOL_PROVIDERS.TRAVEL_API, TOOL_ERROR_MESSAGES.LOCAL_TIPS),
+  async (input, runtime: ToolRuntime) =>
+    executeReadTool(
+      getLocalTips(input, { signal: runtime.signal }),
+      TOOL_PROVIDERS.TRAVEL_API,
+      TOOL_ERROR_MESSAGES.LOCAL_TIPS
+    ),
   {
     name: TOOL_NAMES.LOCAL_TIPS,
     description: `Get informal, practical local tips for a city or country — covering transport, money, street safety, culture, food, connectivity, health, etiquette, best time to visit, and language.

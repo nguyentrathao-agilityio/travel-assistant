@@ -10,6 +10,12 @@ describe('classifyToolError', () => {
   it.each([
     [new ToolTimeoutError(25), 'provider failed', TOOL_ERROR_CODES.TIMEOUT, true],
     [
+      new DOMException('The operation was aborted.', 'AbortError'),
+      'The operation was aborted.',
+      TOOL_ERROR_CODES.CANCELLED,
+      true,
+    ],
+    [
       new Error('401 Unauthorized'),
       '401 Unauthorized',
       TOOL_ERROR_CODES.AUTHENTICATION_FAILED,
@@ -53,6 +59,18 @@ describe('classifyToolError', () => {
 });
 
 describe('mapToolError', () => {
+  it('maps an AbortError to CANCELLED', () => {
+    const error = new DOMException('The operation was aborted.', 'AbortError');
+
+    expect(mapToolError(error, 'test-provider', 'fallback')).toEqual({
+      error: 'The operation was aborted.',
+      message: 'The operation was aborted.',
+      code: TOOL_ERROR_CODES.CANCELLED,
+      retryable: true,
+      provider: 'test-provider',
+    });
+  });
+
   it.each([
     ['request timed out', TOOL_ERROR_CODES.TIMEOUT, true],
     ['429 rate limit exceeded', TOOL_ERROR_CODES.RATE_LIMITED, true],

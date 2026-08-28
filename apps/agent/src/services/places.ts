@@ -39,7 +39,8 @@ const mapPlace = (place: ApiPlace): PlaceResultItem => ({
  * Searches places of interest in a city with optional category and price filters.
  */
 export const getPlaces = async (
-  input: z.infer<typeof PlacesInputSchema>
+  input: z.infer<typeof PlacesInputSchema>,
+  options?: { signal?: AbortSignal }
 ): Promise<PlacesSearchResult> => {
   const params = Object.fromEntries(
     Object.entries({
@@ -55,7 +56,7 @@ export const getPlaces = async (
   );
 
   const url = `${API_URL}${ENDPOINTS.PLACES_SEARCH}?${new URLSearchParams(params)}`;
-  const data = await fetchAndValidate(url, ApiPlacesSearchResponseSchema);
+  const data = await fetchAndValidate(url, ApiPlacesSearchResponseSchema, options?.signal);
 
   return {
     total: data.total,

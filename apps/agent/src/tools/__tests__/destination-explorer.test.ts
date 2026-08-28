@@ -45,7 +45,7 @@ describe('destinationExplorerTool', () => {
       await destinationExplorerTool.invoke(toolCall(destinationExplorerTool.name, input))
     );
 
-    expect(getDestinationExplorerMock).toHaveBeenCalledWith(input);
+    expect(getDestinationExplorerMock).toHaveBeenCalledWith(input, { signal: undefined });
     expect(result).toEqual(destinationExplorerResult);
   });
 

@@ -1,4 +1,5 @@
 import { tool } from '@langchain/core/tools';
+import type { ToolRuntime } from '@langchain/core/tools';
 
 // Constants
 import { TOOL_NAMES } from '@repo/constants';
@@ -14,8 +15,12 @@ import { getPlaces } from '@/services/places';
 import { executeReadTool } from '@/utils/tool';
 
 export const placesTool = tool(
-  async (input) =>
-    executeReadTool(getPlaces(input), TOOL_PROVIDERS.TRAVEL_API, TOOL_ERROR_MESSAGES.PLACES),
+  async (input, runtime: ToolRuntime) =>
+    executeReadTool(
+      getPlaces(input, { signal: runtime.signal }),
+      TOOL_PROVIDERS.TRAVEL_API,
+      TOOL_ERROR_MESSAGES.PLACES
+    ),
   {
     name: TOOL_NAMES.PLACES,
     description: `Search places of interest in a city — attractions, restaurants, cafes, activities, nightlife, and shopping.

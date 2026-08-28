@@ -27,11 +27,15 @@ const mapRouteMode = (mode: string): TransportMode =>
   (ROUTE_MODE_MAP[mode] as TransportMode) ?? 'taxi';
 
 /** Fetches a single leg between two places, returning null on any failure. */
-const fetchRouteLeg = async (origin: string, destination: string): Promise<RouteLegApi | null> => {
+const fetchRouteLeg = async (
+  origin: string,
+  destination: string,
+  signal?: AbortSignal
+): Promise<RouteLegApi | null> => {
   const url = `${API_URL}${ENDPOINTS.PLACES_ROUTE}?${new URLSearchParams({ origin, destination })}`;
 
   try {
-    return await fetchAndValidate(url, RouteLegApiSchema);
+    return await fetchAndValidate(url, RouteLegApiSchema, signal);
   } catch {
     return null;
   }
@@ -40,12 +44,16 @@ const fetchRouteLeg = async (origin: string, destination: string): Promise<Route
 /**
  * Builds a landmark tour itinerary for a city with ordered stops and travel times.
  */
-export const getRoute = async (inputData: {
-  city: string;
-  maxStops?: number;
-}): Promise<RouteResult> => {
+export const getRoute = async (
+  inputData: {
+    city: string;
+    maxStops?: number;
+  },
+  options?: { signal?: AbortSignal }
+): Promise<RouteResult> => {
   // Fetch the highest-rated landmarks within the requested stop limit.
   const { city, maxStops = DEFAULT_STOPS } = inputData;
+  const signal = options?.signal;
 
   const placesUrl = `${API_URL}${ENDPOINTS.PLACES_SEARCH}?${new URLSearchParams({
     city,
@@ -54,7 +62,7 @@ export const getRoute = async (inputData: {
     limit: String(Math.min(maxStops, MAX_STOPS_LIMIT)),
   })}`;
 
-  const placesData = await fetchAndValidate(placesUrl, PlacesResultSchema);
+  const placesData = await fetchAndValidate(placesUrl, PlacesResultSchema, signal);
   const places = placesData.results.slice(0, maxStops);
 
   if (places.length === 0) throw new Error(`No places found for ${city}`);
@@ -62,7 +70,7 @@ export const getRoute = async (inputData: {
   // Resolve travel legs concurrently while preserving landmark order.
   const legPromises = places
     .slice(0, -1)
-    .map((place, i) => fetchRouteLeg(place.id, places[i + 1].id));
+    .map((place, i) => fetchRouteLeg(place.id, places[i + 1].id, signal));
   const routeResults = await Promise.all(legPromises);
 
   // Normalize place and route responses into the itinerary contract.

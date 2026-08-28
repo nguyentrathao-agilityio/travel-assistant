@@ -62,7 +62,8 @@ type TripSummaryToolOutput = z.infer<typeof TripSummaryResultSchema>;
 
 /** Builds a trip summary from parallel flight, hotel, route, and cost lookups. */
 export const getTripSummary = async (
-  input: z.infer<typeof TripSummaryInputSchema>
+  input: z.infer<typeof TripSummaryInputSchema>,
+  options?: { signal?: AbortSignal }
 ): Promise<TripSummaryToolOutput> => {
   const {
     destination,
@@ -73,6 +74,7 @@ export const getTripSummary = async (
     skipFlights = false,
     skipHotel = false,
   } = input;
+  const { signal } = options ?? {};
 
   const today = todayIso();
   const resolvedStart = startDate ?? today;
@@ -85,24 +87,30 @@ export const getTripSummary = async (
 
   const [flightResult, hotelResult, routeResult] = await Promise.allSettled([
     !skipFlights && flightOrigin
-      ? searchFlights({
-          origin: flightOrigin,
-          destination,
-          departure_date: resolvedStart,
-          adults: travelers,
-          sort: FLIGHT_SORT.PRICE_ASC,
-        })
+      ? searchFlights(
+          {
+            origin: flightOrigin,
+            destination,
+            departure_date: resolvedStart,
+            adults: travelers,
+            sort: FLIGHT_SORT.PRICE_ASC,
+          },
+          { signal }
+        )
       : Promise.resolve(null),
     !skipHotel
-      ? searchHotels({
-          city: destination,
-          checkIn: resolvedStart,
-          checkOut: resolvedEnd,
-          adults: travelers,
-          availableOnly: true,
-        })
+      ? searchHotels(
+          {
+            city: destination,
+            checkIn: resolvedStart,
+            checkOut: resolvedEnd,
+            adults: travelers,
+            availableOnly: true,
+          },
+          { signal }
+        )
       : Promise.resolve(null),
-    getRoute({ city: destination, maxStops: Math.min(days + 2, MAX_STOPS_LIMIT) }),
+    getRoute({ city: destination, maxStops: Math.min(days + 2, MAX_STOPS_LIMIT) }, { signal }),
   ]);
 
   const flights = flightResult.status === 'fulfilled' ? flightResult.value : null;

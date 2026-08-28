@@ -50,10 +50,13 @@ export const generateTravelTip = async (
 /**
  * Fetches current weather and forecast for a city, including an AI-generated travel tip.
  */
-export const getWeather = async (inputData: {
-  city: string;
-  days?: number;
-}): Promise<WeatherToolOutput> => {
+export const getWeather = async (
+  inputData: {
+    city: string;
+    days?: number;
+  },
+  options?: { signal?: AbortSignal }
+): Promise<WeatherToolOutput> => {
   const { city, days = 5 } = inputData;
 
   const endpoint = `${API_URL}${ENDPOINTS.WEATHER}`;
@@ -63,7 +66,7 @@ export const getWeather = async (inputData: {
   });
 
   try {
-    const res = await fetch(`${endpoint}?${params.toString()}`);
+    const res = await fetch(`${endpoint}?${params.toString()}`, { signal: options?.signal });
 
     if (!res.ok) {
       throw new Error(`Weather API failed: ${res.status} ${res.statusText}`);

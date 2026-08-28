@@ -54,13 +54,15 @@ const buildSearchParams = (input: z.infer<typeof FlightInputSchema>): URLSearchP
  * Throws on missing config, non-OK response, or invalid response shape.
  */
 export const searchFlights = async (
-  input: z.infer<typeof FlightInputSchema>
+  input: z.infer<typeof FlightInputSchema>,
+  options?: { signal?: AbortSignal }
 ): Promise<z.infer<typeof FlightSearchResultSchema>> => {
   if (!API_URL) throw new Error(ERROR_MESSAGES.NO_API_URL);
 
   try {
     const res = await fetch(
-      `${API_URL}${ENDPOINTS.FLIGHTS}/search?${buildSearchParams(input).toString()}`
+      `${API_URL}${ENDPOINTS.FLIGHTS}/search?${buildSearchParams(input).toString()}`,
+      { signal: options?.signal }
     );
 
     if (!res.ok) throw new Error(flightSearchFailure(res.status, res.statusText));

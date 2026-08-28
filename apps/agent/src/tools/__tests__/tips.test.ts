@@ -46,7 +46,7 @@ describe('tipsTool', () => {
 
     const result = artifactOf(await tipsTool.invoke(toolCall(tipsTool.name, input)));
 
-    expect(getLocalTipsMock).toHaveBeenCalledWith(input);
+    expect(getLocalTipsMock).toHaveBeenCalledWith(input, { signal: undefined });
     expect(result).toEqual(tipsResult);
   });
 

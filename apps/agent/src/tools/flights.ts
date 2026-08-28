@@ -1,4 +1,5 @@
 import { tool } from '@langchain/core/tools';
+import type { ToolRuntime } from '@langchain/core/tools';
 
 // Constants
 import { TOOL_NAMES } from '@repo/constants';
@@ -15,9 +16,11 @@ import { parseToolInput } from '@/utils';
 import { executeReadTool } from '@/utils/tool';
 
 export const flightsTool = tool(
-  async (input) =>
+  async (input, runtime: ToolRuntime) =>
     executeReadTool(
-      parseToolInput(FlightInputSchema, input).then(searchFlights),
+      parseToolInput(FlightInputSchema, input).then((parsed) =>
+        searchFlights(parsed, { signal: runtime.signal })
+      ),
       TOOL_PROVIDERS.TRAVEL_API,
       TOOL_ERROR_MESSAGES.FLIGHTS
     ),

@@ -41,7 +41,7 @@ describe('routeTool', () => {
 
     const result = artifactOf(await routeTool.invoke(toolCall(routeTool.name, input)));
 
-    expect(getRouteMock).toHaveBeenCalledWith(input);
+    expect(getRouteMock).toHaveBeenCalledWith(input, { signal: undefined });
     expect(result).toEqual(routeResult);
   });
 

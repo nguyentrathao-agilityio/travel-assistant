@@ -94,7 +94,10 @@ export const generateTipsFromLLM = async (
  * Fetches local travel tips for a city or country.
  * Falls back to LLM-generated tips when the API returns none.
  */
-export const getLocalTips = async (input: TipsInput): Promise<TipsResult> => {
+export const getLocalTips = async (
+  input: TipsInput,
+  options?: { signal?: AbortSignal }
+): Promise<TipsResult> => {
   const params = Object.fromEntries(
     Object.entries({
       city: input.city,
@@ -105,7 +108,7 @@ export const getLocalTips = async (input: TipsInput): Promise<TipsResult> => {
   );
 
   const url = `${API_URL}${ENDPOINTS.TIPS}?${new URLSearchParams(params)}`;
-  const data = await fetchAndValidate(url, ApiTipsResponseSchema);
+  const data = await fetchAndValidate(url, ApiTipsResponseSchema, options?.signal);
   const apiTips = data.tips.map(mapTip);
   const tips = apiTips?.length
     ? apiTips

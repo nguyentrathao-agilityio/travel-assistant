@@ -4,12 +4,13 @@ import type { z } from 'zod';
 export const fetchAndValidate = async <T>(
   url: string,
   // Input pinned to `any` so schemas with `.default()` infer T from their output type, not input.
-  schema: z.ZodType<T, z.ZodTypeDef, any>
+  schema: z.ZodType<T, z.ZodTypeDef, any>,
+  signal?: AbortSignal
 ): Promise<T> => {
   let res: Response;
 
   try {
-    res = await fetch(url);
+    res = await fetch(url, { signal });
   } catch (cause) {
     throw new Error(`Network request failed: ${url}`, { cause });
   }

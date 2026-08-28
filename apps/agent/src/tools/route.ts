@@ -1,4 +1,5 @@
 import { tool } from '@langchain/core/tools';
+import type { ToolRuntime } from '@langchain/core/tools';
 
 // Constants
 import { TOOL_NAMES } from '@repo/constants';
@@ -14,8 +15,12 @@ import { getRoute } from '@/services/route';
 import { executeReadTool } from '@/utils/tool';
 
 export const routeTool = tool(
-  async (input) =>
-    executeReadTool(getRoute(input), TOOL_PROVIDERS.TRAVEL_API, TOOL_ERROR_MESSAGES.ROUTE),
+  async (input, runtime: ToolRuntime) =>
+    executeReadTool(
+      getRoute(input, { signal: runtime.signal }),
+      TOOL_PROVIDERS.TRAVEL_API,
+      TOOL_ERROR_MESSAGES.ROUTE
+    ),
   {
     name: TOOL_NAMES.ROUTE,
     description: `Build a landmark tour itinerary for a city — ordered stops with travel times and transport modes.

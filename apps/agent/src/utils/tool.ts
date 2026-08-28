@@ -48,6 +48,10 @@ export const withToolTimeout = async <T>(
 };
 
 export const classifyToolError = (error: unknown, message: string): ToolErrorClassification => {
+  if (error instanceof Error && error.name === 'AbortError') {
+    return { code: TOOL_ERROR_CODES.CANCELLED, retryable: true };
+  }
+
   const normalizedMessage = message.toLowerCase();
   const isTimeout =
     error instanceof ToolTimeoutError ||

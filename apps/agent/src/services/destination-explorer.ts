@@ -15,23 +15,28 @@ type DestinationExplorerToolOutput = z.infer<typeof DestinationExplorerResultSch
 
 /** Builds a destination overview, using weather to resolve the country for local tips. */
 export const getDestinationExplorer = async (
-  input: z.infer<typeof DestinationExplorerInputSchema>
+  input: z.infer<typeof DestinationExplorerInputSchema>,
+  options?: { signal?: AbortSignal }
 ): Promise<DestinationExplorerToolOutput> => {
   const { city, country, forecastDays } = input;
+  const { signal } = options ?? {};
 
-  const weather = await getWeather({ city, days: forecastDays });
+  const weather = await getWeather({ city, days: forecastDays }, { signal });
 
   // Use the weather result as the country fallback.
   const resolvedCountry = country ?? weather.location.country;
 
-  const tips = await getLocalTips({ city, country: resolvedCountry });
+  const tips = await getLocalTips({ city, country: resolvedCountry }, { signal });
 
-  const places = await getPlaces({
-    city,
-    recommended: true,
-    sort: PLACES_SORT.RATING_DESC,
-    limit: 3,
-  });
+  const places = await getPlaces(
+    {
+      city,
+      recommended: true,
+      sort: PLACES_SORT.RATING_DESC,
+      limit: 3,
+    },
+    { signal }
+  );
 
   const parsed = DestinationExplorerResultSchema.safeParse({ city, places, tips, weather });
 

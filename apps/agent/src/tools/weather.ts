@@ -1,4 +1,5 @@
 import { tool } from '@langchain/core/tools';
+import type { ToolRuntime } from '@langchain/core/tools';
 
 // Constants
 import { TOOL_NAMES } from '@repo/constants';
@@ -14,8 +15,12 @@ import { getWeather } from '@/services/weather';
 import { executeReadTool } from '@/utils/tool';
 
 export const weatherTool = tool(
-  async ({ city, days }) =>
-    executeReadTool(getWeather({ city, days }), 'weather-api', TOOL_ERROR_MESSAGES.WEATHER),
+  async ({ city, days }, runtime: ToolRuntime) =>
+    executeReadTool(
+      getWeather({ city, days }, { signal: runtime.signal }),
+      'weather-api',
+      TOOL_ERROR_MESSAGES.WEATHER
+    ),
   {
     name: TOOL_NAMES.WEATHER,
     description: `Get current weather conditions and forecast for a destination.

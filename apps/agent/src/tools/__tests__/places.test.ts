@@ -46,7 +46,7 @@ describe('placesTool', () => {
 
     const result = artifactOf(await placesTool.invoke(toolCall(placesTool.name, input)));
 
-    expect(getPlacesMock).toHaveBeenCalledWith(input);
+    expect(getPlacesMock).toHaveBeenCalledWith(input, { signal: undefined });
     expect(result).toEqual(placesResult);
   });
 

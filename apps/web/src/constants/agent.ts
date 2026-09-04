@@ -1,6 +1,7 @@
+export { AGENT_NAME } from '@repo/constants';
+
 export const RUNTIME_URL = import.meta.env.VITE_RUNTIME_URL;
 export const COPILOTKIT_PUBLIC_LICENSE_KEY = import.meta.env.VITE_COPILOTKIT_PUBLIC_LICENSE_KEY;
-export const AGENT_NAME = 'travelAgent';
 
 export const FETCH_THREADS_DELAY_MS = 1000;
 export const FETCH_TITLE_DELAY_MS = 4000;

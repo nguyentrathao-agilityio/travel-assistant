@@ -1,0 +1,44 @@
+{
+  "name": "mobile",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "@copilotkit/react-native": "1.69.0",
+    "@langchain/langgraph-sdk": "^1.9.27",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@repo/constants": "workspace:*",
+    "expo": "~57.0.19",
+    "expo-constants": "~57.0.17",
+    "expo-linear-gradient": "~57.0.1",
+    "expo-linking": "~57.0.9",
+    "expo-router": "~57.0.18",
+    "expo-status-bar": "~57.0.1",
+    "micromark": "^4.0.2",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.2",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@types/node": "^22.20.1",
+    "@types/react": "~19.2.2",
+    "eslint": "^8.57.1",
+    "tsx": "^4.23.12",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "dev": "expo start",
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "build": "expo export --platform android",
+    "build:ios": "expo export --platform ios",
+    "lint": "expo lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/*.test.ts"
+  },
+  "private": true
+}

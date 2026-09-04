@@ -2,9 +2,10 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { toast } from 'sonner';
 
+import { GRAPH_ID, AGENT_NAME } from '@repo/constants';
 import { langgraphClient } from '@/lib/langgraphClient';
 import { useTripStateStore } from '@/stores/tripStateStore';
-import { SESSION_STORAGE_KEY, AGENT_NAME, THREAD_PAGE_SIZE } from '@/constants';
+import { SESSION_STORAGE_KEY, THREAD_PAGE_SIZE } from '@/constants';
 import { ERROR_MESSAGES } from '@/constants/messages';
 import { langgraphMessageText } from '@/utils';
 
@@ -15,8 +16,6 @@ export interface ThreadItem {
   title: string | null;
   createdAt: string;
 }
-
-const GRAPH_ID = 'travel';
 
 const firstHumanMessageText = (messages: Message[] | undefined): string | null => {
   for (const message of messages ?? []) {

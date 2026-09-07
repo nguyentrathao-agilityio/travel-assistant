@@ -10,6 +10,7 @@ export const shellColors = {
   textOnDark: '#f5f3ff',
   textOnDarkMuted: '#c9b8e8',
   textOnDarkFaint: '#8a7aad',
+  danger: '#f87171',
 };
 
 export const shellRadii = {

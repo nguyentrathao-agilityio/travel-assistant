@@ -4,4 +4,5 @@ export * from './IconBadge';
 export * from './GridActionCard';
 export * from './PrimaryActionCard';
 export * from './DashboardScreen';
-export * from './ChatPlaceholderScreen';
+export * from './MessageBubble';
+export * from './ChatScreen';

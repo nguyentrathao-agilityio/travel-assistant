@@ -7,18 +7,21 @@
     "@langchain/langgraph-sdk": "^1.9.27",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@repo/constants": "workspace:*",
+    "@repo/types": "workspace:*",
     "expo": "~57.0.19",
     "expo-constants": "~57.0.17",
     "expo-linear-gradient": "~57.0.1",
     "expo-linking": "~57.0.9",
     "expo-router": "~57.0.18",
+    "expo-secure-store": "~57.0.3",
     "expo-status-bar": "~57.0.1",
     "micromark": "^4.0.2",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.2",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -31,8 +34,8 @@
   "scripts": {
     "dev": "expo start",
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "build": "expo export --platform android",
     "build:ios": "expo export --platform ios",

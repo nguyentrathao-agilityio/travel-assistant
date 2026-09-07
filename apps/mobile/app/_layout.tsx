@@ -1,10 +1,15 @@
 import { CopilotKitProvider } from '@copilotkit/react-native/headless';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { View } from 'react-native';
 
-import { RuntimeSetup } from '../src/components';
+import { ApiKeyScreen, RuntimeSetup } from '../src/components';
 import { resolveRuntimeUrl } from '../src/config';
+import { OPENAI_API_KEY_HEADER } from '../src/constants';
+import { useApiKey } from '../src/hooks';
+import { isApiKeyError } from '../src/services/openaiApiKey';
 import { shellColors } from '../src/theme';
+import { clientTimezone, todayClientIso } from '../src/utils/date';
 
 type RuntimeConfiguration =
   | { status: 'ready'; runtimeUrl: string }
@@ -26,6 +31,8 @@ const runtimeConfiguration: RuntimeConfiguration = (() => {
 })();
 
 export default function RootLayout() {
+  const apiKey = useApiKey();
+
   if (runtimeConfiguration.status === 'error') {
     return (
       <>
@@ -35,12 +42,35 @@ export default function RootLayout() {
     );
   }
 
+  if (apiKey.status === 'loading') {
+    return <View style={{ flex: 1, backgroundColor: shellColors.backgroundGradientEnd }} />;
+  }
+
+  if (apiKey.status === 'missing') {
+    return (
+      <>
+        <ApiKeyScreen
+          error={apiKey.error}
+          isVerifying={apiKey.isVerifying}
+          onSubmit={apiKey.verifyAndSave}
+        />
+        <StatusBar style="light" />
+      </>
+    );
+  }
+
   return (
     <CopilotKitProvider
       headers={() => ({
-        'x-client-date': new Date().toISOString().slice(0, 10),
-        'x-client-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+        [OPENAI_API_KEY_HEADER]: apiKey.apiKey ?? '',
+        'x-client-date': todayClientIso(),
+        'x-client-timezone': clientTimezone(),
       })}
+      onError={(event) => {
+        if (isApiKeyError(event.error.message)) {
+          apiKey.clear();
+        }
+      }}
       runtimeUrl={runtimeConfiguration.runtimeUrl}
     >
       <Stack screenOptions={{ headerShown: false }}>

@@ -6,3 +6,4 @@ export * from './PrimaryActionCard';
 export * from './DashboardScreen';
 export * from './MessageBubble';
 export * from './ChatScreen';
+export * from './ApiKeyScreen';

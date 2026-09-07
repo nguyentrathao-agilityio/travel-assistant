@@ -149,6 +149,9 @@ importers:
       '@repo/constants':
         specifier: workspace:*
         version: link:../../packages/constants
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       expo:
         specifier: ~57.0.19
         version: 57.0.19(@babel/core@7.29.0)(@expo/dom-webview@57.0.1)(@expo/metro-runtime@57.0.15)(expo-router@57.0.18)(react-dom@19.2.6(react@19.2.3))(react-native-worklets@0.12.1(@babel/core@7.29.0)(@react-native/metro-config@0.87.1(@babel/core@7.29.0))(react-native@0.86.3(@babel/core@7.29.0)(@react-native/metro-config@0.87.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.0)(@react-native/metro-config@0.87.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
@@ -164,6 +167,9 @@ importers:
       expo-router:
         specifier: ~57.0.18
         version: 57.0.18(7e0e0f63c92ff830f345bf31998b0727)
+      expo-secure-store:
+        specifier: ~57.0.3
+        version: 57.0.3(expo@57.0.19)
       expo-status-bar:
         specifier: ~57.0.1
         version: 57.0.1(expo@57.0.19)(react-native@0.86.3(@babel/core@7.29.0)(@react-native/metro-config@0.87.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
@@ -185,6 +191,9 @@ importers:
       zod:
         specifier: ^3.25.76
         version: 3.25.76
+      zustand:
+        specifier: ^5.0.13
+        version: 5.0.13(@types/react@19.2.14)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -8869,6 +8878,14 @@ packages:
         optional: true
       react-server-dom-webpack:
         optional: true
+
+  expo-secure-store@57.0.3:
+    resolution:
+      {
+        integrity: sha512-w7XkSQeUiYXPoKXo1jSrQqql7pyCSyIzOp2k0apsZZBE+RkoLTQIMjcbqc181y6KgupfNnYxkaKe+4MEg94+SA==,
+      }
+    peerDependencies:
+      expo: '*'
 
   expo-server@57.0.3:
     resolution:
@@ -20384,7 +20401,7 @@ snapshots:
 
   '@react-native/babel-plugin-codegen@0.87.1(@babel/core@7.29.0)':
     dependencies:
-      '@babel/traverse': 7.29.0
+      '@babel/traverse': 7.29.8
       '@react-native/codegen': 0.87.1(@babel/core@7.29.0)
     transitivePeerDependencies:
       - '@babel/core'
@@ -20441,7 +20458,7 @@ snapshots:
   '@react-native/codegen@0.87.1(@babel/core@7.29.0)':
     dependencies:
       '@babel/core': 7.29.0
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.8
       hermes-parser: 0.36.1
       invariant: 2.2.4
       nullthrows: 1.1.1
@@ -23612,6 +23629,10 @@ snapshots:
       - react-native-worklets
       - supports-color
 
+  expo-secure-store@57.0.3(expo@57.0.19):
+    dependencies:
+      expo: 57.0.19(@babel/core@7.29.0)(@expo/dom-webview@57.0.1)(@expo/metro-runtime@57.0.15)(expo-router@57.0.18)(react-dom@19.2.6(react@19.2.3))(react-native-worklets@0.12.1(@babel/core@7.29.0)(@react-native/metro-config@0.87.1(@babel/core@7.29.0))(react-native@0.86.3(@babel/core@7.29.0)(@react-native/metro-config@0.87.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.0)(@react-native/metro-config@0.87.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
+
   expo-server@57.0.3: {}
 
   expo-status-bar@57.0.1(expo@57.0.19)(react-native@0.86.3(@babel/core@7.29.0)(@react-native/metro-config@0.87.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3):
@@ -26076,8 +26097,8 @@ snapshots:
 
   metro-source-map@0.87.0:
     dependencies:
-      '@babel/traverse': 7.29.0
-      '@babel/types': 7.29.0
+      '@babel/traverse': 7.29.8
+      '@babel/types': 7.29.8
       flow-enums-runtime: 0.0.6
       invariant: 2.2.4
       metro-symbolicate: 0.87.0
@@ -26146,9 +26167,9 @@ snapshots:
   metro-transform-plugins@0.87.0:
     dependencies:
       '@babel/core': 7.29.0
-      '@babel/generator': 7.29.1
-      '@babel/template': 7.28.6
-      '@babel/traverse': 7.29.0
+      '@babel/generator': 7.29.8
+      '@babel/template': 7.29.7
+      '@babel/traverse': 7.29.8
       flow-enums-runtime: 0.0.6
       nullthrows: 1.1.1
     transitivePeerDependencies:
@@ -26197,9 +26218,9 @@ snapshots:
   metro-transform-worker@0.87.0:
     dependencies:
       '@babel/core': 7.29.0
-      '@babel/generator': 7.29.1
-      '@babel/parser': 7.29.3
-      '@babel/types': 7.29.0
+      '@babel/generator': 7.29.8
+      '@babel/parser': 7.29.8
+      '@babel/types': 7.29.8
       flow-enums-runtime: 0.0.6
       metro: 0.87.0
       metro-babel-transformer: 0.87.0
@@ -26306,13 +26327,13 @@ snapshots:
 
   metro@0.87.0:
     dependencies:
-      '@babel/code-frame': 7.29.0
+      '@babel/code-frame': 7.29.7
       '@babel/core': 7.29.0
-      '@babel/generator': 7.29.1
-      '@babel/parser': 7.29.3
-      '@babel/template': 7.28.6
-      '@babel/traverse': 7.29.0
-      '@babel/types': 7.29.0
+      '@babel/generator': 7.29.8
+      '@babel/parser': 7.29.8
+      '@babel/template': 7.29.7
+      '@babel/traverse': 7.29.8
+      '@babel/types': 7.29.8
       accepts: 2.0.0
       ci-info: 2.0.0
       connect: 3.7.0
@@ -27643,7 +27664,7 @@ snapshots:
   react-native-worklets@0.12.1(@babel/core@7.29.0)(@react-native/metro-config@0.87.1(@babel/core@7.29.0))(react-native@0.86.3(@babel/core@7.29.0)(@react-native/metro-config@0.87.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3):
     dependencies:
       '@babel/core': 7.29.0
-      '@babel/generator': 7.29.1
+      '@babel/generator': 7.29.8
       '@babel/plugin-transform-arrow-functions': 7.29.7(@babel/core@7.29.0)
       '@babel/plugin-transform-class-properties': 7.29.7(@babel/core@7.29.0)
       '@babel/plugin-transform-classes': 7.29.7(@babel/core@7.29.0)
@@ -27653,8 +27674,8 @@ snapshots:
       '@babel/plugin-transform-template-literals': 7.29.7(@babel/core@7.29.0)
       '@babel/plugin-transform-unicode-regex': 7.29.7(@babel/core@7.29.0)
       '@babel/preset-typescript': 7.29.7(@babel/core@7.29.0)
-      '@babel/traverse': 7.29.0
-      '@babel/types': 7.29.0
+      '@babel/traverse': 7.29.8
+      '@babel/types': 7.29.8
       '@react-native/metro-config': 0.87.1(@babel/core@7.29.0)
       convert-source-map: 2.0.0
       react: 19.2.3
@@ -29125,6 +29146,11 @@ snapshots:
     dependencies:
       react: 19.2.6
 
+  use-sync-external-store@1.6.0(react@19.2.3):
+    dependencies:
+      react: 19.2.3
+    optional: true
+
   use-sync-external-store@1.6.0(react@19.2.6):
     dependencies:
       react: 19.2.6
@@ -29501,6 +29527,12 @@ snapshots:
   zod@3.25.75: {}
 
   zod@3.25.76: {}
+
+  zustand@5.0.13(@types/react@19.2.14)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3)):
+    optionalDependencies:
+      '@types/react': 19.2.14
+      react: 19.2.3
+      use-sync-external-store: 1.6.0(react@19.2.3)
 
   zustand@5.0.13(@types/react@19.2.14)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6)):
     optionalDependencies:

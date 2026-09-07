@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { GRID_ROW_HEIGHT, RECENT_ICONS } from '../constants';
 import { shellColors, shellRadii, shellSpacing } from '../theme';
 import { GridActionCard } from './GridActionCard';
 import { IconBadge } from './IconBadge';
@@ -11,27 +12,23 @@ import type { ThreadItem } from '../services';
 interface DashboardScreenProps {
   recentThreadsStatus: 'loading' | 'ready' | 'error';
   recentThreads: ThreadItem[];
+  continueThreadId: string | null;
   onStartNewTrip: () => void;
   onOpenThread: (threadId: string) => void;
   onAskByVoice: () => void;
 }
-
-const GRID_ROW_HEIGHT = 232;
-
-// Cycled per row so the recent-trips list doesn't repeat the same glyph for every item —
-// mirrors the reference's mix of distinct icons per row.
-const RECENT_ICONS = ['🧭', '💡', '🎧', '❤️', '🖼️'];
 
 const threadLabel = (thread: ThreadItem): string => thread.title ?? 'Untitled trip';
 
 export const DashboardScreen = ({
   recentThreadsStatus,
   recentThreads,
+  continueThreadId,
   onStartNewTrip,
   onOpenThread,
   onAskByVoice,
 }: DashboardScreenProps) => {
-  const mostRecentThread = recentThreads[0];
+  const continueTripThreadId = continueThreadId ?? recentThreads[0]?.id;
 
   return (
     <LinearGradient
@@ -62,11 +59,11 @@ export const DashboardScreen = ({
               onPress={onAskByVoice}
               style={styles.gridRightItem}
             />
-            {mostRecentThread && (
+            {continueTripThreadId && (
               <GridActionCard
                 icon="🔄"
                 label="Continue last trip"
-                onPress={() => onOpenThread(mostRecentThread.id)}
+                onPress={() => onOpenThread(continueTripThreadId)}
                 style={styles.gridRightItem}
               />
             )}

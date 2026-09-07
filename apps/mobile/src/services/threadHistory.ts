@@ -1,5 +1,6 @@
 import { AGENT_NAME, GRAPH_ID } from '@repo/constants';
 
+import { generateThreadId } from './generateThreadId';
 import { getLanggraphClient } from './langgraphClient';
 
 import type { Message, Thread } from '@langchain/langgraph-sdk';
@@ -69,3 +70,25 @@ export const createRemoteThread = (threadId: string): Promise<Thread> =>
     ifExists: 'do_nothing',
     metadata: { resourceId: AGENT_NAME },
   });
+
+// The thread's last checkpointed graph state — used to hydrate `agent.state` on cold start.
+export const fetchThreadValues = async (
+  threadId: string
+): Promise<Record<string, unknown> | undefined> => {
+  const thread = await getLanggraphClient().threads.get(threadId);
+
+  return thread.values as Record<string, unknown> | undefined;
+};
+
+export const deleteRemoteThread = (threadId: string): Promise<void> =>
+  getLanggraphClient().threads.delete(threadId);
+
+// Deletes `threadId` and creates a fresh one in its place — mirrors web's `resetThread`.
+export const resetRemoteThread = async (threadId: string): Promise<string> => {
+  const newThreadId = generateThreadId();
+
+  await getLanggraphClient().threads.delete(threadId);
+  await createRemoteThread(newThreadId);
+
+  return newThreadId;
+};

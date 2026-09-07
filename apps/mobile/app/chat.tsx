@@ -2,7 +2,13 @@ import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef } from 'react';
 
 import { ChatScreen } from '../src/components';
-import { useActiveThreadId, useChatAgent, useTripState, useWeatherAction } from '../src/hooks';
+import {
+  useActiveThreadId,
+  useChatAgent,
+  usePlacesAction,
+  useTripState,
+  useWeatherAction,
+} from '../src/hooks';
 import { createRemoteThread, generateThreadId } from '../src/services';
 
 export default function ChatRoute() {
@@ -21,6 +27,7 @@ export default function ChatRoute() {
 
   useTripState(threadId);
   useWeatherAction();
+  usePlacesAction();
   const { messages, isReady, isRunning, error, sendMessage, stop } = useChatAgent(threadId);
 
   return (

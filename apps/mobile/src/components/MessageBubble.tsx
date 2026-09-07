@@ -29,7 +29,11 @@ const ToolCallRow = ({
   const toolMessage = findToolMessage(allMessages, toolCall.id);
   const rendered = renderToolCall({ toolCall, toolMessage });
 
-  return rendered ?? <ToolCallFallback name={toolCall.function.name} />;
+  return (
+    <View style={styles.toolCallContent}>
+      {rendered ?? <ToolCallFallback name={toolCall.function.name} />}
+    </View>
+  );
 };
 
 export const MessageBubble = ({ message, allMessages }: MessageBubbleProps) => {
@@ -69,6 +73,11 @@ const styles = StyleSheet.create({
     maxWidth: '85%',
     paddingHorizontal: shellSpacing.md,
     paddingVertical: shellSpacing.sm,
+  },
+  toolCallContent: {
+    marginTop: shellSpacing.xs,
+    maxWidth: '85%',
+    width: '100%',
   },
   bubbleUser: {
     backgroundColor: shellColors.accentGradientStart,

@@ -1,0 +1,1 @@
+export const WEATHER_FORECAST_MAX_DAYS = 16;

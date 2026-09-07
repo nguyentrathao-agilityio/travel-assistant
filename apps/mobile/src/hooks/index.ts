@@ -4,3 +4,5 @@ export * from './useChatAgent';
 export * from './useApiKey';
 export * from './useActiveThreadId';
 export * from './useTripState';
+export * from './useRenderToolResult';
+export * from './useWeatherAction';

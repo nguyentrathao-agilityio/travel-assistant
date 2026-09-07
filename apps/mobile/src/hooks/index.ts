@@ -7,3 +7,4 @@ export * from './useTripState';
 export * from './useRenderToolResult';
 export * from './useWeatherAction';
 export * from './usePlacesAction';
+export * from './useRouteAction';

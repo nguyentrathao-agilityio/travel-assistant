@@ -6,6 +6,7 @@ import {
   useActiveThreadId,
   useChatAgent,
   usePlacesAction,
+  useRouteAction,
   useTripState,
   useWeatherAction,
 } from '../src/hooks';
@@ -28,6 +29,7 @@ export default function ChatRoute() {
   useTripState(threadId);
   useWeatherAction();
   usePlacesAction();
+  useRouteAction();
   const { messages, isReady, isRunning, error, sendMessage, stop } = useChatAgent(threadId);
 
   return (

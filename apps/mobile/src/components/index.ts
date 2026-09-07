@@ -12,3 +12,5 @@ export * from './WeatherDayCard';
 export * from './WeatherCard';
 export * from './PlaceItem';
 export * from './PlacesCard';
+export * from './StopCard';
+export * from './RouteCard';

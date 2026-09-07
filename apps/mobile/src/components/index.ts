@@ -10,3 +10,5 @@ export * from './ChatScreen';
 export * from './ApiKeyScreen';
 export * from './WeatherDayCard';
 export * from './WeatherCard';
+export * from './PlaceItem';
+export * from './PlacesCard';

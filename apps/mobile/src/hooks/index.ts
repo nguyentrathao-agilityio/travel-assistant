@@ -6,3 +6,4 @@ export * from './useActiveThreadId';
 export * from './useTripState';
 export * from './useRenderToolResult';
 export * from './useWeatherAction';
+export * from './usePlacesAction';

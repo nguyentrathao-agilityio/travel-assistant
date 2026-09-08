@@ -18,3 +18,7 @@ export * from './LocalTipsCard';
 export * from './TripTipsSection';
 export * from './TripPlacesSection';
 export * from './DestinationExplorerCard';
+export * from './FlightOptionItem';
+export * from './FlightCard';
+export * from './HotelOptionItem';
+export * from './HotelCard';

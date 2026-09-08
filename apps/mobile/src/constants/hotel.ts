@@ -1,0 +1,1 @@
+export const HOTEL_AMENITIES_MAX_DISPLAY = 5;

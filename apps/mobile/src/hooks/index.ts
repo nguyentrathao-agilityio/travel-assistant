@@ -10,3 +10,5 @@ export * from './usePlacesAction';
 export * from './useRouteAction';
 export * from './useLocalTipsAction';
 export * from './useDestinationExplorerAction';
+export * from './useFlightAction';
+export * from './useHotelAction';

@@ -6,22 +6,22 @@ import type { ToolCallStatus } from '@copilotkit/react-native/headless';
 import type { ReactElement } from 'react';
 import type { z } from 'zod';
 
-interface RenderToolCallProps {
+interface RenderToolCallProps<Args> {
   status: ToolCallStatus;
   result: string | undefined;
+  args: Partial<Args>;
 }
 
 interface UseRenderToolResultOptions<Output> {
   name: string;
   schema: z.ZodType<Output>;
-  render: (props: RenderToolCallProps) => ReactElement;
+  render: (props: RenderToolCallProps<Output>) => ReactElement;
 }
 
-export const useRenderToolResult = <Output>({
-  name,
-  schema,
-  render,
-}: UseRenderToolResultOptions<Output>): void => {
+export const useRenderToolResult = <Output>(
+  { name, schema, render }: UseRenderToolResultOptions<Output>,
+  deps: ReadonlyArray<unknown> = []
+): void => {
   const { copilotkit } = useCopilotKit();
 
   useEffect(() => {
@@ -29,8 +29,10 @@ export const useRenderToolResult = <Output>({
       defineToolCallRenderer({
         name,
         args: schema,
-        render: (props) => render({ status: props.status, result: props.result }),
+        render: (props) => render({ status: props.status, result: props.result, args: props.args }),
       })
     );
-  }, [name, copilotkit, schema]);
+    // `render` is intentionally excluded — it's captured at registration and only
+    // refreshed when `deps` changes, matching @copilotkit/react-core's own useRenderTool.
+  }, [name, copilotkit, schema, JSON.stringify(deps)]);
 };

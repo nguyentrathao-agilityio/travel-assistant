@@ -4,14 +4,17 @@ import { useEffect, useRef } from 'react';
 import { ChatScreen } from '../src/components';
 import {
   useActiveThreadId,
+  useBookingAction,
   useChatAgent,
   useDestinationExplorerAction,
   useFlightAction,
   useHotelAction,
+  useInterruptElement,
   useLocalTipsAction,
   usePlacesAction,
   useRouteAction,
   useTripState,
+  useTripSummaryAction,
   useWeatherAction,
 } from '../src/hooks';
 import { createRemoteThread, generateThreadId } from '../src/services';
@@ -32,6 +35,7 @@ export default function ChatRoute() {
 
   const { state: tripState, selectFlight, selectHotel } = useTripState(threadId);
   const { messages, isReady, isRunning, error, sendMessage, stop } = useChatAgent(threadId);
+  const interruptElement = useInterruptElement();
 
   useWeatherAction();
   usePlacesAction();
@@ -40,10 +44,13 @@ export default function ChatRoute() {
   useDestinationExplorerAction();
   useFlightAction({ selectFlight, sendMessage, state: tripState });
   useHotelAction({ selectHotel, sendMessage, state: tripState });
+  useBookingAction();
+  useTripSummaryAction({ state: tripState });
 
   return (
     <ChatScreen
       error={error}
+      interruptElement={interruptElement}
       isReady={isReady}
       isRunning={isRunning}
       messages={messages}

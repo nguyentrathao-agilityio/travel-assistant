@@ -18,12 +18,14 @@ import { MessageBubble } from './MessageBubble';
 
 import type { RenderableMessage } from '../utils/chatMessages';
 import type { Message } from '@copilotkit/react-native/headless';
+import type { ReactElement } from 'react';
 
 interface ChatScreenProps {
   messages: Message[];
   isReady: boolean;
   isRunning: boolean;
   error: string | null;
+  interruptElement: ReactElement | null;
   onSend: (text: string) => void;
   onStop: () => void;
 }
@@ -33,6 +35,7 @@ export const ChatScreen = ({
   isReady,
   isRunning,
   error,
+  interruptElement,
   onSend,
   onStop,
 }: ChatScreenProps) => {
@@ -40,15 +43,16 @@ export const ChatScreen = ({
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlatList<RenderableMessage>>(null);
   const rows = renderableMessages(messages);
+  const isAwaitingApproval = interruptElement !== null;
 
   useEffect(() => {
     if (rows.length > 0) {
       listRef.current?.scrollToEnd({ animated: true });
     }
-  }, [rows.length, messages]);
+  }, [rows.length, messages, interruptElement]);
 
   const handleSend = () => {
-    if (!draft.trim() || isRunning) return;
+    if (!draft.trim() || isRunning || isAwaitingApproval) return;
     onSend(draft);
     setDraft('');
   };
@@ -78,6 +82,9 @@ export const ChatScreen = ({
             contentContainerStyle={styles.listContent}
             data={rows}
             keyExtractor={(item) => item.id}
+            ListFooterComponent={
+              interruptElement ? <View style={styles.interruptWrap}>{interruptElement}</View> : null
+            }
             ref={listRef}
             renderItem={({ item }) => <MessageBubble allMessages={messages} message={item} />}
           />
@@ -105,9 +112,12 @@ export const ChatScreen = ({
           ) : (
             <Pressable
               accessibilityRole="button"
-              disabled={!draft.trim()}
+              disabled={!draft.trim() || isAwaitingApproval}
               onPress={handleSend}
-              style={[styles.sendButton, !draft.trim() && styles.sendButtonDisabled]}
+              style={[
+                styles.sendButton,
+                (!draft.trim() || isAwaitingApproval) && styles.sendButtonDisabled,
+              ]}
             >
               <Text style={styles.sendIcon}>➤</Text>
             </Pressable>
@@ -127,6 +137,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: shellSpacing.xl,
+  },
+  interruptWrap: {
+    alignItems: 'flex-start',
+    marginTop: shellSpacing.md,
   },
   centeredStateText: {
     color: shellColors.textOnDarkMuted,

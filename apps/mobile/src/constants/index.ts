@@ -4,3 +4,5 @@ export * from './weather';
 export * from './places';
 export * from './route';
 export * from './tips';
+export * from './flight';
+export * from './hotel';

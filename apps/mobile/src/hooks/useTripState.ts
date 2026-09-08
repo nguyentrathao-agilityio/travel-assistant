@@ -1,5 +1,5 @@
 import { useAgent } from '@copilotkit/react-native/headless';
-import { AGENT_NAME } from '@repo/constants';
+import { AGENT_NAME, SELECTION_STATUSES } from '@repo/constants';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { fetchThreadValues } from '../services/threadHistory';
@@ -7,12 +7,14 @@ import { useTripStateStore } from '../stores/tripStateStore';
 import { clientTimezone, todayClientIso } from '../utils/date';
 import { extractTripState } from '../utils/tripState';
 
-import type { TripState } from '@repo/types';
+import type { Flight, HotelAvailability, SelectedFlight, TripState } from '@repo/types';
 
 const EMPTY_TRIP_STATE: TripState = {};
 
 interface UseTripStateResult {
   state: TripState;
+  selectFlight: (flight: Flight, type: keyof SelectedFlight) => void;
+  selectHotel: (hotel: HotelAvailability) => void;
   clearTrip: () => void;
 }
 
@@ -83,11 +85,48 @@ export const useTripState = (threadId: string): UseTripStateResult => {
     [state, savedState]
   );
 
+  const selectFlight = useCallback(
+    (flight: Flight, type: keyof SelectedFlight) => {
+      const current = useTripStateStore.getState().tripStates[threadId] ?? {};
+      const nextFlights = { ...(current.flights ?? {}), [type]: flight };
+
+      setTripState(threadId, {
+        ...current,
+        flights: nextFlights,
+        flightSelectionStatus: SELECTION_STATUSES.CONFIRMED,
+      });
+      agent.setState({
+        ...((agent.state as TripState) ?? {}),
+        flights: nextFlights,
+        flightSelectionStatus: SELECTION_STATUSES.CONFIRMED,
+      });
+    },
+    [agent, threadId, setTripState]
+  );
+
+  const selectHotel = useCallback(
+    (hotel: HotelAvailability) => {
+      const current = useTripStateStore.getState().tripStates[threadId] ?? {};
+
+      setTripState(threadId, {
+        ...current,
+        hotel,
+        hotelSelectionStatus: SELECTION_STATUSES.CONFIRMED,
+      });
+      agent.setState({
+        ...((agent.state as TripState) ?? {}),
+        hotel,
+        hotelSelectionStatus: SELECTION_STATUSES.CONFIRMED,
+      });
+    },
+    [agent, threadId, setTripState]
+  );
+
   const clearTrip = useCallback(() => {
     hasRestoredRef.current = false;
     agent.setState({});
     clearTripState(threadId);
   }, [agent, threadId, clearTripState]);
 
-  return { state: effectiveState, clearTrip };
+  return { state: effectiveState, selectFlight, selectHotel, clearTrip };
 };

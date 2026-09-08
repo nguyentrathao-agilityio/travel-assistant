@@ -5,8 +5,10 @@ import { ChatScreen } from '../src/components';
 import {
   useActiveThreadId,
   useChatAgent,
-  useLocalTipsAction,
   useDestinationExplorerAction,
+  useFlightAction,
+  useHotelAction,
+  useLocalTipsAction,
   usePlacesAction,
   useRouteAction,
   useTripState,
@@ -28,13 +30,16 @@ export default function ChatRoute() {
     markActive(threadId);
   }, [threadId, markActive]);
 
-  useTripState(threadId);
+  const { state: tripState, selectFlight, selectHotel } = useTripState(threadId);
+  const { messages, isReady, isRunning, error, sendMessage, stop } = useChatAgent(threadId);
+
   useWeatherAction();
   usePlacesAction();
   useRouteAction();
   useLocalTipsAction();
   useDestinationExplorerAction();
-  const { messages, isReady, isRunning, error, sendMessage, stop } = useChatAgent(threadId);
+  useFlightAction({ selectFlight, sendMessage, state: tripState });
+  useHotelAction({ selectHotel, sendMessage, state: tripState });
 
   return (
     <ChatScreen

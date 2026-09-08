@@ -1,11 +1,17 @@
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
+// Types
+import type { LandmarkStop, TravelLeg } from '@repo/types';
+
+// Constants
 import { TRAVEL_TRANSPORT_LABELS } from '../constants';
+
+// Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';
 import { formatDuration, toMapsUrl } from '../utils/route';
-import { Card, Typography } from './common';
 
-import type { LandmarkStop, TravelLeg } from '@repo/types';
+// Components
+import { Card, Typography } from './common';
 
 interface StopCardProps {
   stop: LandmarkStop;

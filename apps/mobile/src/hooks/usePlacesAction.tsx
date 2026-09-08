@@ -1,9 +1,16 @@
-import { TOOL_NAMES } from '@repo/constants';
-import { PlacesSearchResultSchema } from '@repo/schemas';
 import { z } from 'zod';
 
+// Constants
+import { TOOL_NAMES } from '@repo/constants';
+
+// Schemas
+import { PlacesSearchResultSchema } from '@repo/schemas';
+
+// Components
 import { renderToolResult } from '../components/common/renderToolResult';
 import { PlacesCard } from '../components/PlacesCard';
+
+// Hooks
 import { useRenderToolResult } from './useRenderToolResult';
 
 const placesParameters = z.object({

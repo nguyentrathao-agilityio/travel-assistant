@@ -1,14 +1,20 @@
 import { Image, StyleSheet, View } from 'react-native';
 
+// Types
+import type { Place } from '@repo/types';
+
+// Constants
 import {
   PLACE_CATEGORY_LABELS,
   PLACE_PRICE_LABEL_FALLBACK,
   PLACE_PRICE_LABELS,
 } from '../constants';
-import { shellColors, shellRadii, shellSpacing } from '../theme';
-import { Typography } from './common';
 
-import type { Place } from '@repo/types';
+// Utils
+import { shellColors, shellRadii, shellSpacing } from '../theme';
+
+// Components
+import { Typography } from './common';
 
 interface PlaceItemProps {
   place: Place;

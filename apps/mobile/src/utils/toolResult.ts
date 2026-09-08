@@ -1,5 +1,6 @@
 import { ToolCallStatus } from '@copilotkit/react-native/headless';
 
+// Types
 import type { z } from 'zod';
 
 export const isToolPending = (status: string): boolean =>

@@ -1,11 +1,15 @@
 import { StyleSheet, View } from 'react-native';
 
+// Types
+import type { LandmarkTourRoute } from '@repo/types';
+
+// Utils
 import { shellSpacing } from '../theme';
 import { formatDuration, toTravelLeg } from '../utils/route';
+
+// Components
 import { Card, Typography } from './common';
 import { StopCard } from './StopCard';
-
-import type { LandmarkTourRoute } from '@repo/types';
 
 interface RouteCardProps {
   data: LandmarkTourRoute;

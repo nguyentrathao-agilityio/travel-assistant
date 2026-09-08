@@ -1,9 +1,16 @@
-import { TOOL_NAMES } from '@repo/constants';
-import { RouteResultSchema } from '@repo/schemas';
 import { z } from 'zod';
 
+// Constants
+import { TOOL_NAMES } from '@repo/constants';
+
+// Schemas
+import { RouteResultSchema } from '@repo/schemas';
+
+// Components
 import { renderToolResult } from '../components/common/renderToolResult';
 import { RouteCard } from '../components/RouteCard';
+
+// Hooks
 import { useRenderToolResult } from './useRenderToolResult';
 
 const routeParameters = z.object({

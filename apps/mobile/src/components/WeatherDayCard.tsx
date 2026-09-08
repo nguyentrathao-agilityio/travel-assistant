@@ -1,10 +1,14 @@
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 
+// Types
+import type { DailyForecast } from '@repo/types';
+
+// Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';
 import { formatDayDate, toFahrenheit } from '../utils/weather';
-import { Typography } from './common';
 
-import type { DailyForecast } from '@repo/types';
+// Components
+import { Typography } from './common';
 
 interface WeatherDayCardProps {
   day: DailyForecast;

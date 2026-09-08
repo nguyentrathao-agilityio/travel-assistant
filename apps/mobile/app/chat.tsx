@@ -5,6 +5,7 @@ import { ChatScreen } from '../src/components';
 import {
   useActiveThreadId,
   useChatAgent,
+  useLocalTipsAction,
   usePlacesAction,
   useRouteAction,
   useTripState,
@@ -30,6 +31,7 @@ export default function ChatRoute() {
   useWeatherAction();
   usePlacesAction();
   useRouteAction();
+  useLocalTipsAction();
   const { messages, isReady, isRunning, error, sendMessage, stop } = useChatAgent(threadId);
 
   return (

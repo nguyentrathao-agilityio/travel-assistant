@@ -14,3 +14,4 @@ export * from './PlaceItem';
 export * from './PlacesCard';
 export * from './StopCard';
 export * from './RouteCard';
+export * from './LocalTipsCard';

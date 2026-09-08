@@ -22,3 +22,33 @@ export const formatPrice = (price: number, currency: string): string =>
     currency,
     maximumFractionDigits: 0,
   }).format(price);
+
+export const formatAmount = (amount: number, currency = 'USD'): string => {
+  if (amount === 0) return '—';
+
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+export const formatDisplayDate = (iso?: string): string => {
+  if (!iso) return '';
+
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+};
+
+/** Adds `dayOffset` days to an ISO date string. Returns null if no date provided. */
+export const offsetDate = (startDate: string | undefined, dayOffset: number): string | null => {
+  if (!startDate) return null;
+  const date = new Date(startDate);
+
+  date.setDate(date.getDate() + dayOffset);
+
+  return date.toISOString().split('T')[0];
+};

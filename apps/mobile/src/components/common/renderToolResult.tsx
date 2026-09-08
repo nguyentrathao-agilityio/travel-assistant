@@ -1,12 +1,16 @@
+// Types
 import type { ReactElement } from 'react';
 import type { z } from 'zod';
 
+// Utils
 import {
   getToolError,
   getToolErrorMessage,
   isToolPending,
   safeParseToolResult,
 } from '../../utils/toolResult';
+
+// Components
 import { EmptyState } from './EmptyState';
 import { ErrorState } from './ErrorState';
 import { LoadingState } from './LoadingState';

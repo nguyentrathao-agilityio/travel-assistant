@@ -1,12 +1,18 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
 
+// Types
+import type { WeatherResult } from '@repo/types';
+
+// Constants
 import { WEATHER_FORECAST_MAX_DAYS } from '../constants';
+
+// Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';
 import { formatDayDate, getBestDayIndex } from '../utils/weather';
+
+// Components
 import { Card, Typography } from './common';
 import { WeatherDayCard } from './WeatherDayCard';
-
-import type { WeatherResult } from '@repo/types';
 
 interface WeatherCardProps {
   data: WeatherResult;

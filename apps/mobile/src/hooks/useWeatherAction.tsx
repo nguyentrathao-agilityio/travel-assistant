@@ -1,9 +1,16 @@
-import { TOOL_NAMES } from '@repo/constants';
-import { WeatherResultSchema } from '@repo/schemas';
 import { z } from 'zod';
 
+// Constants
+import { TOOL_NAMES } from '@repo/constants';
+
+// Schemas
+import { WeatherResultSchema } from '@repo/schemas';
+
+// Components
 import { renderToolResult } from '../components/common/renderToolResult';
 import { WeatherCard } from '../components/WeatherCard';
+
+// Hooks
 import { useRenderToolResult } from './useRenderToolResult';
 
 const weatherParameters = z.object({

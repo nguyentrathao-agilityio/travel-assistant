@@ -6,6 +6,7 @@ import {
   useActiveThreadId,
   useChatAgent,
   useLocalTipsAction,
+  useDestinationExplorerAction,
   usePlacesAction,
   useRouteAction,
   useTripState,
@@ -32,6 +33,7 @@ export default function ChatRoute() {
   usePlacesAction();
   useRouteAction();
   useLocalTipsAction();
+  useDestinationExplorerAction();
   const { messages, isReady, isRunning, error, sendMessage, stop } = useChatAgent(threadId);
 
   return (

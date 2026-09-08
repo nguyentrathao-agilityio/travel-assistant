@@ -9,3 +9,4 @@ export * from './useWeatherAction';
 export * from './usePlacesAction';
 export * from './useRouteAction';
 export * from './useLocalTipsAction';
+export * from './useDestinationExplorerAction';

@@ -8,3 +8,4 @@ export * from './useRenderToolResult';
 export * from './useWeatherAction';
 export * from './usePlacesAction';
 export * from './useRouteAction';
+export * from './useLocalTipsAction';

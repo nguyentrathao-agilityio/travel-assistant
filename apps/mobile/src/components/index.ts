@@ -5,6 +5,7 @@ export * from './IconBadge';
 export * from './GridActionCard';
 export * from './PrimaryActionCard';
 export * from './DashboardScreen';
+export * from './AllTripsScreen';
 export * from './MessageBubble';
 export * from './ChatScreen';
 export * from './ApiKeyScreen';

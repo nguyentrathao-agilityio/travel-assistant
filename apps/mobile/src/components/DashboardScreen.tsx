@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GRID_ROW_HEIGHT, RECENT_ICONS } from '../constants';
 import { shellColors, shellRadii, shellSpacing } from '../theme';
@@ -16,6 +17,7 @@ interface DashboardScreenProps {
   onStartNewTrip: () => void;
   onOpenThread: (threadId: string) => void;
   onAskByVoice: () => void;
+  onSeeAll: () => void;
 }
 
 const threadLabel = (thread: ThreadItem): string => thread.title ?? 'Untitled trip';
@@ -27,15 +29,19 @@ export const DashboardScreen = ({
   onStartNewTrip,
   onOpenThread,
   onAskByVoice,
+  onSeeAll,
 }: DashboardScreenProps) => {
   const continueTripThreadId = continueThreadId ?? recentThreads[0]?.id;
+  const insets = useSafeAreaInsets();
 
   return (
     <LinearGradient
       colors={[shellColors.backgroundGradientStart, shellColors.backgroundGradientEnd]}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + shellSpacing.lg }]}
+      >
         <View style={styles.greetingRow}>
           <View>
             <Text style={styles.greetingHello}>Hello,</Text>
@@ -72,7 +78,9 @@ export const DashboardScreen = ({
 
         <View style={styles.recentHeader}>
           <Text style={styles.recentTitle}>Recent trips</Text>
-          <Text style={styles.seeAll}>See all</Text>
+          <Pressable accessibilityRole="button" onPress={onSeeAll}>
+            <Text style={styles.seeAll}>See all</Text>
+          </Pressable>
         </View>
 
         {recentThreadsStatus === 'loading' && (
@@ -110,7 +118,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: shellSpacing.lg,
-    paddingTop: shellSpacing.xl * 2,
   },
   greetingRow: {
     flexDirection: 'row',

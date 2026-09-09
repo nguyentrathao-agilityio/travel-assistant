@@ -1,7 +1,7 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef } from 'react';
 
-import { ChatScreen } from '../src/components';
+import { ChatScreen } from '../components';
 import {
   useActiveThreadId,
   useBookingAction,
@@ -13,11 +13,13 @@ import {
   useLocalTipsAction,
   usePlacesAction,
   useRouteAction,
+  useSeedAgentHistory,
+  useThreadHistory,
   useTripState,
   useTripSummaryAction,
   useWeatherAction,
-} from '../src/hooks';
-import { createRemoteThread, generateThreadId } from '../src/services';
+} from '../hooks';
+import { createRemoteThread, generateThreadId } from '../services';
 
 export default function ChatRoute() {
   const params = useLocalSearchParams<{ threadId?: string; focusVoice?: string }>();
@@ -36,6 +38,9 @@ export default function ChatRoute() {
   const { state: tripState, selectFlight, selectHotel } = useTripState(threadId);
   const { messages, isReady, isRunning, error, sendMessage, stop } = useChatAgent(threadId);
   const interruptElement = useInterruptElement();
+  const { messages: persistedMessages, isLoading: isHistoryLoading } = useThreadHistory(threadId);
+
+  useSeedAgentHistory(threadId, persistedMessages, isHistoryLoading);
 
   useWeatherAction();
   usePlacesAction();
@@ -51,7 +56,7 @@ export default function ChatRoute() {
     <ChatScreen
       error={error}
       interruptElement={interruptElement}
-      isReady={isReady}
+      isReady={isReady && !isHistoryLoading}
       isRunning={isRunning}
       messages={messages}
       onSend={sendMessage}

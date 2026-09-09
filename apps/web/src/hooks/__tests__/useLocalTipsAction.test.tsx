@@ -13,7 +13,7 @@ jest.mock('@/components', () => ({
   SetLastTool: () => null,
 }));
 jest.mock('@/utils', () => ({
-  ...jest.requireActual('@/utils/toolResult'),
+  ...jest.requireActual('@repo/utils'),
   isToolPending: (s: string) => s === 'inProgress',
 }));
 

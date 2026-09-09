@@ -5,7 +5,7 @@ import type { TripCostEstimate } from '@repo/schemas';
 
 // Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';
-import { formatAmount } from '../utils/format';
+import { formatAmount } from '@repo/utils';
 
 // Components
 import { Typography } from './common';

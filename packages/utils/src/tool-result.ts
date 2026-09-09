@@ -2,13 +2,12 @@ import type { z } from 'zod';
 
 export const parseToolResult = (result: unknown): unknown => {
   if (typeof result !== 'string') return result;
+  const trimmed = result.trim();
 
-  const trimmedResult = result.trim();
-
-  if (!trimmedResult.startsWith('{') && !trimmedResult.startsWith('[')) return result;
+  if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return result;
 
   try {
-    return JSON.parse(trimmedResult);
+    return JSON.parse(trimmed);
   } catch {
     return result;
   }

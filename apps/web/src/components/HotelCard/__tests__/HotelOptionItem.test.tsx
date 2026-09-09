@@ -6,7 +6,6 @@ import type { HotelAvailability } from '@repo/types';
 
 jest.mock('@/utils', () => ({
   cn: (...args: string[]) => args.filter(Boolean).join(' '),
-  formatPrice: (price: number, currency: string) => `${currency} ${price}`,
   getAmenityIcon: () => null,
   getAmenityColor: () => 'amenity-color',
   getRatingColor: () => ({ bgClass: 'bg-green-100', textClass: 'text-green-800' }),
@@ -62,12 +61,12 @@ describe('HotelOptionItem', () => {
 
   it('renders price per night', () => {
     render(<HotelOptionItem hotel={makeHotel()} isSelected={false} />);
-    expect(screen.getByText(/USD 80\/night/)).toBeInTheDocument();
+    expect(screen.getByText('$80/night')).toBeInTheDocument();
   });
 
   it('renders total price', () => {
     render(<HotelOptionItem hotel={makeHotel()} isSelected={false} />);
-    expect(screen.getByText(/USD 240 total/)).toBeInTheDocument();
+    expect(screen.getByText(/\$240 total/)).toBeInTheDocument();
   });
 
   it('renders amenities', () => {

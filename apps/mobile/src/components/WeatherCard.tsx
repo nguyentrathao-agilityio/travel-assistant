@@ -4,11 +4,11 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import type { WeatherResult } from '@repo/types';
 
 // Constants
-import { WEATHER_FORECAST_MAX_DAYS } from '../constants';
+import { WEATHER_FORECAST_MAX_DAYS } from '@repo/constants';
 
 // Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';
-import { formatDayDate, getBestDayIndex } from '../utils/weather';
+import { formatDayDate, getBestDayIndex } from '@repo/utils';
 
 // Components
 import { Card, Typography } from './common';

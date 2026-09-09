@@ -1,7 +1,8 @@
 import { Droplets } from 'lucide-react';
 
 // Utils
-import { cn, formatDayDate, getWeatherIcon, toFahrenheit } from '@/utils';
+import { cn, getWeatherIcon } from '@/utils';
+import { formatDayDate, toFahrenheit } from '@repo/utils';
 
 // Components
 import { Badge, StepBadge, Typography } from '@/components';

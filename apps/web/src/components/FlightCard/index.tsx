@@ -2,7 +2,8 @@ import { useMemo, useState, useCallback } from 'react';
 import { ArrowRight, Plane } from 'lucide-react';
 
 // Utils
-import { cn, computeBadges, formatDateFull, formatPrice, formatTime } from '@/utils';
+import { cn, computeBadges } from '@/utils';
+import { formatDateFull, formatPrice, formatTime } from '@repo/utils';
 
 // Components
 import { ConfirmBanner, FilterBar, Typography } from '@/components';
@@ -10,8 +11,7 @@ import type { FilterOption } from '@/components';
 import { FlightOptionItem } from './FlightOptionItem';
 
 // Constants
-import { FLIGHT_TAB } from '@/constants';
-import type { FlightTab } from '@/constants';
+import { FLIGHT_TAB, type FlightTab } from '@repo/constants';
 
 // Types
 import type { Flight, FlightSearchResult } from '@repo/types';

@@ -1,4 +1,3 @@
-export * from './agent';
 export * from './api-key';
 export * from './theme';
 export * from './chat';
@@ -12,4 +11,4 @@ export * from './session';
 export * from './sidebar';
 export * from './stop';
 export * from './tools';
-export * from './weather';
+export * from './agent';

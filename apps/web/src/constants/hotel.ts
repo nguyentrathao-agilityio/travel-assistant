@@ -6,7 +6,6 @@ type HotelParam = {
 };
 
 export const HOTEL_STAR_MAX = 5;
-export const HOTEL_AMENITIES_MAX_DISPLAY = 5;
 
 /** Canonical CopilotKit parameter list shared by collect-hotel-info and search-hotels. */
 export const HOTEL_BASE_PARAMS: HotelParam[] = [

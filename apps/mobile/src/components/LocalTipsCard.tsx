@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import type { TipsResult } from '@repo/types';
 
 // Constants
-import { TIP_CATEGORY_LABELS } from '../constants';
+import { TIP_CATEGORY_LABELS } from '@repo/constants';
 
 // Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';

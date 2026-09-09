@@ -12,8 +12,6 @@ import {
 import { TOOL_NAMES } from '@repo/constants';
 import type { SuggestionItem } from './chat';
 
-export { TOOL_NAMES };
-
 export const TOOL_SUGGESTION_ITEMS: Readonly<Partial<Record<string, readonly SuggestionItem[]>>> = {
   [TOOL_NAMES.FLIGHTS]: [
     {

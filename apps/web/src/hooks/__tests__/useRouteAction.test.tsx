@@ -17,7 +17,7 @@ jest.mock('@/components', () => ({
   ToolInvalidResultCard: () => null,
 }));
 jest.mock('@/utils', () => ({
-  ...jest.requireActual('@/utils/toolResult'),
+  ...jest.requireActual('@repo/utils'),
   isToolPending: (s: string) => s === 'inProgress',
 }));
 

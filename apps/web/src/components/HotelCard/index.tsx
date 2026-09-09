@@ -2,7 +2,8 @@ import { useMemo, useState, useCallback } from 'react';
 import { Building2 } from 'lucide-react';
 
 // Utils
-import { cn, computeHotelBadges, formatDateRange, formatPrice } from '@/utils';
+import { cn, computeHotelBadges } from '@/utils';
+import { formatDateRange, formatPrice } from '@repo/utils';
 
 // Components
 import { Typography, ConfirmBanner } from '@/components';

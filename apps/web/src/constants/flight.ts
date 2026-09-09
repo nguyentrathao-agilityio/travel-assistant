@@ -5,15 +5,6 @@ type FlightParam = {
   required: boolean;
 };
 
-export const FLIGHT_LOW_SEATS_THRESHOLD = 9;
-
-export const FLIGHT_TAB = {
-  DEPARTURE: 'departure',
-  RETURN: 'return',
-} as const;
-
-export type FlightTab = (typeof FLIGHT_TAB)[keyof typeof FLIGHT_TAB];
-
 /** Canonical CopilotKit parameter list shared by collect-flight-info and search-flights. */
 export const FLIGHT_BASE_PARAMS: FlightParam[] = [
   { name: 'origin', type: 'string', description: 'IATA departure airport code', required: false },

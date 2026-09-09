@@ -7,7 +7,8 @@ import { cn } from '@/utils';
 import { Typography } from '@/components';
 
 // Constants
-import { TIP_CATEGORY_CLASS_MAP, TIP_CATEGORY_LABELS } from '@/constants';
+import { TIP_CATEGORY_CLASS_MAP } from '@/constants';
+import { TIP_CATEGORY_LABELS } from '@repo/constants';
 
 // Types
 import type { TipsResult } from '@repo/types';

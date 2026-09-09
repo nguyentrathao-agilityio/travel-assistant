@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { fetchThreadValues } from '../services/threadHistory';
 import { useTripStateStore } from '../stores/tripStateStore';
-import { clientTimezone, todayClientIso } from '../utils/date';
+import { clientTimezone, todayClientIso } from '@repo/utils';
 import { extractTripState } from '../utils/tripState';
 
 import type { Flight, HotelAvailability, SelectedFlight, TripState } from '@repo/types';

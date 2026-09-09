@@ -1,7 +1,7 @@
 import type { MessagesProps } from '@copilotkit/react-ui';
 
 import { CHAT_ROLE } from '@/constants/agent';
-import { TOOL_NAMES } from '@/constants/tools';
+import { TOOL_NAMES } from '@repo/constants';
 
 export type ChatMessage = MessagesProps['messages'][number];
 type AssistantChatMessage = Extract<ChatMessage, { role: 'assistant' }>;

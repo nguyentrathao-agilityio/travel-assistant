@@ -7,7 +7,7 @@ import type { HotelAvailability, HotelSearchResult } from '@repo/types';
 // Utils
 import { shellSpacing } from '../theme';
 import { computeHotelBadges } from '../utils/hotel';
-import { formatDateRange, formatPrice } from '../utils/format';
+import { formatDateRange, formatPrice } from '@repo/utils';
 
 // Components
 import { Card, ConfirmBanner, Typography } from './common';

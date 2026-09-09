@@ -10,7 +10,7 @@ import { useTripState } from '@/hooks';
 import { SELECTION_STATUSES } from '@repo/constants';
 
 // Utils
-import { formatTime } from '@/utils';
+import { formatTime } from '@repo/utils';
 
 const BookingPanel = () => {
   const { state } = useTripState();

@@ -4,16 +4,12 @@ import { Toaster, toast } from 'sonner';
 import { CopilotErrorBoundary } from '@/components';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
-import {
-  AGENT_NAME,
-  COPILOTKIT_PUBLIC_LICENSE_KEY,
-  ERROR_MESSAGES,
-  OPENAI_API_KEY_HEADER,
-  RUNTIME_URL,
-} from '@/constants';
+import { COPILOTKIT_PUBLIC_LICENSE_KEY, ERROR_MESSAGES, RUNTIME_URL } from '@/constants';
+import { OPENAI_API_KEY_HEADER } from '@repo/constants';
+import { AGENT_NAME } from '@repo/constants';
 import { useThreadStore } from '@/stores/threadStore';
 import { useApiKeyStore } from '@/stores/apiKeyStore';
-import { todayClientIso, clientTimezone } from '@/utils';
+import { todayClientIso, clientTimezone } from '@repo/utils';
 
 interface ProvidersProps {
   children: ReactNode;

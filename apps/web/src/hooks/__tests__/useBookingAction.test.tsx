@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import { fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { useInterrupt, useRenderTool } from '@copilotkit/react-core/v2';
 
-import { TOOL_NAMES } from '@/constants';
+import { TOOL_NAMES } from '@repo/constants';
 import { useBookingAction } from '../useBookingAction';
 
 describe('useBookingAction', () => {

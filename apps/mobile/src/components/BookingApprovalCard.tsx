@@ -9,7 +9,7 @@ import { BOOKING_ACTIONS, BOOKING_DECISIONS } from '@repo/constants';
 
 // Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';
-import { formatPrice } from '../utils/format';
+import { formatPrice } from '@repo/utils';
 
 // Components
 import { Card, Typography } from './common';

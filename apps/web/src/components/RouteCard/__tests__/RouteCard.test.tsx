@@ -11,8 +11,6 @@ jest.mock('@/components', () => ({
 
 jest.mock('@/utils', () => ({
   cn: (...args: string[]) => args.filter(Boolean).join(' '),
-  formatDuration: (min: number) => `${min} min`,
-  toTravelLeg: (leg: unknown) => leg,
 }));
 
 const makeRoute = (overrides: Partial<LandmarkTourRoute> = {}): LandmarkTourRoute => ({
@@ -47,7 +45,7 @@ describe('RouteCard', () => {
 
     it('renders total duration', () => {
       render(<RouteCard data={makeRoute()} />);
-      expect(screen.getByText('240 min')).toBeInTheDocument();
+      expect(screen.getByText('4h')).toBeInTheDocument();
     });
 
     it('renders stop count badge', () => {

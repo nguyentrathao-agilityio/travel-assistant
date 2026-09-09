@@ -9,6 +9,7 @@
     "@repo/constants": "workspace:*",
     "@repo/schemas": "workspace:*",
     "@repo/types": "workspace:*",
+    "@repo/utils": "workspace:*",
     "expo": "~57.0.19",
     "expo-constants": "~57.0.17",
     "expo-linear-gradient": "~57.0.1",

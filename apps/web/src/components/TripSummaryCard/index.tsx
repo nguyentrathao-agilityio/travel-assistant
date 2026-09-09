@@ -15,7 +15,8 @@ import type { SelectedFlight, Hotel } from '@repo/types';
 import { TripSummaryResult } from '@repo/schemas';
 
 // Utils
-import { cn, replaceCostEstimateWithBookings } from '@/utils';
+import { cn } from '@/utils';
+import { replaceCostEstimateWithBookings } from '@repo/utils';
 
 interface TripSummaryCardProps {
   /** Full summary from the trip-summary-tool */

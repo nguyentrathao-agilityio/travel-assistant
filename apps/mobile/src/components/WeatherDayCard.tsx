@@ -5,7 +5,7 @@ import type { DailyForecast } from '@repo/types';
 
 // Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';
-import { formatDayDate, toFahrenheit } from '../utils/weather';
+import { formatDayDate, toFahrenheit } from '@repo/utils';
 
 // Components
 import { Typography } from './common';

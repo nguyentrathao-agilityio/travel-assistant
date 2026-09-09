@@ -8,7 +8,7 @@ import {
   PLACE_CATEGORY_LABELS,
   PLACE_PRICE_LABEL_FALLBACK,
   PLACE_PRICE_LABELS,
-} from '../constants';
+} from '@repo/constants';
 
 // Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';

@@ -5,11 +5,11 @@ import { View } from 'react-native';
 
 import { ApiKeyScreen, RuntimeSetup } from '../src/components';
 import { resolveRuntimeUrl } from '../src/config';
-import { OPENAI_API_KEY_HEADER } from '../src/constants';
+import { OPENAI_API_KEY_HEADER } from '@repo/constants';
 import { useApiKey } from '../src/hooks';
 import { isApiKeyError } from '../src/services/openaiApiKey';
 import { shellColors } from '../src/theme';
-import { clientTimezone, todayClientIso } from '../src/utils/date';
+import { clientTimezone, todayClientIso } from '@repo/utils';
 
 type RuntimeConfiguration =
   | { status: 'ready'; runtimeUrl: string }

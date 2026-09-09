@@ -1,4 +1,5 @@
-import { toTravelLeg, toMapsUrl, chunk, getSlot } from '@/utils/route';
+import { toMapsUrl, chunk, getSlot } from '@/utils/route';
+import { toTravelLeg } from '@repo/utils';
 import type { TourLeg } from '@repo/types';
 
 const makeLeg = (overrides: Partial<TourLeg> = {}): TourLeg => ({

@@ -1,4 +1,4 @@
-import { todayClientIso, clientTimezone } from '@/utils/date';
+import { todayClientIso, clientTimezone } from '@repo/utils';
 
 describe('todayClientIso', () => {
   it('returns a string in YYYY-MM-DD format', () => {

@@ -4,12 +4,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import type { Flight } from '@repo/types';
 
 // Constants
-import { FLIGHT_LOW_SEATS_THRESHOLD } from '../constants';
+import { FLIGHT_LOW_SEATS_THRESHOLD } from '@repo/constants';
 
 // Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';
-import { formatDuration } from '../utils/route';
-import { formatPrice, formatTime } from '../utils/format';
+import { formatDuration } from '@repo/utils';
+import { formatPrice, formatTime } from '@repo/utils';
 import type { FlightBadge } from '../utils/flight';
 
 // Components

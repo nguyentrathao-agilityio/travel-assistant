@@ -6,8 +6,8 @@ import type { LandmarkStop, RouteResult } from '@repo/schemas';
 
 // Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';
-import { formatDuration } from '../utils/route';
-import { offsetDate } from '../utils/format';
+import { formatDuration } from '@repo/utils';
+import { offsetDate } from '@repo/utils';
 
 // Components
 import { Typography } from './common';

@@ -8,7 +8,7 @@ export const formatDateFull = (dateStr?: string): string => {
   });
 };
 
-const formatDateShort = (dateStr: string): string =>
+export const formatDateShort = (dateStr: string): string =>
   new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
 export const formatDateRange = (checkIn: string, checkOut: string): string =>
@@ -33,6 +33,17 @@ export const formatAmount = (amount: number, currency = 'USD'): string => {
   }).format(amount);
 };
 
+export const formatDuration = (minutes: number): string => {
+  const total = Math.round(minutes);
+  const hours = Math.floor(total / 60);
+  const remainingMinutes = total % 60;
+
+  if (!hours) return `${total}m`;
+  if (remainingMinutes === 0) return `${hours}h`;
+
+  return `${hours}h ${remainingMinutes}m`;
+};
+
 export const formatDisplayDate = (iso?: string): string => {
   if (!iso) return '';
 
@@ -43,7 +54,6 @@ export const formatDisplayDate = (iso?: string): string => {
   });
 };
 
-/** Adds `dayOffset` days to an ISO date string. Returns null if no date provided. */
 export const offsetDate = (startDate: string | undefined, dayOffset: number): string | null => {
   if (!startDate) return null;
   const date = new Date(startDate);

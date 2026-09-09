@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAgent } from '@copilotkit/react-core/v2';
 
-import { AGENT_NAME } from '@/constants';
+import { AGENT_NAME } from '@repo/constants';
 // Stores
 import { useThreadStore } from '@/stores';
 

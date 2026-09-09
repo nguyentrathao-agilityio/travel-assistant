@@ -2,7 +2,7 @@ import { AlertCircle, SearchX } from 'lucide-react';
 
 import { Card } from '../Card';
 import { Typography } from '../Typography';
-import { getToolError, getToolErrorMessage } from '@/utils/toolResult';
+import { getToolError, getToolErrorMessage } from '@repo/utils';
 
 export const ToolErrorCard = ({ result }: { result: unknown }) => {
   const error = getToolError(result);

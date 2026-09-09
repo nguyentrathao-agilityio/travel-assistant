@@ -10,7 +10,7 @@ import {
 } from '@/components';
 
 // Constants
-import { TOOL_NAMES, TOOL_STATUS } from '@/constants';
+import { TOOL_STATUS } from '@/constants';
 import {
   BOOKING_ACTIONS,
   BOOKING_APPROVAL_DECISIONS,
@@ -19,19 +19,20 @@ import {
   BOOKING_DECISIONS,
   BOOKING_STATUSES,
   BOOKING_TYPES,
+  TOOL_NAMES,
 } from '@repo/constants';
 
 // Types
 import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
 
 // Utils
+import { isToolPending } from '@/utils';
 import {
   cancellationRejection,
   isBookingBlockedResult,
   isIntentionalRejectionResult,
-  isToolPending,
   parseToolResult,
-} from '@/utils';
+} from '@repo/utils';
 import { useInterruptElement } from './useInterruptElement';
 
 const bookingResultSchema = z.object({

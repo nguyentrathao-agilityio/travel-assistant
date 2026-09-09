@@ -4,13 +4,12 @@ import { Clock, Star, Ticket } from 'lucide-react';
 import { Badge, Typography } from '@/components';
 
 // Constants
+import { PLACE_CATEGORY_BADGE_VARIANTS, PLACE_ICON_SIZES } from '@/constants';
 import {
-  PLACE_CATEGORY_BADGE_VARIANTS,
   PLACE_CATEGORY_LABELS,
-  PLACE_ICON_SIZES,
   PLACE_PRICE_LABEL_FALLBACK,
   PLACE_PRICE_LABELS,
-} from '@/constants';
+} from '@repo/constants';
 
 // Types
 import type { Place } from '@repo/types';

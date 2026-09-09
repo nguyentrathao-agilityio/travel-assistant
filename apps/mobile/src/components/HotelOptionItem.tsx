@@ -4,11 +4,11 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 import type { HotelAvailability } from '@repo/types';
 
 // Constants
-import { HOTEL_AMENITIES_MAX_DISPLAY } from '../constants';
+import { HOTEL_AMENITIES_MAX_DISPLAY } from '@repo/constants';
 
 // Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';
-import { formatPrice } from '../utils/format';
+import { formatPrice } from '@repo/utils';
 import type { HotelBadge } from '../utils/hotel';
 
 // Components

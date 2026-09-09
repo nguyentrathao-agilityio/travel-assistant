@@ -5,12 +5,10 @@ import type { DailyForecast } from '@repo/types';
 
 jest.mock('@/utils', () => ({
   cn: (...args: string[]) => args.filter(Boolean).join(' '),
-  formatDayDate: (dateStr: string) => `Formatted: ${dateStr}`,
   getWeatherIcon: () => ({
     icon: () => <svg data-testid="weather-icon" />,
     color: 'text-blue-500',
   }),
-  toFahrenheit: (c: number) => Math.round((c * 9) / 5 + 32),
 }));
 
 jest.mock('@/components', () => ({
@@ -37,7 +35,7 @@ describe('WeatherDayCard', () => {
 
   it('renders formatted date', () => {
     render(<WeatherDayCard day={makeDay()} dayNumber={1} />);
-    expect(screen.getByText('Formatted: 2026-07-01')).toBeInTheDocument();
+    expect(screen.getByText('Jul 1')).toBeInTheDocument();
   });
 
   it('renders high temperature in Fahrenheit', () => {

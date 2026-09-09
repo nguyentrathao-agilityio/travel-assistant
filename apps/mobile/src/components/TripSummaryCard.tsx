@@ -7,8 +7,8 @@ import type { TripSummaryResult } from '@repo/schemas';
 
 // Utils
 import { shellColors, shellSpacing } from '../theme';
-import { replaceCostEstimateWithBookings } from '../utils/summary';
-import { formatDisplayDate } from '../utils/format';
+import { replaceCostEstimateWithBookings } from '@repo/utils';
+import { formatDisplayDate } from '@repo/utils';
 
 // Components
 import { Card, Typography } from './common';

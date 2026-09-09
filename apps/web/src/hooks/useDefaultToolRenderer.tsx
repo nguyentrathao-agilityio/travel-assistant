@@ -4,7 +4,8 @@ import { useRenderTool } from '@copilotkit/react-core/v2';
 import { ToolCompletedCard, ToolErrorCard, ToolLoading } from '@/components';
 
 // Utils
-import { getToolError, isToolPending } from '@/utils';
+import { isToolPending } from '@/utils';
+import { getToolError } from '@repo/utils';
 
 const toolLabel = (name: string): string =>
   name

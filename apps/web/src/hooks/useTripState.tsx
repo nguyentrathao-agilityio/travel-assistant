@@ -3,7 +3,7 @@ import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useShallow } from 'zustand/shallow';
 
 // Constants
-import { AGENT_NAME } from '@/constants';
+import { AGENT_NAME } from '@repo/constants';
 import { SELECTION_STATUSES } from '@repo/constants';
 
 // Stores
@@ -13,7 +13,7 @@ import { useThreadStore, useTripStateStore } from '@/stores';
 import type { Flight, HotelAvailability, SelectedFlight, TripState } from '@repo/types';
 
 // Utils
-import { todayClientIso, clientTimezone as getClientTimezone } from '@/utils';
+import { todayClientIso, clientTimezone as getClientTimezone } from '@repo/utils';
 
 const EMPTY_TRIP_STATE: TripState = {};
 

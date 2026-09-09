@@ -2,7 +2,7 @@ import { AlertCircle, Building2, Plane } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 import { Button, Typography } from '@/components';
-import { formatPrice } from '@/utils';
+import { formatPrice } from '@repo/utils';
 
 // Constants
 import { BOOKING_ACTIONS, BOOKING_DECISIONS } from '@repo/constants';

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useAgent } from '@copilotkit/react-core/v2';
 
-import { AGENT_NAME } from '@/constants';
+import { AGENT_NAME } from '@repo/constants';
 import type { AgUiMessage } from '@/types';
 import { isRealConversationMessage } from '@/utils';
 

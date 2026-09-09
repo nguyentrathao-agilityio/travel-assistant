@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 
 import { ToolEmptyCard, ToolErrorCard } from '../index';
-import { getToolError } from '@/utils/toolResult';
+import { getToolError } from '@repo/utils';
 
 describe('tool result feedback', () => {
   it('distinguishes an empty result from an error', () => {

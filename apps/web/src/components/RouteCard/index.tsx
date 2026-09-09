@@ -1,6 +1,7 @@
 import { Clock, MapPin } from 'lucide-react';
 
-import { cn, formatDuration, toTravelLeg } from '@/utils';
+import { cn } from '@/utils';
+import { formatDuration, toTravelLeg } from '@repo/utils';
 import type { LandmarkTourRoute } from '@repo/types';
 import { StopCard, Typography } from '@/components';
 

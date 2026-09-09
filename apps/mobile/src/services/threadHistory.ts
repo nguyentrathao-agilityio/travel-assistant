@@ -52,10 +52,25 @@ export const toThreadItem = (thread: Thread): ThreadItem => {
   };
 };
 
-export const fetchRecentThreads = async (): Promise<ThreadItem[]> => {
+export const fetchRecentThreads = async (
+  limit: number = RECENT_THREADS_LIMIT
+): Promise<ThreadItem[]> => {
   const threads = await getLanggraphClient().threads.search({
     metadata: { resourceId: AGENT_NAME },
-    limit: RECENT_THREADS_LIMIT,
+    limit,
+    sortBy: 'created_at',
+    sortOrder: 'desc',
+  });
+
+  return threads.map(toThreadItem);
+};
+
+// Paginated variant for the "All trips" screen — mirrors web's searchThreadsPage.
+export const fetchThreadsPage = async (limit: number, offset: number): Promise<ThreadItem[]> => {
+  const threads = await getLanggraphClient().threads.search({
+    metadata: { resourceId: AGENT_NAME },
+    limit,
+    offset,
     sortBy: 'created_at',
     sortOrder: 'desc',
   });

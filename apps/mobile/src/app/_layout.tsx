@@ -3,12 +3,12 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 
-import { ApiKeyScreen, RuntimeSetup } from '../src/components';
-import { resolveRuntimeUrl } from '../src/config';
+import { ApiKeyScreen, RuntimeSetup } from '../components';
+import { resolveRuntimeUrl } from '../config';
 import { OPENAI_API_KEY_HEADER } from '@repo/constants';
-import { useApiKey } from '../src/hooks';
-import { isApiKeyError } from '../src/services/openaiApiKey';
-import { shellColors } from '../src/theme';
+import { useApiKey } from '../hooks';
+import { isApiKeyError } from '../services/openaiApiKey';
+import { shellColors } from '../theme';
 import { clientTimezone, todayClientIso } from '@repo/utils';
 
 type RuntimeConfiguration =
@@ -80,9 +80,20 @@ export default function RootLayout() {
           name="chat"
           options={{
             headerShown: true,
+            headerBackButtonDisplayMode: 'minimal',
             headerStyle: { backgroundColor: shellColors.backgroundGradientEnd },
             headerTintColor: shellColors.textOnDark,
             title: 'Chat',
+          }}
+        />
+        <Stack.Screen
+          name="threads"
+          options={{
+            headerShown: true,
+            headerBackButtonDisplayMode: 'minimal',
+            headerStyle: { backgroundColor: shellColors.backgroundGradientEnd },
+            headerTintColor: shellColors.textOnDark,
+            title: 'All trips',
           }}
         />
       </Stack>

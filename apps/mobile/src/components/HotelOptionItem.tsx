@@ -107,8 +107,6 @@ const styles = StyleSheet.create({
     borderColor: shellColors.surfaceBorder,
     borderRadius: shellRadii.button,
     borderWidth: 1,
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
     overflow: 'hidden',
   },
   containerSelected: {
@@ -116,14 +114,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   thumbnail: {
-    height: 96,
-    width: 96,
+    height: 168,
+    width: '100%',
   },
   content: {
-    flex: 1,
     gap: shellSpacing.xs,
-    paddingRight: shellSpacing.sm,
-    paddingVertical: shellSpacing.sm,
+    padding: shellSpacing.sm,
   },
   titleRow: {
     alignItems: 'flex-start',
@@ -170,7 +166,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: shellSpacing.sm,
     justifyContent: 'space-between',
-    marginTop: 'auto',
   },
   priceBlock: {
     flex: 1,

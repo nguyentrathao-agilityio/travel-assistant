@@ -1,8 +1,8 @@
 import { useRouter } from 'expo-router';
 
-import { DashboardScreen } from '../src/components';
-import { useActiveThreadId, useRecentThreads } from '../src/hooks';
-import { createRemoteThread, generateThreadId } from '../src/services';
+import { DashboardScreen } from '../components';
+import { useActiveThreadId, useRecentThreads } from '../hooks';
+import { createRemoteThread, generateThreadId } from '../services';
 
 export default function DashboardRoute() {
   const router = useRouter();
@@ -33,11 +33,16 @@ export default function DashboardRoute() {
     router.push({ pathname: '/chat', params: { focusVoice: '1' } });
   };
 
+  const handleSeeAll = () => {
+    router.push('/threads');
+  };
+
   return (
     <DashboardScreen
       continueThreadId={activeThreadId}
       onAskByVoice={handleAskByVoice}
       onOpenThread={handleOpenThread}
+      onSeeAll={handleSeeAll}
       onStartNewTrip={handleStartNewTrip}
       recentThreads={threads}
       recentThreadsStatus={status}

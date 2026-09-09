@@ -9,20 +9,30 @@ type RecentThreadsState =
   | { status: 'ready'; threads: ThreadItem[] }
   | { status: 'error'; threads: [] };
 
-export const useRecentThreads = () => {
+export const useRecentThreads = (limit?: number) => {
   const [state, setState] = useState<RecentThreadsState>({ status: 'loading', threads: [] });
 
   const refresh = useCallback(() => {
     setState({ status: 'loading', threads: [] });
 
-    fetchRecentThreads()
+    fetchRecentThreads(limit)
       .then((threads) => setState({ status: 'ready', threads }))
       .catch(() => setState({ status: 'error', threads: [] }));
-  }, []);
+  }, [limit]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  return { ...state, refresh };
+  // Drops a deleted thread from the current list immediately, instead of waiting
+  // on a full refetch, so the row disappears the moment deletion succeeds.
+  const removeThread = useCallback((threadId: string) => {
+    setState((current) =>
+      current.status === 'ready'
+        ? { status: 'ready', threads: current.threads.filter((thread) => thread.id !== threadId) }
+        : current
+    );
+  }, []);
+
+  return { ...state, refresh, removeThread };
 };

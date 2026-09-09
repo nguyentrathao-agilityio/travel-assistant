@@ -1,7 +1,7 @@
 import { Redirect } from 'expo-router';
 
-import { OnboardingScreen } from '../src/components';
-import { useOnboardingSeen } from '../src/hooks';
+import { OnboardingScreen } from '../components';
+import { useOnboardingSeen } from '../hooks';
 
 export default function OnboardingRoute() {
   const { status, markSeen } = useOnboardingSeen();

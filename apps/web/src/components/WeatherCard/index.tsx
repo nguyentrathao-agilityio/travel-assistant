@@ -1,14 +1,15 @@
 import { CloudSun, Sun } from 'lucide-react';
 
 // Utils
-import { cn, formatDayDate, getBestDayIndex } from '@/utils';
+import { cn } from '@/utils';
+import { formatDayDate, getBestDayIndex } from '@repo/utils';
 
 // Components
 import { Typography } from '@/components';
 import { WeatherDayCard } from './WeatherDayCard';
 
 // Constants
-import { WEATHER_FORECAST_MAX_DAYS } from '@/constants';
+import { WEATHER_FORECAST_MAX_DAYS } from '@repo/constants';
 
 // Types
 import type { WeatherResult } from '@repo/types';

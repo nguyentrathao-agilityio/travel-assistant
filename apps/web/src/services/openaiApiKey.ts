@@ -1,4 +1,5 @@
-import { OPENAI_API_KEY_HEADER, RUNTIME_URL } from '@/constants';
+import { RUNTIME_URL } from '@/constants';
+import { OPENAI_API_KEY_HEADER } from '@repo/constants';
 
 const ERROR_MESSAGE_BY_CODE: Record<string, string> = {
   invalid_key: 'This API key is invalid or has been revoked.',

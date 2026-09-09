@@ -1,5 +1,6 @@
 import type { BadgeVariant } from '@/components';
 import type { PlaceCategory } from '@repo/types';
+import { PLACE_PRICE_LABELS } from '@repo/constants';
 
 export const PLACE_FILTER_VALUES = {
   ATTRACTION: 'attraction',
@@ -40,15 +41,6 @@ export const PLACES_CATEGORY_FILTERS = [
   label: string;
 }>;
 
-export const PLACE_CATEGORY_LABELS: Readonly<Record<PlaceCategory, string>> = {
-  [PLACE_FILTER_VALUES.ATTRACTION]: '🏛️ Attraction',
-  [PLACE_FILTER_VALUES.RESTAURANT]: '🍽️ Restaurant',
-  [PLACE_FILTER_VALUES.CAFE]: '☕ Cafe',
-  [PLACE_FILTER_VALUES.ACTIVITY]: '🎯 Activity',
-  [PLACE_FILTER_VALUES.NIGHTLIFE]: '🎉 Nightlife',
-  [PLACE_FILTER_VALUES.SHOPPING]: '🛍️ Shopping',
-};
-
 export const PLACES_LOADING_SKELETON_COUNT = 6;
 
 export const PLACE_CATEGORY_BADGE_VARIANTS: Readonly<Record<PlaceCategory, BadgeVariant>> = {
@@ -60,19 +52,10 @@ export const PLACE_CATEGORY_BADGE_VARIANTS: Readonly<Record<PlaceCategory, Badge
   [PLACE_FILTER_VALUES.SHOPPING]: 'accent',
 };
 
-export const PLACE_PRICE_LABELS: Readonly<Record<number, string>> = {
-  1: 'Free',
-  2: '$',
-  3: '$$',
-  4: '$$$',
-};
-
 export const PRICE_OPTIONS = Object.entries(PLACE_PRICE_LABELS).map(([value, label]) => ({
   value,
   label,
 }));
-
-export const PLACE_PRICE_LABEL_FALLBACK = '$';
 
 export const PLACE_ICON_SIZES = {
   recommended: 12,

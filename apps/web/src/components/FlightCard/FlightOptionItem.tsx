@@ -1,14 +1,15 @@
 import { ArrowRight, Clock, Hourglass, Plane, Radio } from 'lucide-react';
 
 // Utils
-import { cn, formatDuration, formatPrice, formatTime, getAirlineIconClass } from '@/utils';
+import { cn, getAirlineIconClass } from '@/utils';
+import { formatDuration, formatPrice, formatTime } from '@repo/utils';
 
 // Components
 import { Badge, Button, Typography } from '@/components';
 import type { BadgeVariant } from '@/components';
 
 // Constants
-import { FLIGHT_LOW_SEATS_THRESHOLD } from '@/constants';
+import { FLIGHT_LOW_SEATS_THRESHOLD } from '@repo/constants';
 
 // Types
 import type { Flight } from '@repo/types';

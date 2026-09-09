@@ -5,7 +5,7 @@ import type { LandmarkTourRoute } from '@repo/types';
 
 // Utils
 import { shellSpacing } from '../theme';
-import { formatDuration, toTravelLeg } from '../utils/route';
+import { formatDuration, toTravelLeg } from '@repo/utils';
 
 // Components
 import { Card, Typography } from './common';

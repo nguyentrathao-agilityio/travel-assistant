@@ -1,5 +1,3 @@
-export { AGENT_NAME } from '@repo/constants';
-
 export const RUNTIME_URL = import.meta.env.VITE_RUNTIME_URL;
 export const COPILOTKIT_PUBLIC_LICENSE_KEY = import.meta.env.VITE_COPILOTKIT_PUBLIC_LICENSE_KEY;
 

@@ -9,7 +9,7 @@ import { DestinationExplorerCard, SetLastTool, ToolLoading } from '@/components'
 import { renderToolResult } from '@/components/common/ToolResultBoundary';
 
 // Constants
-import { TOOL_NAMES } from '@/constants';
+import { TOOL_NAMES } from '@repo/constants';
 
 const destinationExplorerParameters = z.object({
   city: z.string().optional(),

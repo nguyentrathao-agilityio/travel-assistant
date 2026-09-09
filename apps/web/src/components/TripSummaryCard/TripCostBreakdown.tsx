@@ -1,7 +1,8 @@
 import { Building2, Compass, DollarSign, LucideIcon, Plane, Tag, Utensils } from 'lucide-react';
 
 // Utils
-import { cn, formatAmount } from '@/utils';
+import { cn } from '@/utils';
+import { formatAmount } from '@repo/utils';
 
 // Components
 import { Divider, Typography } from '@/components';

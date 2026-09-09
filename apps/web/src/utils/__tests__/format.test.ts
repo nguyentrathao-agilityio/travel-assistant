@@ -1,10 +1,5 @@
-import {
-  formatDuration,
-  formatPrice,
-  formatRelativeTime,
-  formatTime,
-  formatDateRange,
-} from '@/utils/format';
+import { formatDuration, formatPrice, formatTime, formatDateRange } from '@repo/utils';
+import { formatRelativeTime } from '@/utils/format';
 
 describe('formatDuration', () => {
   it('formats minutes only when under 1 hour', () => {

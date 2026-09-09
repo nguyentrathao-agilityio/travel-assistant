@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { CalendarDays, MapPin } from 'lucide-react';
 
 // Utils
-import { cn, formatDuration, offsetDate, chunk, getSlot } from '@/utils';
+import { cn, chunk, getSlot } from '@/utils';
+import { formatDuration, offsetDate } from '@repo/utils';
 
 // Constants
 import { ROUTE_TIME_SLOTS } from '@/constants';

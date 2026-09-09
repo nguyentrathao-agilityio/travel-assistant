@@ -1,6 +1,5 @@
-// Types
-import type { Hotel, SelectedFlight } from '@repo/types';
 import type { TripCostEstimate } from '@repo/schemas';
+import type { Hotel, SelectedFlight } from '@repo/types';
 
 interface ReplaceCostEstimateParams {
   costEstimate: TripCostEstimate;
@@ -10,7 +9,6 @@ interface ReplaceCostEstimateParams {
   bookedHotel?: Hotel;
 }
 
-/** Swaps the flight/hotel line items in a cost estimate for actual booked prices. */
 export const replaceCostEstimateWithBookings = ({
   costEstimate,
   days,

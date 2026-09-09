@@ -1,7 +1,8 @@
 import type { ReactElement } from 'react';
 import type { z } from 'zod';
 
-import { getToolError, isToolPending, safeParseToolResult } from '@/utils';
+import { isToolPending } from '@/utils';
+import { getToolError, safeParseToolResult } from '@repo/utils';
 
 import { ToolEmptyCard, ToolErrorCard, ToolInvalidResultCard } from '../ToolResultFeedback';
 

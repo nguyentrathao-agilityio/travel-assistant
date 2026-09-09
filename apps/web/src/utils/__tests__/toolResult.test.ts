@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { getToolErrorMessage, parseToolResult, safeParseToolResult } from '@/utils/toolResult';
+import { getToolErrorMessage, parseToolResult, safeParseToolResult } from '@repo/utils';
 
 describe('tool result utilities', () => {
   it('parses serialized JSON results', () => {

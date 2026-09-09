@@ -10,7 +10,6 @@ jest.mock('@/components', () => ({
 
 jest.mock('@/utils', () => ({
   cn: (...args: string[]) => args.filter(Boolean).join(' '),
-  formatAmount: (amount: number, currency: string) => `${currency} ${amount}`,
 }));
 
 const makeEstimate = (): TripCostEstimate => ({
@@ -33,7 +32,7 @@ const makeEstimate = (): TripCostEstimate => ({
 describe('TripCostBreakdown', () => {
   it('renders grand total', () => {
     render(<TripCostBreakdown estimate={makeEstimate()} />);
-    expect(screen.getByText(/USD 1500/)).toBeInTheDocument();
+    expect(document.body).toHaveTextContent('~$1,500');
   });
 
   it('renders breakdown item labels', () => {

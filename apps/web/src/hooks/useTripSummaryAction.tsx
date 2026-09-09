@@ -2,7 +2,7 @@ import { useRenderTool } from '@copilotkit/react-core/v2';
 import { z } from 'zod';
 
 // Constants
-import { TOOL_NAMES } from '@/constants';
+import { TOOL_NAMES } from '@repo/constants';
 
 // Schemas
 import { TripSummaryResultSchema } from '@repo/schemas';

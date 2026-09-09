@@ -6,9 +6,6 @@ import type { Flight } from '@repo/types';
 
 jest.mock('@/utils', () => ({
   cn: (...args: string[]) => args.filter(Boolean).join(' '),
-  formatDuration: (min: number) => `${min}m`,
-  formatPrice: (price: number, currency: string) => `${currency} ${price}`,
-  formatTime: (iso: string) => iso.split('T')[1]?.slice(0, 5) ?? iso,
   getAirlineIconClass: () => 'airline-icon-class',
 }));
 
@@ -117,6 +114,6 @@ describe('FlightOptionItem', () => {
 
   it('renders price', () => {
     render(<FlightOptionItem flight={makeFlight()} isSelected={false} />);
-    expect(screen.getByText(/USD 200/)).toBeInTheDocument();
+    expect(screen.getByText('$200')).toBeInTheDocument();
   });
 });

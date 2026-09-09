@@ -1,12 +1,13 @@
 // Utils
-import { cn, formatPrice, getAmenityIcon, getAmenityColor, getRatingColor } from '@/utils';
+import { cn, getAmenityIcon, getAmenityColor, getRatingColor } from '@/utils';
+import { formatPrice } from '@repo/utils';
 
 // Components
 import { Badge, Button, StarRating, Typography } from '@/components';
 import type { BadgeVariant } from '@/components';
 
 // Constants
-import { HOTEL_AMENITIES_MAX_DISPLAY } from '@/constants';
+import { HOTEL_AMENITIES_MAX_DISPLAY } from '@repo/constants';
 
 // Types
 import type { HotelAvailability } from '@repo/types';

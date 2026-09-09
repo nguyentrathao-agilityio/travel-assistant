@@ -27,16 +27,3 @@ export const TIP_CATEGORY_OPTIONS = [
   { value: TIP_CATEGORIES.HEALTH, label: '🏥 Health' },
   { value: TIP_CATEGORIES.ETIQUETTE, label: '🤝 Etiquette' },
 ] as const;
-
-export const TIP_CATEGORY_LABELS: Record<TipCategoryValue, string> = {
-  transport: '🚌 Transport',
-  money: '💰 Money',
-  food: '🍜 Food',
-  safety: '🛡️ Safety',
-  culture: '🎭 Culture',
-  best_time: '📅 Best time',
-  language: '🗣️ Language',
-  connectivity: '📶 Connectivity',
-  health: '🏥 Health',
-  etiquette: '🤝 Etiquette',
-};

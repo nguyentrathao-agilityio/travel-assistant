@@ -1,5 +1,6 @@
 // Types
 import type { Flight } from '@repo/types';
+import { computeFlightBadgeKinds } from '@repo/utils';
 
 export interface FlightBadge {
   label: string;
@@ -13,25 +14,7 @@ const FLIGHT_BADGES = {
 
 /** Computes badges for a list of flights based on price, duration, and popularity heuristics. */
 export const computeBadges = (flights: Flight[] = []): Map<string, FlightBadge> => {
-  const map = new Map<string, FlightBadge>();
-
-  if (flights.length < 2) return map;
-
-  const cheapest = flights.reduce((min, curr) => (curr.price < min.price ? curr : min));
-  const fastest = flights.reduce((min, curr) =>
-    curr.durationMinutes < min.durationMinutes ? curr : min
+  return new Map(
+    [...computeFlightBadgeKinds(flights)].map(([id, kind]) => [id, FLIGHT_BADGES[kind]])
   );
-
-  map.set(cheapest.id, FLIGHT_BADGES.cheapest);
-  if (fastest.id !== cheapest.id) {
-    map.set(fastest.id, FLIGHT_BADGES.fastest);
-  }
-
-  if (flights.length >= 3) {
-    const untagged = flights.find((flight) => !map.has(flight.id));
-
-    if (untagged) map.set(untagged.id, FLIGHT_BADGES.popular);
-  }
-
-  return map;
 };

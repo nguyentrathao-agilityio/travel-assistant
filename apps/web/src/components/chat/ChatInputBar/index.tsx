@@ -17,12 +17,8 @@ import { cn } from '@/utils';
 import { Button } from '@/components';
 
 // Constants
-import {
-  AGENT_NAME,
-  CHAT_ROLE,
-  MAX_CHAT_TEXTAREA_HEIGHT,
-  STOP_GENERATION_RETRY_DELAY_MS,
-} from '@/constants';
+import { CHAT_ROLE, MAX_CHAT_TEXTAREA_HEIGHT, STOP_GENERATION_RETRY_DELAY_MS } from '@/constants';
+import { AGENT_NAME } from '@repo/constants';
 
 const ChatInputBar = ({ onSend, onStop, inProgress, hideStopButton = false }: InputProps) => {
   const [value, setValue] = useState('');

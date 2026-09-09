@@ -4,7 +4,7 @@ import { CheckCircle, XCircle } from 'lucide-react';
 import { Typography } from '@/components';
 
 // Utils
-import { formatPrice } from '@/utils';
+import { formatPrice } from '@repo/utils';
 
 // Constants
 import { BOOKING_STATUSES } from '@repo/constants';

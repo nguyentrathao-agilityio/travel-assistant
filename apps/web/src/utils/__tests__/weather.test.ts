@@ -1,10 +1,6 @@
-import { toFahrenheit, getWeatherIcon, formatDayDate, getBestDayIndex } from '@/utils/weather';
+import { getWeatherIcon } from '@/utils/weather';
+import { toFahrenheit, formatDayDate, getBestDayIndex } from '@repo/utils';
 import type { DailyForecast } from '@repo/types';
-
-jest.mock('@/constants', () => ({
-  FAHRENHEIT_MULTIPLIER: 9 / 5,
-  FAHRENHEIT_OFFSET: 32,
-}));
 
 const makeForecast = (precipitationProbabilityMax?: number): DailyForecast => ({
   date: '2026-06-10',

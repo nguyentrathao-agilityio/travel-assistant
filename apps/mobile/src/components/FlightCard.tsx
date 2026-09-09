@@ -5,12 +5,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import type { Flight, FlightSearchResult } from '@repo/types';
 
 // Constants
-import { FLIGHT_TAB, type FlightTab } from '../constants';
+import { FLIGHT_TAB, type FlightTab } from '@repo/constants';
 
 // Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';
 import { computeBadges } from '../utils/flight';
-import { formatDateFull, formatPrice, formatTime } from '../utils/format';
+import { formatDateFull, formatPrice, formatTime } from '@repo/utils';
 
 // Components
 import { Card, ConfirmBanner, Typography } from './common';

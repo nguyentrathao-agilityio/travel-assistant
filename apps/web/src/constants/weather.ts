@@ -1,3 +1,0 @@
-export const WEATHER_FORECAST_MAX_DAYS = 16;
-export const FAHRENHEIT_MULTIPLIER = 9 / 5;
-export const FAHRENHEIT_OFFSET = 32;

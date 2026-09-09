@@ -8,7 +8,8 @@ import { TRAVEL_TRANSPORT_LABELS } from '../constants';
 
 // Utils
 import { shellColors, shellRadii, shellSpacing } from '../theme';
-import { formatDuration, toMapsUrl } from '../utils/route';
+import { formatDuration } from '@repo/utils';
+import { toMapsUrl } from '../utils/route';
 
 // Components
 import { Card, Typography } from './common';

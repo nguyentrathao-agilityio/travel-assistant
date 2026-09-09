@@ -5,29 +5,15 @@ import {
   BOOKING_ACTIONS,
   BOOKING_APPROVAL_DECISIONS,
   BOOKING_APPROVAL_REQUEST_TYPE,
-  BOOKING_CREATION_DECLINED_MESSAGE,
   BOOKING_DECISIONS,
-  CANCELLATION_DECLINED_PREFIX,
   TOOL_NAMES,
 } from '@repo/constants';
 
 // Utils
-import { parseToolResult } from './toolResult';
+import { parseToolResult } from '@repo/utils';
 
 // Types
 import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
-
-export const cancellationRejection = (bookingId: string): string =>
-  `${CANCELLATION_DECLINED_PREFIX}${bookingId} remains active and was NOT cancelled.`;
-
-export const isIntentionalRejectionResult = (result: unknown): boolean =>
-  result === BOOKING_CREATION_DECLINED_MESSAGE ||
-  (typeof result === 'string' && result.startsWith(CANCELLATION_DECLINED_PREFIX));
-
-const BOOKING_BLOCKED_PREFIX = 'Booking blocked:';
-
-export const isBookingBlockedResult = (result: unknown): boolean =>
-  typeof result === 'string' && result.startsWith(BOOKING_BLOCKED_PREFIX);
 
 type EditableBookingDetails = Record<string, string | number | boolean | null>;
 

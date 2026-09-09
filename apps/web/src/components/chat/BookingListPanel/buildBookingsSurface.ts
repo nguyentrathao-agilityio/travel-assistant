@@ -1,7 +1,7 @@
 import { basicCatalog } from '@copilotkit/a2ui-renderer';
 
 import { BOOKING_STATUSES } from '@repo/constants';
-import { formatPrice } from '@/utils';
+import { formatPrice } from '@repo/utils';
 
 import type { Booking } from '@repo/types';
 

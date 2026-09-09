@@ -1,7 +1,8 @@
 import { MapPin, Calendar, Users } from 'lucide-react';
 
 // Utils
-import { cn, formatDisplayDate } from '@/utils';
+import { cn } from '@/utils';
+import { formatDisplayDate } from '@repo/utils';
 
 // Components
 import { Typography } from '@/components';

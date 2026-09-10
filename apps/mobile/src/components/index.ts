@@ -8,6 +8,7 @@ export * from './DashboardScreen';
 export * from './AllTripsScreen';
 export * from './MessageBubble';
 export * from './ChatScreen';
+export * from './VoiceButton';
 export * from './ApiKeyScreen';
 export * from './WeatherDayCard';
 export * from './WeatherCard';

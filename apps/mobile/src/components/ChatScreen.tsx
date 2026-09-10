@@ -15,7 +15,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { shellColors, shellRadii, shellSpacing } from '../theme';
 import { renderableMessages } from '../utils/chatMessages';
 import { MessageBubble } from './MessageBubble';
+import { VoiceButton } from './VoiceButton';
 
+import type { VoiceState } from '../hooks';
 import type { RenderableMessage } from '../utils/chatMessages';
 import type { Message } from '@copilotkit/react-native/headless';
 import type { ReactElement } from 'react';
@@ -26,9 +28,21 @@ interface ChatScreenProps {
   isRunning: boolean;
   error: string | null;
   interruptElement: ReactElement | null;
+  voiceState: VoiceState;
+  voiceErrorMessage: string | null;
   onSend: (text: string) => void;
   onStop: () => void;
+  onStartListening: () => void;
+  onStopListening: () => void;
+  onStopSpeaking: () => void;
 }
+
+const VOICE_STATUS_LABEL: Record<Exclude<VoiceState, 'idle' | 'error'>, string> = {
+  connecting: 'Connecting…',
+  listening: 'Listening…',
+  speaking: 'Speaking…',
+  thinking: 'Thinking…',
+};
 
 export const ChatScreen = ({
   messages,
@@ -36,8 +50,13 @@ export const ChatScreen = ({
   isRunning,
   error,
   interruptElement,
+  voiceState,
+  voiceErrorMessage,
   onSend,
   onStop,
+  onStartListening,
+  onStopListening,
+  onStopSpeaking,
 }: ChatScreenProps) => {
   const [draft, setDraft] = useState('');
   const insets = useSafeAreaInsets();
@@ -96,7 +115,26 @@ export const ChatScreen = ({
           </View>
         )}
 
+        {voiceState === 'error' && voiceErrorMessage && (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorText}>{voiceErrorMessage}</Text>
+          </View>
+        )}
+
+        {voiceState !== 'idle' && voiceState !== 'error' && (
+          <View style={styles.voiceStatusBanner}>
+            <Text style={styles.voiceStatusText}>{VOICE_STATUS_LABEL[voiceState]}</Text>
+          </View>
+        )}
+
         <View style={[styles.inputBar, { paddingBottom: insets.bottom || shellSpacing.md }]}>
+          <VoiceButton
+            disabled={isAwaitingApproval}
+            onStart={onStartListening}
+            onStopListening={onStopListening}
+            onStopSpeaking={onStopSpeaking}
+            voiceState={voiceState}
+          />
           <TextInput
             multiline
             onChangeText={setDraft}
@@ -161,6 +199,14 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: shellColors.danger,
+    fontSize: 13,
+  },
+  voiceStatusBanner: {
+    marginBottom: shellSpacing.sm,
+    marginHorizontal: shellSpacing.lg,
+  },
+  voiceStatusText: {
+    color: shellColors.textOnDarkMuted,
     fontSize: 13,
   },
   inputBar: {

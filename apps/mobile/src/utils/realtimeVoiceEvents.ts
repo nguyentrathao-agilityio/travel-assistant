@@ -1,0 +1,47 @@
+interface RealtimeVoiceMessage {
+  type?: unknown;
+  transcript?: unknown;
+  item?: { content?: Array<{ transcript?: unknown }> };
+  error?: { message?: unknown };
+}
+
+/**
+ * Matches transcript-completed events loosely (type includes "transcription"
+ * and ends with "completed") instead of hardcoding the literal event name, so
+ * a minor provider naming change doesn't silently stop transcripts.
+ */
+export const extractFinalTranscript = (raw: string): string | null => {
+  let message: RealtimeVoiceMessage;
+
+  try {
+    message = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+
+  if (typeof message.type !== 'string') return null;
+  if (!message.type.includes('transcription') || !message.type.endsWith('completed')) return null;
+
+  const transcript =
+    typeof message.transcript === 'string'
+      ? message.transcript
+      : message.item?.content?.find((part) => typeof part.transcript === 'string')?.transcript;
+
+  return typeof transcript === 'string' && transcript.trim().length > 0 ? transcript.trim() : null;
+};
+
+export const extractRealtimeErrorMessage = (raw: string): string | null => {
+  let message: RealtimeVoiceMessage;
+
+  try {
+    message = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+
+  if (message.type !== 'error') return null;
+
+  return typeof message.error?.message === 'string'
+    ? message.error.message
+    : 'Realtime voice session error';
+};

@@ -32,7 +32,7 @@ export const TripPlacesSection = ({ places }: TripPlacesSectionProps) => {
         </Typography>
       </View>
 
-      <View>
+      <View style={styles.list}>
         {topPlaces.map((place) => (
           <PlaceItem key={place.id} place={place} />
         ))}
@@ -49,5 +49,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  list: {
+    gap: shellSpacing.sm,
   },
 });

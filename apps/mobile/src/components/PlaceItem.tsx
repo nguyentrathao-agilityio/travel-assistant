@@ -22,7 +22,9 @@ interface PlaceItemProps {
 
 export const PlaceItem = ({ place }: PlaceItemProps) => (
   <View style={styles.container}>
-    {place.imageUrl && <Image source={{ uri: place.imageUrl }} style={styles.thumbnail} />}
+    {place.imageUrl && (
+      <Image resizeMode="cover" source={{ uri: place.imageUrl }} style={styles.thumbnail} />
+    )}
 
     <View style={styles.content}>
       <View style={styles.titleRow}>
@@ -63,19 +65,17 @@ export const PlaceItem = ({ place }: PlaceItemProps) => (
 const styles = StyleSheet.create({
   container: {
     borderColor: shellColors.surfaceBorder,
-    borderTopWidth: 1,
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-    paddingVertical: shellSpacing.sm,
+    borderRadius: shellRadii.button,
+    borderWidth: 1,
+    overflow: 'hidden',
   },
   thumbnail: {
-    borderRadius: shellRadii.button,
-    height: 64,
-    width: 64,
+    height: 168,
+    width: '100%',
   },
   content: {
-    flex: 1,
     gap: shellSpacing.xs,
+    padding: shellSpacing.sm,
   },
   titleRow: {
     alignItems: 'flex-start',

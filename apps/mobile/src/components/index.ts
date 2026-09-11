@@ -1,4 +1,5 @@
 export * from './common';
+export * from './layout/ChatLayout';
 export * from './RuntimeSetup';
 export * from './IconBadge';
 export * from './GridActionCard';

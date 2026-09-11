@@ -1,20 +1,10 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { shellColors, shellRadii, shellSpacing } from '../theme';
 import { renderableMessages } from '../utils/chatMessages';
-import { MessageBubble, VoiceButton } from '../components';
+import { ChatLayout, MessageBubble, VoiceButton } from '../components';
 
 import type { VoiceState } from '../hooks';
 import type { RenderableMessage } from '../utils/chatMessages';
@@ -58,7 +48,6 @@ export const ChatScreen = ({
   onStopSpeaking,
 }: ChatScreenProps) => {
   const [draft, setDraft] = useState('');
-  const insets = useSafeAreaInsets();
   const listRef = useRef<FlatList<RenderableMessage>>(null);
   const rows = renderableMessages(messages);
   const isAwaitingApproval = interruptElement !== null;
@@ -80,87 +69,89 @@ export const ChatScreen = ({
       colors={[shellColors.backgroundGradientStart, shellColors.backgroundGradientEnd]}
       style={styles.container}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
-      >
-        {!isReady ? (
-          <View style={styles.centeredState}>
-            <Text style={styles.centeredStateText}>Connecting…</Text>
-          </View>
-        ) : rows.length === 0 ? (
-          <View style={styles.centeredState}>
-            <Text style={styles.centeredStateText}>
-              Ask me anything about your trip — flights, hotels, weather, or places to go.
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            contentContainerStyle={styles.listContent}
-            data={rows}
-            keyExtractor={(item) => item.id}
-            ListFooterComponent={
-              interruptElement ? <View style={styles.interruptWrap}>{interruptElement}</View> : null
-            }
-            ref={listRef}
-            renderItem={({ item }) => <MessageBubble allMessages={messages} message={item} />}
-            style={styles.list}
-          />
-        )}
-
-        {error && (
-          <View style={styles.errorBanner}>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        )}
-
-        {voiceState === 'error' && voiceErrorMessage && (
-          <View style={styles.errorBanner}>
-            <Text style={styles.errorText}>{voiceErrorMessage}</Text>
-          </View>
-        )}
-
-        {voiceState !== 'idle' && voiceState !== 'error' && (
-          <View style={styles.voiceStatusBanner}>
-            <Text style={styles.voiceStatusText}>{VOICE_STATUS_LABEL[voiceState]}</Text>
-          </View>
-        )}
-
-        <View style={[styles.inputBar, { paddingBottom: insets.bottom || shellSpacing.md }]}>
-          <VoiceButton
-            disabled={isAwaitingApproval}
-            onStart={onStartListening}
-            onStopListening={onStopListening}
-            onStopSpeaking={onStopSpeaking}
-            voiceState={voiceState}
-          />
-          <TextInput
-            multiline
-            onChangeText={setDraft}
-            placeholder="Ask about your trip…"
-            placeholderTextColor={shellColors.textOnDarkFaint}
-            style={styles.input}
-            value={draft}
-          />
-          {isRunning ? (
-            <Pressable accessibilityRole="button" onPress={onStop} style={styles.stopButton}>
-              <Text style={styles.sendIcon}>■</Text>
-            </Pressable>
+      <ChatLayout
+        backgroundColor="transparent"
+        messages={
+          !isReady ? (
+            <View style={styles.centeredState}>
+              <Text style={styles.centeredStateText}>Connecting…</Text>
+            </View>
+          ) : rows.length === 0 ? (
+            <View style={styles.centeredState}>
+              <Text style={styles.centeredStateText}>
+                Ask me anything about your trip — flights, hotels, weather, or places to go.
+              </Text>
+            </View>
           ) : (
-            <Pressable
-              accessibilityRole="button"
-              disabled={!draft.trim() || isAwaitingApproval}
-              onPress={handleSend}
-              style={[
-                styles.sendButton,
-                (!draft.trim() || isAwaitingApproval) && styles.sendButtonDisabled,
-              ]}
-            >
-              <Text style={styles.sendIcon}>➤</Text>
-            </Pressable>
-          )}
-        </View>
-      </KeyboardAvoidingView>
+            <FlatList
+              contentContainerStyle={styles.listContent}
+              data={rows}
+              keyExtractor={(item) => item.id}
+              ListFooterComponent={
+                interruptElement ? (
+                  <View style={styles.interruptWrap}>{interruptElement}</View>
+                ) : null
+              }
+              ref={listRef}
+              renderItem={({ item }) => <MessageBubble allMessages={messages} message={item} />}
+              style={styles.list}
+            />
+          )
+        }
+        composer={
+          <>
+            {error && (
+              <View style={styles.errorBanner}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            )}
+            {voiceState === 'error' && voiceErrorMessage && (
+              <View style={styles.errorBanner}>
+                <Text style={styles.errorText}>{voiceErrorMessage}</Text>
+              </View>
+            )}
+            {voiceState !== 'idle' && voiceState !== 'error' && (
+              <View style={styles.voiceStatusBanner}>
+                <Text style={styles.voiceStatusText}>{VOICE_STATUS_LABEL[voiceState]}</Text>
+              </View>
+            )}
+            <View style={styles.inputBar}>
+              <VoiceButton
+                disabled={isAwaitingApproval}
+                onStart={onStartListening}
+                onStopListening={onStopListening}
+                onStopSpeaking={onStopSpeaking}
+                voiceState={voiceState}
+              />
+              <TextInput
+                multiline
+                onChangeText={setDraft}
+                placeholder="Ask about your trip…"
+                placeholderTextColor={shellColors.textOnDarkFaint}
+                style={styles.input}
+                value={draft}
+              />
+              {isRunning ? (
+                <Pressable accessibilityRole="button" onPress={onStop} style={styles.stopButton}>
+                  <Text style={styles.sendIcon}>■</Text>
+                </Pressable>
+              ) : (
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={!draft.trim() || isAwaitingApproval}
+                  onPress={handleSend}
+                  style={[
+                    styles.sendButton,
+                    (!draft.trim() || isAwaitingApproval) && styles.sendButtonDisabled,
+                  ]}
+                >
+                  <Text style={styles.sendIcon}>➤</Text>
+                </Pressable>
+              )}
+            </View>
+          </>
+        }
+      />
     </LinearGradient>
   );
 };
@@ -195,7 +186,6 @@ const styles = StyleSheet.create({
     borderColor: shellColors.danger,
     borderRadius: shellRadii.card,
     borderWidth: 1,
-    marginHorizontal: shellSpacing.lg,
     marginBottom: shellSpacing.sm,
     padding: shellSpacing.sm,
   },
@@ -205,7 +195,6 @@ const styles = StyleSheet.create({
   },
   voiceStatusBanner: {
     marginBottom: shellSpacing.sm,
-    marginHorizontal: shellSpacing.lg,
   },
   voiceStatusText: {
     color: shellColors.textOnDarkMuted,
@@ -213,11 +202,8 @@ const styles = StyleSheet.create({
   },
   inputBar: {
     alignItems: 'flex-end',
-    borderTopColor: shellColors.surfaceBorder,
-    borderTopWidth: 1,
     flexDirection: 'row',
     gap: shellSpacing.sm,
-    padding: shellSpacing.md,
   },
   input: {
     backgroundColor: shellColors.surface,

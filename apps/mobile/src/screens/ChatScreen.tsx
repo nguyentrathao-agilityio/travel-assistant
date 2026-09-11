@@ -14,8 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { shellColors, shellRadii, shellSpacing } from '../theme';
 import { renderableMessages } from '../utils/chatMessages';
-import { MessageBubble } from './MessageBubble';
-import { VoiceButton } from './VoiceButton';
+import { MessageBubble, VoiceButton } from '../components';
 
 import type { VoiceState } from '../hooks';
 import type { RenderableMessage } from '../utils/chatMessages';

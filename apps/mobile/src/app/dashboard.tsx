@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 
-import { DashboardScreen } from '../components';
 import { useActiveThreadId, useRecentThreads } from '../hooks';
+import { DashboardScreen } from '../screens';
 import { createRemoteThread, generateThreadId } from '../services';
 
 export default function DashboardRoute() {

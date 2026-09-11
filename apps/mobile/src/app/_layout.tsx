@@ -3,11 +3,12 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 
-import { ApiKeyScreen, RuntimeSetup } from '../components';
+import { RuntimeSetup } from '../components';
 import { resolveRuntimeUrl } from '../config';
 import { OPENAI_API_KEY_HEADER } from '@repo/constants';
 import { useApiKey } from '../hooks';
 import { isApiKeyError } from '../services/openaiApiKey';
+import { ApiKeyScreen } from '../screens';
 import { shellColors } from '../theme';
 import { clientTimezone, todayClientIso } from '@repo/utils';
 

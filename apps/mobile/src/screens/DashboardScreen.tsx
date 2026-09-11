@@ -4,9 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GRID_ROW_HEIGHT, RECENT_ICONS } from '../constants';
 import { shellColors, shellRadii, shellSpacing } from '../theme';
-import { GridActionCard } from './GridActionCard';
-import { IconBadge } from './IconBadge';
-import { PrimaryActionCard } from './PrimaryActionCard';
+import { GridActionCard, IconBadge, PrimaryActionCard } from '../components';
 
 import type { ThreadItem } from '../services';
 

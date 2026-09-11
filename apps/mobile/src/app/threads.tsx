@@ -2,8 +2,8 @@ import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 
-import { AllTripsScreen } from '../components';
 import { useAllThreads } from '../hooks';
+import { AllTripsScreen } from '../screens';
 import { deleteRemoteThread } from '../services';
 
 import type { ThreadItem } from '../services';

@@ -9,7 +9,7 @@ import { RECENT_ICONS } from '../constants';
 import { shellColors, shellRadii, shellSpacing } from '../theme';
 
 // Components
-import { IconBadge } from './IconBadge';
+import { IconBadge } from '../components';
 
 // Types
 import type { ThreadItem } from '../services';

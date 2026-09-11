@@ -1,7 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { ChatScreen } from '../components';
 import {
   useActiveThreadId,
   useBookingAction,
@@ -21,6 +20,7 @@ import {
   useWeatherAction,
 } from '../hooks';
 import { createRemoteThread, generateThreadId } from '../services';
+import { ChatScreen } from '../screens';
 import { messageText, renderableMessages } from '../utils/chatMessages';
 
 export default function ChatRoute() {

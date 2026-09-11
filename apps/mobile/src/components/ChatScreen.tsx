@@ -82,8 +82,7 @@ export const ChatScreen = ({
       style={styles.container}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={insets.top}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         {!isReady ? (
@@ -106,6 +105,7 @@ export const ChatScreen = ({
             }
             ref={listRef}
             renderItem={({ item }) => <MessageBubble allMessages={messages} message={item} />}
+            style={styles.list}
           />
         )}
 
@@ -184,6 +184,9 @@ const styles = StyleSheet.create({
     color: shellColors.textOnDarkMuted,
     fontSize: 15,
     textAlign: 'center',
+  },
+  list: {
+    flex: 1,
   },
   listContent: {
     padding: shellSpacing.lg,

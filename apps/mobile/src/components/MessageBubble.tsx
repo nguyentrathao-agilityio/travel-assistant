@@ -55,13 +55,15 @@ export const MessageBubble = ({ message, allMessages }: MessageBubbleProps) => {
 
   return (
     <View style={[styles.row, isUser ? styles.rowUser : styles.rowAssistant]}>
-      <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleAssistant]}>
-        {isThinking ? (
-          <Text style={styles.thinkingText}>…</Text>
-        ) : (
-          text && <Text style={styles.bubbleText}>{text}</Text>
-        )}
-      </View>
+      {(isThinking || !!text) && (
+        <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleAssistant]}>
+          {isThinking ? (
+            <Text style={styles.thinkingText}>…</Text>
+          ) : (
+            <Text style={styles.bubbleText}>{text}</Text>
+          )}
+        </View>
+      )}
       {toolCalls?.map((toolCall) => (
         <ToolCallRow allMessages={allMessages} key={toolCall.id} toolCall={toolCall} />
       ))}

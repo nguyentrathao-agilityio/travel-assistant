@@ -2,13 +2,24 @@ import { CopilotKitProvider } from '@copilotkit/react-native/headless';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
-import { RuntimeSetup } from '../components';
-import { resolveRuntimeUrl } from '../config';
-import { OPENAI_API_KEY_HEADER } from '@repo/constants';
-import { useApiKey } from '../hooks';
+// Services
 import { isApiKeyError } from '../services/openaiApiKey';
+
+// Constants
+import { OPENAI_API_KEY_HEADER } from '@repo/constants';
+import { CHAT_ROUTE, DASHBOARD_ROUTE, INDEX_ROUTE, THREADS_ROUTE } from '../constants';
+
+// Components
+import { RuntimeSetup } from '../components';
 import { ApiKeyScreen } from '../screens';
+
+// Hooks
+import { useApiKey } from '../hooks';
+
+// Utils
+import { resolveRuntimeUrl } from '../config';
 import { shellColors } from '../theme';
 import { clientTimezone, todayClientIso } from '@repo/utils';
 
@@ -36,10 +47,10 @@ export default function RootLayout() {
 
   if (runtimeConfiguration.status === 'error') {
     return (
-      <>
+      <KeyboardProvider>
         <RuntimeSetup message={runtimeConfiguration.message} />
         <StatusBar style="auto" />
-      </>
+      </KeyboardProvider>
     );
   }
 
@@ -49,56 +60,58 @@ export default function RootLayout() {
 
   if (apiKey.status === 'missing') {
     return (
-      <>
+      <KeyboardProvider>
         <ApiKeyScreen
           error={apiKey.error}
           isVerifying={apiKey.isVerifying}
           onSubmit={apiKey.verifyAndSave}
         />
         <StatusBar style="light" />
-      </>
+      </KeyboardProvider>
     );
   }
 
   return (
-    <CopilotKitProvider
-      headers={() => ({
-        [OPENAI_API_KEY_HEADER]: apiKey.apiKey ?? '',
-        'x-client-date': todayClientIso(),
-        'x-client-timezone': clientTimezone(),
-      })}
-      onError={(event) => {
-        if (isApiKeyError(event.error.message)) {
-          apiKey.clear();
-        }
-      }}
-      runtimeUrl={runtimeConfiguration.runtimeUrl}
-    >
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="dashboard" />
-        <Stack.Screen
-          name="chat"
-          options={{
-            headerShown: true,
-            headerBackButtonDisplayMode: 'minimal',
-            headerStyle: { backgroundColor: shellColors.backgroundGradientEnd },
-            headerTintColor: shellColors.textOnDark,
-            title: 'Chat',
-          }}
-        />
-        <Stack.Screen
-          name="threads"
-          options={{
-            headerShown: true,
-            headerBackButtonDisplayMode: 'minimal',
-            headerStyle: { backgroundColor: shellColors.backgroundGradientEnd },
-            headerTintColor: shellColors.textOnDark,
-            title: 'All trips',
-          }}
-        />
-      </Stack>
-      <StatusBar style="light" />
-    </CopilotKitProvider>
+    <KeyboardProvider>
+      <CopilotKitProvider
+        headers={() => ({
+          [OPENAI_API_KEY_HEADER]: apiKey.apiKey ?? '',
+          'x-client-date': todayClientIso(),
+          'x-client-timezone': clientTimezone(),
+        })}
+        onError={(event) => {
+          if (isApiKeyError(event.error.message)) {
+            apiKey.clear();
+          }
+        }}
+        runtimeUrl={runtimeConfiguration.runtimeUrl}
+      >
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name={INDEX_ROUTE} />
+          <Stack.Screen name={DASHBOARD_ROUTE} />
+          <Stack.Screen
+            name={CHAT_ROUTE}
+            options={{
+              headerShown: true,
+              headerBackButtonDisplayMode: 'minimal',
+              headerStyle: { backgroundColor: shellColors.backgroundGradientEnd },
+              headerTintColor: shellColors.textOnDark,
+              title: 'Chat',
+            }}
+          />
+          <Stack.Screen
+            name={THREADS_ROUTE}
+            options={{
+              headerShown: true,
+              headerBackButtonDisplayMode: 'minimal',
+              headerStyle: { backgroundColor: shellColors.backgroundGradientEnd },
+              headerTintColor: shellColors.textOnDark,
+              title: 'All trips',
+            }}
+          />
+        </Stack>
+        <StatusBar style="light" />
+      </CopilotKitProvider>
+    </KeyboardProvider>
   );
 }

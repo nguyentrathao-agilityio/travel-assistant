@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 
+import { CHAT_PATH } from '../constants';
 import { useAllThreads } from '../hooks';
 import { AllTripsScreen } from '../screens';
 import { deleteRemoteThread } from '../services';
@@ -16,7 +17,7 @@ export default function ThreadsRoute() {
 
   const handleOpenThread = useCallback(
     (threadId: string) => {
-      router.push({ pathname: '/chat', params: { threadId } });
+      router.push({ pathname: CHAT_PATH, params: { threadId } });
     },
     [router]
   );

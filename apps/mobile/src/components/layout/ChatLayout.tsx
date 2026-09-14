@@ -1,8 +1,14 @@
-import { Platform, KeyboardAvoidingView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { KeyboardGestureArea, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+// Constants
+import { CHAT_COMPOSER_INPUT_NATIVE_ID } from '../../constants';
+
+// Utils
 import { shellColors, shellSpacing } from '../../theme';
 
+// Types
 import type { ReactNode } from 'react';
 
 interface ChatLayoutProps {
@@ -10,7 +16,6 @@ interface ChatLayoutProps {
   composer: ReactNode;
   composerInset?: boolean;
   header?: ReactNode;
-  keyboardVerticalOffset?: number;
   messages: ReactNode;
 }
 
@@ -19,33 +24,28 @@ export const ChatLayout = ({
   composer,
   composerInset = true,
   header,
-  keyboardVerticalOffset = 0,
   messages,
 }: ChatLayoutProps) => {
   const insets = useSafeAreaInsets();
+  const restingBottomInset = composerInset ? insets.bottom : 0;
 
   return (
     <SafeAreaView edges={['left', 'right']} style={[styles.safeArea, { backgroundColor }]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={keyboardVerticalOffset}
+      <KeyboardGestureArea
+        enableSwipeToDismiss={false}
+        interpolator="ios"
         style={styles.keyboard}
+        textInputNativeID={CHAT_COMPOSER_INPUT_NATIVE_ID}
       >
         {header ? <View style={styles.header}>{header}</View> : null}
         <View style={styles.messagesContainer}>{messages}</View>
-        <View
-          style={[
-            styles.composerContainer,
-            {
-              paddingBottom: composerInset
-                ? Math.max(insets.bottom, shellSpacing.md)
-                : shellSpacing.md,
-            },
-          ]}
+        <KeyboardStickyView
+          offset={{ closed: restingBottomInset, opened: 0 }}
+          style={styles.composerContainer}
         >
           {composer}
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardStickyView>
+      </KeyboardGestureArea>
     </SafeAreaView>
   );
 };
@@ -66,8 +66,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   composerContainer: {
+    backgroundColor: shellColors.backgroundGradientEnd,
     borderTopColor: shellColors.surfaceBorder,
     borderTopWidth: 1,
+    paddingBottom: shellSpacing.md,
     paddingHorizontal: shellSpacing.md,
     paddingTop: shellSpacing.md,
   },

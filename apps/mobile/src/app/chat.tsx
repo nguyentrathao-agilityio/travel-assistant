@@ -13,6 +13,7 @@ import {
   usePlacesAction,
   useRouteAction,
   useSeedAgentHistory,
+  useThemeAction,
   useThreadHistory,
   useTripState,
   useTripSummaryAction,
@@ -53,6 +54,7 @@ export default function ChatRoute() {
   useHotelAction({ selectHotel, sendMessage, state: tripState });
   useBookingAction();
   useTripSummaryAction({ state: tripState });
+  useThemeAction();
 
   const pendingVoiceReplyRef = useRef(false);
 

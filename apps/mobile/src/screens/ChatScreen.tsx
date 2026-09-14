@@ -1,15 +1,59 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useRef, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  type LayoutChangeEvent,
+  type ScrollViewProps,
+} from 'react-native';
+import { KeyboardChatScrollView } from 'react-native-keyboard-controller';
+import { useSharedValue, withTiming } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { shellColors, shellRadii, shellSpacing } from '../theme';
-import { renderableMessages } from '../utils/chatMessages';
+// Constants
+import { CHAT_COMPOSER_INPUT_NATIVE_ID } from '../constants';
+
+// Components
 import { ChatLayout, MessageBubble, VoiceButton } from '../components';
 
+// Utils
+import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { renderableMessages } from '../utils/chatMessages';
+
+// Types
 import type { VoiceState } from '../hooks';
 import type { RenderableMessage } from '../utils/chatMessages';
 import type { Message } from '@copilotkit/react-native/headless';
+import type { KeyboardChatScrollViewProps } from 'react-native-keyboard-controller';
 import type { ReactElement } from 'react';
+
+const MIN_COMPOSER_INPUT_HEIGHT = 40;
+const COMPOSER_BOTTOM_MARGIN = shellSpacing.xs;
+
+const ChatScrollView = forwardRef<
+  React.ComponentRef<typeof KeyboardChatScrollView>,
+  ScrollViewProps & KeyboardChatScrollViewProps
+>((props, ref) => {
+  const insets = useSafeAreaInsets();
+  const restingBottomInset = Math.max(insets.bottom, shellSpacing.md);
+
+  return (
+    <KeyboardChatScrollView
+      ref={ref}
+      automaticallyAdjustContentInsets={false}
+      contentInsetAdjustmentBehavior="never"
+      keyboardDismissMode="interactive"
+      keyboardLiftBehavior="always"
+      offset={restingBottomInset - COMPOSER_BOTTOM_MARGIN}
+      {...props}
+    />
+  );
+});
+ChatScrollView.displayName = 'ChatScrollView';
 
 interface ChatScreenProps {
   messages: Message[];
@@ -52,8 +96,34 @@ export const ChatScreen = ({
   const rows = renderableMessages(messages);
   const isAwaitingApproval = interruptElement !== null;
 
+  const isAtBottomRef = useRef(true);
+  const onEndVisible = useCallback((visible: boolean) => {
+    isAtBottomRef.current = visible;
+  }, []);
+
+  const extraContentPadding = useSharedValue(0);
+  const onComposerInputLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      extraContentPadding.value = withTiming(
+        Math.max(event.nativeEvent.layout.height - MIN_COMPOSER_INPUT_HEIGHT, 0),
+        { duration: 250 }
+      );
+    },
+    [extraContentPadding]
+  );
+  const renderScrollComponent = useCallback(
+    (props: ScrollViewProps) => (
+      <ChatScrollView
+        {...props}
+        extraContentPadding={extraContentPadding}
+        onEndVisible={onEndVisible}
+      />
+    ),
+    [extraContentPadding, onEndVisible]
+  );
+
   useEffect(() => {
-    if (rows.length > 0) {
+    if (rows.length > 0 && isAtBottomRef.current) {
       listRef.current?.scrollToEnd({ animated: true });
     }
   }, [rows.length, messages, interruptElement]);
@@ -62,6 +132,7 @@ export const ChatScreen = ({
     if (!draft.trim() || isRunning || isAwaitingApproval) return;
     onSend(draft);
     setDraft('');
+    requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
   };
 
   return (
@@ -94,6 +165,7 @@ export const ChatScreen = ({
               }
               ref={listRef}
               renderItem={({ item }) => <MessageBubble allMessages={messages} message={item} />}
+              renderScrollComponent={renderScrollComponent}
               style={styles.list}
             />
           )
@@ -125,7 +197,9 @@ export const ChatScreen = ({
               />
               <TextInput
                 multiline
+                nativeID={CHAT_COMPOSER_INPUT_NATIVE_ID}
                 onChangeText={setDraft}
+                onLayout={onComposerInputLayout}
                 placeholder="Ask about your trip…"
                 placeholderTextColor={shellColors.textOnDarkFaint}
                 style={styles.input}
@@ -201,7 +275,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   inputBar: {
-    alignItems: 'flex-end',
+    alignItems: 'center',
     flexDirection: 'row',
     gap: shellSpacing.sm,
   },

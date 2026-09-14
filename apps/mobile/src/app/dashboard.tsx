@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 
+import { CHAT_PATH, THREADS_PATH } from '../constants';
 import { useActiveThreadId, useRecentThreads } from '../hooks';
 import { DashboardScreen } from '../screens';
 import { createRemoteThread, generateThreadId } from '../services';
@@ -12,7 +13,7 @@ export default function DashboardRoute() {
   const handleStartNewTrip = async () => {
     const threadId = generateThreadId();
 
-    router.push({ pathname: '/chat', params: { threadId } });
+    router.push({ pathname: CHAT_PATH, params: { threadId } });
     markActive(threadId);
 
     try {
@@ -25,16 +26,16 @@ export default function DashboardRoute() {
   };
 
   const handleOpenThread = (threadId: string) => {
-    router.push({ pathname: '/chat', params: { threadId } });
+    router.push({ pathname: CHAT_PATH, params: { threadId } });
     markActive(threadId);
   };
 
   const handleAskByVoice = () => {
-    router.push({ pathname: '/chat', params: { focusVoice: '1' } });
+    router.push({ pathname: CHAT_PATH, params: { focusVoice: '1' } });
   };
 
   const handleSeeAll = () => {
-    router.push('/threads');
+    router.push(THREADS_PATH);
   };
 
   return (

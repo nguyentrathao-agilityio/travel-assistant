@@ -12,7 +12,7 @@ import { OPENAI_API_KEY_HEADER } from '@repo/constants';
 import { CHAT_ROUTE, DASHBOARD_ROUTE, INDEX_ROUTE, THREADS_ROUTE } from '../constants';
 
 // Components
-import { RuntimeSetup } from '../components';
+import { RuntimeSetup, ThemeToggleButton } from '../components';
 import { ApiKeyScreen } from '../screens';
 
 // Hooks
@@ -20,7 +20,7 @@ import { useApiKey } from '../hooks';
 
 // Utils
 import { resolveRuntimeUrl } from '../config';
-import { shellColors } from '../theme';
+import { ThemeProvider, useShellTheme } from '../theme';
 import { clientTimezone, todayClientIso } from '@repo/utils';
 
 type RuntimeConfiguration =
@@ -42,8 +42,9 @@ const runtimeConfiguration: RuntimeConfiguration = (() => {
   }
 })();
 
-export default function RootLayout() {
+const RootLayoutContent = () => {
   const apiKey = useApiKey();
+  const { colors } = useShellTheme();
 
   if (runtimeConfiguration.status === 'error') {
     return (
@@ -55,7 +56,7 @@ export default function RootLayout() {
   }
 
   if (apiKey.status === 'loading') {
-    return <View style={{ flex: 1, backgroundColor: shellColors.backgroundGradientEnd }} />;
+    return <View style={{ flex: 1, backgroundColor: colors.backgroundGradientEnd }} />;
   }
 
   if (apiKey.status === 'missing') {
@@ -92,20 +93,22 @@ export default function RootLayout() {
           <Stack.Screen
             name={CHAT_ROUTE}
             options={{
-              headerShown: true,
               headerBackButtonDisplayMode: 'minimal',
-              headerStyle: { backgroundColor: shellColors.backgroundGradientEnd },
-              headerTintColor: shellColors.textOnDark,
+              headerRight: () => <ThemeToggleButton />,
+              headerShown: true,
+              headerStyle: { backgroundColor: colors.backgroundGradientEnd },
+              headerTintColor: colors.textOnDark,
               title: 'Chat',
             }}
           />
           <Stack.Screen
             name={THREADS_ROUTE}
             options={{
-              headerShown: true,
               headerBackButtonDisplayMode: 'minimal',
-              headerStyle: { backgroundColor: shellColors.backgroundGradientEnd },
-              headerTintColor: shellColors.textOnDark,
+              headerRight: () => <ThemeToggleButton />,
+              headerShown: true,
+              headerStyle: { backgroundColor: colors.backgroundGradientEnd },
+              headerTintColor: colors.textOnDark,
               title: 'All trips',
             }}
           />
@@ -113,5 +116,13 @@ export default function RootLayout() {
         <StatusBar style="light" />
       </CopilotKitProvider>
     </KeyboardProvider>
+  );
+};
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <RootLayoutContent />
+    </ThemeProvider>
   );
 }

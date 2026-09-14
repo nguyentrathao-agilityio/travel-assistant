@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 // Types
@@ -7,11 +8,13 @@ import type { Booking } from '@repo/types';
 import { BOOKING_STATUSES } from '@repo/constants';
 
 // Utils
-import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatPrice } from '@repo/utils';
 
 // Components
 import { Card, Typography } from './common';
+
+import type { ShellColors } from '../theme';
 
 interface BookingResultCardProps {
   booking: Booking;
@@ -19,6 +22,8 @@ interface BookingResultCardProps {
 
 export const BookingResultCard = ({ booking }: BookingResultCardProps) => {
   const isCancelled = booking.status === BOOKING_STATUSES.CANCELLED;
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <Card style={styles.card}>
@@ -54,28 +59,29 @@ export const BookingResultCard = ({ booking }: BookingResultCardProps) => {
   );
 };
 
-const styles = StyleSheet.create({
-  card: {
-    gap: shellSpacing.sm,
-  },
-  headerRow: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-  },
-  headerText: {
-    flex: 1,
-    gap: 2,
-  },
-  detailsGrid: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.button,
-    flexDirection: 'row',
-    gap: shellSpacing.md,
-    padding: shellSpacing.sm,
-  },
-  detailCell: {
-    flex: 1,
-    gap: 2,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    card: {
+      gap: shellSpacing.sm,
+    },
+    headerRow: {
+      alignItems: 'flex-start',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+    },
+    headerText: {
+      flex: 1,
+      gap: 2,
+    },
+    detailsGrid: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.button,
+      flexDirection: 'row',
+      gap: shellSpacing.md,
+      padding: shellSpacing.sm,
+    },
+    detailCell: {
+      flex: 1,
+      gap: 2,
+    },
+  });

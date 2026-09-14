@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 // Types
@@ -7,10 +8,12 @@ import type { TipsResult } from '@repo/types';
 import { TIP_CATEGORY_LABELS } from '@repo/constants';
 
 // Utils
-import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 
 // Components
 import { Typography } from './common';
+
+import type { ShellColors } from '../theme';
 
 interface TripTipsSectionProps {
   tips: TipsResult;
@@ -19,6 +22,9 @@ interface TripTipsSectionProps {
 const MAX_TIPS = 4;
 
 export const TripTipsSection = ({ tips }: TripTipsSectionProps) => {
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   if (!tips.tips.length) return null;
 
   const essentialTips = tips.tips.filter((tip) => tip.isEssential).slice(0, MAX_TIPS);
@@ -52,31 +58,32 @@ export const TripTipsSection = ({ tips }: TripTipsSectionProps) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    gap: shellSpacing.sm,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: shellSpacing.xs,
-  },
-  content: {
-    flex: 1,
-    gap: 2,
-  },
-  titleRow: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-    justifyContent: 'space-between',
-  },
-  title: {
-    flex: 1,
-  },
-  badge: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.pill,
-    paddingHorizontal: shellSpacing.xs,
-    paddingVertical: 2,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    container: {
+      gap: shellSpacing.sm,
+    },
+    row: {
+      flexDirection: 'row',
+      gap: shellSpacing.xs,
+    },
+    content: {
+      flex: 1,
+      gap: 2,
+    },
+    titleRow: {
+      alignItems: 'flex-start',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+      justifyContent: 'space-between',
+    },
+    title: {
+      flex: 1,
+    },
+    badge: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.pill,
+      paddingHorizontal: shellSpacing.xs,
+      paddingVertical: 2,
+    },
+  });

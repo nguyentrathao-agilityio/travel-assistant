@@ -1,9 +1,11 @@
 import { Mic, MicOff, Volume2 } from 'lucide-react-native';
+import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 
-import { shellColors, shellRadii } from '../theme';
+import { shellRadii, useShellTheme } from '../theme';
 
 import type { VoiceState } from '../hooks';
+import type { ShellColors } from '../theme';
 
 interface VoiceButtonProps {
   voiceState: VoiceState;
@@ -22,6 +24,9 @@ export const VoiceButton = ({
   onStopListening,
   onStopSpeaking,
 }: VoiceButtonProps) => {
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const handlePress = () => {
     if (voiceState === 'listening') {
       onStopListening();
@@ -57,18 +62,20 @@ export const VoiceButton = ({
 };
 
 const VoiceIcon = ({ voiceState }: { voiceState: VoiceState }) => {
+  const { colors } = useShellTheme();
+
   switch (voiceState) {
     case 'listening':
-      return <Mic color={shellColors.textOnDark} size={ICON_SIZE} />;
+      return <Mic color={colors.textOnDark} size={ICON_SIZE} />;
     case 'connecting':
     case 'thinking':
-      return <ActivityIndicator color={shellColors.textOnDarkMuted} />;
+      return <ActivityIndicator color={colors.textOnDarkMuted} />;
     case 'speaking':
-      return <Volume2 color={shellColors.textOnDark} size={ICON_SIZE} />;
+      return <Volume2 color={colors.textOnDark} size={ICON_SIZE} />;
     case 'error':
-      return <MicOff color={shellColors.danger} size={ICON_SIZE} />;
+      return <MicOff color={colors.danger} size={ICON_SIZE} />;
     default:
-      return <Mic color={shellColors.textOnDarkMuted} size={ICON_SIZE} />;
+      return <Mic color={colors.textOnDarkMuted} size={ICON_SIZE} />;
   }
 };
 
@@ -89,19 +96,20 @@ const voiceLabel = (voiceState: VoiceState): string => {
   }
 };
 
-const styles = StyleSheet.create({
-  button: {
-    alignItems: 'center',
-    backgroundColor: shellColors.surface,
-    borderColor: shellColors.surfaceBorder,
-    borderRadius: shellRadii.pill,
-    borderWidth: 1,
-    height: 44,
-    justifyContent: 'center',
-    width: 44,
-  },
-  buttonActive: {
-    backgroundColor: shellColors.danger,
-    borderColor: shellColors.danger,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    button: {
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderColor: colors.surfaceBorder,
+      borderRadius: shellRadii.pill,
+      borderWidth: 1,
+      height: 44,
+      justifyContent: 'center',
+      width: 44,
+    },
+    buttonActive: {
+      backgroundColor: colors.danger,
+      borderColor: colors.danger,
+    },
+  });

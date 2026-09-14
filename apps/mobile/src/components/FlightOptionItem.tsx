@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 // Types
@@ -7,13 +8,15 @@ import type { Flight } from '@repo/types';
 import { FLIGHT_LOW_SEATS_THRESHOLD } from '@repo/constants';
 
 // Utils
-import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatDuration } from '@repo/utils';
 import { formatPrice, formatTime } from '@repo/utils';
 import type { FlightBadge } from '../utils/flight';
 
 // Components
 import { Typography } from './common';
+
+import type { ShellColors } from '../theme';
 
 interface FlightOptionItemProps {
   flight: Flight;
@@ -32,6 +35,8 @@ export const FlightOptionItem = ({
 }: FlightOptionItemProps) => {
   const stopsLabel =
     flight.stops === 0 ? 'Direct' : `${flight.stops} stop${flight.stops > 1 ? 's' : ''}`;
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <View style={[styles.container, isSelected && styles.containerSelected]}>
@@ -89,51 +94,52 @@ export const FlightOptionItem = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    borderColor: shellColors.surfaceBorder,
-    borderTopWidth: 1,
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-    paddingVertical: shellSpacing.sm,
-  },
-  containerSelected: {
-    backgroundColor: shellColors.pillBackground,
-  },
-  avatar: {
-    alignItems: 'center',
-    backgroundColor: shellColors.accentGradientStart,
-    borderRadius: shellRadii.button,
-    height: 36,
-    justifyContent: 'center',
-    width: 36,
-  },
-  content: {
-    flex: 1,
-    gap: 2,
-  },
-  footerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-    marginTop: shellSpacing.xs,
-  },
-  badge: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.pill,
-    paddingHorizontal: shellSpacing.xs,
-    paddingVertical: 2,
-  },
-  price: {
-    flex: 1,
-  },
-  selectButton: {
-    backgroundColor: shellColors.accentGradientStart,
-    borderRadius: shellRadii.pill,
-    paddingHorizontal: shellSpacing.sm,
-    paddingVertical: shellSpacing.xs,
-  },
-  selectButtonDisabled: {
-    opacity: 0.4,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    container: {
+      borderColor: colors.surfaceBorder,
+      borderTopWidth: 1,
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+      paddingVertical: shellSpacing.sm,
+    },
+    containerSelected: {
+      backgroundColor: colors.pillBackground,
+    },
+    avatar: {
+      alignItems: 'center',
+      backgroundColor: colors.accentGradientStart,
+      borderRadius: shellRadii.button,
+      height: 36,
+      justifyContent: 'center',
+      width: 36,
+    },
+    content: {
+      flex: 1,
+      gap: 2,
+    },
+    footerRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+      marginTop: shellSpacing.xs,
+    },
+    badge: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.pill,
+      paddingHorizontal: shellSpacing.xs,
+      paddingVertical: 2,
+    },
+    price: {
+      flex: 1,
+    },
+    selectButton: {
+      backgroundColor: colors.accentGradientStart,
+      borderRadius: shellRadii.pill,
+      paddingHorizontal: shellSpacing.sm,
+      paddingVertical: shellSpacing.xs,
+    },
+    selectButtonDisabled: {
+      opacity: 0.4,
+    },
+  });

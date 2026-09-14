@@ -1,7 +1,10 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import type { ReactNode } from 'react';
 
-import { shellColors, shellRadii, shellSpacing } from '../../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+
+import type { ShellColors } from '../../theme';
 
 interface CardProps {
   children: ReactNode;
@@ -10,6 +13,9 @@ interface CardProps {
 }
 
 export const Card = ({ children, onPress, style }: CardProps) => {
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   if (onPress) {
     return (
       <Pressable accessibilityRole="button" onPress={onPress} style={[styles.card, style]}>
@@ -21,12 +27,13 @@ export const Card = ({ children, onPress, style }: CardProps) => {
   return <View style={[styles.card, style]}>{children}</View>;
 };
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: shellColors.surface,
-    borderColor: shellColors.surfaceBorder,
-    borderRadius: shellRadii.card,
-    borderWidth: 1,
-    padding: shellSpacing.md,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderColor: colors.surfaceBorder,
+      borderRadius: shellRadii.card,
+      borderWidth: 1,
+      padding: shellSpacing.md,
+    },
+  });

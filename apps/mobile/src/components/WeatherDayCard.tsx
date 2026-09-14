@@ -1,14 +1,17 @@
+import { useMemo } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 
 // Types
 import type { DailyForecast } from '@repo/types';
 
 // Utils
-import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatDayDate, toFahrenheit } from '@repo/utils';
 
 // Components
 import { Typography } from './common';
+
+import type { ShellColors } from '../theme';
 
 interface WeatherDayCardProps {
   day: DailyForecast;
@@ -46,6 +49,8 @@ export const WeatherDayCard = ({
   const highF = toFahrenheit(day.tempMaxC);
   const lowF = toFahrenheit(day.tempMinC);
   const rainPct = day.precipitationProbabilityMax ?? 0;
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <View style={[styles.card, (isBest || isSingle) && styles.cardHighlighted, style]}>
@@ -94,54 +99,55 @@ export const WeatherDayCard = ({
   );
 };
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: shellColors.surface,
-    borderColor: shellColors.surfaceBorder,
-    borderRadius: shellRadii.button,
-    borderWidth: 1,
-    gap: shellSpacing.xs,
-    padding: shellSpacing.sm,
-  },
-  cardHighlighted: {
-    borderColor: shellColors.accentGradientStart,
-    borderWidth: 2,
-  },
-  headerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  headerLeft: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: shellSpacing.xs,
-  },
-  stepBadge: {
-    alignItems: 'center',
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.pill,
-    height: 20,
-    justifyContent: 'center',
-    width: 20,
-  },
-  bestBadge: {
-    backgroundColor: shellColors.accentGradientStart,
-    borderRadius: shellRadii.pill,
-    paddingHorizontal: shellSpacing.xs,
-    paddingVertical: 2,
-  },
-  conditionRow: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    gap: shellSpacing.xs,
-  },
-  conditionText: {
-    flex: 1,
-  },
-  tempsRow: {
-    alignItems: 'baseline',
-    flexDirection: 'row',
-    gap: shellSpacing.xs,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderColor: colors.surfaceBorder,
+      borderRadius: shellRadii.button,
+      borderWidth: 1,
+      gap: shellSpacing.xs,
+      padding: shellSpacing.sm,
+    },
+    cardHighlighted: {
+      borderColor: colors.accentGradientStart,
+      borderWidth: 2,
+    },
+    headerRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    headerLeft: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: shellSpacing.xs,
+    },
+    stepBadge: {
+      alignItems: 'center',
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.pill,
+      height: 20,
+      justifyContent: 'center',
+      width: 20,
+    },
+    bestBadge: {
+      backgroundColor: colors.accentGradientStart,
+      borderRadius: shellRadii.pill,
+      paddingHorizontal: shellSpacing.xs,
+      paddingVertical: 2,
+    },
+    conditionRow: {
+      alignItems: 'flex-start',
+      flexDirection: 'row',
+      gap: shellSpacing.xs,
+    },
+    conditionText: {
+      flex: 1,
+    },
+    tempsRow: {
+      alignItems: 'baseline',
+      flexDirection: 'row',
+      gap: shellSpacing.xs,
+    },
+  });

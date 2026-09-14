@@ -1,24 +1,34 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 // Types
 import type { DestinationExplorerResult } from '@repo/schemas';
 
 // Utils
-import { shellColors, shellSpacing } from '../theme';
+import { shellSpacing, useShellTheme } from '../theme';
 
 // Components
 import { Card, Typography } from './common';
 import { TripPlacesSection } from './TripPlacesSection';
 import { TripTipsSection } from './TripTipsSection';
 
+import type { ShellColors } from '../theme';
+
 interface DestinationExplorerCardProps {
   data: DestinationExplorerResult;
 }
 
-const Divider = () => <View style={styles.divider} />;
+const Divider = () => {
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
+  return <View style={styles.divider} />;
+};
 
 export const DestinationExplorerCard = ({ data }: DestinationExplorerCardProps) => {
   const { city, places, tips, weather } = data;
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const hasPlaces = !!places && places.results.length > 0;
   const hasTips = !!tips && tips.count > 0;
@@ -68,20 +78,21 @@ export const DestinationExplorerCard = ({ data }: DestinationExplorerCardProps) 
   );
 };
 
-const styles = StyleSheet.create({
-  card: {
-    gap: shellSpacing.sm,
-  },
-  section: {
-    gap: shellSpacing.xs,
-  },
-  weatherRow: {
-    alignItems: 'baseline',
-    flexDirection: 'row',
-    gap: shellSpacing.xs,
-  },
-  divider: {
-    backgroundColor: shellColors.surfaceBorder,
-    height: 1,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    card: {
+      gap: shellSpacing.sm,
+    },
+    section: {
+      gap: shellSpacing.xs,
+    },
+    weatherRow: {
+      alignItems: 'baseline',
+      flexDirection: 'row',
+      gap: shellSpacing.xs,
+    },
+    divider: {
+      backgroundColor: colors.surfaceBorder,
+      height: 1,
+    },
+  });

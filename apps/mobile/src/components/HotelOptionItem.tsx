@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 // Types
@@ -7,12 +8,14 @@ import type { HotelAvailability } from '@repo/types';
 import { HOTEL_AMENITIES_MAX_DISPLAY } from '@repo/constants';
 
 // Utils
-import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatPrice } from '@repo/utils';
 import type { HotelBadge } from '../utils/hotel';
 
 // Components
 import { Typography } from './common';
+
+import type { ShellColors } from '../theme';
 
 interface HotelOptionItemProps {
   hotel: HotelAvailability;
@@ -31,6 +34,8 @@ export const HotelOptionItem = ({
 }: HotelOptionItemProps) => {
   const visibleAmenities = hotel.amenities.slice(0, HOTEL_AMENITIES_MAX_DISPLAY);
   const extraAmenities = hotel.amenities.length - visibleAmenities.length;
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <View style={[styles.container, isSelected && styles.containerSelected]}>
@@ -104,82 +109,83 @@ export const HotelOptionItem = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    borderColor: shellColors.surfaceBorder,
-    borderRadius: shellRadii.button,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  containerSelected: {
-    borderColor: shellColors.accentGradientStart,
-    borderWidth: 2,
-  },
-  thumbnail: {
-    height: 168,
-    width: '100%',
-  },
-  content: {
-    gap: shellSpacing.xs,
-    padding: shellSpacing.sm,
-  },
-  titleRow: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-    justifyContent: 'space-between',
-  },
-  titleBlock: {
-    flex: 1,
-    gap: 2,
-  },
-  starRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: shellSpacing.xs,
-  },
-  ratingPill: {
-    alignSelf: 'flex-start',
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.pill,
-    paddingHorizontal: shellSpacing.xs,
-    paddingVertical: 2,
-  },
-  badge: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.pill,
-    paddingHorizontal: shellSpacing.xs,
-    paddingVertical: 2,
-  },
-  amenitiesRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: shellSpacing.xs,
-  },
-  amenityPill: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.pill,
-    paddingHorizontal: shellSpacing.xs,
-    paddingVertical: 2,
-  },
-  footerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-    justifyContent: 'space-between',
-  },
-  priceBlock: {
-    flex: 1,
-    gap: 2,
-  },
-  selectButton: {
-    backgroundColor: shellColors.accentGradientStart,
-    borderRadius: shellRadii.pill,
-    paddingHorizontal: shellSpacing.sm,
-    paddingVertical: shellSpacing.xs,
-  },
-  selectButtonDisabled: {
-    opacity: 0.4,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    container: {
+      borderColor: colors.surfaceBorder,
+      borderRadius: shellRadii.button,
+      borderWidth: 1,
+      overflow: 'hidden',
+    },
+    containerSelected: {
+      borderColor: colors.accentGradientStart,
+      borderWidth: 2,
+    },
+    thumbnail: {
+      height: 168,
+      width: '100%',
+    },
+    content: {
+      gap: shellSpacing.xs,
+      padding: shellSpacing.sm,
+    },
+    titleRow: {
+      alignItems: 'flex-start',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+      justifyContent: 'space-between',
+    },
+    titleBlock: {
+      flex: 1,
+      gap: 2,
+    },
+    starRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: shellSpacing.xs,
+    },
+    ratingPill: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.pill,
+      paddingHorizontal: shellSpacing.xs,
+      paddingVertical: 2,
+    },
+    badge: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.pill,
+      paddingHorizontal: shellSpacing.xs,
+      paddingVertical: 2,
+    },
+    amenitiesRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: shellSpacing.xs,
+    },
+    amenityPill: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.pill,
+      paddingHorizontal: shellSpacing.xs,
+      paddingVertical: 2,
+    },
+    footerRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+      justifyContent: 'space-between',
+    },
+    priceBlock: {
+      flex: 1,
+      gap: 2,
+    },
+    selectButton: {
+      backgroundColor: colors.accentGradientStart,
+      borderRadius: shellRadii.pill,
+      paddingHorizontal: shellSpacing.sm,
+      paddingVertical: shellSpacing.xs,
+    },
+    selectButtonDisabled: {
+      opacity: 0.4,
+    },
+  });

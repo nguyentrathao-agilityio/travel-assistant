@@ -8,13 +8,15 @@ import type { Flight, FlightSearchResult } from '@repo/types';
 import { FLIGHT_TAB, type FlightTab } from '@repo/constants';
 
 // Utils
-import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { computeBadges } from '../utils/flight';
 import { formatDateFull, formatPrice, formatTime } from '@repo/utils';
 
 // Components
 import { Card, ConfirmBanner, Typography } from './common';
 import { FlightOptionItem } from './FlightOptionItem';
+
+import type { ShellColors } from '../theme';
 
 interface FlightCardProps {
   data: FlightSearchResult;
@@ -49,6 +51,8 @@ export const FlightCard = ({
   const [selectedReturn, setSelectedReturn] = useState<Flight | null>(initialReturn);
   const [activeTab, setActiveTab] = useState<FlightTab>(FLIGHT_TAB.DEPARTURE);
   const [confirmed, setConfirmed] = useState(isConfirmed);
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const hasReturn = Boolean(data.returnResults?.length);
 
@@ -191,37 +195,38 @@ export const FlightCard = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    gap: shellSpacing.sm,
-  },
-  card: {
-    gap: shellSpacing.xs,
-  },
-  headerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-    justifyContent: 'space-between',
-  },
-  title: {
-    flex: 1,
-  },
-  tabRow: {
-    flexDirection: 'row',
-    gap: shellSpacing.xs,
-    marginTop: shellSpacing.xs,
-  },
-  tab: {
-    borderRadius: shellRadii.pill,
-    paddingHorizontal: shellSpacing.sm,
-    paddingVertical: shellSpacing.xs,
-  },
-  tabActive: {
-    backgroundColor: shellColors.accentGradientStart,
-  },
-  emptyText: {
-    paddingVertical: shellSpacing.md,
-    textAlign: 'center',
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    container: {
+      gap: shellSpacing.sm,
+    },
+    card: {
+      gap: shellSpacing.xs,
+    },
+    headerRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+      justifyContent: 'space-between',
+    },
+    title: {
+      flex: 1,
+    },
+    tabRow: {
+      flexDirection: 'row',
+      gap: shellSpacing.xs,
+      marginTop: shellSpacing.xs,
+    },
+    tab: {
+      borderRadius: shellRadii.pill,
+      paddingHorizontal: shellSpacing.sm,
+      paddingVertical: shellSpacing.xs,
+    },
+    tabActive: {
+      backgroundColor: colors.accentGradientStart,
+    },
+    emptyText: {
+      paddingVertical: shellSpacing.md,
+      textAlign: 'center',
+    },
+  });

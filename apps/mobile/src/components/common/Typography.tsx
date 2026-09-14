@@ -1,6 +1,9 @@
+import { useMemo } from 'react';
 import { Text, type TextProps, type TextStyle } from 'react-native';
 
-import { shellColors } from '../../theme';
+import { useShellTheme } from '../../theme';
+
+import type { ShellColors } from '../../theme';
 
 type TypographyVariant = 'display' | 'heading' | 'title' | 'body' | 'meta' | 'label';
 type TypographyWeight = 'regular' | 'medium' | 'semibold' | 'bold';
@@ -28,12 +31,12 @@ const WEIGHT_STYLES: Record<TypographyWeight, TextStyle['fontWeight']> = {
   bold: '700',
 };
 
-const COLOR_STYLES: Record<TypographyColor, string> = {
-  primary: shellColors.textOnDark,
-  muted: shellColors.textOnDarkMuted,
-  faint: shellColors.textOnDarkFaint,
-  danger: shellColors.danger,
-};
+const createColorStyles = (colors: ShellColors): Record<TypographyColor, string> => ({
+  primary: colors.textOnDark,
+  muted: colors.textOnDarkMuted,
+  faint: colors.textOnDarkFaint,
+  danger: colors.danger,
+});
 
 export const Typography = ({
   variant = 'body',
@@ -41,13 +44,18 @@ export const Typography = ({
   color = 'primary',
   style,
   ...rest
-}: TypographyProps) => (
-  <Text
-    style={[
-      VARIANT_STYLES[variant],
-      { fontWeight: WEIGHT_STYLES[weight], color: COLOR_STYLES[color] },
-      style,
-    ]}
-    {...rest}
-  />
-);
+}: TypographyProps) => {
+  const { colors } = useShellTheme();
+  const colorStyles = useMemo(() => createColorStyles(colors), [colors]);
+
+  return (
+    <Text
+      style={[
+        VARIANT_STYLES[variant],
+        { fontWeight: WEIGHT_STYLES[weight], color: colorStyles[color] },
+        style,
+      ]}
+      {...rest}
+    />
+  );
+};

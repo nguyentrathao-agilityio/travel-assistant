@@ -1,12 +1,20 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+// Constants
 import { GRID_ROW_HEIGHT, RECENT_ICONS } from '../constants';
-import { shellColors, shellRadii, shellSpacing } from '../theme';
-import { GridActionCard, IconBadge, PrimaryActionCard } from '../components';
 
+// Components
+import { GridActionCard, IconBadge, PrimaryActionCard, ThemeToggleButton } from '../components';
+
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
+
+// Types
 import type { ThreadItem } from '../services';
+import type { ShellColors } from '../theme';
 
 interface DashboardScreenProps {
   recentThreadsStatus: 'loading' | 'ready' | 'error';
@@ -31,10 +39,12 @@ export const DashboardScreen = ({
 }: DashboardScreenProps) => {
   const continueTripThreadId = continueThreadId ?? recentThreads[0]?.id;
   const insets = useSafeAreaInsets();
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <LinearGradient
-      colors={[shellColors.backgroundGradientStart, shellColors.backgroundGradientEnd]}
+      colors={[colors.backgroundGradientStart, colors.backgroundGradientEnd]}
       style={styles.container}
     >
       <ScrollView
@@ -45,6 +55,7 @@ export const DashboardScreen = ({
             <Text style={styles.greetingHello}>Hello,</Text>
             <Text style={styles.greetingName}>Traveler</Text>
           </View>
+          <ThemeToggleButton />
         </View>
 
         <View style={styles.grid}>
@@ -110,82 +121,84 @@ export const DashboardScreen = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: shellSpacing.lg,
-  },
-  greetingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: shellSpacing.lg,
-  },
-  greetingHello: {
-    color: shellColors.textOnDarkMuted,
-    fontSize: 15,
-  },
-  greetingName: {
-    color: shellColors.textOnDark,
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  grid: {
-    flexDirection: 'row',
-    gap: shellSpacing.md,
-    height: GRID_ROW_HEIGHT,
-    marginBottom: shellSpacing.lg,
-  },
-  gridLeft: {
-    flex: 1,
-  },
-  gridRight: {
-    flex: 1,
-    gap: shellSpacing.md,
-  },
-  gridRightItem: {
-    flex: 1,
-  },
-  recentHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: shellSpacing.sm,
-  },
-  recentTitle: {
-    color: shellColors.textOnDark,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  seeAll: {
-    color: shellColors.textOnDarkFaint,
-    fontSize: 13,
-  },
-  recentEmpty: {
-    color: shellColors.textOnDarkMuted,
-    fontSize: 13,
-  },
-  recentRow: {
-    alignItems: 'center',
-    backgroundColor: shellColors.surface,
-    borderColor: shellColors.surfaceBorder,
-    borderRadius: shellRadii.row,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-    marginBottom: shellSpacing.sm,
-    paddingHorizontal: shellSpacing.md,
-    paddingVertical: shellSpacing.sm + 2,
-  },
-  recentItemText: {
-    color: shellColors.textOnDarkMuted,
-    flex: 1,
-    fontSize: 13,
-  },
-  chevron: {
-    color: shellColors.textOnDarkMuted,
-    fontSize: 20,
-    fontWeight: '300',
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    content: {
+      padding: shellSpacing.lg,
+    },
+    greetingRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: shellSpacing.lg,
+    },
+    greetingHello: {
+      color: colors.textOnDarkMuted,
+      fontSize: 15,
+    },
+    greetingName: {
+      color: colors.textOnDark,
+      fontSize: 24,
+      fontWeight: '700',
+    },
+    grid: {
+      flexDirection: 'row',
+      gap: shellSpacing.md,
+      height: GRID_ROW_HEIGHT,
+      marginBottom: shellSpacing.lg,
+    },
+    gridLeft: {
+      flex: 1,
+    },
+    gridRight: {
+      flex: 1,
+      gap: shellSpacing.md,
+    },
+    gridRightItem: {
+      flex: 1,
+    },
+    recentHeader: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: shellSpacing.sm,
+    },
+    recentTitle: {
+      color: colors.textOnDark,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    seeAll: {
+      color: colors.textOnDarkFaint,
+      fontSize: 13,
+    },
+    recentEmpty: {
+      color: colors.textOnDarkMuted,
+      fontSize: 13,
+    },
+    recentRow: {
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderColor: colors.surfaceBorder,
+      borderRadius: shellRadii.row,
+      borderWidth: 1,
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+      marginBottom: shellSpacing.sm,
+      paddingHorizontal: shellSpacing.md,
+      paddingVertical: shellSpacing.sm + 2,
+    },
+    recentItemText: {
+      color: colors.textOnDarkMuted,
+      flex: 1,
+      fontSize: 13,
+    },
+    chevron: {
+      color: colors.textOnDarkMuted,
+      fontSize: 20,
+      fontWeight: '300',
+    },
+  });

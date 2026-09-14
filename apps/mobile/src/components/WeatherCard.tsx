@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 // Types
@@ -7,12 +8,14 @@ import type { WeatherResult } from '@repo/types';
 import { WEATHER_FORECAST_MAX_DAYS } from '@repo/constants';
 
 // Utils
-import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatDayDate, getBestDayIndex } from '@repo/utils';
 
 // Components
 import { Card, Typography } from './common';
 import { WeatherDayCard } from './WeatherDayCard';
+
+import type { ShellColors } from '../theme';
 
 interface WeatherCardProps {
   data: WeatherResult;
@@ -21,6 +24,8 @@ interface WeatherCardProps {
 export const WeatherCard = ({ data }: WeatherCardProps) => {
   const visibleDays = (data.daily ?? []).slice(0, WEATHER_FORECAST_MAX_DAYS);
   const bestIdx = getBestDayIndex(visibleDays);
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <Card style={styles.card}>
@@ -68,20 +73,21 @@ export const WeatherCard = ({ data }: WeatherCardProps) => {
   );
 };
 
-const styles = StyleSheet.create({
-  card: {
-    gap: shellSpacing.sm,
-  },
-  grid: {
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-  },
-  dayCard: {
-    width: 120,
-  },
-  banner: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.button,
-    padding: shellSpacing.sm,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    card: {
+      gap: shellSpacing.sm,
+    },
+    grid: {
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+    },
+    dayCard: {
+      width: 120,
+    },
+    banner: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.button,
+      padding: shellSpacing.sm,
+    },
+  });

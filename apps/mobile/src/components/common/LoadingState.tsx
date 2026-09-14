@@ -1,19 +1,26 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 
-import { shellColors, shellRadii, shellSpacing } from '../../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
 import { Card } from './Card';
+
+import type { ShellColors } from '../../theme';
 
 interface LoadingStateProps {
   lines?: number;
 }
 
-const SkeletonLine = ({ width, opacity }: { width: `${number}%`; opacity: Animated.Value }) => (
-  <Animated.View style={[styles.line, { width, opacity }]} />
-);
+const SkeletonLine = ({ width, opacity }: { width: `${number}%`; opacity: Animated.Value }) => {
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
+  return <Animated.View style={[styles.line, { width, opacity }]} />;
+};
 
 export const LoadingState = ({ lines = 3 }: LoadingStateProps) => {
   const opacity = useRef(new Animated.Value(0.4)).current;
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   useEffect(() => {
     const pulse = Animated.loop(
@@ -49,13 +56,14 @@ export const LoadingState = ({ lines = 3 }: LoadingStateProps) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    gap: shellSpacing.sm,
-  },
-  line: {
-    backgroundColor: shellColors.surfaceBorder,
-    borderRadius: shellRadii.button,
-    height: 10,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    container: {
+      gap: shellSpacing.sm,
+    },
+    line: {
+      backgroundColor: colors.surfaceBorder,
+      borderRadius: shellRadii.button,
+      height: 10,
+    },
+  });

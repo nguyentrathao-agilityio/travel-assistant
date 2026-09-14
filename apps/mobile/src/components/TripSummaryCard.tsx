@@ -6,7 +6,7 @@ import type { Hotel, SelectedFlight } from '@repo/types';
 import type { TripSummaryResult } from '@repo/schemas';
 
 // Utils
-import { shellColors, shellSpacing } from '../theme';
+import { shellSpacing, useShellTheme } from '../theme';
 import { replaceCostEstimateWithBookings } from '@repo/utils';
 import { formatDisplayDate } from '@repo/utils';
 
@@ -17,18 +17,27 @@ import { TripFlightSection } from './TripFlightSection';
 import { TripHotelSection } from './TripHotelSection';
 import { TripRouteSection } from './TripRouteSection';
 
+import type { ShellColors } from '../theme';
+
 interface TripSummaryCardProps {
   data: TripSummaryResult;
   bookedFlight?: SelectedFlight;
   bookedHotel?: Hotel;
 }
 
-const Divider = () => <View style={styles.divider} />;
+const Divider = () => {
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
+  return <View style={styles.divider} />;
+};
 
 export const TripSummaryCard = ({ data, bookedFlight, bookedHotel }: TripSummaryCardProps) => {
   const hasFlight = !!(bookedFlight?.departure ?? data.suggestedFlight);
   const hasHotel = !!(bookedHotel ?? data.suggestedHotel);
   const hasRoute = !!data.route?.stops?.length;
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const finalCostEstimate = useMemo(
     () =>
@@ -100,33 +109,34 @@ export const TripSummaryCard = ({ data, bookedFlight, bookedHotel }: TripSummary
   );
 };
 
-const styles = StyleSheet.create({
-  card: {
-    gap: shellSpacing.sm,
-  },
-  header: {
-    gap: shellSpacing.xs,
-  },
-  headerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-  },
-  destination: {
-    flex: 1,
-  },
-  summaryBadge: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: 999,
-    paddingHorizontal: shellSpacing.xs,
-    paddingVertical: 2,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    gap: shellSpacing.md,
-  },
-  divider: {
-    backgroundColor: shellColors.surfaceBorder,
-    height: 1,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    card: {
+      gap: shellSpacing.sm,
+    },
+    header: {
+      gap: shellSpacing.xs,
+    },
+    headerRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+    },
+    destination: {
+      flex: 1,
+    },
+    summaryBadge: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: 999,
+      paddingHorizontal: shellSpacing.xs,
+      paddingVertical: 2,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      gap: shellSpacing.md,
+    },
+    divider: {
+      backgroundColor: colors.surfaceBorder,
+      height: 1,
+    },
+  });

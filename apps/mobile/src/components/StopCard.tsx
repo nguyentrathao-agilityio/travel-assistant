@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
 // Types
@@ -7,12 +8,14 @@ import type { LandmarkStop, TravelLeg } from '@repo/types';
 import { TRAVEL_TRANSPORT_LABELS } from '../constants';
 
 // Utils
-import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatDuration } from '@repo/utils';
 import { toMapsUrl } from '../utils/route';
 
 // Components
 import { Card, Typography } from './common';
+
+import type { ShellColors } from '../theme';
 
 interface StopCardProps {
   stop: LandmarkStop;
@@ -23,6 +26,8 @@ interface StopCardProps {
 export const StopCard = ({ stop, index, nextLeg }: StopCardProps) => {
   const { name, description, visitDurationMin, openingHours, entranceFee, lat, lng } = stop;
   const mapsUrl = toMapsUrl(lat, lng);
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <View style={styles.container}>
@@ -87,51 +92,52 @@ export const StopCard = ({ stop, index, nextLeg }: StopCardProps) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    gap: shellSpacing.xs,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-  },
-  stepBadge: {
-    alignItems: 'center',
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.pill,
-    height: 24,
-    justifyContent: 'center',
-    marginTop: 2,
-    width: 24,
-  },
-  card: {
-    flex: 1,
-    gap: shellSpacing.xs,
-  },
-  titleRow: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-    justifyContent: 'space-between',
-  },
-  title: {
-    flex: 1,
-  },
-  durationPill: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.pill,
-    paddingHorizontal: shellSpacing.xs,
-    paddingVertical: 2,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: shellSpacing.md,
-  },
-  mapLink: {
-    textDecorationLine: 'underline',
-  },
-  legRow: {
-    paddingLeft: shellSpacing.lg + shellSpacing.xs,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    container: {
+      gap: shellSpacing.xs,
+    },
+    row: {
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+    },
+    stepBadge: {
+      alignItems: 'center',
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.pill,
+      height: 24,
+      justifyContent: 'center',
+      marginTop: 2,
+      width: 24,
+    },
+    card: {
+      flex: 1,
+      gap: shellSpacing.xs,
+    },
+    titleRow: {
+      alignItems: 'flex-start',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+      justifyContent: 'space-between',
+    },
+    title: {
+      flex: 1,
+    },
+    durationPill: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.pill,
+      paddingHorizontal: shellSpacing.xs,
+      paddingVertical: 2,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: shellSpacing.md,
+    },
+    mapLink: {
+      textDecorationLine: 'underline',
+    },
+    legRow: {
+      paddingLeft: shellSpacing.lg + shellSpacing.xs,
+    },
+  });

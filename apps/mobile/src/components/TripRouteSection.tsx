@@ -1,16 +1,18 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 // Types
 import type { LandmarkStop, RouteResult } from '@repo/schemas';
 
 // Utils
-import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatDuration } from '@repo/utils';
 import { offsetDate } from '@repo/utils';
 
 // Components
 import { Typography } from './common';
+
+import type { ShellColors } from '../theme';
 
 interface TripRouteSectionProps {
   route?: RouteResult | null;
@@ -26,25 +28,32 @@ const chunk = <T,>(items: T[], size: number): T[][] => {
   return result;
 };
 
-const StopRow = ({ stop }: { stop: LandmarkStop }) => (
-  <View style={styles.stopRow}>
-    <View style={styles.dot} />
-    <View style={styles.stopContent}>
-      <Typography variant="meta" weight="medium">
-        {stop.name}
-        {stop.visitDurationMin ? ` · ${formatDuration(stop.visitDurationMin)}` : ''}
-      </Typography>
-      {!!stop.entranceFee && (
-        <Typography color="faint" variant="label">
-          Entrance: ${stop.entranceFee}
+const StopRow = ({ stop }: { stop: LandmarkStop }) => {
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
+  return (
+    <View style={styles.stopRow}>
+      <View style={styles.dot} />
+      <View style={styles.stopContent}>
+        <Typography variant="meta" weight="medium">
+          {stop.name}
+          {stop.visitDurationMin ? ` · ${formatDuration(stop.visitDurationMin)}` : ''}
         </Typography>
-      )}
+        {!!stop.entranceFee && (
+          <Typography color="faint" variant="label">
+            Entrance: ${stop.entranceFee}
+          </Typography>
+        )}
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 export const TripRouteSection = ({ route, days, startDate }: TripRouteSectionProps) => {
   const [activeDay, setActiveDay] = useState(0);
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   if (!route?.stops?.length) return null;
 
@@ -101,50 +110,51 @@ export const TripRouteSection = ({ route, days, startDate }: TripRouteSectionPro
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    gap: shellSpacing.sm,
-  },
-  headerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  tabRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: shellSpacing.xs,
-  },
-  tab: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.pill,
-    paddingHorizontal: shellSpacing.sm,
-    paddingVertical: shellSpacing.xs,
-  },
-  tabActive: {
-    backgroundColor: shellColors.accentGradientStart,
-  },
-  dayCard: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.button,
-    gap: shellSpacing.sm,
-    padding: shellSpacing.sm,
-  },
-  stopRow: {
-    flexDirection: 'row',
-    gap: shellSpacing.xs,
-    paddingLeft: shellSpacing.xs,
-  },
-  dot: {
-    backgroundColor: shellColors.textOnDarkFaint,
-    borderRadius: 3,
-    height: 6,
-    marginTop: 6,
-    width: 6,
-  },
-  stopContent: {
-    flex: 1,
-    gap: 1,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    container: {
+      gap: shellSpacing.sm,
+    },
+    headerRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+    },
+    tabRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: shellSpacing.xs,
+    },
+    tab: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.pill,
+      paddingHorizontal: shellSpacing.sm,
+      paddingVertical: shellSpacing.xs,
+    },
+    tabActive: {
+      backgroundColor: colors.accentGradientStart,
+    },
+    dayCard: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.button,
+      gap: shellSpacing.sm,
+      padding: shellSpacing.sm,
+    },
+    stopRow: {
+      flexDirection: 'row',
+      gap: shellSpacing.xs,
+      paddingLeft: shellSpacing.xs,
+    },
+    dot: {
+      backgroundColor: colors.textOnDarkFaint,
+      borderRadius: 3,
+      height: 6,
+      marginTop: 6,
+      width: 6,
+    },
+    stopContent: {
+      flex: 1,
+      gap: 1,
+    },
+  });

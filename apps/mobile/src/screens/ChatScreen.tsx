@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   Pressable,
@@ -21,11 +21,12 @@ import { CHAT_COMPOSER_INPUT_NATIVE_ID } from '../constants';
 import { ChatLayout, MessageBubble, VoiceButton } from '../components';
 
 // Utils
-import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { renderableMessages } from '../utils/chatMessages';
 
 // Types
 import type { VoiceState } from '../hooks';
+import type { ShellColors } from '../theme';
 import type { RenderableMessage } from '../utils/chatMessages';
 import type { Message } from '@copilotkit/react-native/headless';
 import type { KeyboardChatScrollViewProps } from 'react-native-keyboard-controller';
@@ -95,6 +96,8 @@ export const ChatScreen = ({
   const listRef = useRef<FlatList<RenderableMessage>>(null);
   const rows = renderableMessages(messages);
   const isAwaitingApproval = interruptElement !== null;
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const isAtBottomRef = useRef(true);
   const onEndVisible = useCallback((visible: boolean) => {
@@ -137,7 +140,7 @@ export const ChatScreen = ({
 
   return (
     <LinearGradient
-      colors={[shellColors.backgroundGradientStart, shellColors.backgroundGradientEnd]}
+      colors={[colors.backgroundGradientStart, colors.backgroundGradientEnd]}
       style={styles.container}
     >
       <ChatLayout
@@ -201,7 +204,7 @@ export const ChatScreen = ({
                 onChangeText={setDraft}
                 onLayout={onComposerInputLayout}
                 placeholder="Ask about your trip…"
-                placeholderTextColor={shellColors.textOnDarkFaint}
+                placeholderTextColor={colors.textOnDarkFaint}
                 style={styles.input}
                 value={draft}
               />
@@ -230,88 +233,89 @@ export const ChatScreen = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  centeredState: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-    padding: shellSpacing.xl,
-  },
-  interruptWrap: {
-    alignItems: 'flex-start',
-    marginTop: shellSpacing.md,
-  },
-  centeredStateText: {
-    color: shellColors.textOnDarkMuted,
-    fontSize: 15,
-    textAlign: 'center',
-  },
-  list: {
-    flex: 1,
-  },
-  listContent: {
-    padding: shellSpacing.lg,
-  },
-  errorBanner: {
-    backgroundColor: 'rgba(248, 113, 113, 0.16)',
-    borderColor: shellColors.danger,
-    borderRadius: shellRadii.card,
-    borderWidth: 1,
-    marginBottom: shellSpacing.sm,
-    padding: shellSpacing.sm,
-  },
-  errorText: {
-    color: shellColors.danger,
-    fontSize: 13,
-  },
-  voiceStatusBanner: {
-    marginBottom: shellSpacing.sm,
-  },
-  voiceStatusText: {
-    color: shellColors.textOnDarkMuted,
-    fontSize: 13,
-  },
-  inputBar: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-  },
-  input: {
-    backgroundColor: shellColors.surface,
-    borderColor: shellColors.surfaceBorder,
-    borderRadius: shellRadii.row,
-    borderWidth: 1,
-    color: shellColors.textOnDark,
-    flex: 1,
-    fontSize: 15,
-    maxHeight: 120,
-    paddingHorizontal: shellSpacing.md,
-    paddingVertical: shellSpacing.sm,
-  },
-  sendButton: {
-    alignItems: 'center',
-    backgroundColor: shellColors.accentGradientStart,
-    borderRadius: shellRadii.pill,
-    height: 44,
-    justifyContent: 'center',
-    width: 44,
-  },
-  sendButtonDisabled: {
-    opacity: 0.4,
-  },
-  stopButton: {
-    alignItems: 'center',
-    backgroundColor: shellColors.danger,
-    borderRadius: shellRadii.pill,
-    height: 44,
-    justifyContent: 'center',
-    width: 44,
-  },
-  sendIcon: {
-    color: shellColors.textOnDark,
-    fontSize: 16,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    centeredState: {
+      alignItems: 'center',
+      flex: 1,
+      justifyContent: 'center',
+      padding: shellSpacing.xl,
+    },
+    interruptWrap: {
+      alignItems: 'flex-start',
+      marginTop: shellSpacing.md,
+    },
+    centeredStateText: {
+      color: colors.textOnDarkMuted,
+      fontSize: 15,
+      textAlign: 'center',
+    },
+    list: {
+      flex: 1,
+    },
+    listContent: {
+      padding: shellSpacing.lg,
+    },
+    errorBanner: {
+      backgroundColor: 'rgba(248, 113, 113, 0.16)',
+      borderColor: colors.danger,
+      borderRadius: shellRadii.card,
+      borderWidth: 1,
+      marginBottom: shellSpacing.sm,
+      padding: shellSpacing.sm,
+    },
+    errorText: {
+      color: colors.danger,
+      fontSize: 13,
+    },
+    voiceStatusBanner: {
+      marginBottom: shellSpacing.sm,
+    },
+    voiceStatusText: {
+      color: colors.textOnDarkMuted,
+      fontSize: 13,
+    },
+    inputBar: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderColor: colors.surfaceBorder,
+      borderRadius: shellRadii.row,
+      borderWidth: 1,
+      color: colors.textOnDark,
+      flex: 1,
+      fontSize: 15,
+      maxHeight: 120,
+      paddingHorizontal: shellSpacing.md,
+      paddingVertical: shellSpacing.sm,
+    },
+    sendButton: {
+      alignItems: 'center',
+      backgroundColor: colors.accentGradientStart,
+      borderRadius: shellRadii.pill,
+      height: 44,
+      justifyContent: 'center',
+      width: 44,
+    },
+    sendButtonDisabled: {
+      opacity: 0.4,
+    },
+    stopButton: {
+      alignItems: 'center',
+      backgroundColor: colors.danger,
+      borderRadius: shellRadii.pill,
+      height: 44,
+      justifyContent: 'center',
+      width: 44,
+    },
+    sendIcon: {
+      color: colors.textOnDark,
+      fontSize: 16,
+    },
+  });

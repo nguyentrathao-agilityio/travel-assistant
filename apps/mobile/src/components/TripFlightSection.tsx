@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 // Types
@@ -5,11 +6,13 @@ import type { Flight } from '@repo/types';
 import type { SuggestedFlight } from '@repo/schemas';
 
 // Utils
-import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 
 // Components
 import { FlightOptionItem } from './FlightOptionItem';
 import { Typography } from './common';
+
+import type { ShellColors } from '../theme';
 
 interface TripFlightSectionProps {
   suggested?: SuggestedFlight | null;
@@ -21,6 +24,8 @@ export const TripFlightSection = ({ suggested, booked, bookedReturn }: TripFligh
   const departureFlight = booked ?? suggested;
   const isBooked = !!booked;
   const hasReturn = !!bookedReturn;
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   if (!departureFlight) return null;
 
@@ -58,27 +63,28 @@ export const TripFlightSection = ({ suggested, booked, bookedReturn }: TripFligh
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    gap: shellSpacing.xs,
-  },
-  headerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  badge: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.pill,
-    paddingHorizontal: shellSpacing.xs,
-    paddingVertical: 2,
-  },
-  badgeBooked: {
-    backgroundColor: shellColors.accentGradientStart,
-  },
-  itemWrapper: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.button,
-    paddingHorizontal: shellSpacing.sm,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    container: {
+      gap: shellSpacing.xs,
+    },
+    headerRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    badge: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.pill,
+      paddingHorizontal: shellSpacing.xs,
+      paddingVertical: 2,
+    },
+    badgeBooked: {
+      backgroundColor: colors.accentGradientStart,
+    },
+    itemWrapper: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.button,
+      paddingHorizontal: shellSpacing.sm,
+    },
+  });

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 // Types
@@ -8,11 +8,13 @@ import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
 import { BOOKING_ACTIONS, BOOKING_DECISIONS } from '@repo/constants';
 
 // Utils
-import { shellColors, shellRadii, shellSpacing } from '../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatPrice } from '@repo/utils';
 
 // Components
 import { Card, Typography } from './common';
+
+import type { ShellColors } from '../theme';
 
 type EditableBookingDetails = Record<string, string | number | boolean | null>;
 
@@ -39,6 +41,8 @@ export const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCard
   const [hasSavedChanges, setHasSavedChanges] = useState(false);
   const isCancellation = request.action === BOOKING_ACTIONS.CANCEL;
   const canEdit = !isCancellation && request.allowedDecisions.includes(BOOKING_DECISIONS.EDIT);
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleConfirm = useCallback(() => {
     setSubmitted(true);
@@ -172,66 +176,67 @@ export const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCard
   );
 };
 
-const styles = StyleSheet.create({
-  card: {
-    gap: shellSpacing.sm,
-  },
-  headerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-  },
-  title: {
-    flex: 1,
-  },
-  detailsGrid: {
-    backgroundColor: shellColors.pillBackground,
-    borderRadius: shellRadii.button,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: shellSpacing.sm,
-    padding: shellSpacing.sm,
-  },
-  detailCell: {
-    gap: 2,
-    minWidth: '42%',
-  },
-  input: {
-    borderColor: shellColors.surfaceBorder,
-    borderRadius: shellRadii.button,
-    borderWidth: 1,
-    color: shellColors.textOnDark,
-    fontSize: 13,
-    paddingHorizontal: shellSpacing.sm,
-    paddingVertical: shellSpacing.xs,
-  },
-  totalRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: shellSpacing.sm,
-    justifyContent: 'flex-end',
-  },
-  secondaryButton: {
-    alignItems: 'center',
-    borderColor: shellColors.surfaceBorder,
-    borderRadius: shellRadii.button,
-    borderWidth: 1,
-    paddingHorizontal: shellSpacing.md,
-    paddingVertical: shellSpacing.sm,
-  },
-  primaryButton: {
-    alignItems: 'center',
-    backgroundColor: shellColors.accentGradientStart,
-    borderRadius: shellRadii.button,
-    paddingHorizontal: shellSpacing.md,
-    paddingVertical: shellSpacing.sm,
-  },
-  buttonDisabled: {
-    opacity: 0.4,
-  },
-});
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    card: {
+      gap: shellSpacing.sm,
+    },
+    headerRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+    },
+    title: {
+      flex: 1,
+    },
+    detailsGrid: {
+      backgroundColor: colors.pillBackground,
+      borderRadius: shellRadii.button,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: shellSpacing.sm,
+      padding: shellSpacing.sm,
+    },
+    detailCell: {
+      gap: 2,
+      minWidth: '42%',
+    },
+    input: {
+      borderColor: colors.surfaceBorder,
+      borderRadius: shellRadii.button,
+      borderWidth: 1,
+      color: colors.textOnDark,
+      fontSize: 13,
+      paddingHorizontal: shellSpacing.sm,
+      paddingVertical: shellSpacing.xs,
+    },
+    totalRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    buttonRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: shellSpacing.sm,
+      justifyContent: 'flex-end',
+    },
+    secondaryButton: {
+      alignItems: 'center',
+      borderColor: colors.surfaceBorder,
+      borderRadius: shellRadii.button,
+      borderWidth: 1,
+      paddingHorizontal: shellSpacing.md,
+      paddingVertical: shellSpacing.sm,
+    },
+    primaryButton: {
+      alignItems: 'center',
+      backgroundColor: colors.accentGradientStart,
+      borderRadius: shellRadii.button,
+      paddingHorizontal: shellSpacing.md,
+      paddingVertical: shellSpacing.sm,
+    },
+    buttonDisabled: {
+      opacity: 0.4,
+    },
+  });

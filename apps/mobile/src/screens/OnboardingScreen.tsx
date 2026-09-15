@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { ArrowLeft, ArrowRight, ChevronsRight } from 'lucide-react-native';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
@@ -19,11 +20,13 @@ export const OnboardingScreen = ({ onContinue }: OnboardingScreenProps) => {
   return (
     <LinearGradient
       colors={[colors.backgroundGradientStart, colors.backgroundGradientEnd]}
+      end={{ x: 0.9, y: 0 }}
+      start={{ x: 0.1, y: 1 }}
       style={styles.container}
     >
       <View style={styles.brandRow}>
         <Text style={styles.brandMark}>◔</Text>
-        <Text style={styles.brandName}>Travel Planner</Text>
+        <Text style={styles.brandName}>Chattie Travel</Text>
       </View>
 
       <View style={styles.illustrationArea}>
@@ -36,14 +39,11 @@ export const OnboardingScreen = ({ onContinue }: OnboardingScreenProps) => {
           <View style={[styles.tailDot, styles.tailDotSmall]} />
         </View>
 
-        <LinearGradient
-          colors={[colors.accentGradientStart, colors.accentGradientEnd]}
-          end={{ x: 1, y: 1 }}
-          start={{ x: 0, y: 0 }}
-          style={styles.illustrationBadge}
-        >
-          <Text style={styles.illustrationEmoji}>🧭</Text>
-        </LinearGradient>
+        <Image
+          resizeMode="contain"
+          source={require('../../assets/onboarding-robot.png')}
+          style={styles.illustrationImage}
+        />
       </View>
 
       <View style={styles.textBlock}>
@@ -59,18 +59,23 @@ export const OnboardingScreen = ({ onContinue }: OnboardingScreenProps) => {
         </View>
       </View>
 
-      <Pressable accessibilityRole="button" onPress={onContinue} style={styles.continuePill}>
-        <LinearGradient
-          colors={[colors.accentGradientStart, colors.accentGradientEnd]}
-          end={{ x: 1, y: 1 }}
-          start={{ x: 0, y: 0 }}
-          style={styles.continueIconCircle}
-        >
-          <Text style={styles.continueIconText}>→</Text>
-        </LinearGradient>
-        <Text style={styles.continueLabel}>Continue</Text>
-        <Text style={styles.continueChevrons}>›››</Text>
-      </Pressable>
+      <View style={styles.bottomRow}>
+        <View importantForAccessibility="no-hide-descendants" style={styles.backCircle}>
+          <ArrowLeft color={colors.textOnDark} size={20} />
+        </View>
+        <Pressable accessibilityRole="button" onPress={onContinue} style={styles.continuePill}>
+          <LinearGradient
+            colors={[colors.accentGradientStart, colors.accentGradientEnd]}
+            end={{ x: 1, y: 1 }}
+            start={{ x: 0, y: 0 }}
+            style={styles.continueIconCircle}
+          >
+            <ArrowRight color={colors.textOnDark} size={18} />
+          </LinearGradient>
+          <Text style={styles.continueLabel}>Continue</Text>
+          <ChevronsRight color={colors.textOnDarkMuted} size={16} style={styles.continueChevrons} />
+        </Pressable>
+      </View>
     </LinearGradient>
   );
 };
@@ -80,14 +85,15 @@ const createStyles = (colors: ShellColors) =>
     container: {
       flex: 1,
       justifyContent: 'space-between',
-      paddingBottom: shellSpacing.xl,
-      paddingHorizontal: shellSpacing.xl,
-      paddingTop: shellSpacing.xl * 2,
+      paddingBottom: shellSpacing.lg,
+      paddingHorizontal: shellSpacing.lg,
+      paddingTop: shellSpacing.xl + shellSpacing.lg,
     },
     brandRow: {
       alignItems: 'center',
       flexDirection: 'row',
       gap: shellSpacing.xs,
+      justifyContent: 'center',
     },
     brandMark: {
       color: colors.textOnDark,
@@ -102,6 +108,7 @@ const createStyles = (colors: ShellColors) =>
       alignItems: 'center',
       flex: 1,
       justifyContent: 'center',
+      paddingTop: shellSpacing.md,
     },
     speechBubble: {
       backgroundColor: colors.surface,
@@ -136,28 +143,23 @@ const createStyles = (colors: ShellColors) =>
       height: 4,
       width: 4,
     },
-    illustrationBadge: {
-      alignItems: 'center',
-      borderRadius: 32,
-      height: 160,
-      justifyContent: 'center',
-      marginTop: shellSpacing.md,
-      width: 160,
-    },
-    illustrationEmoji: {
-      fontSize: 68,
+    illustrationImage: {
+      height: 270,
+      marginTop: shellSpacing.xs,
+      width: 290,
     },
     textBlock: {
       marginBottom: shellSpacing.lg,
     },
     headline: {
       color: colors.textOnDark,
-      fontSize: 26,
-      fontWeight: '700',
-      lineHeight: 34,
+      fontSize: 27,
+      fontWeight: '500',
+      lineHeight: 36,
     },
     headlineAccent: {
       color: colors.accentGradientEnd,
+      fontWeight: '700',
     },
     subcopy: {
       color: colors.textOnDarkMuted,
@@ -179,25 +181,36 @@ const createStyles = (colors: ShellColors) =>
       backgroundColor: colors.accentGradientEnd,
       width: 24,
     },
+    bottomRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+    },
+    backCircle: {
+      alignItems: 'center',
+      backgroundColor: colors.pillBackground,
+      borderColor: colors.surfaceBorder,
+      borderWidth: 1,
+      borderRadius: shellRadii.pill,
+      height: 56,
+      justifyContent: 'center',
+      width: 56,
+    },
     continuePill: {
       alignItems: 'center',
       backgroundColor: colors.pillBackground,
       borderRadius: shellRadii.pill,
+      flex: 1,
       flexDirection: 'row',
+      height: 56,
       paddingHorizontal: shellSpacing.sm,
-      paddingVertical: shellSpacing.sm,
     },
     continueIconCircle: {
       alignItems: 'center',
       borderRadius: shellRadii.pill,
-      height: 40,
+      height: 48,
       justifyContent: 'center',
-      width: 40,
-    },
-    continueIconText: {
-      color: colors.textOnDark,
-      fontSize: 18,
-      fontWeight: '700',
+      width: 48,
     },
     continueLabel: {
       color: colors.textOnDark,
@@ -207,8 +220,6 @@ const createStyles = (colors: ShellColors) =>
       textAlign: 'center',
     },
     continueChevrons: {
-      color: colors.textOnDarkMuted,
-      fontSize: 16,
       marginRight: shellSpacing.sm,
     },
   });

@@ -1,18 +1,18 @@
 export type ShellColors = typeof darkShellColors;
 
 export const darkShellColors = {
-  backgroundGradientStart: '#1b0b34',
-  backgroundGradientEnd: '#3a0f5c',
-  accentGradientStart: '#a21caf',
-  accentGradientEnd: '#ec4899',
-  surface: 'rgba(255, 255, 255, 0.07)',
-  surfaceBorder: 'rgba(255, 255, 255, 0.14)',
-  iconBadgeBackground: 'rgba(0, 0, 0, 0.32)',
-  pillBackground: '#241141',
-  bubbleUserBackground: '#a21caf',
-  textOnDark: '#f5f3ff',
-  textOnDarkMuted: '#c9b8e8',
-  textOnDarkFaint: '#8a7aad',
+  backgroundGradientStart: '#0d0618',
+  backgroundGradientEnd: '#421267',
+  accentGradientStart: '#8b20e8',
+  accentGradientEnd: '#ec24b7',
+  surface: 'rgba(255, 255, 255, 0.075)',
+  surfaceBorder: 'rgba(230, 192, 255, 0.13)',
+  iconBadgeBackground: 'rgba(183, 123, 220, 0.2)',
+  pillBackground: '#211033',
+  bubbleUserBackground: '#5b2877',
+  textOnDark: '#fbf7ff',
+  textOnDarkMuted: '#d0c0dc',
+  textOnDarkFaint: '#9b87ae',
   danger: '#f87171',
 };
 

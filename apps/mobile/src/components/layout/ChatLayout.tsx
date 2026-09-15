@@ -12,8 +12,6 @@ import { shellSpacing, useShellTheme } from '../../theme';
 // Types
 import type { ReactNode } from 'react';
 
-import type { ShellColors } from '../../theme';
-
 interface ChatLayoutProps {
   backgroundColor?: string;
   composer: ReactNode;
@@ -32,7 +30,7 @@ export const ChatLayout = ({
   const insets = useSafeAreaInsets();
   const restingBottomInset = composerInset ? insets.bottom : 0;
   const { colors } = useShellTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useMemo(() => createStyles(), []);
   const resolvedBackgroundColor = backgroundColor ?? colors.backgroundGradientEnd;
 
   return (
@@ -59,7 +57,7 @@ export const ChatLayout = ({
   );
 };
 
-const createStyles = (colors: ShellColors) =>
+const createStyles = () =>
   StyleSheet.create({
     safeArea: {
       flex: 1,
@@ -76,9 +74,7 @@ const createStyles = (colors: ShellColors) =>
       flex: 1,
     },
     composerContainer: {
-      backgroundColor: colors.backgroundGradientEnd,
-      borderTopColor: colors.surfaceBorder,
-      borderTopWidth: 1,
+      backgroundColor: 'transparent',
       paddingBottom: shellSpacing.md,
       paddingHorizontal: shellSpacing.md,
       paddingTop: shellSpacing.md,

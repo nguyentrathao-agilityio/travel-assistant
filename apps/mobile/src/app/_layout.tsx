@@ -1,7 +1,8 @@
 import { CopilotKitProvider } from '@copilotkit/react-native/headless';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View } from 'react-native';
+import { Sparkles } from 'lucide-react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 // Services
@@ -95,10 +96,17 @@ const RootLayoutContent = () => {
             options={{
               headerBackButtonDisplayMode: 'minimal',
               headerRight: () => <ThemeToggleButton />,
+              headerTitle: () => (
+                <View style={styles.chatHeaderTitle}>
+                  <Sparkles color={colors.textOnDark} size={18} strokeWidth={2.2} />
+                  <Text style={[styles.chatHeaderTitleText, { color: colors.textOnDark }]}>
+                    AI Travel
+                  </Text>
+                </View>
+              ),
               headerShown: true,
               headerStyle: { backgroundColor: colors.backgroundGradientEnd },
               headerTintColor: colors.textOnDark,
-              title: 'Chat',
             }}
           />
           <Stack.Screen
@@ -126,3 +134,15 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  chatHeaderTitle: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  chatHeaderTitleText: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+});

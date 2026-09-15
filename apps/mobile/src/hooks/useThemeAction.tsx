@@ -3,16 +3,21 @@ import { Moon, Sun } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
 import { z } from 'zod';
 
+// Constants
+import {
+  CHANGE_THEME_ACTION,
+  CHANGE_THEME_ACTION_DESCRIPTION,
+  THEME_VALUES,
+} from '@repo/constants';
+
 // Components
 import { Card, Typography } from '../components/common';
 
 // Utils
 import { shellSpacing, useShellTheme } from '../theme';
 
-const CHANGE_THEME_TOOL_NAME = 'changeTheme';
-
 const themeParameters = z.object({
-  theme: z.enum(['toggle', 'light', 'dark']),
+  theme: z.enum([THEME_VALUES.TOGGLE, THEME_VALUES.LIGHT, THEME_VALUES.DARK]),
 });
 
 /** Lets the agent change the app theme on behalf of the user via chat. */
@@ -21,12 +26,16 @@ export const useThemeAction = () => {
 
   useRenderTool(
     {
-      name: CHANGE_THEME_TOOL_NAME,
-      description:
-        'Change the app theme. ALWAYS pass theme="toggle" unless the user explicitly says "light mode" or "dark mode".',
+      name: CHANGE_THEME_ACTION,
+      description: CHANGE_THEME_ACTION_DESCRIPTION,
       parameters: themeParameters,
       handler: async ({ theme: requested }) => {
-        const next = requested === 'toggle' ? (theme === 'dark' ? 'light' : 'dark') : requested;
+        const next =
+          requested === THEME_VALUES.TOGGLE
+            ? theme === THEME_VALUES.DARK
+              ? THEME_VALUES.LIGHT
+              : THEME_VALUES.DARK
+            : requested;
 
         setTheme(next);
 
@@ -35,7 +44,7 @@ export const useThemeAction = () => {
       render: ({ status, result }) => {
         if (status !== ToolCallStatus.Complete || !result) return <></>;
 
-        const isDark = result === 'dark';
+        const isDark = result === THEME_VALUES.DARK;
 
         return (
           <Card style={styles.row}>

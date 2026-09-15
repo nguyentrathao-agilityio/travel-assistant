@@ -1,9 +1,5 @@
-export const THEME = {
-  LIGHT: 'light',
-  DARK: 'dark',
-  TOGGLE: 'toggle',
-} as const;
+import type { THEME_VALUES } from '@repo/constants';
 
-export type Theme = (typeof THEME)[keyof Omit<typeof THEME, 'TOGGLE'>];
+export type Theme = (typeof THEME_VALUES)[keyof Omit<typeof THEME_VALUES, 'TOGGLE'>];
 
 export const THEME_STORAGE_KEY = 'vite-ui-theme';

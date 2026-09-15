@@ -30,6 +30,17 @@ export const PLACE_PRICE_LABELS: Readonly<Record<number, string>> = {
 
 export const PLACE_PRICE_LABEL_FALLBACK = '$';
 
+export const THEME_VALUES = {
+  LIGHT: 'light',
+  DARK: 'dark',
+  TOGGLE: 'toggle',
+} as const;
+
+export const CHANGE_THEME_ACTION = 'changeTheme';
+
+export const CHANGE_THEME_ACTION_DESCRIPTION =
+  'Change the app theme. ALWAYS pass theme="toggle" unless the user explicitly says "light mode" or "dark mode".';
+
 export const TIP_CATEGORY_LABELS = {
   transport: '🚌 Transport',
   money: '💰 Money',

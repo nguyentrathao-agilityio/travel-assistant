@@ -28,7 +28,6 @@ jest.mock('@/constants', () => ({
   COPILOTKIT_PUBLIC_LICENSE_KEY: 'test-key',
   OPENAI_API_KEY_HEADER: 'x-openai-api-key',
   RUNTIME_URL: 'http://localhost',
-  THEME: { LIGHT: 'light', DARK: 'dark', TOGGLE: 'toggle' },
   THEME_STORAGE_KEY: 'vite-ui-theme',
 }));
 

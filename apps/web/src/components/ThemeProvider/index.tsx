@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
 // Constants
-import { THEME, THEME_STORAGE_KEY, type Theme } from '@/constants';
+import { THEME_VALUES } from '@repo/constants';
+import { THEME_STORAGE_KEY, type Theme } from '@/constants';
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ type ThemeProviderState = {
 };
 
 const initialState: ThemeProviderState = {
-  theme: THEME.LIGHT,
+  theme: THEME_VALUES.LIGHT,
   setTheme: () => null,
 };
 
@@ -23,7 +24,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = THEME.LIGHT,
+  defaultTheme = THEME_VALUES.LIGHT,
   storageKey = THEME_STORAGE_KEY,
   ...props
 }: ThemeProviderProps) {
@@ -34,7 +35,7 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
 
-    root.classList.remove(THEME.LIGHT, THEME.DARK);
+    root.classList.remove(THEME_VALUES.LIGHT, THEME_VALUES.DARK);
     root.classList.add(theme);
   }, [theme]);
 

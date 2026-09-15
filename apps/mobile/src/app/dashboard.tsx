@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { CHAT_PATH, THREADS_PATH } from '../constants';
 import { useActiveThreadId, useRecentThreads } from '../hooks';
 import { DashboardScreen } from '../screens';
-import { createRemoteThread, generateThreadId } from '../services';
+import { createRemoteThread, findEmptyThreadId, generateThreadId } from '../services';
 
 export default function DashboardRoute() {
   const router = useRouter();
@@ -11,6 +11,14 @@ export default function DashboardRoute() {
   const { activeThreadId, markActive } = useActiveThreadId();
 
   const handleStartNewTrip = async () => {
+    const emptyThreadId = findEmptyThreadId(threads);
+
+    if (emptyThreadId) {
+      router.push({ pathname: CHAT_PATH, params: { threadId: emptyThreadId } });
+      markActive(emptyThreadId);
+      return;
+    }
+
     const threadId = generateThreadId();
 
     router.push({ pathname: CHAT_PATH, params: { threadId } });

@@ -1,13 +1,15 @@
+import { ArrowRight } from 'lucide-react-native';
+import type { LucideIcon } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
-import { shellRadii, shellSpacing, useShellTheme } from '../theme';
+import { shellSpacing, useShellTheme } from '../theme';
 import { IconBadge } from './IconBadge';
 
 import type { ShellColors } from '../theme';
 
 interface GridActionCardProps {
-  icon: string;
+  icon: string | LucideIcon;
   label: string;
   onPress: () => void;
   style?: ViewStyle;
@@ -19,13 +21,13 @@ export const GridActionCard = ({ icon, label, onPress, style }: GridActionCardPr
 
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={[styles.card, style]}>
-      <View style={styles.headerRow}>
-        <IconBadge icon={icon} size={32} />
-        <Text style={styles.chevron}>›</Text>
+      <IconBadge icon={icon} shape="square" size={32} />
+      <View style={styles.footerRow}>
+        <Text numberOfLines={2} style={styles.label}>
+          {label}
+        </Text>
+        <ArrowRight color={colors.textOnDarkMuted} size={17} />
       </View>
-      <Text numberOfLines={2} style={styles.label}>
-        {label}
-      </Text>
     </Pressable>
   );
 };
@@ -35,26 +37,23 @@ const createStyles = (colors: ShellColors) =>
     card: {
       backgroundColor: colors.surface,
       borderColor: colors.surfaceBorder,
-      borderRadius: shellRadii.card,
+      borderRadius: 18,
       borderWidth: 1,
       justifyContent: 'space-between',
       padding: shellSpacing.md,
     },
-    headerRow: {
-      alignItems: 'center',
+    footerRow: {
+      alignItems: 'flex-end',
       flexDirection: 'row',
+      gap: shellSpacing.xs,
       justifyContent: 'space-between',
-      marginBottom: shellSpacing.sm,
-    },
-    chevron: {
-      color: colors.textOnDarkMuted,
-      fontSize: 20,
-      fontWeight: '300',
+      marginTop: shellSpacing.sm,
     },
     label: {
       color: colors.textOnDark,
-      fontSize: 14,
-      fontWeight: '600',
+      flex: 1,
+      fontSize: 15,
+      fontWeight: '500',
       lineHeight: 18,
     },
   });

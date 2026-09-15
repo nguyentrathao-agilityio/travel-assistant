@@ -1,13 +1,15 @@
 import { useRenderToolCall } from '@copilotkit/react-native/headless';
-import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef } from 'react';
+import { AccessibilityInfo, Animated, StyleSheet, Text, View } from 'react-native';
 
+// Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { findToolMessage, messageText } from '../utils/chatMessages';
 
+// Types
+import type { Message } from '@copilotkit/react-native/headless';
 import type { ShellColors } from '../theme';
 import type { RenderableMessage } from '../utils/chatMessages';
-import type { Message } from '@copilotkit/react-native/headless';
 
 interface MessageBubbleProps {
   message: RenderableMessage;
@@ -21,6 +23,51 @@ const ToolCallFallback = ({ name }: { name: string }) => {
   return (
     <View style={styles.toolCallFallback}>
       <Text style={styles.toolCallFallbackText}>Using {name}…</Text>
+    </View>
+  );
+};
+
+export const ThinkingIndicator = () => {
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const dots = useRef([0, 1, 2].map(() => new Animated.Value(0.35))).current;
+
+  useEffect(() => {
+    let animation: Animated.CompositeAnimation | null = null;
+    let cancelled = false;
+
+    AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
+      if (cancelled || reduceMotion) return;
+
+      animation = Animated.loop(
+        Animated.stagger(
+          140,
+          dots.map((opacity) =>
+            Animated.sequence([
+              Animated.timing(opacity, { duration: 280, toValue: 1, useNativeDriver: true }),
+              Animated.timing(opacity, { duration: 280, toValue: 0.35, useNativeDriver: true }),
+            ])
+          )
+        )
+      );
+      animation.start();
+    });
+
+    return () => {
+      cancelled = true;
+      animation?.stop();
+    };
+  }, [dots]);
+
+  return (
+    <View
+      accessibilityLabel="AI is responding"
+      accessibilityRole="progressbar"
+      style={styles.thinkingBubble}
+    >
+      {dots.map((opacity, index) => (
+        <Animated.View key={index} style={[styles.thinkingDot, { opacity }]} />
+      ))}
     </View>
   );
 };
@@ -55,15 +102,13 @@ export const MessageBubble = ({ message, allMessages }: MessageBubbleProps) => {
 
   return (
     <View style={[styles.row, isUser ? styles.rowUser : styles.rowAssistant]}>
-      {(isThinking || !!text) && (
+      {isThinking ? (
+        <ThinkingIndicator />
+      ) : !!text ? (
         <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleAssistant]}>
-          {isThinking ? (
-            <Text style={styles.thinkingText}>…</Text>
-          ) : (
-            <Text style={styles.bubbleText}>{text}</Text>
-          )}
+          <Text style={styles.bubbleText}>{text}</Text>
         </View>
-      )}
+      ) : null}
       {toolCalls?.map((toolCall) => (
         <ToolCallRow allMessages={allMessages} key={toolCall.id} toolCall={toolCall} />
       ))}
@@ -83,10 +128,10 @@ const createStyles = (colors: ShellColors) =>
       alignItems: 'flex-start',
     },
     bubble: {
-      borderRadius: shellRadii.card,
+      borderRadius: shellRadii.card + 4,
       maxWidth: '85%',
-      paddingHorizontal: shellSpacing.md,
-      paddingVertical: shellSpacing.sm,
+      paddingHorizontal: shellSpacing.md + 2,
+      paddingVertical: shellSpacing.sm + 2,
     },
     toolCallContent: {
       marginTop: shellSpacing.xs,
@@ -106,9 +151,17 @@ const createStyles = (colors: ShellColors) =>
       fontSize: 15,
       lineHeight: 21,
     },
-    thinkingText: {
-      color: colors.textOnDarkMuted,
-      fontSize: 15,
+    thinkingBubble: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: 5,
+      minHeight: 20,
+    },
+    thinkingDot: {
+      backgroundColor: colors.textOnDarkMuted,
+      borderRadius: 4,
+      height: 7,
+      width: 7,
     },
     toolCallFallback: {
       backgroundColor: colors.surface,

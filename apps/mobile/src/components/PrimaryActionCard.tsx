@@ -1,4 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import type { LucideIcon } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
@@ -8,8 +9,8 @@ import { IconBadge } from './IconBadge';
 import type { ShellColors } from '../theme';
 
 interface PrimaryActionCardProps {
-  icon: string;
-  title: string;
+  icon: string | LucideIcon;
+  title?: string;
   description: string;
   buttonLabel: string;
   onPress: () => void;
@@ -29,9 +30,21 @@ export const PrimaryActionCard = ({
 
   return (
     <View style={[styles.card, style]}>
-      <IconBadge icon={icon} size={40} />
+      <IconBadge icon={icon} shape="square" size={40} />
       <View style={styles.body}>
-        <Text style={styles.title}>{title}</Text>
+        {title ? (
+          <Text style={styles.title}>{title}</Text>
+        ) : (
+          <View accessibilityLabel="Voice waveform" style={styles.waveform}>
+            {[12, 24, 42, 28, 14].map((height, index) => (
+              <LinearGradient
+                colors={[colors.accentGradientStart, colors.accentGradientEnd]}
+                key={height}
+                style={[styles.waveformBar, { height }, index === 2 && styles.waveformBarWide]}
+              />
+            ))}
+          </View>
+        )}
         <Text style={styles.description}>{description}</Text>
       </View>
       <Pressable accessibilityRole="button" onPress={onPress}>
@@ -53,29 +66,45 @@ const createStyles = (colors: ShellColors) =>
     card: {
       backgroundColor: colors.surface,
       borderColor: colors.surfaceBorder,
-      borderRadius: shellRadii.card,
+      borderRadius: 18,
       borderWidth: 1,
       flex: 1,
       justifyContent: 'space-between',
       padding: shellSpacing.md,
     },
     body: {
+      flex: 1,
+      justifyContent: 'flex-end',
       marginVertical: shellSpacing.md,
     },
     title: {
       color: colors.textOnDark,
-      fontSize: 16,
-      fontWeight: '700',
+      fontSize: 17,
+      fontWeight: '600',
       marginBottom: shellSpacing.xs,
     },
     description: {
-      color: colors.textOnDarkFaint,
-      fontSize: 12,
-      lineHeight: 17,
+      color: colors.textOnDarkMuted,
+      fontSize: 15,
+      lineHeight: 22,
+    },
+    waveform: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: 6,
+      justifyContent: 'center',
+      marginBottom: shellSpacing.xl,
+    },
+    waveformBar: {
+      borderRadius: shellRadii.pill,
+      width: 8,
+    },
+    waveformBarWide: {
+      width: 10,
     },
     button: {
       alignItems: 'center',
-      borderRadius: shellRadii.button,
+      borderRadius: shellRadii.pill,
       paddingVertical: shellSpacing.sm + 2,
     },
     buttonLabel: {

@@ -11,6 +11,21 @@ export interface ThreadItem {
   createdAt: string;
 }
 
+export const findEmptyThreadId = (threads: ThreadItem[]): string | null =>
+  threads.find((thread) => thread.title === null)?.id ?? null;
+
+export const keepNewestEmptyThread = (threads: ThreadItem[]): ThreadItem[] => {
+  let hasKeptEmptyThread = false;
+
+  return threads.filter((thread) => {
+    if (thread.title !== null) return true;
+    if (hasKeptEmptyThread) return false;
+
+    hasKeptEmptyThread = true;
+    return true;
+  });
+};
+
 const RECENT_THREADS_LIMIT = 5;
 
 const messageText = (content: unknown): string => {
@@ -62,7 +77,7 @@ export const fetchRecentThreads = async (
     sortOrder: 'desc',
   });
 
-  return threads.map(toThreadItem);
+  return keepNewestEmptyThread(threads.map(toThreadItem));
 };
 
 // Paginated variant for the "All trips" screen — mirrors web's searchThreadsPage.

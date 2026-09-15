@@ -9,7 +9,7 @@ import {
   UtensilsCrossed,
   Zap,
 } from 'lucide-react';
-import { TOOL_NAMES } from '@repo/constants';
+import { CHANGE_THEME_ACTION, TOOL_NAMES } from '@repo/constants';
 import type { SuggestionItem } from './chat';
 
 export const TOOL_SUGGESTION_ITEMS: Readonly<Partial<Record<string, readonly SuggestionItem[]>>> = {
@@ -165,7 +165,7 @@ export const TOOL_STATUS = {
 
 // CopilotKit action names — human-in-the-loop, gates, and booked-item display
 export const ACTIONS = {
-  CHANGE_THEME: 'changeTheme',
+  CHANGE_THEME: CHANGE_THEME_ACTION,
   SHOW_BOOKED_FLIGHTS: 'show-booked-flights',
   SHOW_BOOKED_HOTEL: 'show-booked-hotel',
 } as const;

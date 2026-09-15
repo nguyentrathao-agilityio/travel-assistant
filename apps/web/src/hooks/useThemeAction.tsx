@@ -3,7 +3,8 @@ import { Moon, Sun } from 'lucide-react';
 import { z } from 'zod';
 
 // Constants
-import { ACTIONS, THEME } from '@/constants';
+import { CHANGE_THEME_ACTION_DESCRIPTION, THEME_VALUES } from '@repo/constants';
+import { ACTIONS } from '@/constants';
 
 // Components
 import { useTheme } from '@/components/ThemeProvider';
@@ -21,31 +22,30 @@ export const useThemeAction = () => {
   useFrontendTool(
     {
       name: ACTIONS.CHANGE_THEME,
-      description:
-        'Change the app theme. ALWAYS pass theme="toggle" unless the user explicitly says "light mode" or "dark mode".',
+      description: CHANGE_THEME_ACTION_DESCRIPTION,
       parameters: z.object({
         theme: z
-          .enum([THEME.TOGGLE, THEME.LIGHT, THEME.DARK])
+          .enum([THEME_VALUES.TOGGLE, THEME_VALUES.LIGHT, THEME_VALUES.DARK])
           .describe(
             'MUST be "toggle" by default. Only use "light" or "dark" if the user explicitly requests a specific theme by name.'
           ),
       }),
       handler: async ({ theme: requested }) => {
         const next =
-          requested === THEME.TOGGLE
-            ? theme === THEME.DARK
-              ? THEME.LIGHT
-              : THEME.DARK
+          requested === THEME_VALUES.TOGGLE
+            ? theme === THEME_VALUES.DARK
+              ? THEME_VALUES.LIGHT
+              : THEME_VALUES.DARK
             : requested;
 
-        if (next === THEME.LIGHT || next === THEME.DARK) setTheme(next);
+        if (next === THEME_VALUES.LIGHT || next === THEME_VALUES.DARK) setTheme(next);
 
         return next;
       },
       render: ({ status, result }) => {
         if (status !== 'complete' || !result) return <></>;
 
-        const isDark = result === THEME.DARK;
+        const isDark = result === THEME_VALUES.DARK;
 
         return (
           <div className="border-border-secondary bg-background-primary flex items-center gap-3 rounded-lg border px-4 py-3">

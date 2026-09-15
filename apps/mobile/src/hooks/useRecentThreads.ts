@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 
+// Services
 import { fetchRecentThreads } from '../services';
 
+// Types
 import type { ThreadItem } from '../services';
 
 type RecentThreadsState =

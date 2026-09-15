@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+// Services
 import { clearApiKey, getApiKey, setApiKey } from '../services/apiKeyStorage';
 import { verifyOpenAiApiKey } from '../services/openaiApiKey';
 

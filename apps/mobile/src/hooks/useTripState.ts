@@ -1,12 +1,20 @@
 import { useAgent } from '@copilotkit/react-native/headless';
-import { AGENT_NAME, SELECTION_STATUSES } from '@repo/constants';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
+// Constants
+import { AGENT_NAME, SELECTION_STATUSES } from '@repo/constants';
+
+// Services
 import { fetchThreadValues } from '../services/threadHistory';
+
+// Stores
 import { useTripStateStore } from '../stores/tripStateStore';
+
+// Utils
 import { clientTimezone, todayClientIso } from '@repo/utils';
 import { extractTripState } from '../utils/tripState';
 
+// Types
 import type { Flight, HotelAvailability, SelectedFlight, TripState } from '@repo/types';
 
 const EMPTY_TRIP_STATE: TripState = {};

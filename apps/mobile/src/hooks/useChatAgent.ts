@@ -1,9 +1,13 @@
 import { UseAgentUpdate, useAgent, useCopilotKit } from '@copilotkit/react-native/headless';
-import { AGENT_NAME } from '@repo/constants';
 import { useCallback, useEffect, useState } from 'react';
 
+// Constants
+import { AGENT_NAME } from '@repo/constants';
+
+// Services
 import { generateThreadId } from '../services';
 
+// Types
 import type { Message } from '@copilotkit/react-native/headless';
 
 interface UseChatAgentResult {
@@ -15,14 +19,6 @@ interface UseChatAgentResult {
   stop: () => void;
 }
 
-/**
- * Binds this screen's chat to the shared `travelAgent` agent, pinned to
- * `threadId`. Mirrors @copilotkit/react-native's own `<CopilotChat>` headless
- * component: a single shared agent instance (`useAgent({ agentId })`) whose
- * `.threadId` is mutated in an effect, rather than registering a distinct
- * proxied agent per thread — the latter is for running several threads
- * *simultaneously* (e.g. a multi-thread drawer), not a single active screen.
- */
 export const useChatAgent = (threadId: string): UseChatAgentResult => {
   const { agent, isReady } = useAgent({
     agentId: AGENT_NAME,
@@ -35,11 +31,6 @@ export const useChatAgent = (threadId: string): UseChatAgentResult => {
     agent.threadId = threadId;
   }, [agent, threadId]);
 
-  // `copilotkit.runAgent()` resolves normally even when the run fails
-  // mid-stream (a RUN_ERROR event, e.g. a missing OpenAI key) — it only
-  // rejects for request-level failures (network down, bad URL). Mid-run
-  // errors surface exclusively through this core-level subscription, which
-  // is how @copilotkit/react-native's own <CopilotChat> reports them too.
   useEffect(() => {
     const subscription = copilotkit.subscribe({
       onError: (event) => {

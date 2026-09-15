@@ -26,8 +26,6 @@ const flightSearchParameters = z.object({
   sort: z.string().optional(),
 });
 
-// No shared FlightSearchResultSchema exists in @repo/schemas — mirrors web's own
-// useFlightAction.tsx, which also falls back to a structural guard for this tool.
 const flightSearchResultSchema = z.custom<FlightSearchResult>(
   (value) =>
     typeof value === 'object' &&

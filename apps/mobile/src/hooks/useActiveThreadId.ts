@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useState } from 'react';
 
+// Utils
 import { getActiveThreadId, setActiveThreadId } from '../storage';
 
 interface UseActiveThreadIdResult {

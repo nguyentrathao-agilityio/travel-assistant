@@ -1,17 +1,20 @@
 import * as Speech from 'expo-speech';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+// Constants
 import { REALTIME_VOICE_SAMPLE_RATE, REALTIME_VOICE_WS_URL, VOICE_LOCALE } from '../constants';
+
+// Services
 import { fetchVoiceSessionToken } from '../services/voiceSession';
+
+// Utils
 import { arrayBufferToBase64 } from '../utils/base64Audio';
 import { extractFinalTranscript, extractRealtimeErrorMessage } from '../utils/realtimeVoiceEvents';
 
+// Types
 import type { AudioStream, AudioStreamBuffer, AudioStreamResult } from 'expo-audio';
 import type * as ExpoAudioTypes from 'expo-audio';
 
-// Native module may not be linked yet (Expo Go / a stale dev client) — a
-// top-level import would crash every screen via the `hooks` barrel, so load
-// defensively and degrade to the `error` state instead.
 let audioApi: typeof ExpoAudioTypes | null;
 
 try {

@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useState } from 'react';
 
+// Utils
 import { getOnboardingSeen, markOnboardingSeen } from '../storage';
 
 type OnboardingStatus = 'loading' | 'seen' | 'unseen';

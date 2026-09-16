@@ -1,4 +1,5 @@
 import { resolveRuntimeUrl } from '../config';
+import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 import { OPENAI_API_KEY_HEADER } from '@repo/constants';
 
 const ERROR_MESSAGE_BY_CODE: Record<string, string> = {
@@ -25,7 +26,7 @@ export const verifyOpenAiApiKey = async (apiKey: string): Promise<void> => {
   let response: Response;
 
   try {
-    response = await fetch(verificationUrl(), {
+    response = await fetchWithTimeout(verificationUrl(), {
       method: 'POST',
       headers: { [OPENAI_API_KEY_HEADER]: apiKey },
     });

@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useRef, useState } from 'react';
 
 import { CHAT_PATH, THREADS_PATH } from '../constants';
 import { useActiveThreadId, useRecentThreads } from '../hooks';
@@ -9,27 +10,39 @@ export default function DashboardRoute() {
   const router = useRouter();
   const { status, threads, refresh } = useRecentThreads();
   const { activeThreadId, markActive } = useActiveThreadId();
+  const [isStartingTrip, setIsStartingTrip] = useState(false);
+  const isStartingTripRef = useRef(false);
 
   const handleStartNewTrip = async () => {
-    const emptyThreadId = findEmptyThreadId(threads);
+    if (isStartingTripRef.current) return;
 
-    if (emptyThreadId) {
-      router.push({ pathname: CHAT_PATH, params: { threadId: emptyThreadId } });
-      markActive(emptyThreadId);
-      return;
-    }
-
-    const threadId = generateThreadId();
-
-    router.push({ pathname: CHAT_PATH, params: { threadId } });
-    markActive(threadId);
+    isStartingTripRef.current = true;
+    setIsStartingTrip(true);
 
     try {
-      await createRemoteThread(threadId);
-      refresh();
-    } catch {
-      // The chat screen still opens with a client-generated id; it will surface
-      // the failure itself once it actually needs the thread to exist server-side.
+      const emptyThreadId = findEmptyThreadId(threads);
+
+      if (emptyThreadId) {
+        router.push({ pathname: CHAT_PATH, params: { threadId: emptyThreadId } });
+        markActive(emptyThreadId);
+        return;
+      }
+
+      const threadId = generateThreadId();
+
+      router.push({ pathname: CHAT_PATH, params: { threadId } });
+      markActive(threadId);
+
+      try {
+        await createRemoteThread(threadId);
+        refresh();
+      } catch {
+        // The chat screen still opens with a client-generated id; it will surface
+        // the failure itself once it actually needs the thread to exist server-side.
+      }
+    } finally {
+      isStartingTripRef.current = false;
+      setIsStartingTrip(false);
     }
   };
 
@@ -49,8 +62,10 @@ export default function DashboardRoute() {
   return (
     <DashboardScreen
       continueThreadId={activeThreadId}
+      isStartingTrip={isStartingTrip}
       onAskByVoice={handleAskByVoice}
       onOpenThread={handleOpenThread}
+      onRetryRecentThreads={refresh}
       onSeeAll={handleSeeAll}
       onStartNewTrip={handleStartNewTrip}
       recentThreads={threads}

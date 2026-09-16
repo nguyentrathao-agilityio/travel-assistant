@@ -11,8 +11,16 @@ import type { ThreadItem } from '../services';
 
 export default function ThreadsRoute() {
   const router = useRouter();
-  const { status, threads, isLoadingMore, hasMore, fetchMore, refresh, removeThread } =
-    useAllThreads();
+  const {
+    status,
+    threads,
+    isLoadingMore,
+    hasMore,
+    loadMoreFailed,
+    fetchMore,
+    refresh,
+    removeThread,
+  } = useAllThreads();
   const [deletingThreadId, setDeletingThreadId] = useState<string | null>(null);
 
   const handleOpenThread = useCallback(
@@ -34,7 +42,7 @@ export default function ThreadsRoute() {
               await deleteRemoteThread(thread.id);
               removeThread(thread.id);
             } catch {
-              Alert.alert('Couldn’t delete this trip. Please try again.');
+              Alert.alert('Couldn’t delete this trip', 'Please try again.');
               refresh();
             } finally {
               setDeletingThreadId(null);
@@ -53,9 +61,11 @@ export default function ThreadsRoute() {
       deletingThreadId={deletingThreadId}
       hasMore={hasMore}
       isLoadingMore={isLoadingMore}
+      loadMoreFailed={loadMoreFailed}
       onDeleteThread={handleDeleteThread}
       onLoadMore={fetchMore}
       onOpenThread={handleOpenThread}
+      onRetry={refresh}
       status={status}
       threads={threads}
     />

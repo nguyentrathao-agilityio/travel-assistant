@@ -1,6 +1,7 @@
 import { OPENAI_API_KEY_HEADER } from '@repo/constants';
 
 import { resolveRuntimeUrl } from '../config';
+import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 import { getApiKey } from './apiKeyStorage';
 
 interface VoiceSessionToken {
@@ -25,10 +26,17 @@ export const fetchVoiceSessionToken = async (): Promise<VoiceSessionToken> => {
 
   if (!apiKey) throw new Error('An OpenAI API key is required for voice.');
 
-  const response = await fetch(voiceSessionUrl(), {
-    headers: { [OPENAI_API_KEY_HEADER]: apiKey },
-    method: 'POST',
-  });
+  let response: Response;
+
+  try {
+    response = await fetchWithTimeout(
+      voiceSessionUrl(),
+      { headers: { [OPENAI_API_KEY_HEADER]: apiKey }, method: 'POST' },
+      10000
+    );
+  } catch {
+    throw new Error('Voice session is unavailable.');
+  }
 
   if (!response.ok) throw new Error('Voice session is unavailable.');
 

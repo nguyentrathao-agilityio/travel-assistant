@@ -7,7 +7,7 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from '
 import { RECENT_ICONS } from '../constants';
 
 // Components
-import { IconBadge } from '../components';
+import { EmptyState, ErrorState, IconBadge, LoadingState } from '../components';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
@@ -21,10 +21,12 @@ interface AllTripsScreenProps {
   threads: ThreadItem[];
   isLoadingMore: boolean;
   hasMore: boolean;
+  loadMoreFailed: boolean;
   deletingThreadId: string | null;
   onOpenThread: (threadId: string) => void;
   onDeleteThread: (thread: ThreadItem) => void;
   onLoadMore: () => void;
+  onRetry: () => void;
 }
 
 const threadLabel = (thread: ThreadItem): string => thread.title ?? 'Untitled trip';
@@ -34,10 +36,12 @@ export const AllTripsScreen = ({
   threads,
   isLoadingMore,
   hasMore,
+  loadMoreFailed,
   deletingThreadId,
   onOpenThread,
   onDeleteThread,
   onLoadMore,
+  onRetry,
 }: AllTripsScreenProps) => {
   const { colors } = useShellTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -47,10 +51,18 @@ export const AllTripsScreen = ({
       colors={[colors.backgroundGradientStart, colors.backgroundGradientEnd]}
       style={styles.container}
     >
-      {status === 'loading' && <Text style={styles.emptyText}>Loading your trips…</Text>}
-      {status === 'error' && <Text style={styles.emptyText}>Couldn&apos;t load your trips.</Text>}
+      {status === 'loading' && (
+        <View style={styles.list}>
+          <LoadingState />
+        </View>
+      )}
+      {status === 'error' && (
+        <View style={styles.list}>
+          <ErrorState message="Couldn't load your trips." onRetry={onRetry} />
+        </View>
+      )}
       {status === 'ready' && threads.length === 0 && (
-        <Text style={styles.emptyText}>Your trips will show up here.</Text>
+        <EmptyState icon="🧳" message="Your trips will show up here." />
       )}
 
       {status === 'ready' && threads.length > 0 && (
@@ -59,13 +71,14 @@ export const AllTripsScreen = ({
           data={threads}
           keyExtractor={(thread) => thread.id}
           ListFooterComponent={
-            isLoadingMore ? (
-              <View style={styles.footer}>
-                <ActivityIndicator color={colors.textOnDarkMuted} />
-              </View>
-            ) : null
+            <View style={styles.footer}>
+              {isLoadingMore && <ActivityIndicator color={colors.textOnDarkMuted} />}
+              {loadMoreFailed && (
+                <ErrorState message="Couldn't load more trips." onRetry={onLoadMore} />
+              )}
+            </View>
           }
-          onEndReached={hasMore ? onLoadMore : undefined}
+          onEndReached={hasMore && !loadMoreFailed ? onLoadMore : undefined}
           onEndReachedThreshold={0.5}
           renderItem={({ item: thread, index }) => (
             <View style={styles.row}>
@@ -109,13 +122,8 @@ const createStyles = (colors: ShellColors) =>
     list: {
       padding: shellSpacing.lg,
     },
-    emptyText: {
-      color: colors.textOnDarkMuted,
-      fontSize: 13,
-      padding: shellSpacing.lg,
-      textAlign: 'center',
-    },
     footer: {
+      gap: shellSpacing.sm,
       paddingVertical: shellSpacing.md,
     },
     row: {

@@ -51,6 +51,8 @@ const PERMISSION_DENIED_MESSAGE =
 const NO_SPEECH_MESSAGE = "Didn't catch that — try again or type your question.";
 const STT_UNAVAILABLE_MESSAGE = "Voice input isn't available right now — please type instead.";
 const TTS_FAILED_MESSAGE = "Couldn't play the response out loud.";
+const CONNECTING_TIMEOUT_MESSAGE = 'Connecting is taking too long. Please try again.';
+const CONNECTING_TIMEOUT_MS = 15000;
 
 interface UseVoiceAssistantOptions {
   isAgentRunning: boolean;
@@ -87,6 +89,7 @@ export const useVoiceAssistant = ({
   const hasFinalizedRef = useRef(false);
   const isVoiceTurnActiveRef = useRef(false);
   const wasAgentRunningRef = useRef(isAgentRunning);
+  const connectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const wasRunning = wasAgentRunningRef.current;
@@ -96,11 +99,6 @@ export const useVoiceAssistant = ({
       isVoiceTurnActiveRef.current = false;
     }
   }, [isAgentRunning]);
-
-  const setPhase = useCallback((phase: WsPhase) => {
-    wsPhaseRef.current = phase;
-    setWsPhase(phase);
-  }, []);
 
   const handleAudioBuffer = useCallback((buffer: AudioStreamBuffer) => {
     const socket = wsRef.current;
@@ -140,7 +138,40 @@ export const useVoiceAssistant = ({
 
   useEffect(() => closeSession, [closeSession]);
 
+  const clearConnectTimeout = useCallback(() => {
+    if (connectTimeoutRef.current) {
+      clearTimeout(connectTimeoutRef.current);
+      connectTimeoutRef.current = null;
+    }
+  }, []);
+
+  const setPhase = useCallback(
+    (phase: WsPhase) => {
+      wsPhaseRef.current = phase;
+      setWsPhase(phase);
+
+      if (phase !== 'connecting') {
+        clearConnectTimeout();
+        return;
+      }
+
+      clearConnectTimeout();
+      connectTimeoutRef.current = setTimeout(() => {
+        hasFinalizedRef.current = true;
+        closeSession();
+        wsPhaseRef.current = 'idle';
+        setWsPhase('idle');
+        setErrorMessage(CONNECTING_TIMEOUT_MESSAGE);
+      }, CONNECTING_TIMEOUT_MS);
+    },
+    [clearConnectTimeout, closeSession]
+  );
+
+  useEffect(() => clearConnectTimeout, [clearConnectTimeout]);
+
   const startListening = useCallback(() => {
+    if (wsPhaseRef.current !== 'idle') return;
+
     setErrorMessage(null);
     Speech.stop();
     setIsSpeaking(false);

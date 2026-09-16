@@ -1,33 +1,68 @@
-import { StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { shellSpacing } from '../../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
 import { Card } from './Card';
 import { Typography } from './Typography';
 
+import type { ShellColors } from '../../theme';
+
 interface ErrorStateProps {
   message?: string;
+  onRetry?: () => void;
+  retryLabel?: string;
 }
 
 export const ErrorState = ({
   message = 'Something went wrong. Please try again.',
-}: ErrorStateProps) => (
-  <Card>
-    <View accessibilityRole="alert" style={styles.row}>
-      <Typography color="danger">⚠️</Typography>
-      <Typography color="muted" style={styles.message}>
-        {message}
-      </Typography>
-    </View>
-  </Card>
-);
+  onRetry,
+  retryLabel = 'Retry',
+}: ErrorStateProps) => {
+  const { colors } = useShellTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
-const styles = StyleSheet.create({
-  row: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: shellSpacing.sm,
-  },
-  message: {
-    flex: 1,
-  },
-});
+  return (
+    <Card>
+      <View accessibilityRole="alert" style={styles.row}>
+        <Typography color="danger">⚠️</Typography>
+        <Typography color="muted" style={styles.message}>
+          {message}
+        </Typography>
+      </View>
+      {onRetry && (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onRetry}
+          style={({ pressed }) => [styles.retryButton, pressed && styles.retryButtonPressed]}
+        >
+          <Typography weight="semibold">{retryLabel}</Typography>
+        </Pressable>
+      )}
+    </Card>
+  );
+};
+
+const createStyles = (colors: ShellColors) =>
+  StyleSheet.create({
+    row: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+    },
+    message: {
+      flex: 1,
+    },
+    retryButton: {
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      borderColor: colors.surfaceBorder,
+      borderRadius: shellRadii.button,
+      borderWidth: 1,
+      marginTop: shellSpacing.sm,
+      paddingHorizontal: shellSpacing.md,
+      paddingVertical: shellSpacing.xs,
+    },
+    retryButtonPressed: {
+      opacity: 0.6,
+    },
+  });

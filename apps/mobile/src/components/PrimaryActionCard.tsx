@@ -9,6 +9,7 @@ import { IconBadge } from './IconBadge';
 import type { ShellColors } from '../theme';
 
 interface PrimaryActionCardProps {
+  disabled?: boolean;
   icon: string | LucideIcon;
   title?: string;
   description: string;
@@ -18,6 +19,7 @@ interface PrimaryActionCardProps {
 }
 
 export const PrimaryActionCard = ({
+  disabled = false,
   icon,
   title,
   description,
@@ -47,12 +49,12 @@ export const PrimaryActionCard = ({
         )}
         <Text style={styles.description}>{description}</Text>
       </View>
-      <Pressable accessibilityRole="button" onPress={onPress}>
+      <Pressable accessibilityRole="button" disabled={disabled} onPress={onPress}>
         <LinearGradient
           colors={[colors.accentGradientStart, colors.accentGradientEnd]}
           end={{ x: 1, y: 0 }}
           start={{ x: 0, y: 0 }}
-          style={styles.button}
+          style={[styles.button, disabled && styles.buttonDisabled]}
         >
           <Text style={styles.buttonLabel}>{buttonLabel}</Text>
         </LinearGradient>
@@ -106,6 +108,9 @@ const createStyles = (colors: ShellColors) =>
       alignItems: 'center',
       borderRadius: shellRadii.pill,
       paddingVertical: shellSpacing.sm + 2,
+    },
+    buttonDisabled: {
+      opacity: 0.5,
     },
     buttonLabel: {
       color: colors.textOnDark,

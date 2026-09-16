@@ -14,6 +14,7 @@ interface AllThreadsState {
   threads: ThreadItem[];
   isLoadingMore: boolean;
   hasMore: boolean;
+  loadMoreFailed: boolean;
 }
 
 const INITIAL_STATE: AllThreadsState = {
@@ -21,6 +22,7 @@ const INITIAL_STATE: AllThreadsState = {
   threads: [],
   isLoadingMore: false,
   hasMore: false,
+  loadMoreFailed: false,
 };
 
 export const useAllThreads = () => {
@@ -36,6 +38,7 @@ export const useAllThreads = () => {
           threads,
           isLoadingMore: false,
           hasMore: threads.length === THREAD_PAGE_SIZE,
+          loadMoreFailed: false,
         })
       )
       .catch(() => setState({ ...INITIAL_STATE, status: 'error' }));
@@ -57,14 +60,17 @@ export const useAllThreads = () => {
             return {
               ...latest,
               isLoadingMore: false,
+              loadMoreFailed: false,
               threads: [...latest.threads, ...page.filter((item) => !existingIds.has(item.id))],
               hasMore: page.length === THREAD_PAGE_SIZE,
             };
           });
         })
-        .catch(() => setState((latest) => ({ ...latest, isLoadingMore: false })));
+        .catch(() =>
+          setState((latest) => ({ ...latest, isLoadingMore: false, loadMoreFailed: true }))
+        );
 
-      return { ...current, isLoadingMore: true };
+      return { ...current, isLoadingMore: true, loadMoreFailed: false };
     });
   }, []);
 

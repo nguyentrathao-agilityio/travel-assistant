@@ -19,7 +19,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CHAT_COMPOSER_INPUT_NATIVE_ID } from '../constants';
 
 // Components
-import { ChatLayout, MessageBubble, ThinkingIndicator, VoiceButton } from '../components';
+import {
+  ChatLayout,
+  LoadingState,
+  MessageBubble,
+  ThinkingIndicator,
+  VoiceButton,
+} from '../components';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
@@ -139,6 +145,18 @@ export const ChatScreen = ({
   const isAwaitingApproval = interruptElement !== null;
   const { colors } = useShellTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const [isTakingLong, setIsTakingLong] = useState(false);
+
+  useEffect(() => {
+    if (isReady) {
+      setIsTakingLong(false);
+      return;
+    }
+
+    const timer = setTimeout(() => setIsTakingLong(true), 8000);
+
+    return () => clearTimeout(timer);
+  }, [isReady]);
 
   const isAtBottomRef = useRef(true);
   const onEndVisible = useCallback((visible: boolean) => {
@@ -191,7 +209,12 @@ export const ChatScreen = ({
         messages={
           !isReady ? (
             <View style={styles.centeredState}>
-              <Text style={styles.centeredStateText}>Connecting…</Text>
+              <LoadingState lines={2} />
+              {isTakingLong && (
+                <Text style={styles.centeredStateText}>
+                  This is taking longer than usual — check your connection.
+                </Text>
+              )}
             </View>
           ) : rows.length === 0 ? (
             <View style={styles.emptyState}>

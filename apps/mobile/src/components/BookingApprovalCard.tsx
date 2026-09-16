@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 // Types
@@ -29,6 +29,9 @@ const ACTION_ICON: Record<string, string> = {
   [BOOKING_ACTIONS.CREATE_HOTEL]: '🏨',
 };
 
+const SUBMIT_TIMEOUT_MESSAGE = 'This is taking longer than expected. Please try again.';
+const SUBMIT_TIMEOUT_MS = 20000;
+
 interface BookingApprovalCardProps {
   request: BookingApprovalRequest;
   onDecision: (decision: BookingDecision, editedDetails?: EditableBookingDetails) => void;
@@ -36,6 +39,7 @@ interface BookingApprovalCardProps {
 
 export const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCardProps) => {
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDetails, setEditedDetails] = useState<EditableBookingDetails>(request.details);
   const [hasSavedChanges, setHasSavedChanges] = useState(false);
@@ -43,19 +47,40 @@ export const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCard
   const canEdit = !isCancellation && request.allowedDecisions.includes(BOOKING_DECISIONS.EDIT);
   const { colors } = useShellTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const submitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (submitTimeoutRef.current) clearTimeout(submitTimeoutRef.current);
+    },
+    []
+  );
+
+  const armSubmitTimeout = useCallback(() => {
+    if (submitTimeoutRef.current) clearTimeout(submitTimeoutRef.current);
+
+    submitTimeoutRef.current = setTimeout(() => {
+      setSubmitted(false);
+      setSubmitError(SUBMIT_TIMEOUT_MESSAGE);
+    }, SUBMIT_TIMEOUT_MS);
+  }, []);
 
   const handleConfirm = useCallback(() => {
     setSubmitted(true);
+    setSubmitError(null);
+    armSubmitTimeout();
     onDecision(
       hasSavedChanges ? BOOKING_DECISIONS.EDIT : BOOKING_DECISIONS.APPROVE,
       hasSavedChanges ? editedDetails : undefined
     );
-  }, [editedDetails, hasSavedChanges, onDecision]);
+  }, [armSubmitTimeout, editedDetails, hasSavedChanges, onDecision]);
 
   const handleReject = useCallback(() => {
     setSubmitted(true);
+    setSubmitError(null);
+    armSubmitTimeout();
     onDecision(BOOKING_DECISIONS.REJECT);
-  }, [onDecision]);
+  }, [armSubmitTimeout, onDecision]);
 
   const handleSaveChanges = useCallback(() => {
     setHasSavedChanges(true);
@@ -120,6 +145,12 @@ export const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCard
             ? 'Review the updated details, then confirm to create this booking.'
             : 'Choose Cancel to stop without creating this booking.'}
       </Typography>
+
+      {submitError && (
+        <Typography color="danger" variant="meta">
+          {submitError}
+        </Typography>
+      )}
 
       <View style={styles.buttonRow}>
         {isEditing ? (

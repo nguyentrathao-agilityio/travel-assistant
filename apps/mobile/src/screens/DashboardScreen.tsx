@@ -15,7 +15,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GRID_ROW_HEIGHT, RECENT_ICONS } from '../constants';
 
 // Components
-import { GridActionCard, IconBadge, PrimaryActionCard, ThemeToggleButton } from '../components';
+import {
+  EmptyState,
+  ErrorState,
+  GridActionCard,
+  IconBadge,
+  LoadingState,
+  PrimaryActionCard,
+  ThemeToggleButton,
+} from '../components';
 
 // Utils
 import { shellSpacing, useShellTheme } from '../theme';
@@ -28,10 +36,12 @@ interface DashboardScreenProps {
   recentThreadsStatus: 'loading' | 'ready' | 'error';
   recentThreads: ThreadItem[];
   continueThreadId: string | null;
+  isStartingTrip: boolean;
   onStartNewTrip: () => void;
   onOpenThread: (threadId: string) => void;
   onAskByVoice: () => void;
   onSeeAll: () => void;
+  onRetryRecentThreads: () => void;
 }
 
 const threadLabel = (thread: ThreadItem): string => thread.title ?? 'Untitled trip';
@@ -40,10 +50,12 @@ export const DashboardScreen = ({
   recentThreadsStatus,
   recentThreads,
   continueThreadId,
+  isStartingTrip,
   onStartNewTrip,
   onOpenThread,
   onAskByVoice,
   onSeeAll,
+  onRetryRecentThreads,
 }: DashboardScreenProps) => {
   const continueTripThreadId = continueThreadId ?? recentThreads[0]?.id;
   const insets = useSafeAreaInsets();
@@ -81,6 +93,7 @@ export const DashboardScreen = ({
           />
           <View style={styles.gridRight}>
             <GridActionCard
+              disabled={isStartingTrip}
               icon={MessageCircleMore}
               label="Start new chat"
               onPress={onStartNewTrip}
@@ -104,14 +117,12 @@ export const DashboardScreen = ({
           </Pressable>
         </View>
 
-        {recentThreadsStatus === 'loading' && (
-          <Text style={styles.recentEmpty}>Loading your trips…</Text>
-        )}
+        {recentThreadsStatus === 'loading' && <LoadingState />}
         {recentThreadsStatus === 'error' && (
-          <Text style={styles.recentEmpty}>Couldn&apos;t load recent trips.</Text>
+          <ErrorState message="Couldn't load recent trips." onRetry={onRetryRecentThreads} />
         )}
         {recentThreadsStatus === 'ready' && recentThreads.length === 0 && (
-          <Text style={styles.recentEmpty}>Your trips will show up here.</Text>
+          <EmptyState icon="🧳" message="Your trips will show up here." />
         )}
         {recentThreadsStatus === 'ready' &&
           recentThreads.map((thread, index) => (
@@ -151,8 +162,9 @@ export const DashboardScreen = ({
         <Pressable
           accessibilityLabel="Start new chat"
           accessibilityRole="button"
+          disabled={isStartingTrip}
           onPress={onStartNewTrip}
-          style={styles.bottomNavButton}
+          style={[styles.bottomNavButton, isStartingTrip && styles.bottomNavButtonDisabled]}
         >
           <BotMessageSquare color={colors.textOnDarkMuted} size={20} strokeWidth={2.2} />
         </Pressable>
@@ -216,10 +228,6 @@ const createStyles = (colors: ShellColors) =>
       color: colors.textOnDarkFaint,
       fontSize: 15,
     },
-    recentEmpty: {
-      color: colors.textOnDarkMuted,
-      fontSize: 13,
-    },
     recentRow: {
       alignItems: 'center',
       backgroundColor: colors.surface,
@@ -265,5 +273,8 @@ const createStyles = (colors: ShellColors) =>
       height: 48,
       justifyContent: 'center',
       width: 48,
+    },
+    bottomNavButtonDisabled: {
+      opacity: 0.5,
     },
   });

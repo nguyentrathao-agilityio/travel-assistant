@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
 
 import {
@@ -26,6 +26,7 @@ import { messageText, renderableMessages } from '../utils/chatMessages';
 
 export default function ChatRoute() {
   const params = useLocalSearchParams<{ threadId?: string; focusVoice?: string }>();
+  const router = useRouter();
   const threadIdRef = useRef(params.threadId ?? generateThreadId());
   const threadId = threadIdRef.current;
   const { markActive } = useActiveThreadId();
@@ -104,6 +105,7 @@ export default function ChatRoute() {
       isReady={isReady && !isHistoryLoading}
       isRunning={isRunning}
       messages={messages}
+      onBack={router.back}
       onSend={sendMessage}
       onStartListening={voice.startListening}
       onStop={stop}

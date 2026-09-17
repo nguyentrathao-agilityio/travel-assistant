@@ -1,7 +1,18 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowRight, Building2, Compass, MapPin, Plane, Send, Square } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  Compass,
+  MapPin,
+  Plane,
+  Send,
+  Sparkles,
+  Square,
+} from 'lucide-react-native';
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Pressable,
   StyleSheet,
@@ -11,7 +22,7 @@ import {
   type LayoutChangeEvent,
   type ScrollViewProps,
 } from 'react-native';
-import { KeyboardChatScrollView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView, KeyboardChatScrollView } from 'react-native-keyboard-controller';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -21,8 +32,8 @@ import { CHAT_COMPOSER_INPUT_NATIVE_ID } from '../constants';
 // Components
 import {
   ChatLayout,
-  LoadingState,
   MessageBubble,
+  ThemeToggleButton,
   ThinkingIndicator,
   VoiceButton,
 } from '../components';
@@ -106,6 +117,7 @@ interface ChatScreenProps {
   interruptElement: ReactElement | null;
   voiceState: VoiceState;
   voiceErrorMessage: string | null;
+  onBack: () => void;
   onSend: (text: string) => void;
   onStop: () => void;
   onStartListening: () => void;
@@ -128,6 +140,7 @@ export const ChatScreen = ({
   interruptElement,
   voiceState,
   voiceErrorMessage,
+  onBack,
   onSend,
   onStop,
   onStartListening,
@@ -206,10 +219,34 @@ export const ChatScreen = ({
     >
       <ChatLayout
         backgroundColor="transparent"
+        header={
+          <View style={styles.headerRow}>
+            <Pressable
+              accessibilityLabel="Back"
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={onBack}
+              style={styles.headerBackButton}
+            >
+              <ArrowLeft color={colors.textOnDark} size={22} />
+            </Pressable>
+            <View style={styles.headerTitleWrap}>
+              <Sparkles color={colors.textOnDark} size={18} strokeWidth={2.2} />
+              <Text style={styles.headerTitleText}>AI Travel</Text>
+            </View>
+            <View style={styles.headerSpacer} />
+            <ThemeToggleButton />
+          </View>
+        }
         messages={
           !isReady ? (
             <View style={styles.centeredState}>
-              <LoadingState lines={2} />
+              <ActivityIndicator
+                accessibilityLabel="Loading"
+                accessibilityRole="progressbar"
+                color={colors.textOnDarkMuted}
+                size="large"
+              />
               {isTakingLong && (
                 <Text style={styles.centeredStateText}>
                   This is taking longer than usual — check your connection.
@@ -217,7 +254,10 @@ export const ChatScreen = ({
               )}
             </View>
           ) : rows.length === 0 ? (
-            <View style={styles.emptyState}>
+            <KeyboardAwareScrollView
+              contentContainerStyle={styles.emptyState}
+              style={styles.emptyStateScroll}
+            >
               <View style={styles.emptyTitleWrap}>
                 <Text style={styles.emptyTitle}>Where to next?</Text>
                 <Text style={styles.emptyDescription}>
@@ -262,7 +302,7 @@ export const ChatScreen = ({
                   )
                 )}
               </View>
-            </View>
+            </KeyboardAwareScrollView>
           ) : (
             <FlatList
               contentContainerStyle={styles.listContent}
@@ -358,6 +398,30 @@ const createStyles = (colors: ShellColors) =>
     container: {
       flex: 1,
     },
+    headerRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: shellSpacing.sm,
+    },
+    headerBackButton: {
+      alignItems: 'center',
+      height: 36,
+      justifyContent: 'center',
+      width: 36,
+    },
+    headerTitleWrap: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: shellSpacing.xs,
+    },
+    headerTitleText: {
+      color: colors.textOnDark,
+      fontSize: 18,
+      fontWeight: '700',
+    },
+    headerSpacer: {
+      flex: 1,
+    },
     centeredState: {
       alignItems: 'center',
       flex: 1,
@@ -376,10 +440,14 @@ const createStyles = (colors: ShellColors) =>
     centeredStateText: {
       color: colors.textOnDarkMuted,
       fontSize: 15,
+      marginTop: shellSpacing.md,
       textAlign: 'center',
     },
-    emptyState: {
+    emptyStateScroll: {
       flex: 1,
+    },
+    emptyState: {
+      flexGrow: 1,
       justifyContent: 'center',
       paddingBottom: 92,
       paddingHorizontal: shellSpacing.md,

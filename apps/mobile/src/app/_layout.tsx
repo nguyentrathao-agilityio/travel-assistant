@@ -1,8 +1,7 @@
 import { CopilotKitProvider } from '@copilotkit/react-native/headless';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Sparkles } from 'lucide-react-native';
-import { StyleSheet, Text, View } from 'react-native';
+import { View } from 'react-native';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 // Services
@@ -49,7 +48,7 @@ const RootLayoutContent = () => {
 
   if (runtimeConfiguration.status === 'error') {
     return (
-      <KeyboardProvider>
+      <KeyboardProvider navigationBarTranslucent statusBarTranslucent>
         <RuntimeSetup message={runtimeConfiguration.message} />
         <StatusBar style="auto" />
       </KeyboardProvider>
@@ -62,7 +61,7 @@ const RootLayoutContent = () => {
 
   if (apiKey.status === 'missing') {
     return (
-      <KeyboardProvider>
+      <KeyboardProvider navigationBarTranslucent statusBarTranslucent>
         <ApiKeyScreen
           error={apiKey.error}
           isVerifying={apiKey.isVerifying}
@@ -74,7 +73,7 @@ const RootLayoutContent = () => {
   }
 
   return (
-    <KeyboardProvider>
+    <KeyboardProvider navigationBarTranslucent statusBarTranslucent>
       <CopilotKitProvider
         headers={() => ({
           [OPENAI_API_KEY_HEADER]: apiKey.apiKey ?? '',
@@ -91,24 +90,10 @@ const RootLayoutContent = () => {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name={INDEX_ROUTE} />
           <Stack.Screen name={DASHBOARD_ROUTE} />
-          <Stack.Screen
-            name={CHAT_ROUTE}
-            options={{
-              headerBackButtonDisplayMode: 'minimal',
-              headerRight: () => <ThemeToggleButton />,
-              headerTitle: () => (
-                <View style={styles.chatHeaderTitle}>
-                  <Sparkles color={colors.textOnDark} size={18} strokeWidth={2.2} />
-                  <Text style={[styles.chatHeaderTitleText, { color: colors.textOnDark }]}>
-                    AI Travel
-                  </Text>
-                </View>
-              ),
-              headerShown: true,
-              headerStyle: { backgroundColor: colors.backgroundGradientEnd },
-              headerTintColor: colors.textOnDark,
-            }}
-          />
+          {/* Chat renders its own header (ChatLayout's `header` slot) so it can size the
+              top inset itself — the native header's edge-to-edge inset math left too much
+              empty space above the title on Android. */}
+          <Stack.Screen name={CHAT_ROUTE} />
           <Stack.Screen
             name={THREADS_ROUTE}
             options={{
@@ -134,15 +119,3 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  chatHeaderTitle: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 8,
-  },
-  chatHeaderTitleText: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-});

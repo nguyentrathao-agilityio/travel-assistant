@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SystemUI from 'expo-system-ui';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { darkShellColors, lightShellColors } from './shellTheme';
@@ -44,6 +45,10 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const colors = theme === 'dark' ? darkShellColors : lightShellColors;
+
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(colors.backgroundGradientStart);
+  }, [colors.backgroundGradientStart]);
 
   const value = useMemo(() => ({ theme, setTheme, colors }), [theme, setTheme, colors]);
 

@@ -185,6 +185,9 @@ importers:
       expo-status-bar:
         specifier: ~57.0.1
         version: 57.0.1(expo@57.0.19)(react-native@0.86.3(@babel/core@7.29.0)(@react-native/jest-preset@0.86.2(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
+      expo-system-ui:
+        specifier: ~57.0.4
+        version: 57.0.4(expo@57.0.19)(react-native@0.86.3(@babel/core@7.29.0)(@react-native/jest-preset@0.86.2(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))
       lucide-react-native:
         specifier: ^1.43.0
         version: 1.43.0(react-native-svg@15.15.4(react-native@0.86.3(@babel/core@7.29.0)(@react-native/jest-preset@0.86.2(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.0)(@react-native/jest-preset@0.86.2(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
@@ -9058,6 +9061,19 @@ packages:
       react: '*'
       react-native: '*'
 
+  expo-system-ui@57.0.4:
+    resolution:
+      {
+        integrity: sha512-z//rxQJzhTNA1PcKrUtWmrd21jAS3nEDu1b0n8B/7LTTR933OcsZYP1HnbaZifuo2ZH/h7nce2Ow61WZ1Ig2bg==,
+      }
+    peerDependencies:
+      expo: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native-web:
+        optional: true
+
   expo@57.0.19:
     resolution:
       {
@@ -9614,7 +9630,7 @@ packages:
         integrity: sha512-ICsMM1Wk8xSGMowkOmPrzo2Fgmfo4bMHLNX6ytHjajRJUqvHOw/TFapQ+QG75c3X/tTDDhOSRPGC52dDbNM8FQ==,
       }
     engines: { node: '>=16' }
-    deprecated: This package is no longer maintained. For the JavaScript API, please use @conventional-changelog/git-client instead.
+    deprecated: Deprecated and no longer maintained. Use @conventional-changelog/git-client instead.
     hasBin: true
 
   glob-parent@5.1.2:
@@ -15828,6 +15844,7 @@ packages:
         integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==,
       }
     engines: { node: ^18 || >=20 }
+    deprecated: unmaintained
     hasBin: true
     peerDependencies:
       typescript: ^5.0.0
@@ -20730,7 +20747,9 @@ snapshots:
       metro-runtime: 0.84.6
     transitivePeerDependencies:
       - '@babel/core'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.86.3': {}
 
@@ -23916,6 +23935,15 @@ snapshots:
       react: 19.2.3
       react-native: 0.86.3(@babel/core@7.29.0)(@react-native/jest-preset@0.86.2(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3)
       sf-symbols-typescript: 2.2.0
+
+  expo-system-ui@57.0.4(expo@57.0.19)(react-native@0.86.3(@babel/core@7.29.0)(@react-native/jest-preset@0.86.2(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3)):
+    dependencies:
+      '@react-native/normalize-colors': 0.86.3
+      debug: 4.4.3
+      expo: 57.0.19(@babel/core@7.29.0)(@expo/dom-webview@57.0.1)(@expo/metro-runtime@57.0.15)(expo-router@57.0.18)(react-dom@19.2.6(react@19.2.3))(react-native-worklets@0.10.1(@babel/core@7.29.0)(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(react-native@0.86.3(@babel/core@7.29.0)(@react-native/jest-preset@0.86.2(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.0)(@react-native/jest-preset@0.86.2(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
+      react-native: 0.86.3(@babel/core@7.29.0)(@react-native/jest-preset@0.86.2(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3)
+    transitivePeerDependencies:
+      - supports-color
 
   expo@57.0.19(@babel/core@7.29.0)(@expo/dom-webview@57.0.1)(@expo/metro-runtime@57.0.15)(expo-router@57.0.18)(react-dom@19.2.6(react@19.2.3))(react-native-worklets@0.10.1(@babel/core@7.29.0)(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(react-native@0.86.3(@babel/core@7.29.0)(@react-native/jest-preset@0.86.2(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.0)(@react-native/jest-preset@0.86.2(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)(typescript@6.0.3):
     dependencies:

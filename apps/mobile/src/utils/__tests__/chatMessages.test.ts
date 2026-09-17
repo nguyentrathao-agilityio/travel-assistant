@@ -1,7 +1,4 @@
-import assert from 'node:assert/strict';
-import test from 'node:test';
-
-import { findToolMessage, renderableMessages } from './chatMessages';
+import { findToolMessage, renderableMessages } from '../chatMessages';
 
 import type { Message } from '@copilotkit/react-native/headless';
 
@@ -15,10 +12,7 @@ test('renderableMessages keeps only user and assistant turns', () => {
 
   const result = renderableMessages(messages);
 
-  assert.deepEqual(
-    result.map((message) => message.id),
-    ['2', '3']
-  );
+  expect(result.map((message) => message.id)).toEqual(['2', '3']);
 });
 
 test('findToolMessage locates the tool result matching a tool call id', () => {
@@ -28,7 +22,7 @@ test('findToolMessage locates the tool result matching a tool call id', () => {
     { id: '3', role: 'tool', content: 'rainy', toolCallId: 'call-2' },
   ] as unknown as Message[];
 
-  assert.equal(findToolMessage(messages, 'call-1')?.content, 'sunny');
-  assert.equal(findToolMessage(messages, 'call-2')?.content, 'rainy');
-  assert.equal(findToolMessage(messages, 'call-3'), undefined);
+  expect(findToolMessage(messages, 'call-1')?.content).toBe('sunny');
+  expect(findToolMessage(messages, 'call-2')?.content).toBe('rainy');
+  expect(findToolMessage(messages, 'call-3')).toBeUndefined();
 });

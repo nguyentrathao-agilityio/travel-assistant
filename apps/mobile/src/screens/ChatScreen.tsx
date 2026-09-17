@@ -323,11 +323,17 @@ export const ChatScreen = ({
                 value={draft}
               />
               {isRunning ? (
-                <Pressable accessibilityRole="button" onPress={onStop} style={styles.stopButton}>
+                <Pressable
+                  accessibilityLabel="Stop"
+                  accessibilityRole="button"
+                  onPress={onStop}
+                  style={styles.stopButton}
+                >
                   <Square color={colors.textOnDark} fill={colors.textOnDark} size={14} />
                 </Pressable>
               ) : (
                 <Pressable
+                  accessibilityLabel="Send"
                   accessibilityRole="button"
                   disabled={!draft.trim() || isAwaitingApproval}
                   onPress={handleSend}

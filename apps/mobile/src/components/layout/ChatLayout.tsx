@@ -44,7 +44,11 @@ export const ChatLayout = ({
         style={styles.keyboard}
         textInputNativeID={CHAT_COMPOSER_INPUT_NATIVE_ID}
       >
-        {header ? <View style={styles.header}>{header}</View> : null}
+        {header ? (
+          <View style={[styles.header, { paddingTop: insets.top + shellSpacing.md }]}>
+            {header}
+          </View>
+        ) : null}
         <View style={styles.messagesContainer}>{messages}</View>
         <KeyboardStickyView
           offset={{ closed: -restingBottomInset, opened: 0 }}
@@ -68,7 +72,6 @@ const createStyles = () =>
     header: {
       paddingBottom: shellSpacing.sm,
       paddingHorizontal: shellSpacing.md,
-      paddingTop: shellSpacing.md,
     },
     messagesContainer: {
       flex: 1,

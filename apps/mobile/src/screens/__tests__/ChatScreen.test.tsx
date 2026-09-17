@@ -31,6 +31,7 @@ const baseProps: Parameters<typeof ChatScreen>[0] = {
   isReady: true,
   isRunning: false,
   messages: [] as Message[],
+  onBack: jest.fn(),
   onSend: jest.fn(),
   onStartListening: jest.fn(),
   onStop: jest.fn(),

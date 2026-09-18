@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 
 import { CHAT_PATH, THREADS_PATH } from '../constants';
@@ -12,6 +12,10 @@ export default function DashboardRoute() {
   const { activeThreadId, markActive } = useActiveThreadId();
   const [isStartingTrip, setIsStartingTrip] = useState(false);
   const isStartingTripRef = useRef(false);
+
+  // Re-syncs the list whenever Dashboard regains focus, e.g. after starting or
+  // continuing a chat, so it always reflects the latest server-side state.
+  useFocusEffect(refresh);
 
   const handleStartNewTrip = async () => {
     if (isStartingTripRef.current) return;
@@ -35,7 +39,6 @@ export default function DashboardRoute() {
 
       try {
         await createRemoteThread(threadId);
-        refresh();
       } catch {
         // The chat screen still opens with a client-generated id; it will surface
         // the failure itself once it actually needs the thread to exist server-side.

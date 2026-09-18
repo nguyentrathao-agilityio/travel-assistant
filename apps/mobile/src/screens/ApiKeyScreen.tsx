@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo, useState } from 'react';
 import { Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 // Constants
 import { OPENAI_KEYS_URL } from '../constants';
@@ -33,60 +34,67 @@ export const ApiKeyScreen = ({ isVerifying, error, onSubmit }: ApiKeyScreenProps
       colors={[colors.backgroundGradientStart, colors.backgroundGradientEnd]}
       style={styles.container}
     >
-      <View style={styles.card}>
-        <Text style={styles.title}>OpenAI API key</Text>
-        <Text style={styles.description}>
-          Your key is stored securely on this device (Keychain/Keystore) and sent to the agent
-          runtime with every request. It is never written to plain app storage.
-        </Text>
+      <KeyboardAwareScrollView
+        bottomOffset={shellSpacing.md}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        testID="api-key-keyboard-scroll"
+      >
+        <View style={styles.card}>
+          <Text style={styles.title}>OpenAI API key</Text>
+          <Text style={styles.description}>
+            Your key is stored securely on this device (Keychain/Keystore) and sent to the agent
+            runtime with every request. It is never written to plain app storage.
+          </Text>
 
-        <View style={styles.inputRow}>
-          <TextInput
-            autoCapitalize="none"
-            autoCorrect={false}
-            editable={!isVerifying}
-            onChangeText={setValue}
-            placeholder="sk-…"
-            placeholderTextColor={colors.textOnDarkFaint}
-            secureTextEntry={!showKey}
-            style={styles.input}
-            value={value}
-          />
+          <View style={styles.inputRow}>
+            <TextInput
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isVerifying}
+              onChangeText={setValue}
+              placeholder="sk-…"
+              placeholderTextColor={colors.textOnDarkFaint}
+              secureTextEntry={!showKey}
+              style={styles.input}
+              value={value}
+            />
+            <Pressable
+              accessibilityLabel={showKey ? 'Hide API key' : 'Show API key'}
+              accessibilityRole="button"
+              disabled={isVerifying}
+              onPress={() => setShowKey((prev) => !prev)}
+            >
+              <Text style={styles.toggleLabel}>{showKey ? 'Hide' : 'Show'}</Text>
+            </Pressable>
+          </View>
+
+          {error && <Text style={styles.error}>{error}</Text>}
+
           <Pressable
-            accessibilityLabel={showKey ? 'Hide API key' : 'Show API key'}
             accessibilityRole="button"
-            disabled={isVerifying}
-            onPress={() => setShowKey((prev) => !prev)}
+            disabled={!value.trim() || isVerifying}
+            onPress={handleSubmit}
           >
-            <Text style={styles.toggleLabel}>{showKey ? 'Hide' : 'Show'}</Text>
+            <LinearGradient
+              colors={[colors.accentGradientStart, colors.accentGradientEnd]}
+              end={{ x: 1, y: 0 }}
+              start={{ x: 0, y: 0 }}
+              style={[styles.submitButton, (!value.trim() || isVerifying) && styles.submitDisabled]}
+            >
+              <Text style={styles.submitLabel}>{isVerifying ? 'Verifying…' : 'Continue'}</Text>
+            </LinearGradient>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="link"
+            onPress={() => Linking.openURL(OPENAI_KEYS_URL)}
+            style={styles.linkRow}
+          >
+            <Text style={styles.linkText}>Don&apos;t have a key? Get one from OpenAI</Text>
           </Pressable>
         </View>
-
-        {error && <Text style={styles.error}>{error}</Text>}
-
-        <Pressable
-          accessibilityRole="button"
-          disabled={!value.trim() || isVerifying}
-          onPress={handleSubmit}
-        >
-          <LinearGradient
-            colors={[colors.accentGradientStart, colors.accentGradientEnd]}
-            end={{ x: 1, y: 0 }}
-            start={{ x: 0, y: 0 }}
-            style={[styles.submitButton, (!value.trim() || isVerifying) && styles.submitDisabled]}
-          >
-            <Text style={styles.submitLabel}>{isVerifying ? 'Verifying…' : 'Continue'}</Text>
-          </LinearGradient>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="link"
-          onPress={() => Linking.openURL(OPENAI_KEYS_URL)}
-          style={styles.linkRow}
-        >
-          <Text style={styles.linkText}>Don&apos;t have a key? Get one from OpenAI</Text>
-        </Pressable>
-      </View>
+      </KeyboardAwareScrollView>
     </LinearGradient>
   );
 };
@@ -94,8 +102,11 @@ export const ApiKeyScreen = ({ isVerifying, error, onSubmit }: ApiKeyScreenProps
 const createStyles = (colors: ShellColors) =>
   StyleSheet.create({
     container: {
-      alignItems: 'center',
       flex: 1,
+    },
+    content: {
+      alignItems: 'center',
+      flexGrow: 1,
       justifyContent: 'center',
       padding: shellSpacing.xl,
     },

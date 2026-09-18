@@ -23,6 +23,15 @@ test('renders the title and description', async () => {
   expect(screen.getByText('OpenAI API key')).toBeOnTheScreen();
 });
 
+test('keeps the form reachable when the keyboard is open', async () => {
+  await renderScreen();
+
+  expect(screen.getByTestId('api-key-keyboard-scroll')).toHaveProp(
+    'keyboardShouldPersistTaps',
+    'handled'
+  );
+});
+
 test('continue is disabled until a key is entered', async () => {
   await renderScreen();
 

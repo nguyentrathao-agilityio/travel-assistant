@@ -4,6 +4,9 @@ import { StyleSheet, View, type ViewStyle } from 'react-native';
 // Types
 import type { DailyForecast } from '@repo/types';
 
+// Constants
+import { DEFAULT_WEATHER_ICON, WEATHER_ICON_THRESHOLDS } from '../constants';
+
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatDayDate, toFahrenheit } from '@repo/utils';
@@ -22,20 +25,12 @@ interface WeatherDayCardProps {
   style?: ViewStyle;
 }
 
-const WEATHER_ICON_THRESHOLDS: [number, string][] = [
-  [0, '☀️'],
-  [3, '⛅'],
-  [48, '☁️'],
-  [67, '🌧️'],
-  [77, '❄️'],
-  [82, '🌧️'],
-  [86, '❄️'],
-];
-
 const getWeatherIcon = (code?: number): string => {
-  if (code === undefined) return '⛈️';
+  if (code === undefined) return DEFAULT_WEATHER_ICON;
 
-  return WEATHER_ICON_THRESHOLDS.find(([threshold]) => code <= threshold)?.[1] ?? '⛈️';
+  return (
+    WEATHER_ICON_THRESHOLDS.find(([threshold]) => code <= threshold)?.[1] ?? DEFAULT_WEATHER_ICON
+  );
 };
 
 export const WeatherDayCard = ({

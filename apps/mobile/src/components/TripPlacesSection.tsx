@@ -3,6 +3,9 @@ import { StyleSheet, View } from 'react-native';
 // Types
 import type { PlaceSearchResult } from '@repo/types';
 
+// Constants
+import { MAX_TRIP_PLACES } from '../constants';
+
 // Utils
 import { shellSpacing } from '../theme';
 
@@ -14,12 +17,10 @@ interface TripPlacesSectionProps {
   places: PlaceSearchResult;
 }
 
-const MAX_PLACES = 6;
-
 export const TripPlacesSection = ({ places }: TripPlacesSectionProps) => {
   if (!places.results.length) return null;
 
-  const topPlaces = places.results.slice(0, MAX_PLACES);
+  const topPlaces = places.results.slice(0, MAX_TRIP_PLACES);
 
   return (
     <View style={styles.container}>

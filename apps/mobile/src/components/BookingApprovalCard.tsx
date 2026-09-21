@@ -6,6 +6,12 @@ import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
 
 // Constants
 import { BOOKING_ACTIONS, BOOKING_DECISIONS } from '@repo/constants';
+import {
+  BOOKING_ACTION_ICON,
+  NON_EDITABLE_DETAIL_KEYS,
+  SUBMIT_TIMEOUT_MESSAGE,
+  SUBMIT_TIMEOUT_MS,
+} from '../constants';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
@@ -17,20 +23,6 @@ import { Card, Typography } from './common';
 import type { ShellColors } from '../theme';
 
 type EditableBookingDetails = Record<string, string | number | boolean | null>;
-
-// Reference identifiers tie the approval to a specific, already-revalidated search
-// result — changing them here wouldn't re-run availability/price revalidation, so they
-// display but never become an editable input.
-const NON_EDITABLE_DETAIL_KEYS = new Set(['flightId', 'hotelId']);
-
-const ACTION_ICON: Record<string, string> = {
-  [BOOKING_ACTIONS.CREATE_FLIGHT]: '✈️',
-  [BOOKING_ACTIONS.CANCEL]: '⚠️',
-  [BOOKING_ACTIONS.CREATE_HOTEL]: '🏨',
-};
-
-const SUBMIT_TIMEOUT_MESSAGE = 'This is taking longer than expected. Please try again.';
-const SUBMIT_TIMEOUT_MS = 20000;
 
 interface BookingApprovalCardProps {
   request: BookingApprovalRequest;
@@ -95,7 +87,7 @@ export const BookingApprovalCard = ({ request, onDecision }: BookingApprovalCard
   return (
     <Card style={styles.card}>
       <View style={styles.headerRow}>
-        <Typography>{ACTION_ICON[request.action] ?? '📋'}</Typography>
+        <Typography>{BOOKING_ACTION_ICON[request.action] ?? '📋'}</Typography>
         <Typography style={styles.title} variant="title" weight="medium">
           {request.title}
         </Typography>

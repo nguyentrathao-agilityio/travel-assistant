@@ -1,16 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  ArrowLeft,
-  ArrowRight,
-  AudioLines,
-  Building2,
-  Compass,
-  MapPin,
-  Plane,
-  Send,
-  Sparkles,
-  Square,
-} from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, AudioLines, Send, Sparkles, Square } from 'lucide-react-native';
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -32,7 +21,14 @@ import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Constants
-import { CHAT_COMPOSER_INPUT_NATIVE_ID } from '../constants';
+import {
+  CHAT_COMPOSER_INPUT_NATIVE_ID,
+  COMPOSER_BOTTOM_MARGIN,
+  DESTINATION_PILLS,
+  EMPTY_STATE_SUGGESTIONS,
+  MIN_COMPOSER_INPUT_HEIGHT,
+  VOICE_STATE_LABEL,
+} from '../constants';
 
 // Components
 import {
@@ -52,48 +48,10 @@ import { messageText, renderableMessages } from '../utils/chatMessages';
 import type { VoiceState } from '../hooks';
 import type { ShellColors } from '../theme';
 import type { RenderableMessage } from '../utils/chatMessages';
-import type { LucideIcon } from 'lucide-react-native';
 import type { Message } from '@copilotkit/react-native/headless';
 import type { KeyboardChatScrollViewProps } from 'react-native-keyboard-controller';
 import type { SharedValue } from 'react-native-reanimated';
 import type { ReactElement } from 'react';
-
-const MIN_COMPOSER_INPUT_HEIGHT = 40;
-const COMPOSER_BOTTOM_MARGIN = shellSpacing.xs;
-
-const EMPTY_STATE_SUGGESTIONS: Array<{
-  description: string;
-  icon: LucideIcon;
-  message: string;
-  title: string;
-}> = [
-  {
-    description: 'Trip Summary for Da Nang',
-    icon: Compass,
-    message: 'Trip Summary for Da Nang',
-    title: 'Plan my trip',
-  },
-  {
-    description: 'Find places to visit in Da Nang',
-    icon: MapPin,
-    message: 'Show me places to visit in Da Nang',
-    title: 'Find places',
-  },
-  {
-    description: 'Find hotels in Hoi An',
-    icon: Building2,
-    message: 'Show hotels in Hoi An',
-    title: 'Find hotels',
-  },
-  {
-    description: 'Find flights to Bangkok',
-    icon: Plane,
-    message: 'Find flights to Bangkok',
-    title: 'Find flights',
-  },
-];
-
-const DESTINATION_PILLS = ['Da Nang', 'Hanoi', 'Bangkok', 'Tokyo'] as const;
 
 const ChatScrollView = forwardRef<
   React.ComponentRef<typeof KeyboardChatScrollView>,
@@ -138,13 +96,6 @@ interface ChatScreenProps {
   onExitVoiceMode: () => void;
   onStopVoiceModeTurn: () => void;
 }
-
-const VOICE_STATUS_LABEL: Record<Exclude<VoiceState, 'idle' | 'error'>, string> = {
-  connecting: 'Connecting…',
-  listening: 'Listening…',
-  speaking: 'Speaking…',
-  thinking: 'Thinking…',
-};
 
 export const ChatScreen = ({
   messages,
@@ -382,7 +333,7 @@ export const ChatScreen = ({
             )}
             {!isVoiceModeActive && voiceState !== 'idle' && voiceState !== 'error' && (
               <View style={styles.voiceStatusBanner}>
-                <Text style={styles.voiceStatusText}>{VOICE_STATUS_LABEL[voiceState]}</Text>
+                <Text style={styles.voiceStatusText}>{VOICE_STATE_LABEL[voiceState]}</Text>
               </View>
             )}
             <View style={styles.inputBar}>

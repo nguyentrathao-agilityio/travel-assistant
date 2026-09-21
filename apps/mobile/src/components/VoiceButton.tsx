@@ -2,6 +2,7 @@ import { Mic, MicOff, Volume2 } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 
+import { HEADER_ICON_SIZE } from '../constants';
 import { shellRadii, useShellTheme } from '../theme';
 
 import type { VoiceState } from '../hooks';
@@ -14,8 +15,6 @@ interface VoiceButtonProps {
   onStopListening: () => void;
   onStopSpeaking: () => void;
 }
-
-const ICON_SIZE = 20;
 
 export const VoiceButton = ({
   voiceState,
@@ -66,16 +65,16 @@ const VoiceIcon = ({ voiceState }: { voiceState: VoiceState }) => {
 
   switch (voiceState) {
     case 'listening':
-      return <Mic color={colors.textOnDark} size={ICON_SIZE} />;
+      return <Mic color={colors.textOnDark} size={HEADER_ICON_SIZE} />;
     case 'connecting':
     case 'thinking':
       return <ActivityIndicator color={colors.textOnDarkMuted} />;
     case 'speaking':
-      return <Volume2 color={colors.textOnDark} size={ICON_SIZE} />;
+      return <Volume2 color={colors.textOnDark} size={HEADER_ICON_SIZE} />;
     case 'error':
-      return <MicOff color={colors.danger} size={ICON_SIZE} />;
+      return <MicOff color={colors.danger} size={HEADER_ICON_SIZE} />;
     default:
-      return <Mic color={colors.textOnDarkMuted} size={ICON_SIZE} />;
+      return <Mic color={colors.textOnDarkMuted} size={HEADER_ICON_SIZE} />;
   }
 };
 

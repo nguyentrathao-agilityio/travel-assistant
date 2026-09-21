@@ -1,1 +1,46 @@
+import { Building2, Compass, MapPin, Plane } from 'lucide-react-native';
+
+// Utils
+import { shellSpacing } from '../theme';
+
+// Types
+import type { LucideIcon } from 'lucide-react-native';
+
 export const CHAT_COMPOSER_INPUT_NATIVE_ID = 'chat-composer-input';
+
+export const MIN_COMPOSER_INPUT_HEIGHT = 40;
+export const COMPOSER_BOTTOM_MARGIN = shellSpacing.xs;
+
+export const EMPTY_STATE_SUGGESTIONS: Array<{
+  description: string;
+  icon: LucideIcon;
+  message: string;
+  title: string;
+}> = [
+  {
+    description: 'Trip Summary for Da Nang',
+    icon: Compass,
+    message: 'Trip Summary for Da Nang',
+    title: 'Plan my trip',
+  },
+  {
+    description: 'Find places to visit in Da Nang',
+    icon: MapPin,
+    message: 'Show me places to visit in Da Nang',
+    title: 'Find places',
+  },
+  {
+    description: 'Find hotels in Hoi An',
+    icon: Building2,
+    message: 'Show hotels in Hoi An',
+    title: 'Find hotels',
+  },
+  {
+    description: 'Find flights to Bangkok',
+    icon: Plane,
+    message: 'Find flights to Bangkok',
+    title: 'Find flights',
+  },
+];
+
+export const DESTINATION_PILLS = ['Da Nang', 'Hanoi', 'Bangkok', 'Tokyo'] as const;

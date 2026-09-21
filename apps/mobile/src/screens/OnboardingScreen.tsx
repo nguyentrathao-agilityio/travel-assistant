@@ -3,39 +3,14 @@ import { ArrowLeft, ArrowRight, ChevronsRight } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
+// Constants
+import { ONBOARDING_SLIDES } from '../constants';
+
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 
 // Types
 import type { ShellColors } from '../theme';
-
-interface OnboardingSlide {
-  bubble: string;
-  headlinePrefix: string;
-  headlineAccent: string;
-  subcopy: string;
-}
-
-const SLIDES: OnboardingSlide[] = [
-  {
-    bubble: 'Hi! Ready to plan your next adventure?',
-    headlineAccent: 'Chat',
-    headlinePrefix: 'Your Next Adventure Starts With a Simple',
-    subcopy: "Tell us where you want to go, and we'll handle the rest.",
-  },
-  {
-    bubble: 'How can I help you plan your trip?',
-    headlineAccent: 'Assistant',
-    headlinePrefix: 'Smarter Trips Start Here — Meet Your',
-    subcopy: 'Say hello to your new travel companion!',
-  },
-  {
-    bubble: 'Flights, hotels, itineraries — all in one place.',
-    headlineAccent: 'Minutes',
-    headlinePrefix: 'From Flights to Full Itineraries, Done in',
-    subcopy: "Let's turn your travel ideas into a real plan.",
-  },
-];
 
 interface OnboardingScreenProps {
   onContinue: () => void;
@@ -45,8 +20,8 @@ export const OnboardingScreen = ({ onContinue }: OnboardingScreenProps) => {
   const { colors } = useShellTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [activeSlide, setActiveSlide] = useState(0);
-  const slide = SLIDES[activeSlide];
-  const isLastSlide = activeSlide === SLIDES.length - 1;
+  const slide = ONBOARDING_SLIDES[activeSlide];
+  const isLastSlide = activeSlide === ONBOARDING_SLIDES.length - 1;
 
   const handleBack = () => {
     if (activeSlide > 0) setActiveSlide(activeSlide - 1);
@@ -98,7 +73,7 @@ export const OnboardingScreen = ({ onContinue }: OnboardingScreenProps) => {
         <Text style={styles.subcopy}>{slide.subcopy}</Text>
 
         <View style={styles.pagination}>
-          {SLIDES.map((item, index) => (
+          {ONBOARDING_SLIDES.map((item, index) => (
             <View
               key={item.headlineAccent}
               style={[styles.dot, index === activeSlide && styles.dotActive]}

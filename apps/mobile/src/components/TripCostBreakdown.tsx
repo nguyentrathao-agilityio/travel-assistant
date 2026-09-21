@@ -4,6 +4,9 @@ import { StyleSheet, View } from 'react-native';
 // Types
 import type { TripCostEstimate } from '@repo/schemas';
 
+// Constants
+import { COST_ICON_MAP, DEFAULT_COST_ICON } from '../constants';
+
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatAmount } from '@repo/utils';
@@ -17,18 +20,12 @@ interface TripCostBreakdownProps {
   estimate: TripCostEstimate;
 }
 
-const COST_ICON_MAP: { keywords: string[]; icon: string }[] = [
-  { keywords: ['flight', 'air'], icon: '✈️' },
-  { keywords: ['hotel', 'accommodation', 'stay', 'room'], icon: '🏨' },
-  { keywords: ['food', 'meal', 'dining', 'restaurant'], icon: '🍜' },
-  { keywords: ['activity', 'activities', 'tour', 'sightseeing'], icon: '🎯' },
-];
-
 const getCostIcon = (label: string): string => {
   const lower = label.toLowerCase();
 
   return (
-    COST_ICON_MAP.find(({ keywords }) => keywords.some((k) => lower.includes(k)))?.icon ?? '🏷️'
+    COST_ICON_MAP.find(({ keywords }) => keywords.some((k) => lower.includes(k)))?.icon ??
+    DEFAULT_COST_ICON
   );
 };
 

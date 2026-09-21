@@ -1,11 +1,10 @@
 import { Moon, Sun } from 'lucide-react-native';
 import { Pressable, StyleSheet } from 'react-native';
 
+import { HEADER_ICON_SIZE } from '../../constants';
 import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
 
 import type { ShellColors } from '../../theme';
-
-const ICON_SIZE = 20;
 
 export const ThemeToggleButton = () => {
   const { theme, setTheme, colors } = useShellTheme();
@@ -20,9 +19,9 @@ export const ThemeToggleButton = () => {
       style={styles.button}
     >
       {theme === 'dark' ? (
-        <Sun color={colors.textOnDark} size={ICON_SIZE} />
+        <Sun color={colors.textOnDark} size={HEADER_ICON_SIZE} />
       ) : (
-        <Moon color={colors.textOnDark} size={ICON_SIZE} />
+        <Moon color={colors.textOnDark} size={HEADER_ICON_SIZE} />
       )}
     </Pressable>
   );

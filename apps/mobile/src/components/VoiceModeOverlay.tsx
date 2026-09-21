@@ -15,7 +15,13 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Constants
-import { VOICE_STATES } from '../constants';
+import {
+  VOICE_BAR_MAX_HEIGHT,
+  VOICE_BAR_MIN_HEIGHT,
+  VOICE_BAR_MULTIPLIERS,
+  VOICE_STATE_LABEL,
+  VOICE_STATES,
+} from '../constants';
 
 // Utils
 import { shellSpacing, useShellTheme } from '../theme';
@@ -34,19 +40,6 @@ interface VoiceModeOverlayProps {
   onStopTurn: () => void;
 }
 
-const STATE_LABEL: Record<VoiceState, string> = {
-  [VOICE_STATES.CONNECTING]: 'Connecting…',
-  [VOICE_STATES.ERROR]: 'Something went wrong',
-  [VOICE_STATES.IDLE]: 'Tap the mic to talk',
-  [VOICE_STATES.LISTENING]: 'Listening…',
-  [VOICE_STATES.SPEAKING]: 'Speaking…',
-  [VOICE_STATES.THINKING]: 'Thinking…',
-};
-
-const BAR_MULTIPLIERS = [0.35, 0.65, 1, 0.65, 0.35];
-const BAR_MIN_HEIGHT = 10;
-const BAR_MAX_HEIGHT = 72;
-
 const WaveformBar = ({
   level,
   multiplier,
@@ -60,7 +53,7 @@ const WaveformBar = ({
     height: interpolate(
       level.value * multiplier,
       [0, 1],
-      [BAR_MIN_HEIGHT, BAR_MAX_HEIGHT],
+      [VOICE_BAR_MIN_HEIGHT, VOICE_BAR_MAX_HEIGHT],
       Extrapolation.CLAMP
     ),
   }));
@@ -68,9 +61,6 @@ const WaveformBar = ({
   return <Animated.View style={[waveformStyles.bar, { backgroundColor: color }, style]} />;
 };
 
-// Real mic volume drives the bars while listening. There's no equivalent signal
-// for `speaking`/`thinking`/`connecting` (expo-speech doesn't expose TTS playback
-// amplitude), so those states get a gentle decorative idle pulse instead.
 const Waveform = ({
   voiceState,
   micLevel,
@@ -109,7 +99,7 @@ const Waveform = ({
 
   return (
     <View style={waveformStyles.row}>
-      {BAR_MULTIPLIERS.map((multiplier, index) => (
+      {VOICE_BAR_MULTIPLIERS.map((multiplier, index) => (
         <WaveformBar
           color={barColors[index]}
           key={index}
@@ -126,7 +116,7 @@ const waveformStyles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 6,
-    height: BAR_MAX_HEIGHT,
+    height: VOICE_BAR_MAX_HEIGHT,
   },
   bar: {
     borderRadius: 4,
@@ -166,7 +156,9 @@ export const VoiceModeOverlay = ({
     >
       <View style={styles.center}>
         <Waveform colors={colors} micLevel={micLevel} voiceState={voiceState} />
-        <Text style={styles.transcriptText}>{partialTranscript || STATE_LABEL[voiceState]}</Text>
+        <Text style={styles.transcriptText}>
+          {partialTranscript || VOICE_STATE_LABEL[voiceState]}
+        </Text>
         {voiceState === VOICE_STATES.ERROR && errorMessage && (
           <Text style={styles.errorText}>{errorMessage}</Text>
         )}

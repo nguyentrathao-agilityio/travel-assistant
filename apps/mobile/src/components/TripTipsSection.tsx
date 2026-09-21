@@ -6,6 +6,7 @@ import type { TipsResult } from '@repo/types';
 
 // Constants
 import { TIP_CATEGORY_LABELS } from '@repo/constants';
+import { MAX_TRIP_TIPS } from '../constants';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
@@ -19,16 +20,14 @@ interface TripTipsSectionProps {
   tips: TipsResult;
 }
 
-const MAX_TIPS = 4;
-
 export const TripTipsSection = ({ tips }: TripTipsSectionProps) => {
   const { colors } = useShellTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   if (!tips.tips.length) return null;
 
-  const essentialTips = tips.tips.filter((tip) => tip.isEssential).slice(0, MAX_TIPS);
-  const displayTips = essentialTips.length ? essentialTips : tips.tips.slice(0, MAX_TIPS);
+  const essentialTips = tips.tips.filter((tip) => tip.isEssential).slice(0, MAX_TRIP_TIPS);
+  const displayTips = essentialTips.length ? essentialTips : tips.tips.slice(0, MAX_TRIP_TIPS);
 
   return (
     <View style={styles.container}>

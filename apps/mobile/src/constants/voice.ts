@@ -27,3 +27,16 @@ export const VOICE_ERROR_MESSAGES = {
   STT_UNAVAILABLE: "Voice input isn't available right now — please type instead.",
   TTS_FAILED: "Couldn't play the response out loud.",
 } as const;
+
+export const VOICE_STATE_LABEL: Record<VoiceState, string> = {
+  [VOICE_STATES.CONNECTING]: 'Connecting…',
+  [VOICE_STATES.ERROR]: 'Something went wrong',
+  [VOICE_STATES.IDLE]: 'Tap the mic to talk',
+  [VOICE_STATES.LISTENING]: 'Listening…',
+  [VOICE_STATES.SPEAKING]: 'Speaking…',
+  [VOICE_STATES.THINKING]: 'Thinking…',
+};
+
+export const VOICE_BAR_MULTIPLIERS = [0.35, 0.65, 1, 0.65, 0.35];
+export const VOICE_BAR_MIN_HEIGHT = 10;
+export const VOICE_BAR_MAX_HEIGHT = 72;

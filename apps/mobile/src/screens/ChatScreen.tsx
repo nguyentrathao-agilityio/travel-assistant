@@ -23,7 +23,11 @@ import {
   type LayoutChangeEvent,
   type ScrollViewProps,
 } from 'react-native';
-import { KeyboardChatScrollView } from 'react-native-keyboard-controller';
+import {
+  KeyboardChatScrollView,
+  KeyboardController,
+  useKeyboardState,
+} from 'react-native-keyboard-controller';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -165,6 +169,7 @@ export const ChatScreen = ({
   onStopVoiceModeTurn,
 }: ChatScreenProps) => {
   const [draft, setDraft] = useState('');
+  const isKeyboardVisible = useKeyboardState((state) => state.isVisible);
 
   useEffect(() => {
     if (!dictatedTranscript) return;
@@ -229,8 +234,14 @@ export const ChatScreen = ({
     }
   }, [rows.length, messages, interruptElement]);
 
+  const handleSuggestionPress = (message: string) => {
+    KeyboardController.dismiss();
+    onSend(message);
+  };
+
   const handleSend = () => {
     if (!draft.trim() || isRunning || isAwaitingApproval) return;
+    KeyboardController.dismiss();
     onSend(draft);
     setDraft('');
     requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
@@ -281,7 +292,11 @@ export const ChatScreen = ({
             </View>
           ) : rows.length === 0 ? (
             <ChatScrollView
-              contentContainerStyle={styles.emptyState}
+              contentContainerStyle={[
+                styles.emptyState,
+                isKeyboardVisible && styles.emptyStateKeyboardVisible,
+              ]}
+              keyboardLiftBehavior="never"
               style={styles.emptyStateScroll}
             >
               <View style={styles.emptyTitleWrap}>
@@ -296,7 +311,7 @@ export const ChatScreen = ({
                       accessibilityRole="button"
                       disabled={isRunning || isAwaitingApproval}
                       key={city}
-                      onPress={() => onSend(`Plan a trip to ${city}`)}
+                      onPress={() => handleSuggestionPress(`Plan a trip to ${city}`)}
                       style={styles.destinationPill}
                     >
                       <Text style={styles.destinationPillLabel}>{city}</Text>
@@ -312,7 +327,7 @@ export const ChatScreen = ({
                       accessibilityRole="button"
                       disabled={isRunning || isAwaitingApproval}
                       key={title}
-                      onPress={() => onSend(message)}
+                      onPress={() => handleSuggestionPress(message)}
                       style={styles.quickAction}
                     >
                       <ActionIcon color={colors.textOnDarkMuted} size={18} strokeWidth={2.1} />
@@ -494,6 +509,10 @@ const createStyles = (colors: ShellColors) =>
       justifyContent: 'center',
       paddingBottom: 92,
       paddingHorizontal: shellSpacing.md,
+    },
+    emptyStateKeyboardVisible: {
+      justifyContent: 'flex-start',
+      paddingTop: shellSpacing.xl,
     },
     emptyTitleWrap: {
       alignItems: 'center',

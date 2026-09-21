@@ -1,4 +1,5 @@
 import { Text } from 'react-native';
+import { KeyboardController } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { act, render, screen, userEvent } from '@testing-library/react-native';
@@ -142,6 +143,15 @@ test('pressing a quick action suggestion sends its message', async () => {
   expect(onSend).toHaveBeenCalledWith('Show hotels in Hoi An');
 });
 
+test('pressing a suggestion dismisses the keyboard', async () => {
+  const user = userEvent.setup();
+  await renderScreen({ messages: [] });
+
+  await user.press(screen.getByText('Hanoi'));
+
+  expect(KeyboardController.dismiss).toHaveBeenCalledTimes(1);
+});
+
 test('empty-state suggestions are disabled while awaiting approval', async () => {
   await renderScreen({
     messages: [],
@@ -192,6 +202,16 @@ test('typing and sending a message clears the draft', async () => {
 
   expect(onSend).toHaveBeenCalledWith('Hello there');
   expect(input).toHaveProp('value', '');
+});
+
+test('sending a typed message dismisses the keyboard', async () => {
+  const user = userEvent.setup();
+  await renderScreen();
+
+  await user.type(screen.getByPlaceholderText('Write here…'), 'Hello there');
+  await user.press(screen.getByRole('button', { name: 'Send' }));
+
+  expect(KeyboardController.dismiss).toHaveBeenCalledTimes(1);
 });
 
 test('shows a voice mode trigger instead of send while the draft is empty', async () => {

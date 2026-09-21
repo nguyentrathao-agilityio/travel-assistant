@@ -1,5 +1,6 @@
 import * as Speech from 'expo-speech';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSharedValue, withTiming } from 'react-native-reanimated';
 
 // Constants
 import {
@@ -18,11 +19,17 @@ import { fetchVoiceSessionToken } from '../services/voiceSession';
 
 // Utils
 import { arrayBufferToBase64 } from '../utils/base64Audio';
-import { extractFinalTranscript, extractRealtimeErrorMessage } from '../utils/realtimeVoiceEvents';
+import {
+  extractFinalTranscript,
+  extractRealtimeErrorMessage,
+  extractTranscriptDelta,
+} from '../utils/realtimeVoiceEvents';
 
 // Types
 import type { AudioStream, AudioStreamBuffer, AudioStreamResult } from 'expo-audio';
 import type * as ExpoAudioTypes from 'expo-audio';
+import type { RefObject } from 'react';
+import type { SharedValue } from 'react-native-reanimated';
 
 let audioApi: typeof ExpoAudioTypes | null;
 
@@ -53,6 +60,11 @@ const useAudioStream: (
 
 export type { VoiceState } from '../constants';
 
+// int16 speech samples rarely approach full scale, so RMS/32768 alone reads as
+// near-silent — this gain brings typical speaking volume up into a usable 0..1
+// range for the waveform. Approximate; may need retuning against real devices.
+const MIC_LEVEL_GAIN = 5;
+
 interface VoiceStateContext {
   errorMessage: string | null;
   isAgentRunning: boolean;
@@ -77,6 +89,7 @@ const resolveVoiceState = (context: VoiceStateContext): VoiceState =>
 
 interface UseVoiceAssistantOptions {
   isAgentRunning: boolean;
+  isVoiceModeActiveRef: RefObject<boolean>;
   onTranscript: (text: string) => void;
 }
 
@@ -84,6 +97,8 @@ interface UseVoiceAssistantResult {
   voiceState: VoiceState;
   errorMessage: string | null;
   isPermissionDenied: boolean;
+  partialTranscript: string;
+  micLevel: SharedValue<number>;
   startListening: () => void;
   stopListening: () => void;
   speak: (text: string) => void;
@@ -95,16 +110,21 @@ interface UseVoiceAssistantResult {
  * Realtime transcription session (WebSocket, server VAD, never auto-replies by
  * design), transcripts feed the same `onTranscript`/send path as typed text, and
  * `speak` reads the agent's reply via on-device TTS — no parallel pipeline.
- * `thinking` only fires for voice-started turns (via `isAgentRunning`).
+ * `thinking` only fires for turns handed off while `isVoiceModeActiveRef` is
+ * true — a dictated transcript the user reviews and sends manually doesn't
+ * count, since by then they're back to driving the composer themselves.
  */
 export const useVoiceAssistant = ({
   isAgentRunning,
+  isVoiceModeActiveRef,
   onTranscript,
 }: UseVoiceAssistantOptions): UseVoiceAssistantResult => {
   const [wsPhase, setWsPhase] = useState<VoiceWebSocketPhase>(VOICE_STATES.IDLE);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPermissionDenied, setIsPermissionDenied] = useState(false);
+  const [partialTranscript, setPartialTranscript] = useState('');
+  const micLevel = useSharedValue(0);
   const wsRef = useRef<WebSocket | null>(null);
   const wsPhaseRef = useRef<VoiceWebSocketPhase>(VOICE_STATES.IDLE);
   const hasFinalizedRef = useRef(false);
@@ -122,15 +142,31 @@ export const useVoiceAssistant = ({
     }
   }, [isAgentRunning]);
 
-  const handleAudioBuffer = useCallback((buffer: AudioStreamBuffer) => {
-    const socket = wsRef.current;
+  const handleAudioBuffer = useCallback(
+    (buffer: AudioStreamBuffer) => {
+      const socket = wsRef.current;
 
-    if (!socket || socket.readyState !== WebSocket.OPEN) return;
+      if (!socket || socket.readyState !== WebSocket.OPEN) return;
 
-    socket.send(
-      JSON.stringify({ audio: arrayBufferToBase64(buffer.data), type: 'input_audio_buffer.append' })
-    );
-  }, []);
+      socket.send(
+        JSON.stringify({
+          audio: arrayBufferToBase64(buffer.data),
+          type: 'input_audio_buffer.append',
+        })
+      );
+
+      const sampleCount = Math.floor(buffer.data.byteLength / 2);
+      const samples = new Int16Array(buffer.data, 0, sampleCount);
+      let sumSquares = 0;
+
+      for (let i = 0; i < samples.length; i++) sumSquares += samples[i] * samples[i];
+
+      const rms = samples.length > 0 ? Math.sqrt(sumSquares / samples.length) / 32768 : 0;
+
+      micLevel.value = withTiming(Math.min(rms * MIC_LEVEL_GAIN, 1), { duration: 80 });
+    },
+    [micLevel]
+  );
 
   const { stream: audioStream } = useAudioStream({
     channels: 1,
@@ -148,13 +184,14 @@ export const useVoiceAssistant = ({
     if (isAudioStreamStoppedRef.current) return;
 
     isAudioStreamStoppedRef.current = true;
+    micLevel.value = 0;
 
     try {
       audioStream.stop();
     } catch {
       // Already stopped/released.
     }
-  }, [audioStream]);
+  }, [audioStream, micLevel]);
 
   const closeSession = useCallback(() => {
     stopAudioStream();
@@ -219,6 +256,7 @@ export const useVoiceAssistant = ({
 
         return fetchVoiceSessionToken().then(({ token }) => {
           hasFinalizedRef.current = false;
+          setPartialTranscript('');
 
           const socket = new WebSocket(REALTIME_VOICE_WS_URL, [
             'realtime',
@@ -257,10 +295,22 @@ export const useVoiceAssistant = ({
 
             if (transcript) {
               hasFinalizedRef.current = true;
-              isVoiceTurnActiveRef.current = true;
+
+              if (isVoiceModeActiveRef.current) {
+                isVoiceTurnActiveRef.current = true;
+              }
+
+              setPartialTranscript('');
               closeSession();
               setPhase(VOICE_STATES.IDLE);
               onTranscript(transcript);
+              return;
+            }
+
+            const delta = extractTranscriptDelta(data);
+
+            if (delta) {
+              setPartialTranscript((prev) => prev + delta);
               return;
             }
 
@@ -268,6 +318,7 @@ export const useVoiceAssistant = ({
 
             if (providerError) {
               hasFinalizedRef.current = true;
+              setPartialTranscript('');
               closeSession();
               setPhase(VOICE_STATES.IDLE);
               setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
@@ -276,6 +327,7 @@ export const useVoiceAssistant = ({
 
           socket.onerror = () => {
             hasFinalizedRef.current = true;
+            setPartialTranscript('');
             closeSession();
             setPhase(VOICE_STATES.IDLE);
             setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
@@ -284,6 +336,7 @@ export const useVoiceAssistant = ({
           socket.onclose = () => {
             wsRef.current = null;
             stopAudioStream();
+            setPartialTranscript('');
 
             if (!hasFinalizedRef.current && wsPhaseRef.current !== VOICE_STATES.IDLE) {
               setErrorMessage(VOICE_ERROR_MESSAGES.NO_SPEECH);
@@ -339,6 +392,8 @@ export const useVoiceAssistant = ({
   return {
     errorMessage,
     isPermissionDenied,
+    micLevel,
+    partialTranscript,
     speak,
     startListening,
     stopListening,

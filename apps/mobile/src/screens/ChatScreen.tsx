@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import {
   ArrowLeft,
   ArrowRight,
+  AudioLines,
   Building2,
   Compass,
   MapPin,
@@ -22,7 +23,7 @@ import {
   type LayoutChangeEvent,
   type ScrollViewProps,
 } from 'react-native';
-import { KeyboardAwareScrollView, KeyboardChatScrollView } from 'react-native-keyboard-controller';
+import { KeyboardChatScrollView } from 'react-native-keyboard-controller';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -36,6 +37,7 @@ import {
   ThemeToggleButton,
   ThinkingIndicator,
   VoiceButton,
+  VoiceModeOverlay,
 } from '../components';
 
 // Utils
@@ -49,6 +51,7 @@ import type { RenderableMessage } from '../utils/chatMessages';
 import type { LucideIcon } from 'lucide-react-native';
 import type { Message } from '@copilotkit/react-native/headless';
 import type { KeyboardChatScrollViewProps } from 'react-native-keyboard-controller';
+import type { SharedValue } from 'react-native-reanimated';
 import type { ReactElement } from 'react';
 
 const MIN_COMPOSER_INPUT_HEIGHT = 40;
@@ -117,12 +120,19 @@ interface ChatScreenProps {
   interruptElement: ReactElement | null;
   voiceState: VoiceState;
   voiceErrorMessage: string | null;
+  partialTranscript: string;
+  micLevel: SharedValue<number>;
+  dictatedTranscript: { text: string; id: number } | null;
+  isVoiceModeActive: boolean;
   onBack: () => void;
   onSend: (text: string) => void;
   onStop: () => void;
   onStartListening: () => void;
   onStopListening: () => void;
   onStopSpeaking: () => void;
+  onStartVoiceMode: () => void;
+  onExitVoiceMode: () => void;
+  onStopVoiceModeTurn: () => void;
 }
 
 const VOICE_STATUS_LABEL: Record<Exclude<VoiceState, 'idle' | 'error'>, string> = {
@@ -140,14 +150,30 @@ export const ChatScreen = ({
   interruptElement,
   voiceState,
   voiceErrorMessage,
+  partialTranscript,
+  micLevel,
+  dictatedTranscript,
+  isVoiceModeActive,
   onBack,
   onSend,
   onStop,
   onStartListening,
   onStopListening,
   onStopSpeaking,
+  onStartVoiceMode,
+  onExitVoiceMode,
+  onStopVoiceModeTurn,
 }: ChatScreenProps) => {
   const [draft, setDraft] = useState('');
+
+  useEffect(() => {
+    if (!dictatedTranscript) return;
+
+    setDraft((prev) =>
+      prev.trim() ? `${prev.trim()} ${dictatedTranscript.text}` : dictatedTranscript.text
+    );
+  }, [dictatedTranscript]);
+
   const listRef = useRef<FlatList<RenderableMessage>>(null);
   const rows = renderableMessages(messages);
   const lastRow = rows.at(-1);
@@ -254,7 +280,7 @@ export const ChatScreen = ({
               )}
             </View>
           ) : rows.length === 0 ? (
-            <KeyboardAwareScrollView
+            <ChatScrollView
               contentContainerStyle={styles.emptyState}
               style={styles.emptyStateScroll}
             >
@@ -302,7 +328,7 @@ export const ChatScreen = ({
                   )
                 )}
               </View>
-            </KeyboardAwareScrollView>
+            </ChatScrollView>
           ) : (
             <FlatList
               contentContainerStyle={styles.listContent}
@@ -334,19 +360,19 @@ export const ChatScreen = ({
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             )}
-            {voiceState === 'error' && voiceErrorMessage && (
+            {!isVoiceModeActive && voiceState === 'error' && voiceErrorMessage && (
               <View style={styles.errorBanner}>
                 <Text style={styles.errorText}>{voiceErrorMessage}</Text>
               </View>
             )}
-            {voiceState !== 'idle' && voiceState !== 'error' && (
+            {!isVoiceModeActive && voiceState !== 'idle' && voiceState !== 'error' && (
               <View style={styles.voiceStatusBanner}>
                 <Text style={styles.voiceStatusText}>{VOICE_STATUS_LABEL[voiceState]}</Text>
               </View>
             )}
             <View style={styles.inputBar}>
               <VoiceButton
-                disabled={isAwaitingApproval}
+                disabled={isAwaitingApproval || isVoiceModeActive}
                 onStart={onStartListening}
                 onStopListening={onStopListening}
                 onStopSpeaking={onStopSpeaking}
@@ -371,24 +397,41 @@ export const ChatScreen = ({
                 >
                   <Square color={colors.textOnDark} fill={colors.textOnDark} size={14} />
                 </Pressable>
-              ) : (
+              ) : draft.trim() ? (
                 <Pressable
                   accessibilityLabel="Send"
                   accessibilityRole="button"
-                  disabled={!draft.trim() || isAwaitingApproval}
+                  disabled={isAwaitingApproval}
                   onPress={handleSend}
-                  style={[
-                    styles.sendButton,
-                    (!draft.trim() || isAwaitingApproval) && styles.sendButtonDisabled,
-                  ]}
+                  style={[styles.sendButton, isAwaitingApproval && styles.sendButtonDisabled]}
                 >
                   <Send color={colors.textOnDark} fill={colors.textOnDark} size={18} />
+                </Pressable>
+              ) : (
+                <Pressable
+                  accessibilityLabel="Voice mode"
+                  accessibilityRole="button"
+                  disabled={isAwaitingApproval}
+                  onPress={onStartVoiceMode}
+                  style={[styles.sendButton, isAwaitingApproval && styles.sendButtonDisabled]}
+                >
+                  <AudioLines color={colors.textOnDark} size={18} />
                 </Pressable>
               )}
             </View>
           </>
         }
       />
+      {isVoiceModeActive && (
+        <VoiceModeOverlay
+          errorMessage={voiceErrorMessage}
+          micLevel={micLevel}
+          onExit={onExitVoiceMode}
+          onStopTurn={onStopVoiceModeTurn}
+          partialTranscript={partialTranscript}
+          voiceState={voiceState}
+        />
+      )}
     </LinearGradient>
   );
 };

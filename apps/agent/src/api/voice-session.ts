@@ -1,12 +1,12 @@
 import type { Hono } from 'hono';
 
 // Constants
-import { OPENAI_API_KEY_HEADER } from '@/constants';
-
-export const REALTIME_VOICE_MODEL = 'gpt-4o-mini-transcribe';
-
-const SESSION_TTL_SECONDS = 300;
-const CLIENT_SECRETS_URL = 'https://api.openai.com/v1/realtime/client_secrets';
+import {
+  OPENAI_API_KEY_HEADER,
+  OPENAI_REALTIME_CLIENT_SECRETS_URL,
+  REALTIME_VOICE_MODEL,
+  REALTIME_VOICE_SESSION_TTL_SECONDS,
+} from '@/constants';
 
 interface EphemeralVoiceSession {
   token: string;
@@ -18,15 +18,13 @@ interface VoiceSessionRouteDependencies {
 }
 
 const requestEphemeralSession = async (apiKey: string): Promise<EphemeralVoiceSession> => {
-  const response = await fetch(CLIENT_SECRETS_URL, {
+  const response = await fetch(OPENAI_REALTIME_CLIENT_SECRETS_URL, {
     body: JSON.stringify({
-      expires_after: { anchor: 'created_at', seconds: SESSION_TTL_SECONDS },
+      expires_after: { anchor: 'created_at', seconds: REALTIME_VOICE_SESSION_TTL_SECONDS },
       session: {
         audio: {
           input: {
             format: { rate: 24000, type: 'audio/pcm' },
-            // Transcription sessions never auto-reply by design — LangGraph +
-            // expo-speech stay the sole source of the assistant's voice.
             transcription: { model: REALTIME_VOICE_MODEL },
             turn_detection: { type: 'server_vad' },
           },
@@ -41,7 +39,6 @@ const requestEphemeralSession = async (apiKey: string): Promise<EphemeralVoiceSe
   if (!response.ok) {
     const body = await response.text();
 
-    // eslint-disable-next-line no-console
     console.error(`OpenAI realtime session request failed (${response.status}): ${body}`);
     throw new Error(`OpenAI realtime session request failed with status ${response.status}`);
   }

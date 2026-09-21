@@ -14,3 +14,4 @@ export * from './middleware';
 export * from './tips';
 export * from './search';
 export * from './routing';
+export * from './voice';

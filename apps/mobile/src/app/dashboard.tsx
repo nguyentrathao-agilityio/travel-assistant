@@ -1,21 +1,31 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
-import { CHAT_PATH, THREADS_PATH } from '../constants';
-import { useActiveThreadId, useRecentThreads } from '../hooks';
-import { DashboardScreen } from '../screens';
+// Services
 import { createRemoteThread, findEmptyThreadId, generateThreadId } from '../services';
+
+// Constants
+import { CHAT_PATH, THREADS_PATH } from '../constants';
+
+// Components
+import { DashboardScreen } from '../screens';
+
+// Hooks
+import { useActiveThreadId, useRecentThreads } from '../hooks';
 
 export default function DashboardRoute() {
   const router = useRouter();
   const { status, threads, refresh } = useRecentThreads();
-  const { activeThreadId, markActive } = useActiveThreadId();
+  const { activeThreadId, markActive, refresh: refreshActiveThreadId } = useActiveThreadId();
   const [isStartingTrip, setIsStartingTrip] = useState(false);
   const isStartingTripRef = useRef(false);
 
-  // Re-syncs the list whenever Dashboard regains focus, e.g. after starting or
-  // continuing a chat, so it always reflects the latest server-side state.
-  useFocusEffect(refresh);
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+      refreshActiveThreadId();
+    }, [refresh, refreshActiveThreadId])
+  );
 
   const handleStartNewTrip = async () => {
     if (isStartingTripRef.current) return;

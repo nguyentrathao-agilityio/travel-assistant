@@ -50,3 +50,24 @@ test('markActive persists and updates the active thread id', async () => {
     expect(result.current.activeThreadId).toBe('thread-2');
   });
 });
+
+test('refresh re-reads storage, picking up changes made by another mounted screen', async () => {
+  (getActiveThreadId as jest.Mock).mockResolvedValue(null);
+
+  const { result } = await renderHook(() => useActiveThreadId());
+
+  await waitFor(() => {
+    expect(result.current.loading).toBe(false);
+  });
+  expect(result.current.activeThreadId).toBeNull();
+
+  (getActiveThreadId as jest.Mock).mockResolvedValue('thread-3');
+
+  await act(async () => {
+    result.current.refresh();
+  });
+
+  await waitFor(() => {
+    expect(result.current.activeThreadId).toBe('thread-3');
+  });
+});

@@ -22,7 +22,6 @@ import {
 } from '../hooks';
 import { createRemoteThread, generateThreadId } from '../services';
 import { ChatScreen } from '../screens';
-import { messageText, renderableMessages } from '../utils/chatMessages';
 
 export default function ChatRoute() {
   const params = useLocalSearchParams<{ threadId?: string; focusVoice?: string }>();
@@ -57,36 +56,14 @@ export default function ChatRoute() {
   useTripSummaryAction({ state: tripState });
   useThemeAction();
 
-  const pendingVoiceReplyRef = useRef(false);
-
   const handleTranscript = useCallback(
     (text: string) => {
-      pendingVoiceReplyRef.current = true;
       sendMessage(text);
     },
     [sendMessage]
   );
 
   const voice = useVoiceAssistant({ isAgentRunning: isRunning, onTranscript: handleTranscript });
-
-  // Speak the agent's reply once its run finishes, but only for a turn that
-  // started by voice — a normal typed message should stay silent.
-  const wasRunningRef = useRef(isRunning);
-
-  useEffect(() => {
-    const wasRunning = wasRunningRef.current;
-    wasRunningRef.current = isRunning;
-
-    if (!wasRunning || isRunning || !pendingVoiceReplyRef.current) return;
-
-    pendingVoiceReplyRef.current = false;
-    const lastAssistantMessage = renderableMessages(messages)
-      .filter((message) => message.role === 'assistant')
-      .at(-1);
-    const replyText = lastAssistantMessage ? messageText(lastAssistantMessage.content) : '';
-
-    if (replyText) voice.speak(replyText);
-  }, [isRunning, messages, voice.speak]);
 
   const hasAutoStartedVoiceRef = useRef(false);
 

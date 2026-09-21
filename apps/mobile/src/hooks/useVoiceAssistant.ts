@@ -2,7 +2,16 @@ import * as Speech from 'expo-speech';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Constants
-import { REALTIME_VOICE_SAMPLE_RATE, REALTIME_VOICE_WS_URL, VOICE_LOCALE } from '../constants';
+import {
+  REALTIME_VOICE_SAMPLE_RATE,
+  REALTIME_VOICE_WS_URL,
+  VOICE_CONNECTING_TIMEOUT_MS,
+  VOICE_ERROR_MESSAGES,
+  VOICE_LOCALE,
+  VOICE_STATES,
+  type VoiceState,
+  type VoiceWebSocketPhase,
+} from '../constants';
 
 // Services
 import { fetchVoiceSessionToken } from '../services/voiceSession';
@@ -42,17 +51,29 @@ const useAudioStream: (
     } as AudioStream,
   }));
 
-export type VoiceState = 'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking' | 'error';
+export type { VoiceState } from '../constants';
 
-type WsPhase = 'idle' | 'connecting' | 'listening';
+interface VoiceStateContext {
+  errorMessage: string | null;
+  isAgentRunning: boolean;
+  isSpeaking: boolean;
+  isVoiceTurnActive: boolean;
+  wsPhase: VoiceWebSocketPhase;
+}
 
-const PERMISSION_DENIED_MESSAGE =
-  'Microphone access is off. Enable it in Settings to use voice, or keep typing.';
-const NO_SPEECH_MESSAGE = "Didn't catch that — try again or type your question.";
-const STT_UNAVAILABLE_MESSAGE = "Voice input isn't available right now — please type instead.";
-const TTS_FAILED_MESSAGE = "Couldn't play the response out loud.";
-const CONNECTING_TIMEOUT_MESSAGE = 'Connecting is taking too long. Please try again.';
-const CONNECTING_TIMEOUT_MS = 15000;
+const VOICE_STATE_RULES: Record<VoiceState, (context: VoiceStateContext) => boolean> = {
+  [VOICE_STATES.ERROR]: ({ errorMessage }) => Boolean(errorMessage),
+  [VOICE_STATES.SPEAKING]: ({ isSpeaking }) => isSpeaking,
+  [VOICE_STATES.CONNECTING]: ({ wsPhase }) => wsPhase === VOICE_STATES.CONNECTING,
+  [VOICE_STATES.LISTENING]: ({ wsPhase }) => wsPhase === VOICE_STATES.LISTENING,
+  [VOICE_STATES.THINKING]: ({ isAgentRunning, isVoiceTurnActive }) =>
+    isVoiceTurnActive && isAgentRunning,
+  [VOICE_STATES.IDLE]: () => true,
+};
+
+const resolveVoiceState = (context: VoiceStateContext): VoiceState =>
+  (Object.entries(VOICE_STATE_RULES).find(([, matches]) => matches(context))?.[0] as VoiceState) ??
+  VOICE_STATES.IDLE;
 
 interface UseVoiceAssistantOptions {
   isAgentRunning: boolean;
@@ -80,16 +101,17 @@ export const useVoiceAssistant = ({
   isAgentRunning,
   onTranscript,
 }: UseVoiceAssistantOptions): UseVoiceAssistantResult => {
-  const [wsPhase, setWsPhase] = useState<WsPhase>('idle');
+  const [wsPhase, setWsPhase] = useState<VoiceWebSocketPhase>(VOICE_STATES.IDLE);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPermissionDenied, setIsPermissionDenied] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
-  const wsPhaseRef = useRef<WsPhase>('idle');
+  const wsPhaseRef = useRef<VoiceWebSocketPhase>(VOICE_STATES.IDLE);
   const hasFinalizedRef = useRef(false);
   const isVoiceTurnActiveRef = useRef(false);
   const wasAgentRunningRef = useRef(isAgentRunning);
   const connectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isAudioStreamStoppedRef = useRef(true);
 
   useEffect(() => {
     const wasRunning = wasAgentRunningRef.current;
@@ -117,9 +139,16 @@ export const useVoiceAssistant = ({
     sampleRate: REALTIME_VOICE_SAMPLE_RATE,
   });
 
-  // Both closeSession and the ws onclose handler stop the stream — calling
-  // .stop() twice throws (the native object is already released), so guard it.
+  // Both closeSession and the ws onclose handler stop the stream. AudioStream
+  // releases its native shared object after .stop(), so this must be idempotent.
+  // The ref covers same-instance double calls (onclose + closeSession); the
+  // try/catch covers the object being invalidated out from under us by a Fast
+  // Refresh remount, which the ref can't observe.
   const stopAudioStream = useCallback(() => {
+    if (isAudioStreamStoppedRef.current) return;
+
+    isAudioStreamStoppedRef.current = true;
+
     try {
       audioStream.stop();
     } catch {
@@ -146,11 +175,11 @@ export const useVoiceAssistant = ({
   }, []);
 
   const setPhase = useCallback(
-    (phase: WsPhase) => {
+    (phase: VoiceWebSocketPhase) => {
       wsPhaseRef.current = phase;
       setWsPhase(phase);
 
-      if (phase !== 'connecting') {
+      if (phase !== VOICE_STATES.CONNECTING) {
         clearConnectTimeout();
         return;
       }
@@ -159,10 +188,10 @@ export const useVoiceAssistant = ({
       connectTimeoutRef.current = setTimeout(() => {
         hasFinalizedRef.current = true;
         closeSession();
-        wsPhaseRef.current = 'idle';
-        setWsPhase('idle');
-        setErrorMessage(CONNECTING_TIMEOUT_MESSAGE);
-      }, CONNECTING_TIMEOUT_MS);
+        wsPhaseRef.current = VOICE_STATES.IDLE;
+        setWsPhase(VOICE_STATES.IDLE);
+        setErrorMessage(VOICE_ERROR_MESSAGES.CONNECTING_TIMEOUT);
+      }, VOICE_CONNECTING_TIMEOUT_MS);
     },
     [clearConnectTimeout, closeSession]
   );
@@ -170,19 +199,19 @@ export const useVoiceAssistant = ({
   useEffect(() => clearConnectTimeout, [clearConnectTimeout]);
 
   const startListening = useCallback(() => {
-    if (wsPhaseRef.current !== 'idle') return;
+    if (wsPhaseRef.current !== VOICE_STATES.IDLE) return;
 
     setErrorMessage(null);
     Speech.stop();
     setIsSpeaking(false);
-    setPhase('connecting');
+    setPhase(VOICE_STATES.CONNECTING);
 
     requestRecordingPermissionsAsync()
       .then((permission) => {
         if (!permission.granted) {
           setIsPermissionDenied(true);
-          setErrorMessage(PERMISSION_DENIED_MESSAGE);
-          setPhase('idle');
+          setErrorMessage(VOICE_ERROR_MESSAGES.PERMISSION_DENIED);
+          setPhase(VOICE_STATES.IDLE);
           return;
         }
 
@@ -191,8 +220,6 @@ export const useVoiceAssistant = ({
         return fetchVoiceSessionToken().then(({ token }) => {
           hasFinalizedRef.current = false;
 
-          // Transcription sessions never auto-reply by design — LangGraph +
-          // expo-speech stay the sole source of the assistant's voice.
           const socket = new WebSocket(REALTIME_VOICE_WS_URL, [
             'realtime',
             `openai-insecure-api-key.${token}`,
@@ -201,6 +228,7 @@ export const useVoiceAssistant = ({
           wsRef.current = socket;
 
           socket.onopen = () => {
+            isAudioStreamStoppedRef.current = false;
             socket.send(
               JSON.stringify({
                 session: {
@@ -217,10 +245,10 @@ export const useVoiceAssistant = ({
             );
             audioStream.start().catch(() => {
               closeSession();
-              setPhase('idle');
-              setErrorMessage(STT_UNAVAILABLE_MESSAGE);
+              setPhase(VOICE_STATES.IDLE);
+              setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
             });
-            setPhase('listening');
+            setPhase(VOICE_STATES.LISTENING);
           };
 
           socket.onmessage = (event) => {
@@ -231,7 +259,7 @@ export const useVoiceAssistant = ({
               hasFinalizedRef.current = true;
               isVoiceTurnActiveRef.current = true;
               closeSession();
-              setPhase('idle');
+              setPhase(VOICE_STATES.IDLE);
               onTranscript(transcript);
               return;
             }
@@ -241,40 +269,40 @@ export const useVoiceAssistant = ({
             if (providerError) {
               hasFinalizedRef.current = true;
               closeSession();
-              setPhase('idle');
-              setErrorMessage(STT_UNAVAILABLE_MESSAGE);
+              setPhase(VOICE_STATES.IDLE);
+              setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
             }
           };
 
           socket.onerror = () => {
             hasFinalizedRef.current = true;
             closeSession();
-            setPhase('idle');
-            setErrorMessage(STT_UNAVAILABLE_MESSAGE);
+            setPhase(VOICE_STATES.IDLE);
+            setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
           };
 
           socket.onclose = () => {
             wsRef.current = null;
             stopAudioStream();
 
-            if (!hasFinalizedRef.current && wsPhaseRef.current !== 'idle') {
-              setErrorMessage(NO_SPEECH_MESSAGE);
+            if (!hasFinalizedRef.current && wsPhaseRef.current !== VOICE_STATES.IDLE) {
+              setErrorMessage(VOICE_ERROR_MESSAGES.NO_SPEECH);
             }
 
-            setPhase('idle');
+            setPhase(VOICE_STATES.IDLE);
           };
         });
       })
       .catch(() => {
-        setErrorMessage(STT_UNAVAILABLE_MESSAGE);
-        setPhase('idle');
+        setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
+        setPhase(VOICE_STATES.IDLE);
       });
   }, [audioStream, closeSession, onTranscript, setPhase, stopAudioStream]);
 
   const stopListening = useCallback(() => {
     hasFinalizedRef.current = true;
     closeSession();
-    setPhase('idle');
+    setPhase(VOICE_STATES.IDLE);
   }, [closeSession, setPhase]);
 
   const speak = useCallback((text: string) => {
@@ -287,7 +315,7 @@ export const useVoiceAssistant = ({
       onDone: () => setIsSpeaking(false),
       onError: () => {
         setIsSpeaking(false);
-        setErrorMessage(TTS_FAILED_MESSAGE);
+        setErrorMessage(VOICE_ERROR_MESSAGES.TTS_FAILED);
       },
       onStopped: () => setIsSpeaking(false),
     });
@@ -300,17 +328,13 @@ export const useVoiceAssistant = ({
 
   useEffect(() => stopSpeaking, [stopSpeaking]);
 
-  const voiceState: VoiceState = errorMessage
-    ? 'error'
-    : isSpeaking
-      ? 'speaking'
-      : wsPhase === 'connecting'
-        ? 'connecting'
-        : wsPhase === 'listening'
-          ? 'listening'
-          : isVoiceTurnActiveRef.current && isAgentRunning
-            ? 'thinking'
-            : 'idle';
+  const voiceState = resolveVoiceState({
+    errorMessage,
+    isAgentRunning,
+    isSpeaking,
+    isVoiceTurnActive: isVoiceTurnActiveRef.current,
+    wsPhase,
+  });
 
   return {
     errorMessage,

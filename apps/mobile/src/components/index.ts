@@ -6,6 +6,7 @@ export * from './GridActionCard';
 export * from './PrimaryActionCard';
 export * from './MessageBubble';
 export * from './VoiceButton';
+export * from './VoiceModeOverlay';
 export * from './WeatherDayCard';
 export * from './WeatherCard';
 export * from './PlaceItem';

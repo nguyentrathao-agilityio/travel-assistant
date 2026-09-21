@@ -7,6 +7,29 @@ import { makeThread, SAFE_AREA_INITIAL_METRICS } from '../../test/fixtures';
 
 import type { ThreadItem } from '../../services';
 
+jest.mock('react-native-reanimated', () => {
+  const { useRef } = jest.requireActual('react');
+  const { View } = jest.requireActual('react-native');
+
+  return {
+    __esModule: true,
+    default: { View },
+    Extrapolation: { CLAMP: 'clamp' },
+    interpolate: () => 0,
+    useAnimatedStyle: (fn: () => unknown) => fn(),
+    useDerivedValue: (fn: () => unknown) =>
+      useRef({
+        get value() {
+          return fn();
+        },
+      }).current,
+    useSharedValue: (initial: unknown) => useRef({ value: initial }).current,
+    withRepeat: (animation: unknown) => animation,
+    withSequence: (...values: unknown[]) => values[values.length - 1],
+    withTiming: (toValue: unknown) => toValue,
+  };
+});
+
 const baseProps: Parameters<typeof AllTripsScreen>[0] = {
   deletingThreadId: null,
   hasMore: false,

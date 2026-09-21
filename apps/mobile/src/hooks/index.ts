@@ -20,4 +20,5 @@ export * from './useHotelAction';
 export * from './useBookingAction';
 export * from './useTripSummaryAction';
 export * from './useVoiceAssistant';
+export * from './useVoiceModeConversation';
 export * from './useThemeAction';

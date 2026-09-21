@@ -16,27 +16,57 @@ jest.mock('@copilotkit/react-native/headless', () => ({
   useRenderToolCall: () => mockRenderToolCall,
 }));
 
-// The real package pulls in react-native-worklets' native (JSI) module, which
-// isn't linked under Jest. ChatScreen only reads/writes `.value` and calls
-// withTiming for a layout-driven padding animation, so a minimal stand-in
-// covers everything it actually does with these two APIs.
-jest.mock('react-native-reanimated', () => ({
-  useSharedValue: (initial: unknown) => ({ value: initial }),
-  withTiming: (toValue: unknown) => toValue,
-}));
+jest.mock('react-native-reanimated', () => {
+  const { useRef } = jest.requireActual('react');
+  const { View } = jest.requireActual('react-native');
+
+  const interpolate = (value: number, input: [number, number], output: [number, number]) => {
+    const [inMin, inMax] = input;
+    const [outMin, outMax] = output;
+    const clamped = Math.min(Math.max(value, inMin), inMax);
+    const ratio = inMax === inMin ? 0 : (clamped - inMin) / (inMax - inMin);
+
+    return outMin + ratio * (outMax - outMin);
+  };
+
+  return {
+    __esModule: true,
+    default: { View },
+    Extrapolation: { CLAMP: 'clamp' },
+    interpolate,
+    useAnimatedStyle: (fn: () => unknown) => fn(),
+    useDerivedValue: (fn: () => unknown) =>
+      useRef({
+        get value() {
+          return fn();
+        },
+      }).current,
+    useSharedValue: (initial: unknown) => useRef({ value: initial }).current,
+    withRepeat: (animation: unknown) => animation,
+    withSequence: (...values: unknown[]) => values[values.length - 1],
+    withTiming: (toValue: unknown) => toValue,
+  };
+});
 
 const baseProps: Parameters<typeof ChatScreen>[0] = {
+  dictatedTranscript: null as { text: string; id: number } | null,
   error: null,
   interruptElement: null as ReactElement | null,
   isReady: true,
   isRunning: false,
+  isVoiceModeActive: false,
   messages: [] as Message[],
+  micLevel: { value: 0 } as Parameters<typeof ChatScreen>[0]['micLevel'],
   onBack: jest.fn(),
+  onExitVoiceMode: jest.fn(),
   onSend: jest.fn(),
   onStartListening: jest.fn(),
+  onStartVoiceMode: jest.fn(),
   onStop: jest.fn(),
   onStopListening: jest.fn(),
   onStopSpeaking: jest.fn(),
+  onStopVoiceModeTurn: jest.fn(),
+  partialTranscript: '',
   voiceErrorMessage: null as string | null,
   voiceState: 'idle' as const,
 };
@@ -164,10 +194,25 @@ test('typing and sending a message clears the draft', async () => {
   expect(input).toHaveProp('value', '');
 });
 
-test('send is disabled with an empty draft', async () => {
+test('shows a voice mode trigger instead of send while the draft is empty', async () => {
+  const user = userEvent.setup();
+  const { onStartVoiceMode } = await renderScreen();
+
+  expect(screen.queryByRole('button', { name: 'Send' })).not.toBeOnTheScreen();
+
+  await user.press(screen.getByRole('button', { name: 'Voice mode' }));
+
+  expect(onStartVoiceMode).toHaveBeenCalledTimes(1);
+});
+
+test('typing text swaps the voice mode trigger for send', async () => {
+  const user = userEvent.setup();
   await renderScreen();
 
-  expect(screen.getByRole('button', { name: 'Send' })).toBeDisabled();
+  await user.type(screen.getByPlaceholderText('Write here…'), 'Hi');
+
+  expect(screen.getByRole('button', { name: 'Send' })).toBeOnTheScreen();
+  expect(screen.queryByRole('button', { name: 'Voice mode' })).not.toBeOnTheScreen();
 });
 
 test('shows a stop button instead of send while running, and stops on press', async () => {
@@ -206,4 +251,73 @@ test('the voice button is disabled from starting while awaiting approval', async
   });
 
   expect(screen.getByLabelText('Ask by voice')).toBeDisabled();
+});
+
+test('the voice button is disabled while voice mode is active', async () => {
+  await renderScreen({ isVoiceModeActive: true });
+
+  expect(screen.getByLabelText('Ask by voice')).toBeDisabled();
+});
+
+test('shows the voice mode overlay when active, and exits via X or the keyboard button', async () => {
+  const user = userEvent.setup();
+  const { onExitVoiceMode } = await renderScreen({
+    isVoiceModeActive: true,
+    voiceState: 'listening',
+  });
+
+  expect(screen.getByText('Listening…')).toBeOnTheScreen();
+
+  await user.press(screen.getByLabelText('Exit voice mode'));
+  await user.press(screen.getByLabelText('Switch to keyboard'));
+
+  expect(onExitVoiceMode).toHaveBeenCalledTimes(2);
+});
+
+test('voice mode overlay shows the live partial transcript over the status label', async () => {
+  await renderScreen({
+    isVoiceModeActive: true,
+    voiceState: 'listening',
+    partialTranscript: 'Plan a trip to',
+  });
+
+  expect(screen.getByText('Plan a trip to')).toBeOnTheScreen();
+  expect(screen.queryByText('Listening…')).toBeNull();
+});
+
+test('voice mode overlay: the center mic button is disabled while connecting/thinking', async () => {
+  await renderScreen({ isVoiceModeActive: true, voiceState: 'connecting' });
+
+  expect(screen.getByLabelText('Voice mode mic')).toBeDisabled();
+});
+
+test('voice mode overlay: the center mic button stops the turn while listening', async () => {
+  const user = userEvent.setup();
+  const { onStopVoiceModeTurn } = await renderScreen({
+    isVoiceModeActive: true,
+    voiceState: 'listening',
+  });
+
+  await user.press(screen.getByLabelText('End your turn'));
+
+  expect(onStopVoiceModeTurn).toHaveBeenCalledTimes(1);
+});
+
+test('voice mode overlay: the center mic button interrupts playback while speaking', async () => {
+  const user = userEvent.setup();
+  const { onStopVoiceModeTurn } = await renderScreen({
+    isVoiceModeActive: true,
+    voiceState: 'speaking',
+  });
+
+  await user.press(screen.getByLabelText('Interrupt the reply'));
+
+  expect(onStopVoiceModeTurn).toHaveBeenCalledTimes(1);
+});
+
+test('a dictated transcript is merged into the draft without being sent', async () => {
+  const { onSend } = await renderScreen({ dictatedTranscript: { text: 'Plan a trip', id: 1 } });
+
+  expect(screen.getByPlaceholderText('Write here…')).toHaveProp('value', 'Plan a trip');
+  expect(onSend).not.toHaveBeenCalled();
 });

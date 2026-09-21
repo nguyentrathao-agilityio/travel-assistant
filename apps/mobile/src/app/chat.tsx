@@ -1,8 +1,11 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Services
 import { createRemoteThread, generateThreadId } from '../services';
+
+// Constants
+import { VOICE_STATES } from '../constants';
 
 // Components
 import { ChatScreen } from '../screens';
@@ -25,6 +28,7 @@ import {
   useTripState,
   useTripSummaryAction,
   useVoiceAssistant,
+  useVoiceModeConversation,
   useWeatherAction,
 } from '../hooks';
 
@@ -61,14 +65,44 @@ export default function ChatRoute() {
   useTripSummaryAction({ state: tripState });
   useThemeAction();
 
+  const [dictatedTranscript, setDictatedTranscript] = useState<{
+    text: string;
+    id: number;
+  } | null>(null);
+
+  const isVoiceModeActiveRef = useRef(false);
+
   const handleTranscript = useCallback(
     (text: string) => {
-      sendMessage(text);
+      if (isVoiceModeActiveRef.current) {
+        sendMessage(text); // Voice Mode: auto-send, the loop continues on its own.
+        return;
+      }
+
+      setDictatedTranscript({ text, id: Date.now() }); // Dictate: let the user review first.
     },
     [sendMessage]
   );
 
-  const voice = useVoiceAssistant({ isAgentRunning: isRunning, onTranscript: handleTranscript });
+  const voice = useVoiceAssistant({
+    isAgentRunning: isRunning,
+    isVoiceModeActiveRef,
+    onTranscript: handleTranscript,
+  });
+  const voiceMode = useVoiceModeConversation({ isRunning, messages, voice });
+
+  useEffect(() => {
+    isVoiceModeActiveRef.current = voiceMode.isActive;
+  }, [voiceMode.isActive]);
+
+  const handleStopVoiceModeTurn = useCallback(() => {
+    if (voice.voiceState === VOICE_STATES.SPEAKING) {
+      voice.stopSpeaking();
+      return;
+    }
+
+    voice.stopListening();
+  }, [voice]);
 
   const hasAutoStartedVoiceRef = useRef(false);
 
@@ -82,17 +116,24 @@ export default function ChatRoute() {
 
   return (
     <ChatScreen
+      dictatedTranscript={dictatedTranscript}
       error={error}
       interruptElement={interruptElement}
       isReady={isReady && !isHistoryLoading}
       isRunning={isRunning}
+      isVoiceModeActive={voiceMode.isActive}
       messages={messages}
+      micLevel={voice.micLevel}
       onBack={router.back}
+      onExitVoiceMode={voiceMode.stop}
       onSend={sendMessage}
       onStartListening={voice.startListening}
+      onStartVoiceMode={voiceMode.start}
       onStop={stop}
       onStopListening={voice.stopListening}
       onStopSpeaking={voice.stopSpeaking}
+      onStopVoiceModeTurn={handleStopVoiceModeTurn}
+      partialTranscript={voice.partialTranscript}
       voiceErrorMessage={voice.errorMessage}
       voiceState={voice.voiceState}
     />

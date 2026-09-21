@@ -1,4 +1,8 @@
-import { extractFinalTranscript, extractRealtimeErrorMessage } from '../realtimeVoiceEvents';
+import {
+  extractFinalTranscript,
+  extractRealtimeErrorMessage,
+  extractTranscriptDelta,
+} from '../realtimeVoiceEvents';
 
 describe('extractFinalTranscript', () => {
   test('extracts the transcript from a top-level transcript field', () => {
@@ -83,6 +87,76 @@ describe('extractFinalTranscript', () => {
     });
 
     expect(extractFinalTranscript(raw)).toBeNull();
+  });
+});
+
+describe('extractTranscriptDelta', () => {
+  test('extracts the delta field from a delta event', () => {
+    const raw = JSON.stringify({
+      type: 'conversation.item.input_audio_transcription.delta',
+      delta: 'Plan a ',
+    });
+
+    expect(extractTranscriptDelta(raw)).toBe('Plan a ');
+  });
+
+  test('does not trim the delta — fragments are append-only', () => {
+    const raw = JSON.stringify({
+      type: 'conversation.item.input_audio_transcription.delta',
+      delta: '  trip  ',
+    });
+
+    expect(extractTranscriptDelta(raw)).toBe('  trip  ');
+  });
+
+  test('matches event types loosely as long as they include "transcription" and end with "delta"', () => {
+    const raw = JSON.stringify({
+      type: 'custom.transcription.something.delta',
+      delta: 'loose match',
+    });
+
+    expect(extractTranscriptDelta(raw)).toBe('loose match');
+  });
+
+  test('returns null when the type does not end with "delta"', () => {
+    const raw = JSON.stringify({
+      type: 'conversation.item.input_audio_transcription.completed',
+      delta: 'ignored',
+    });
+
+    expect(extractTranscriptDelta(raw)).toBeNull();
+  });
+
+  test('returns null when the type does not include "transcription"', () => {
+    const raw = JSON.stringify({ type: 'response.audio.delta', delta: 'ignored' });
+
+    expect(extractTranscriptDelta(raw)).toBeNull();
+  });
+
+  test('returns null for an empty delta', () => {
+    const raw = JSON.stringify({
+      type: 'conversation.item.input_audio_transcription.delta',
+      delta: '',
+    });
+
+    expect(extractTranscriptDelta(raw)).toBeNull();
+  });
+
+  test('returns null when delta is missing or not a string', () => {
+    expect(
+      extractTranscriptDelta(
+        JSON.stringify({ type: 'conversation.item.input_audio_transcription.delta' })
+      )
+    ).toBeNull();
+    expect(
+      extractTranscriptDelta(
+        JSON.stringify({ type: 'conversation.item.input_audio_transcription.delta', delta: 42 })
+      )
+    ).toBeNull();
+  });
+
+  test('returns null for invalid JSON', () => {
+    expect(extractTranscriptDelta('not json')).toBeNull();
   });
 });
 

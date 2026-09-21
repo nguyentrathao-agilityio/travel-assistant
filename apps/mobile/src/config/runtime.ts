@@ -1,42 +1,43 @@
-const LOCALHOST_NAMES = new Set(['localhost', '127.0.0.1', '::1']);
+import { LOCALHOST_HOSTNAMES, RUNTIME_URL_ERRORS } from '../constants/runtime';
 
-// EXPO_OS avoids importing 'react-native' Platform, which breaks plain-Node tests.
-// Per-platform URL overrides win over the shared one, since simulator/emulator
-// often need a different host than physical devices for the same dev machine.
-const platformOverride = (): string | undefined => {
-  if (process.env.EXPO_OS === 'ios') return process.env.EXPO_PUBLIC_RUNTIME_URL_IOS;
-  if (process.env.EXPO_OS === 'android') return process.env.EXPO_PUBLIC_RUNTIME_URL_ANDROID;
+const platformOverride = (platform: string | undefined): string | undefined => {
+  if (platform === 'ios') return process.env.EXPO_PUBLIC_RUNTIME_URL_IOS;
+  if (platform === 'android') return process.env.EXPO_PUBLIC_RUNTIME_URL_ANDROID;
+
   return undefined;
 };
 
-export const resolveRuntimeUrl = (configuredUrl: string | undefined): string => {
-  const override = platformOverride();
-  const value = (override ?? configuredUrl)?.trim();
-
-  if (!value) {
-    throw new Error('EXPO_PUBLIC_RUNTIME_URL is required. Copy .env.example to .env.local.');
-  }
-
+const parseHttpUrl = (value: string): URL => {
   let url: URL;
 
   try {
     url = new URL(value);
   } catch {
-    throw new Error('EXPO_PUBLIC_RUNTIME_URL must be a valid URL.');
+    throw new Error(RUNTIME_URL_ERRORS.INVALID);
   }
 
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-    throw new Error('EXPO_PUBLIC_RUNTIME_URL must use HTTP or HTTPS.');
+    throw new Error(RUNTIME_URL_ERRORS.PROTOCOL);
   }
 
-  // Only the explicit iOS override may use localhost — the shared value is also
-  // used for physical-device builds, where localhost would point at the device itself.
-  const isTrustedIosLocalhost = Boolean(override) && process.env.EXPO_OS === 'ios';
+  return url;
+};
 
-  if (!isTrustedIosLocalhost && LOCALHOST_NAMES.has(url.hostname)) {
-    throw new Error(
-      'EXPO_PUBLIC_RUNTIME_URL must use a device-reachable host, not localhost. Use your LAN IP, an emulator host alias, or HTTPS deployment.'
-    );
+export const resolveRuntimeUrl = (
+  configuredUrl: string | undefined,
+  platform: string | undefined = process.env.EXPO_OS
+): string => {
+  const override = platformOverride(platform);
+  const value = (override ?? configuredUrl)?.trim();
+
+  if (!value) throw new Error(RUNTIME_URL_ERRORS.REQUIRED);
+
+  const url = parseHttpUrl(value);
+
+  const allowsLocalhost = Boolean(override) && platform === 'ios';
+
+  if (!allowsLocalhost && LOCALHOST_HOSTNAMES.has(url.hostname)) {
+    throw new Error(RUNTIME_URL_ERRORS.LOCALHOST);
   }
 
   return value.replace(/\/+$/, '');

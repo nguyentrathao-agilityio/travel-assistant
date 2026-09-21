@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
 
 // Constants
-import { THREAD_PAGE_SIZE } from '../constants';
+import { THREAD_LIST_STATUS, THREAD_PAGE_SIZE } from '../constants';
 
 // Services
 import { fetchThreadsPage } from '../services';
 
 // Types
+import type { ThreadListStatus } from '../constants';
 import type { ThreadItem } from '../services';
 
 interface AllThreadsState {
-  status: 'loading' | 'ready' | 'error';
+  status: ThreadListStatus;
   threads: ThreadItem[];
   isLoadingMore: boolean;
   hasMore: boolean;
@@ -18,7 +19,7 @@ interface AllThreadsState {
 }
 
 const INITIAL_STATE: AllThreadsState = {
-  status: 'loading',
+  status: THREAD_LIST_STATUS.LOADING,
   threads: [],
   isLoadingMore: false,
   hasMore: false,
@@ -29,19 +30,19 @@ export const useAllThreads = () => {
   const [state, setState] = useState<AllThreadsState>(INITIAL_STATE);
 
   const refresh = useCallback(() => {
-    setState({ ...INITIAL_STATE, status: 'loading' });
+    setState({ ...INITIAL_STATE, status: THREAD_LIST_STATUS.LOADING });
 
     fetchThreadsPage(THREAD_PAGE_SIZE, 0)
       .then((threads) =>
         setState({
-          status: 'ready',
+          status: THREAD_LIST_STATUS.READY,
           threads,
           isLoadingMore: false,
           hasMore: threads.length === THREAD_PAGE_SIZE,
           loadMoreFailed: false,
         })
       )
-      .catch(() => setState({ ...INITIAL_STATE, status: 'error' }));
+      .catch(() => setState({ ...INITIAL_STATE, status: THREAD_LIST_STATUS.ERROR }));
   }, []);
 
   useEffect(() => {
@@ -50,7 +51,8 @@ export const useAllThreads = () => {
 
   const fetchMore = useCallback(() => {
     setState((current) => {
-      if (current.isLoadingMore || !current.hasMore || current.status !== 'ready') return current;
+      if (current.isLoadingMore || !current.hasMore || current.status !== THREAD_LIST_STATUS.READY)
+        return current;
 
       fetchThreadsPage(THREAD_PAGE_SIZE, current.threads.length)
         .then((page) => {

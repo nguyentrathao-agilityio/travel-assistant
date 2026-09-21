@@ -1,6 +1,13 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
 
+// Services
+import { createRemoteThread, generateThreadId } from '../services';
+
+// Components
+import { ChatScreen } from '../screens';
+
+// Hooks
 import {
   useActiveThreadId,
   useBookingAction,
@@ -20,8 +27,6 @@ import {
   useVoiceAssistant,
   useWeatherAction,
 } from '../hooks';
-import { createRemoteThread, generateThreadId } from '../services';
-import { ChatScreen } from '../screens';
 
 export default function ChatRoute() {
   const params = useLocalSearchParams<{ threadId?: string; focusVoice?: string }>();

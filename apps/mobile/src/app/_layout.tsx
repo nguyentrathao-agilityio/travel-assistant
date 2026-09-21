@@ -12,7 +12,7 @@ import { OPENAI_API_KEY_HEADER } from '@repo/constants';
 import { CHAT_ROUTE, DASHBOARD_ROUTE, INDEX_ROUTE, THREADS_ROUTE } from '../constants';
 
 // Components
-import { RuntimeSetup, ThemeToggleButton } from '../components';
+import { RuntimeSetup } from '../components';
 import { ApiKeyScreen } from '../screens';
 
 // Hooks
@@ -90,21 +90,8 @@ const RootLayoutContent = () => {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name={INDEX_ROUTE} />
           <Stack.Screen name={DASHBOARD_ROUTE} />
-          {/* Chat renders its own header (ChatLayout's `header` slot) so it can size the
-              top inset itself — the native header's edge-to-edge inset math left too much
-              empty space above the title on Android. */}
           <Stack.Screen name={CHAT_ROUTE} />
-          <Stack.Screen
-            name={THREADS_ROUTE}
-            options={{
-              headerBackButtonDisplayMode: 'minimal',
-              headerRight: () => <ThemeToggleButton />,
-              headerShown: true,
-              headerStyle: { backgroundColor: colors.backgroundGradientEnd },
-              headerTintColor: colors.textOnDark,
-              title: 'All trips',
-            }}
-          />
+          <Stack.Screen name={THREADS_ROUTE} />
         </Stack>
         <StatusBar style="light" />
       </CopilotKitProvider>

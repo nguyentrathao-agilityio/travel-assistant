@@ -1,8 +1,13 @@
 import { Redirect } from 'expo-router';
 
+// Constants
 import { DASHBOARD_PATH } from '../constants';
-import { useOnboardingSeen } from '../hooks';
+
+// Components
 import { OnboardingScreen } from '../screens';
+
+// Hooks
+import { useOnboardingSeen } from '../hooks';
 
 export default function OnboardingRoute() {
   const { status, markSeen } = useOnboardingSeen();

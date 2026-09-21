@@ -4,7 +4,7 @@ import { Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-nat
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 // Constants
-import { OPENAI_KEYS_URL } from '../constants';
+import { API_KEY_KEYBOARD_BOTTOM_OFFSET, OPENAI_KEYS_URL } from '../constants';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
@@ -35,8 +35,9 @@ export const ApiKeyScreen = ({ isVerifying, error, onSubmit }: ApiKeyScreenProps
       style={styles.container}
     >
       <KeyboardAwareScrollView
-        bottomOffset={shellSpacing.md}
+        bottomOffset={API_KEY_KEYBOARD_BOTTOM_OFFSET}
         contentContainerStyle={styles.content}
+        keyboardDismissMode="interactive"
         keyboardShouldPersistTaps="handled"
         testID="api-key-keyboard-scroll"
       >
@@ -53,8 +54,10 @@ export const ApiKeyScreen = ({ isVerifying, error, onSubmit }: ApiKeyScreenProps
               autoCorrect={false}
               editable={!isVerifying}
               onChangeText={setValue}
+              onSubmitEditing={handleSubmit}
               placeholder="sk-…"
               placeholderTextColor={colors.textOnDarkFaint}
+              returnKeyType="go"
               secureTextEntry={!showKey}
               style={styles.input}
               value={value}

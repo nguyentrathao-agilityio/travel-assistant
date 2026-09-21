@@ -28,6 +28,7 @@ import {
   EMPTY_STATE_SUGGESTIONS,
   MIN_COMPOSER_INPUT_HEIGHT,
   VOICE_STATE_LABEL,
+  VOICE_STATES,
 } from '../constants';
 
 // Components
@@ -66,7 +67,7 @@ const ChatScrollView = forwardRef<
       automaticallyAdjustContentInsets={false}
       contentInsetAdjustmentBehavior="never"
       keyboardDismissMode="interactive"
-      keyboardLiftBehavior="always"
+      keyboardLiftBehavior="whenAtEnd"
       offset={restingBottomInset - COMPOSER_BOTTOM_MARGIN}
       {...props}
     />
@@ -326,16 +327,18 @@ export const ChatScreen = ({
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             )}
-            {!isVoiceModeActive && voiceState === 'error' && voiceErrorMessage && (
+            {!isVoiceModeActive && voiceState === VOICE_STATES.ERROR && voiceErrorMessage && (
               <View style={styles.errorBanner}>
                 <Text style={styles.errorText}>{voiceErrorMessage}</Text>
               </View>
             )}
-            {!isVoiceModeActive && voiceState !== 'idle' && voiceState !== 'error' && (
-              <View style={styles.voiceStatusBanner}>
-                <Text style={styles.voiceStatusText}>{VOICE_STATE_LABEL[voiceState]}</Text>
-              </View>
-            )}
+            {!isVoiceModeActive &&
+              voiceState !== VOICE_STATES.IDLE &&
+              voiceState !== VOICE_STATES.ERROR && (
+                <View style={styles.voiceStatusBanner}>
+                  <Text style={styles.voiceStatusText}>{VOICE_STATE_LABEL[voiceState]}</Text>
+                </View>
+              )}
             <View style={styles.inputBar}>
               <VoiceButton
                 disabled={isAwaitingApproval || isVoiceModeActive}

@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
+// Constants
+import { THREAD_LIST_STATUS } from '../constants';
+
 // Services
 import { fetchRecentThreads } from '../services';
 
@@ -7,19 +10,22 @@ import { fetchRecentThreads } from '../services';
 import type { ThreadItem } from '../services';
 
 type RecentThreadsState =
-  | { status: 'loading'; threads: [] }
-  | { status: 'ready'; threads: ThreadItem[] }
-  | { status: 'error'; threads: [] };
+  | { status: typeof THREAD_LIST_STATUS.LOADING; threads: [] }
+  | { status: typeof THREAD_LIST_STATUS.READY; threads: ThreadItem[] }
+  | { status: typeof THREAD_LIST_STATUS.ERROR; threads: [] };
 
 export const useRecentThreads = (limit?: number) => {
-  const [state, setState] = useState<RecentThreadsState>({ status: 'loading', threads: [] });
+  const [state, setState] = useState<RecentThreadsState>({
+    status: THREAD_LIST_STATUS.LOADING,
+    threads: [],
+  });
 
   const refresh = useCallback(() => {
-    setState({ status: 'loading', threads: [] });
+    setState({ status: THREAD_LIST_STATUS.LOADING, threads: [] });
 
     fetchRecentThreads(limit)
-      .then((threads) => setState({ status: 'ready', threads }))
-      .catch(() => setState({ status: 'error', threads: [] }));
+      .then((threads) => setState({ status: THREAD_LIST_STATUS.READY, threads }))
+      .catch(() => setState({ status: THREAD_LIST_STATUS.ERROR, threads: [] }));
   }, [limit]);
 
   useEffect(() => {
@@ -30,8 +36,11 @@ export const useRecentThreads = (limit?: number) => {
   // on a full refetch, so the row disappears the moment deletion succeeds.
   const removeThread = useCallback((threadId: string) => {
     setState((current) =>
-      current.status === 'ready'
-        ? { status: 'ready', threads: current.threads.filter((thread) => thread.id !== threadId) }
+      current.status === THREAD_LIST_STATUS.READY
+        ? {
+            status: THREAD_LIST_STATUS.READY,
+            threads: current.threads.filter((thread) => thread.id !== threadId),
+          }
         : current
     );
   }, []);

@@ -25,3 +25,11 @@ export const ONBOARDING_SLIDES: OnboardingSlide[] = [
     subcopy: "Let's turn your travel ideas into a real plan.",
   },
 ];
+
+export const ONBOARDING_STATUS = {
+  LOADING: 'loading',
+  SEEN: 'seen',
+  UNSEEN: 'unseen',
+} as const;
+
+export type OnboardingStatus = (typeof ONBOARDING_STATUS)[keyof typeof ONBOARDING_STATUS];

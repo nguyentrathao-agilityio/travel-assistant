@@ -2,7 +2,7 @@ import { Mic, MicOff, Volume2 } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 
-import { HEADER_ICON_SIZE } from '../constants';
+import { HEADER_ICON_SIZE, VOICE_STATES } from '../constants';
 import { shellRadii, useShellTheme } from '../theme';
 
 import type { VoiceState } from '../hooks';
@@ -27,25 +27,27 @@ export const VoiceButton = ({
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handlePress = () => {
-    if (voiceState === 'listening') {
+    if (voiceState === VOICE_STATES.LISTENING) {
       onStopListening();
       return;
     }
 
-    if (voiceState === 'speaking') {
+    if (voiceState === VOICE_STATES.SPEAKING) {
       onStopSpeaking();
       return;
     }
 
-    if (disabled || voiceState === 'connecting' || voiceState === 'thinking') return;
+    if (disabled || voiceState === VOICE_STATES.CONNECTING || voiceState === VOICE_STATES.THINKING)
+      return;
 
     onStart();
   };
 
   // A pending approval or an in-flight run still allow cancelling an
   // already-active listen/speak session — only starting a new one is blocked.
-  const isStartBlocked = disabled || voiceState === 'connecting' || voiceState === 'thinking';
-  const canCancel = voiceState === 'listening' || voiceState === 'speaking';
+  const isStartBlocked =
+    disabled || voiceState === VOICE_STATES.CONNECTING || voiceState === VOICE_STATES.THINKING;
+  const canCancel = voiceState === VOICE_STATES.LISTENING || voiceState === VOICE_STATES.SPEAKING;
 
   return (
     <Pressable
@@ -53,7 +55,7 @@ export const VoiceButton = ({
       accessibilityRole="button"
       disabled={isStartBlocked && !canCancel}
       onPress={handlePress}
-      style={[styles.button, voiceState === 'listening' && styles.buttonActive]}
+      style={[styles.button, voiceState === VOICE_STATES.LISTENING && styles.buttonActive]}
     >
       <VoiceIcon voiceState={voiceState} />
     </Pressable>
@@ -64,14 +66,14 @@ const VoiceIcon = ({ voiceState }: { voiceState: VoiceState }) => {
   const { colors } = useShellTheme();
 
   switch (voiceState) {
-    case 'listening':
+    case VOICE_STATES.LISTENING:
       return <Mic color={colors.textOnDark} size={HEADER_ICON_SIZE} />;
-    case 'connecting':
-    case 'thinking':
+    case VOICE_STATES.CONNECTING:
+    case VOICE_STATES.THINKING:
       return <ActivityIndicator color={colors.textOnDarkMuted} />;
-    case 'speaking':
+    case VOICE_STATES.SPEAKING:
       return <Volume2 color={colors.textOnDark} size={HEADER_ICON_SIZE} />;
-    case 'error':
+    case VOICE_STATES.ERROR:
       return <MicOff color={colors.danger} size={HEADER_ICON_SIZE} />;
     default:
       return <Mic color={colors.textOnDarkMuted} size={HEADER_ICON_SIZE} />;
@@ -80,15 +82,15 @@ const VoiceIcon = ({ voiceState }: { voiceState: VoiceState }) => {
 
 const voiceLabel = (voiceState: VoiceState): string => {
   switch (voiceState) {
-    case 'listening':
+    case VOICE_STATES.LISTENING:
       return 'Stop listening';
-    case 'speaking':
+    case VOICE_STATES.SPEAKING:
       return 'Stop speaking';
-    case 'connecting':
+    case VOICE_STATES.CONNECTING:
       return 'Connecting to voice session';
-    case 'thinking':
+    case VOICE_STATES.THINKING:
       return 'Waiting for the response';
-    case 'error':
+    case VOICE_STATES.ERROR:
       return 'Voice input unavailable, tap to retry';
     default:
       return 'Ask by voice';

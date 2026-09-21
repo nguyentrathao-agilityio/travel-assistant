@@ -1,7 +1,7 @@
 import { Redirect } from 'expo-router';
 
 // Constants
-import { DASHBOARD_PATH } from '../constants';
+import { DASHBOARD_PATH, ONBOARDING_STATUS } from '../constants';
 
 // Components
 import { OnboardingScreen } from '../screens';
@@ -12,11 +12,11 @@ import { useOnboardingSeen } from '../hooks';
 export default function OnboardingRoute() {
   const { status, markSeen } = useOnboardingSeen();
 
-  if (status === 'loading') {
+  if (status === ONBOARDING_STATUS.LOADING) {
     return null;
   }
 
-  if (status === 'seen') {
+  if (status === ONBOARDING_STATUS.SEEN) {
     return <Redirect href={DASHBOARD_PATH} />;
   }
 

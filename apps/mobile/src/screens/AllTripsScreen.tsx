@@ -7,7 +7,7 @@ import {
   Search,
   Trash2,
 } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -16,11 +16,13 @@ import {
   Text,
   TextInput,
   View,
+  type ScrollViewProps,
 } from 'react-native';
+import { KeyboardChatScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Constants
-import { RECENT_ICONS, THREAD_LIST_STATUS } from '../constants';
+import { ALL_TRIPS_BOTTOM_NAV_CLEARANCE, RECENT_ICONS, THREAD_LIST_STATUS } from '../constants';
 
 // Components
 import { EmptyState, ErrorState, IconBadge, LoadingState, ThemeToggleButton } from '../components';
@@ -87,6 +89,20 @@ export const AllTripsScreen = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
+  const listBottomClearance = insets.bottom + ALL_TRIPS_BOTTOM_NAV_CLEARANCE;
+
+  const renderScrollComponent = useCallback(
+    (props: ScrollViewProps) => (
+      <KeyboardChatScrollView
+        {...props}
+        keyboardDismissMode="on-drag"
+        keyboardLiftBehavior="never"
+        keyboardShouldPersistTaps="handled"
+        offset={listBottomClearance}
+      />
+    ),
+    [listBottomClearance]
+  );
 
   const filteredThreads = useMemo(() => {
     const query = debouncedQuery.trim().toLowerCase();
@@ -137,6 +153,7 @@ export const AllTripsScreen = ({
           onFocus={() => setIsSearchFocused(true)}
           placeholder="Search your trips"
           placeholderTextColor={colors.textOnDarkMuted}
+          returnKeyType="search"
           style={styles.searchInput}
           value={searchQuery}
         />
@@ -164,7 +181,7 @@ export const AllTripsScreen = ({
 
       {status === THREAD_LIST_STATUS.READY && filteredThreads.length > 0 && (
         <SectionList
-          contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 104 }]}
+          contentContainerStyle={[styles.list, { paddingBottom: listBottomClearance }]}
           keyExtractor={(thread) => thread.id}
           ListFooterComponent={
             <View style={styles.footer}>
@@ -206,6 +223,7 @@ export const AllTripsScreen = ({
               </Pressable>
             </View>
           )}
+          renderScrollComponent={renderScrollComponent}
           renderSectionHeader={({ section }) => (
             <Text style={styles.sectionHeader}>{section.title.toUpperCase()}</Text>
           )}

@@ -81,3 +81,12 @@ test('pressing the OpenAI link opens the keys URL', async () => {
 
   expect(openURL).toHaveBeenCalledWith(expect.stringContaining('openai.com'));
 });
+
+test('pressing the keyboard go key submits the typed key', async () => {
+  const user = userEvent.setup();
+  const { onSubmit } = await renderScreen();
+
+  await user.type(screen.getByPlaceholderText('sk-…'), 'sk-abc123', { submitEditing: true });
+
+  expect(onSubmit).toHaveBeenCalledWith('sk-abc123');
+});

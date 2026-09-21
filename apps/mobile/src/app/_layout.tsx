@@ -9,7 +9,14 @@ import { isApiKeyError } from '../services/openaiApiKey';
 
 // Constants
 import { OPENAI_API_KEY_HEADER } from '@repo/constants';
-import { CHAT_ROUTE, DASHBOARD_ROUTE, INDEX_ROUTE, THREADS_ROUTE } from '../constants';
+import {
+  API_KEY_STATUS,
+  CHAT_ROUTE,
+  DASHBOARD_ROUTE,
+  INDEX_ROUTE,
+  RUNTIME_CONFIG_STATUS,
+  THREADS_ROUTE,
+} from '../constants';
 
 // Components
 import { RuntimeSetup } from '../components';
@@ -24,18 +31,18 @@ import { ThemeProvider, useShellTheme } from '../theme';
 import { clientTimezone, todayClientIso } from '@repo/utils';
 
 type RuntimeConfiguration =
-  | { status: 'ready'; runtimeUrl: string }
-  | { status: 'error'; message: string };
+  | { status: typeof RUNTIME_CONFIG_STATUS.READY; runtimeUrl: string }
+  | { status: typeof RUNTIME_CONFIG_STATUS.ERROR; message: string };
 
 const runtimeConfiguration: RuntimeConfiguration = (() => {
   try {
     return {
-      status: 'ready',
+      status: RUNTIME_CONFIG_STATUS.READY,
       runtimeUrl: resolveRuntimeUrl(process.env.EXPO_PUBLIC_RUNTIME_URL),
     };
   } catch (error) {
     return {
-      status: 'error',
+      status: RUNTIME_CONFIG_STATUS.ERROR,
       message:
         error instanceof Error ? error.message : 'Unable to configure the CopilotKit runtime.',
     };
@@ -46,7 +53,7 @@ const RootLayoutContent = () => {
   const apiKey = useApiKey();
   const { colors } = useShellTheme();
 
-  if (runtimeConfiguration.status === 'error') {
+  if (runtimeConfiguration.status === RUNTIME_CONFIG_STATUS.ERROR) {
     return (
       <KeyboardProvider navigationBarTranslucent statusBarTranslucent>
         <RuntimeSetup message={runtimeConfiguration.message} />
@@ -55,11 +62,11 @@ const RootLayoutContent = () => {
     );
   }
 
-  if (apiKey.status === 'loading') {
+  if (apiKey.status === API_KEY_STATUS.LOADING) {
     return <View style={{ flex: 1, backgroundColor: colors.backgroundGradientEnd }} />;
   }
 
-  if (apiKey.status === 'missing') {
+  if (apiKey.status === API_KEY_STATUS.MISSING) {
     return (
       <KeyboardProvider navigationBarTranslucent statusBarTranslucent>
         <ApiKeyScreen

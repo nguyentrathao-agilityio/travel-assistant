@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 
+// Constants
+import { API_KEY_STATUS } from '../constants';
+
 // Services
 import { clearApiKey, getApiKey, setApiKey } from '../services/apiKeyStorage';
 import { verifyOpenAiApiKey } from '../services/openaiApiKey';
 
 type ApiKeyStatus =
-  | { status: 'loading' }
-  | { status: 'missing' }
-  | { status: 'ready'; apiKey: string };
+  | { status: typeof API_KEY_STATUS.LOADING }
+  | { status: typeof API_KEY_STATUS.MISSING }
+  | { status: typeof API_KEY_STATUS.READY; apiKey: string };
 
 interface UseApiKeyResult {
   status: ApiKeyStatus['status'];
@@ -19,7 +22,7 @@ interface UseApiKeyResult {
 }
 
 export const useApiKey = (): UseApiKeyResult => {
-  const [state, setState] = useState<ApiKeyStatus>({ status: 'loading' });
+  const [state, setState] = useState<ApiKeyStatus>({ status: API_KEY_STATUS.LOADING });
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +31,11 @@ export const useApiKey = (): UseApiKeyResult => {
 
     getApiKey().then((storedKey) => {
       if (cancelled) return;
-      setState(storedKey ? { status: 'ready', apiKey: storedKey } : { status: 'missing' });
+      setState(
+        storedKey
+          ? { status: API_KEY_STATUS.READY, apiKey: storedKey }
+          : { status: API_KEY_STATUS.MISSING }
+      );
     });
 
     return () => {
@@ -51,7 +58,7 @@ export const useApiKey = (): UseApiKeyResult => {
     try {
       await verifyOpenAiApiKey(trimmed);
       await setApiKey(trimmed);
-      setState({ status: 'ready', apiKey: trimmed });
+      setState({ status: API_KEY_STATUS.READY, apiKey: trimmed });
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -65,12 +72,12 @@ export const useApiKey = (): UseApiKeyResult => {
 
   const clear = useCallback(async () => {
     await clearApiKey();
-    setState({ status: 'missing' });
+    setState({ status: API_KEY_STATUS.MISSING });
   }, []);
 
   return {
     status: state.status,
-    apiKey: state.status === 'ready' ? state.apiKey : null,
+    apiKey: state.status === API_KEY_STATUS.READY ? state.apiKey : null,
     isVerifying,
     error,
     verifyAndSave,

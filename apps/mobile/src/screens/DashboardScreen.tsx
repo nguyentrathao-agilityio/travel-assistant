@@ -12,7 +12,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Constants
-import { GRID_ROW_HEIGHT, RECENT_ICONS } from '../constants';
+import { GRID_ROW_HEIGHT, RECENT_ICONS, THREAD_LIST_STATUS } from '../constants';
 
 // Components
 import {
@@ -29,11 +29,12 @@ import {
 import { shellSpacing, useShellTheme } from '../theme';
 
 // Types
+import type { ThreadListStatus } from '../constants';
 import type { ThreadItem } from '../services';
 import type { ShellColors } from '../theme';
 
 interface DashboardScreenProps {
-  recentThreadsStatus: 'loading' | 'ready' | 'error';
+  recentThreadsStatus: ThreadListStatus;
   recentThreads: ThreadItem[];
   continueThreadId: string | null;
   isStartingTrip: boolean;
@@ -117,14 +118,14 @@ export const DashboardScreen = ({
           </Pressable>
         </View>
 
-        {recentThreadsStatus === 'loading' && <LoadingState />}
-        {recentThreadsStatus === 'error' && (
+        {recentThreadsStatus === THREAD_LIST_STATUS.LOADING && <LoadingState />}
+        {recentThreadsStatus === THREAD_LIST_STATUS.ERROR && (
           <ErrorState message="Couldn't load recent trips." onRetry={onRetryRecentThreads} />
         )}
-        {recentThreadsStatus === 'ready' && recentThreads.length === 0 && (
+        {recentThreadsStatus === THREAD_LIST_STATUS.READY && recentThreads.length === 0 && (
           <EmptyState icon="🧳" message="Your trips will show up here." />
         )}
-        {recentThreadsStatus === 'ready' &&
+        {recentThreadsStatus === THREAD_LIST_STATUS.READY &&
           recentThreads.map((thread, index) => (
             <Pressable
               accessibilityRole="button"

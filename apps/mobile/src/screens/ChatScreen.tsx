@@ -47,12 +47,11 @@ import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { messageText, renderableMessages } from '../utils/chatMessages';
 
 // Types
-import type { VoiceState } from '../hooks';
+import type { ChatVoiceProps } from '../hooks';
 import type { ShellColors } from '../theme';
 import type { RenderableMessage } from '../utils/chatMessages';
 import type { Message } from '@copilotkit/react-native/headless';
 import type { KeyboardChatScrollViewProps } from 'react-native-keyboard-controller';
-import type { SharedValue } from 'react-native-reanimated';
 import type { ReactElement } from 'react';
 
 const ChatScrollView = forwardRef<
@@ -82,21 +81,10 @@ interface ChatScreenProps {
   isRunning: boolean;
   error: string | null;
   interruptElement: ReactElement | null;
-  voiceState: VoiceState;
-  voiceErrorMessage: string | null;
-  partialTranscript: string;
-  micLevel: SharedValue<number>;
-  dictatedTranscript: { text: string; id: number } | null;
-  isVoiceModeActive: boolean;
+  voice: ChatVoiceProps;
   onBack: () => void;
   onSend: (text: string) => void;
   onStop: () => void;
-  onStartListening: () => void;
-  onStopListening: () => void;
-  onStopSpeaking: () => void;
-  onStartVoiceMode: () => void;
-  onExitVoiceMode: () => void;
-  onStopVoiceModeTurn: () => void;
 }
 
 export const ChatScreen = ({
@@ -105,22 +93,25 @@ export const ChatScreen = ({
   isRunning,
   error,
   interruptElement,
-  voiceState,
-  voiceErrorMessage,
-  partialTranscript,
-  micLevel,
-  dictatedTranscript,
-  isVoiceModeActive,
+  voice,
   onBack,
   onSend,
   onStop,
-  onStartListening,
-  onStopListening,
-  onStopSpeaking,
-  onStartVoiceMode,
-  onExitVoiceMode,
-  onStopVoiceModeTurn,
 }: ChatScreenProps) => {
+  const {
+    dictatedTranscript,
+    isVoiceModeActive,
+    micLevel,
+    onExitVoiceMode,
+    onStartListening,
+    onStartVoiceMode,
+    onStopListening,
+    onStopSpeaking,
+    onStopVoiceModeTurn,
+    partialTranscript,
+    voiceErrorMessage,
+    voiceState,
+  } = voice;
   const [draft, setDraft] = useState('');
   const isKeyboardVisible = useKeyboardState((state) => state.isVisible);
 

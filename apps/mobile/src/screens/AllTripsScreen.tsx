@@ -38,26 +38,28 @@ import { getRecentIcon, threadLabel } from '../utils/thread';
 
 // Types
 import type { ThreadListStatus } from '../constants';
+import type { ThreadDeletionProps } from '../hooks';
 import type { ThreadItem } from '../services';
 import type { ShellColors } from '../theme';
 
-interface AllTripsScreenProps {
+export interface AllTripsListProps {
   status: ThreadListStatus;
   threads: ThreadItem[];
   isLoadingMore: boolean;
   hasMore: boolean;
   loadMoreFailed: boolean;
-  deletingThreadId: string | null;
-  isStartingTrip: boolean;
-  isDeletingAll: boolean;
-  onOpenThread: (threadId: string) => void;
-  onDeleteThread: (thread: ThreadItem) => void;
-  onDeleteAllTrips: () => void;
   onLoadMore: () => void;
   onRetry: () => void;
+}
+
+interface AllTripsScreenProps {
+  list: AllTripsListProps;
+  deletion: ThreadDeletionProps;
+  isStartingTrip: boolean;
+  onOpenThread: (threadId: string) => void;
+  onStartNewTrip: () => void;
   onGoHome: () => void;
   onAskByVoice: () => void;
-  onStartNewTrip: () => void;
   onBack: () => void;
 }
 
@@ -65,24 +67,17 @@ const threadTime = (thread: ThreadItem): string =>
   new Date(thread.createdAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 
 export const AllTripsScreen = ({
-  status,
-  threads,
-  isLoadingMore,
-  hasMore,
-  loadMoreFailed,
-  deletingThreadId,
+  list,
+  deletion,
   isStartingTrip,
-  isDeletingAll,
   onOpenThread,
-  onDeleteThread,
-  onDeleteAllTrips,
-  onLoadMore,
-  onRetry,
+  onStartNewTrip,
   onGoHome,
   onAskByVoice,
-  onStartNewTrip,
   onBack,
 }: AllTripsScreenProps) => {
+  const { status, threads, isLoadingMore, hasMore, loadMoreFailed, onLoadMore, onRetry } = list;
+  const { deletingThreadId, isDeletingAll, onDeleteAllTrips, onDeleteThread } = deletion;
   const { colors } = useShellTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const insets = useSafeAreaInsets();

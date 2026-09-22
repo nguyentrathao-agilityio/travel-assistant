@@ -8,6 +8,9 @@ import { FLIGHT_TAB, type FlightTab } from '@repo/constants';
 import { Card, ConfirmBanner, Typography } from './common';
 import { FlightOptionItem } from './FlightOptionItem';
 
+// Hooks
+import { useConfirmedSelection } from '../hooks';
+
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { computeBadges } from '../utils/flight';
@@ -49,7 +52,7 @@ export const FlightCard = ({
   const [selectedDeparture, setSelectedDeparture] = useState<Flight | null>(initialDeparture);
   const [selectedReturn, setSelectedReturn] = useState<Flight | null>(initialReturn);
   const [activeTab, setActiveTab] = useState<FlightTab>(FLIGHT_TAB.DEPARTURE);
-  const [confirmed, setConfirmed] = useState(isConfirmed);
+  const { confirmed, markChanged, markConfirmed } = useConfirmedSelection(isConfirmed);
   const { colors } = useShellTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -62,10 +65,10 @@ export const FlightCard = ({
       const flight = data.results.find((f) => f.id === id) ?? null;
 
       setSelectedDeparture(flight);
-      setConfirmed(false);
+      markChanged();
       if (!selectedReturn && data.returnResults?.length) setActiveTab(FLIGHT_TAB.RETURN);
     },
-    [data.results, data.returnResults?.length, isBookingLocked, selectedReturn]
+    [data.results, data.returnResults?.length, isBookingLocked, selectedReturn, markChanged]
   );
 
   const handleSelectReturn = useCallback(
@@ -75,25 +78,32 @@ export const FlightCard = ({
       const flight = data.returnResults?.find((f) => f.id === id) ?? null;
 
       setSelectedReturn(flight);
-      setConfirmed(false);
+      markChanged();
       if (!selectedDeparture && data.results.length) setActiveTab(FLIGHT_TAB.DEPARTURE);
     },
-    [data.returnResults, data.results.length, isBookingLocked, selectedDeparture]
+    [data.returnResults, data.results.length, isBookingLocked, selectedDeparture, markChanged]
   );
 
   const handleChange = useCallback(() => {
     setSelectedDeparture(null);
     setSelectedReturn(null);
-    setConfirmed(false);
-  }, []);
+    markChanged();
+  }, [markChanged]);
 
   const handleConfirm = useCallback(() => {
     if (!selectedDeparture || isBookingLocked) return;
     onSelect?.(selectedDeparture, FLIGHT_TAB.DEPARTURE);
     if (selectedReturn) onSelect?.(selectedReturn, FLIGHT_TAB.RETURN);
     onContinueBooking?.(selectedDeparture, selectedReturn ?? undefined);
-    setConfirmed(true);
-  }, [selectedDeparture, selectedReturn, isBookingLocked, onSelect, onContinueBooking]);
+    markConfirmed();
+  }, [
+    selectedDeparture,
+    selectedReturn,
+    isBookingLocked,
+    onSelect,
+    onContinueBooking,
+    markConfirmed,
+  ]);
 
   const outboundBadges = useMemo(() => computeBadges(data.results), [data.results]);
   const returnBadges = useMemo(() => computeBadges(data.returnResults ?? []), [data.returnResults]);

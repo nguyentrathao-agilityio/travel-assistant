@@ -85,12 +85,13 @@ test('fetchMore appends the next page and de-duplicates by id', async () => {
     result.current.fetchMore();
   });
 
+  // React Query's notifyManager batches the re-render via setTimeout, so it can land
+  // after this promise resolves — wait on the merged length itself, not a transient flag.
   await waitFor(() => {
-    expect(result.current.isLoadingMore).toBe(false);
+    expect(result.current.threads).toHaveLength(FULL_PAGE + 2);
   });
 
   expect(fetchThreadsPage).toHaveBeenLastCalledWith(FULL_PAGE, FULL_PAGE);
-  expect(result.current.threads).toHaveLength(FULL_PAGE + 2);
   expect(result.current.hasMore).toBe(false);
 });
 

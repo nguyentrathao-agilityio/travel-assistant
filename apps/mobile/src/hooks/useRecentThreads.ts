@@ -1,49 +1,35 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Services
-import { fetchRecentThreads } from '../services';
+import { fetchRecentThreads, RECENT_THREADS_LIMIT } from '../services';
 
 // Constants
 import { THREAD_LIST_STATUS } from '../constants';
 
+// Hooks
+import { threadQueryKeys } from './threadQueryKeys';
+
 // Types
 import type { ThreadItem } from '../services';
 
-type RecentThreadsState =
-  | { status: typeof THREAD_LIST_STATUS.LOADING; threads: [] }
-  | { status: typeof THREAD_LIST_STATUS.READY; threads: ThreadItem[] }
-  | { status: typeof THREAD_LIST_STATUS.ERROR; threads: [] };
-
-export const useRecentThreads = (limit?: number) => {
-  const [state, setState] = useState<RecentThreadsState>({
-    status: THREAD_LIST_STATUS.LOADING,
-    threads: [],
+export const useRecentThreads = (limit: number = RECENT_THREADS_LIMIT) => {
+  const queryClient = useQueryClient();
+  const query = useQuery({
+    queryFn: () => fetchRecentThreads(limit),
+    queryKey: threadQueryKeys.recent(limit),
   });
 
-  const refresh = useCallback(() => {
-    setState({ status: THREAD_LIST_STATUS.LOADING, threads: [] });
+  const status = query.isPending
+    ? THREAD_LIST_STATUS.LOADING
+    : query.isError
+      ? THREAD_LIST_STATUS.ERROR
+      : THREAD_LIST_STATUS.READY;
 
-    fetchRecentThreads(limit)
-      .then((threads) => setState({ status: THREAD_LIST_STATUS.READY, threads }))
-      .catch(() => setState({ status: THREAD_LIST_STATUS.ERROR, threads: [] }));
-  }, [limit]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  // Drops a deleted thread from the current list immediately, instead of waiting
-  // on a full refetch, so the row disappears the moment deletion succeeds.
-  const removeThread = useCallback((threadId: string) => {
-    setState((current) =>
-      current.status === THREAD_LIST_STATUS.READY
-        ? {
-            status: THREAD_LIST_STATUS.READY,
-            threads: current.threads.filter((thread) => thread.id !== threadId),
-          }
-        : current
+  const removeThread = (threadId: string) => {
+    queryClient.setQueryData<ThreadItem[]>(threadQueryKeys.recent(limit), (current) =>
+      current?.filter((thread) => thread.id !== threadId)
     );
-  }, []);
+  };
 
-  return { ...state, refresh, removeThread };
+  return { status, threads: query.data ?? [], refresh: query.refetch, removeThread };
 };

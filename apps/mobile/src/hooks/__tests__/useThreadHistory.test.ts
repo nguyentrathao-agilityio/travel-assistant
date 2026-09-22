@@ -1,4 +1,6 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react-native';
+import { createElement } from 'react';
 
 import { useThreadHistory } from '../useThreadHistory';
 
@@ -14,13 +16,23 @@ jest.mock('../../utils/langgraphMessage', () => ({
 
 import { fetchThreadValues } from '../../services/threadHistory';
 
+let queryClient: QueryClient;
+
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  createElement(QueryClientProvider, { client: queryClient }, children);
+
+afterEach(() => {
+  queryClient.clear();
+});
+
 beforeEach(() => {
   (fetchThreadValues as jest.Mock).mockReset();
   mockToAgUiMessage.mockReset();
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 });
 
 test('returns empty, non-loading state when threadId is empty', async () => {
-  const { result } = await renderHook(() => useThreadHistory(''));
+  const { result } = await renderHook(() => useThreadHistory(''), { wrapper });
 
   expect(result.current).toEqual({ messages: [], isLoading: false });
   expect(fetchThreadValues).not.toHaveBeenCalled();
@@ -29,7 +41,7 @@ test('returns empty, non-loading state when threadId is empty', async () => {
 test('starts loading once a threadId is provided', async () => {
   (fetchThreadValues as jest.Mock).mockReturnValue(new Promise(() => {}));
 
-  const { result } = await renderHook(() => useThreadHistory('thread-1'));
+  const { result } = await renderHook(() => useThreadHistory('thread-1'), { wrapper });
 
   expect(result.current.isLoading).toBe(true);
   expect(result.current.messages).toEqual([]);
@@ -46,7 +58,7 @@ test('converts raw messages via toAgUiMessage and drops nulls', async () => {
     message.id === 'r1' ? { id: 'r1', role: 'user', content: 'hi' } : null
   );
 
-  const { result } = await renderHook(() => useThreadHistory('thread-1'));
+  const { result } = await renderHook(() => useThreadHistory('thread-1'), { wrapper });
 
   await waitFor(() => {
     expect(result.current.isLoading).toBe(false);
@@ -59,7 +71,7 @@ test('converts raw messages via toAgUiMessage and drops nulls', async () => {
 test('falls back to an empty conversation when the thread values have no messages', async () => {
   (fetchThreadValues as jest.Mock).mockResolvedValue({});
 
-  const { result } = await renderHook(() => useThreadHistory('thread-1'));
+  const { result } = await renderHook(() => useThreadHistory('thread-1'), { wrapper });
 
   await waitFor(() => {
     expect(result.current.isLoading).toBe(false);
@@ -70,7 +82,7 @@ test('falls back to an empty conversation when the thread values have no message
 test('resolves to an empty conversation when the fetch rejects', async () => {
   (fetchThreadValues as jest.Mock).mockRejectedValue(new Error('not found'));
 
-  const { result } = await renderHook(() => useThreadHistory('thread-1'));
+  const { result } = await renderHook(() => useThreadHistory('thread-1'), { wrapper });
 
   await waitFor(() => {
     expect(result.current.isLoading).toBe(false);
@@ -85,6 +97,7 @@ test('re-fetches when threadId changes', async () => {
     ({ threadId }: { threadId: string }) => useThreadHistory(threadId),
     {
       initialProps: { threadId: 'thread-1' },
+      wrapper,
     }
   );
 

@@ -28,7 +28,7 @@ export const keepNewestEmptyThread = (threads: ThreadItem[]): ThreadItem[] => {
   });
 };
 
-const RECENT_THREADS_LIMIT = 5;
+export const RECENT_THREADS_LIMIT = 5;
 
 const messageText = (content: unknown): string => {
   if (typeof content === 'string') return content;

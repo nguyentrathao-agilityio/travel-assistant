@@ -8,6 +8,7 @@ import { ChatScreen } from '../ChatScreen';
 import { ThemeProvider } from '../../theme';
 import { SAFE_AREA_INITIAL_METRICS } from '../../test/fixtures';
 
+import type { ChatVoiceProps } from '../../hooks';
 import type { Message } from '@copilotkit/react-native/headless';
 import type { ReactElement } from 'react';
 
@@ -49,31 +50,40 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-const baseProps: Parameters<typeof ChatScreen>[0] = {
-  dictatedTranscript: null as { text: string; id: number } | null,
-  error: null,
-  interruptElement: null as ReactElement | null,
-  isReady: true,
-  isRunning: false,
+const baseVoice: ChatVoiceProps = {
+  dictatedTranscript: null,
   isVoiceModeActive: false,
-  messages: [] as Message[],
-  micLevel: { value: 0 } as Parameters<typeof ChatScreen>[0]['micLevel'],
-  onBack: jest.fn(),
+  micLevel: { value: 0 } as ChatVoiceProps['micLevel'],
   onExitVoiceMode: jest.fn(),
-  onSend: jest.fn(),
   onStartListening: jest.fn(),
   onStartVoiceMode: jest.fn(),
-  onStop: jest.fn(),
   onStopListening: jest.fn(),
   onStopSpeaking: jest.fn(),
   onStopVoiceModeTurn: jest.fn(),
   partialTranscript: '',
-  voiceErrorMessage: null as string | null,
-  voiceState: 'idle' as const,
+  voiceErrorMessage: null,
+  voiceState: 'idle',
 };
 
-const renderScreen = async (props: Partial<Parameters<typeof ChatScreen>[0]> = {}) => {
-  const merged = { ...baseProps, ...props };
+const baseProps: Parameters<typeof ChatScreen>[0] = {
+  error: null,
+  interruptElement: null as ReactElement | null,
+  isReady: true,
+  isRunning: false,
+  messages: [] as Message[],
+  onBack: jest.fn(),
+  onSend: jest.fn(),
+  onStop: jest.fn(),
+  voice: baseVoice,
+};
+
+const renderScreen = async (
+  props: Partial<Omit<Parameters<typeof ChatScreen>[0], 'voice'>> & {
+    voice?: Partial<ChatVoiceProps>;
+  } = {}
+) => {
+  const { voice: voiceOverrides, ...rest } = props;
+  const merged = { ...baseProps, ...rest, voice: { ...baseVoice, ...voiceOverrides } };
 
   await render(
     <SafeAreaProvider initialMetrics={SAFE_AREA_INITIAL_METRICS}>
@@ -216,13 +226,13 @@ test('sending a typed message dismisses the keyboard', async () => {
 
 test('shows a voice mode trigger instead of send while the draft is empty', async () => {
   const user = userEvent.setup();
-  const { onStartVoiceMode } = await renderScreen();
+  const { voice } = await renderScreen();
 
   expect(screen.queryByRole('button', { name: 'Send' })).not.toBeOnTheScreen();
 
   await user.press(screen.getByRole('button', { name: 'Voice mode' }));
 
-  expect(onStartVoiceMode).toHaveBeenCalledTimes(1);
+  expect(voice.onStartVoiceMode).toHaveBeenCalledTimes(1);
 });
 
 test('typing text swaps the voice mode trigger for send', async () => {
@@ -253,13 +263,15 @@ test('shows an error banner', async () => {
 });
 
 test('shows a voice status banner while listening', async () => {
-  await renderScreen({ voiceState: 'listening' });
+  await renderScreen({ voice: { voiceState: 'listening' } });
 
   expect(screen.getByText('Listening…')).toBeOnTheScreen();
 });
 
 test('shows the voice error message instead of the status banner', async () => {
-  await renderScreen({ voiceState: 'error', voiceErrorMessage: 'Microphone permission denied' });
+  await renderScreen({
+    voice: { voiceState: 'error', voiceErrorMessage: 'Microphone permission denied' },
+  });
 
   expect(screen.getByText('Microphone permission denied')).toBeOnTheScreen();
 });
@@ -274,16 +286,15 @@ test('the voice button is disabled from starting while awaiting approval', async
 });
 
 test('the voice button is disabled while voice mode is active', async () => {
-  await renderScreen({ isVoiceModeActive: true });
+  await renderScreen({ voice: { isVoiceModeActive: true } });
 
   expect(screen.getByLabelText('Ask by voice')).toBeDisabled();
 });
 
 test('shows the voice mode overlay when active, and exits via X or the keyboard button', async () => {
   const user = userEvent.setup();
-  const { onExitVoiceMode } = await renderScreen({
-    isVoiceModeActive: true,
-    voiceState: 'listening',
+  const { voice } = await renderScreen({
+    voice: { isVoiceModeActive: true, voiceState: 'listening' },
   });
 
   expect(screen.getByText('Listening…')).toBeOnTheScreen();
@@ -291,14 +302,16 @@ test('shows the voice mode overlay when active, and exits via X or the keyboard 
   await user.press(screen.getByLabelText('Exit voice mode'));
   await user.press(screen.getByLabelText('Switch to keyboard'));
 
-  expect(onExitVoiceMode).toHaveBeenCalledTimes(2);
+  expect(voice.onExitVoiceMode).toHaveBeenCalledTimes(2);
 });
 
 test('voice mode overlay shows the live partial transcript over the status label', async () => {
   await renderScreen({
-    isVoiceModeActive: true,
-    voiceState: 'listening',
-    partialTranscript: 'Plan a trip to',
+    voice: {
+      isVoiceModeActive: true,
+      voiceState: 'listening',
+      partialTranscript: 'Plan a trip to',
+    },
   });
 
   expect(screen.getByText('Plan a trip to')).toBeOnTheScreen();
@@ -306,37 +319,37 @@ test('voice mode overlay shows the live partial transcript over the status label
 });
 
 test('voice mode overlay: the center mic button is disabled while connecting/thinking', async () => {
-  await renderScreen({ isVoiceModeActive: true, voiceState: 'connecting' });
+  await renderScreen({ voice: { isVoiceModeActive: true, voiceState: 'connecting' } });
 
   expect(screen.getByLabelText('Voice mode mic')).toBeDisabled();
 });
 
 test('voice mode overlay: the center mic button stops the turn while listening', async () => {
   const user = userEvent.setup();
-  const { onStopVoiceModeTurn } = await renderScreen({
-    isVoiceModeActive: true,
-    voiceState: 'listening',
+  const { voice } = await renderScreen({
+    voice: { isVoiceModeActive: true, voiceState: 'listening' },
   });
 
   await user.press(screen.getByLabelText('End your turn'));
 
-  expect(onStopVoiceModeTurn).toHaveBeenCalledTimes(1);
+  expect(voice.onStopVoiceModeTurn).toHaveBeenCalledTimes(1);
 });
 
 test('voice mode overlay: the center mic button interrupts playback while speaking', async () => {
   const user = userEvent.setup();
-  const { onStopVoiceModeTurn } = await renderScreen({
-    isVoiceModeActive: true,
-    voiceState: 'speaking',
+  const { voice } = await renderScreen({
+    voice: { isVoiceModeActive: true, voiceState: 'speaking' },
   });
 
   await user.press(screen.getByLabelText('Interrupt the reply'));
 
-  expect(onStopVoiceModeTurn).toHaveBeenCalledTimes(1);
+  expect(voice.onStopVoiceModeTurn).toHaveBeenCalledTimes(1);
 });
 
 test('a dictated transcript is merged into the draft without being sent', async () => {
-  const { onSend } = await renderScreen({ dictatedTranscript: { text: 'Plan a trip', id: 1 } });
+  const { onSend } = await renderScreen({
+    voice: { dictatedTranscript: { text: 'Plan a trip', id: 1 } },
+  });
 
   expect(screen.getByPlaceholderText('Write here…')).toHaveProp('value', 'Plan a trip');
   expect(onSend).not.toHaveBeenCalled();

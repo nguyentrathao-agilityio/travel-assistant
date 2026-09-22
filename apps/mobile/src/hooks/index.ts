@@ -1,5 +1,7 @@
 export * from './useDebouncedValue';
+export * from './useConfirmedSelection';
 export * from './useStartNewTrip';
+export * from './useThreadDeletion';
 export * from './useOnboardingSeen';
 export * from './useRecentThreads';
 export * from './useAllThreads';
@@ -22,4 +24,6 @@ export * from './useBookingAction';
 export * from './useTripSummaryAction';
 export * from './useVoiceAssistant';
 export * from './useVoiceModeConversation';
+export * from './useChatVoice';
+export * from './useTravelActions';
 export * from './useThemeAction';

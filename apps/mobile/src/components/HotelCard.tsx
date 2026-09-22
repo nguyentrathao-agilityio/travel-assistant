@@ -5,6 +5,9 @@ import { StyleSheet, View } from 'react-native';
 import { Card, ConfirmBanner, Typography } from './common';
 import { HotelOptionItem } from './HotelOptionItem';
 
+// Hooks
+import { useConfirmedSelection } from '../hooks';
+
 // Utils
 import { shellSpacing } from '../theme';
 import { computeHotelBadges } from '../utils/hotel';
@@ -37,22 +40,22 @@ export const HotelCard = ({
   initialHotel = null,
 }: HotelCardProps) => {
   const [selectedId, setSelectedId] = useState<string | null>(initialHotel?.id ?? null);
-  const [confirmed, setConfirmed] = useState(isConfirmed);
+  const { confirmed, markChanged, markConfirmed } = useConfirmedSelection(isConfirmed);
 
   const handleSelect = useCallback(
     (id: string) => {
       if (isBookingLocked) return;
 
       setSelectedId(id);
-      setConfirmed(false);
+      markChanged();
     },
-    [isBookingLocked]
+    [isBookingLocked, markChanged]
   );
 
   const handleChange = useCallback(() => {
     setSelectedId(null);
-    setConfirmed(false);
-  }, []);
+    markChanged();
+  }, [markChanged]);
 
   const selectedHotel = data.results.find((hotel) => hotel.id === selectedId);
 
@@ -60,8 +63,8 @@ export const HotelCard = ({
     if (!selectedHotel || isBookingLocked) return;
     onSelect?.(selectedHotel);
     onContinueBooking?.(selectedHotel);
-    setConfirmed(true);
-  }, [selectedHotel, isBookingLocked, onSelect, onContinueBooking]);
+    markConfirmed();
+  }, [selectedHotel, isBookingLocked, onSelect, onContinueBooking, markConfirmed]);
 
   const badges = useMemo(() => computeHotelBadges(data.results), [data.results]);
   const showBanner = !confirmed && !!selectedHotel;

@@ -1,4 +1,6 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { createElement } from 'react';
 
 import { useRecentThreads } from '../useRecentThreads';
 
@@ -8,14 +10,24 @@ jest.mock('../../services', () => ({
 
 import { fetchRecentThreads } from '../../services';
 
+let queryClient: QueryClient;
+
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  createElement(QueryClientProvider, { client: queryClient }, children);
+
+afterEach(() => {
+  queryClient.clear();
+});
+
 beforeEach(() => {
   (fetchRecentThreads as jest.Mock).mockReset();
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 });
 
 test('starts in a loading state', async () => {
   (fetchRecentThreads as jest.Mock).mockReturnValue(new Promise(() => {}));
 
-  const { result } = await renderHook(() => useRecentThreads());
+  const { result } = await renderHook(() => useRecentThreads(), { wrapper });
 
   expect(result.current.status).toBe('loading');
   expect(result.current.threads).toEqual([]);
@@ -26,7 +38,7 @@ test('resolves to ready with the fetched threads', async () => {
 
   (fetchRecentThreads as jest.Mock).mockResolvedValue(threads);
 
-  const { result } = await renderHook(() => useRecentThreads());
+  const { result } = await renderHook(() => useRecentThreads(), { wrapper });
 
   await waitFor(() => {
     expect(result.current.status).toBe('ready');
@@ -37,7 +49,7 @@ test('resolves to ready with the fetched threads', async () => {
 test('passes the limit through to the service', async () => {
   (fetchRecentThreads as jest.Mock).mockResolvedValue([]);
 
-  await renderHook(() => useRecentThreads(10));
+  await renderHook(() => useRecentThreads(10), { wrapper });
 
   expect(fetchRecentThreads).toHaveBeenCalledWith(10);
 });
@@ -45,7 +57,7 @@ test('passes the limit through to the service', async () => {
 test('resolves to error status when the fetch rejects', async () => {
   (fetchRecentThreads as jest.Mock).mockRejectedValue(new Error('network down'));
 
-  const { result } = await renderHook(() => useRecentThreads());
+  const { result } = await renderHook(() => useRecentThreads(), { wrapper });
 
   await waitFor(() => {
     expect(result.current.status).toBe('error');
@@ -56,7 +68,7 @@ test('resolves to error status when the fetch rejects', async () => {
 test('refresh re-fetches and resets to loading first', async () => {
   (fetchRecentThreads as jest.Mock).mockResolvedValue([]);
 
-  const { result } = await renderHook(() => useRecentThreads());
+  const { result } = await renderHook(() => useRecentThreads(), { wrapper });
 
   await waitFor(() => {
     expect(result.current.status).toBe('ready');
@@ -84,7 +96,7 @@ test('removeThread drops a thread from the ready list immediately', async () => 
 
   (fetchRecentThreads as jest.Mock).mockResolvedValue(threads);
 
-  const { result } = await renderHook(() => useRecentThreads());
+  const { result } = await renderHook(() => useRecentThreads(), { wrapper });
 
   await waitFor(() => {
     expect(result.current.status).toBe('ready');
@@ -94,13 +106,15 @@ test('removeThread drops a thread from the ready list immediately', async () => 
     result.current.removeThread('t1');
   });
 
-  expect(result.current.threads).toEqual([threads[1]]);
+  await waitFor(() => {
+    expect(result.current.threads).toEqual([threads[1]]);
+  });
 });
 
 test('removeThread is a no-op while still loading', async () => {
   (fetchRecentThreads as jest.Mock).mockReturnValue(new Promise(() => {}));
 
-  const { result } = await renderHook(() => useRecentThreads());
+  const { result } = await renderHook(() => useRecentThreads(), { wrapper });
 
   await act(async () => {
     result.current.removeThread('t1');

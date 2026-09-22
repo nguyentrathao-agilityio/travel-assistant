@@ -1,4 +1,6 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { createElement } from 'react';
 
 import { useAllThreads } from '../useAllThreads';
 
@@ -19,10 +21,23 @@ const makeThreads = (count: number, offset = 0): ThreadItem[] =>
 
 const FULL_PAGE = 10;
 
+let queryClient: QueryClient;
+
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  createElement(QueryClientProvider, { client: queryClient }, children);
+
+afterEach(() => {
+  queryClient.clear();
+});
+
+beforeEach(() => {
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+});
+
 test('loads the first page and reports hasMore when the page is full', async () => {
   (fetchThreadsPage as jest.Mock).mockResolvedValue(makeThreads(FULL_PAGE));
 
-  const { result } = await renderHook(() => useAllThreads());
+  const { result } = await renderHook(() => useAllThreads(), { wrapper });
 
   await waitFor(() => {
     expect(result.current.status).toBe('ready');
@@ -35,7 +50,7 @@ test('loads the first page and reports hasMore when the page is full', async () 
 test('reports no more pages when the page is short', async () => {
   (fetchThreadsPage as jest.Mock).mockResolvedValue(makeThreads(3));
 
-  const { result } = await renderHook(() => useAllThreads());
+  const { result } = await renderHook(() => useAllThreads(), { wrapper });
 
   await waitFor(() => {
     expect(result.current.status).toBe('ready');
@@ -46,7 +61,7 @@ test('reports no more pages when the page is short', async () => {
 test('sets error status when the initial fetch fails', async () => {
   (fetchThreadsPage as jest.Mock).mockRejectedValue(new Error('network down'));
 
-  const { result } = await renderHook(() => useAllThreads());
+  const { result } = await renderHook(() => useAllThreads(), { wrapper });
 
   await waitFor(() => {
     expect(result.current.status).toBe('error');
@@ -57,7 +72,7 @@ test('sets error status when the initial fetch fails', async () => {
 test('fetchMore appends the next page and de-duplicates by id', async () => {
   (fetchThreadsPage as jest.Mock).mockResolvedValueOnce(makeThreads(FULL_PAGE));
 
-  const { result } = await renderHook(() => useAllThreads());
+  const { result } = await renderHook(() => useAllThreads(), { wrapper });
 
   await waitFor(() => {
     expect(result.current.status).toBe('ready');
@@ -82,7 +97,7 @@ test('fetchMore appends the next page and de-duplicates by id', async () => {
 test('fetchMore marks loadMoreFailed on rejection without clearing existing threads', async () => {
   (fetchThreadsPage as jest.Mock).mockResolvedValueOnce(makeThreads(FULL_PAGE));
 
-  const { result } = await renderHook(() => useAllThreads());
+  const { result } = await renderHook(() => useAllThreads(), { wrapper });
 
   await waitFor(() => {
     expect(result.current.status).toBe('ready');
@@ -104,7 +119,7 @@ test('fetchMore marks loadMoreFailed on rejection without clearing existing thre
 test('fetchMore is a no-op when there is no more to load', async () => {
   (fetchThreadsPage as jest.Mock).mockResolvedValue(makeThreads(3));
 
-  const { result } = await renderHook(() => useAllThreads());
+  const { result } = await renderHook(() => useAllThreads(), { wrapper });
 
   await waitFor(() => {
     expect(result.current.status).toBe('ready');
@@ -121,7 +136,7 @@ test('fetchMore is a no-op when there is no more to load', async () => {
 test('removeThread filters the thread out of local state', async () => {
   (fetchThreadsPage as jest.Mock).mockResolvedValue(makeThreads(3));
 
-  const { result } = await renderHook(() => useAllThreads());
+  const { result } = await renderHook(() => useAllThreads(), { wrapper });
 
   await waitFor(() => {
     expect(result.current.status).toBe('ready');
@@ -131,13 +146,15 @@ test('removeThread filters the thread out of local state', async () => {
     result.current.removeThread('thread-1');
   });
 
-  expect(result.current.threads.map((thread) => thread.id)).toEqual(['thread-0', 'thread-2']);
+  await waitFor(() => {
+    expect(result.current.threads.map((thread) => thread.id)).toEqual(['thread-0', 'thread-2']);
+  });
 });
 
 test('refresh resets state to loading and re-fetches from the start', async () => {
   (fetchThreadsPage as jest.Mock).mockResolvedValue(makeThreads(3));
 
-  const { result } = await renderHook(() => useAllThreads());
+  const { result } = await renderHook(() => useAllThreads(), { wrapper });
 
   await waitFor(() => {
     expect(result.current.status).toBe('ready');

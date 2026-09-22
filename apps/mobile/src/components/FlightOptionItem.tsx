@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 // Types
 import type { Flight } from '@repo/types';
@@ -14,7 +14,7 @@ import { formatPrice, formatTime } from '@repo/utils';
 import type { FlightBadge } from '../utils/flight';
 
 // Components
-import { Typography } from './common';
+import { SelectControl, Typography } from './common';
 
 import type { ShellColors } from '../theme';
 
@@ -71,23 +71,13 @@ export const FlightOptionItem = ({
           <Typography style={styles.price} weight="semibold">
             {formatPrice(flight.price, flight.currency)}
           </Typography>
-          {onSelect &&
-            (isSelected ? (
-              <Typography color="muted" variant="meta" weight="medium">
-                Selected
-              </Typography>
-            ) : (
-              <Pressable
-                accessibilityRole="button"
-                disabled={isBookingLocked}
-                onPress={() => onSelect(flight.id)}
-                style={[styles.selectButton, isBookingLocked && styles.selectButtonDisabled]}
-              >
-                <Typography variant="label" weight="semibold">
-                  Select
-                </Typography>
-              </Pressable>
-            ))}
+          {onSelect && (
+            <SelectControl
+              isBookingLocked={isBookingLocked}
+              isSelected={isSelected}
+              onSelect={() => onSelect(flight.id)}
+            />
+          )}
         </View>
       </View>
     </View>
@@ -132,14 +122,5 @@ const createStyles = (colors: ShellColors) =>
     },
     price: {
       flex: 1,
-    },
-    selectButton: {
-      backgroundColor: colors.accentGradientStart,
-      borderRadius: shellRadii.pill,
-      paddingHorizontal: shellSpacing.sm,
-      paddingVertical: shellSpacing.xs,
-    },
-    selectButtonDisabled: {
-      opacity: 0.4,
     },
   });

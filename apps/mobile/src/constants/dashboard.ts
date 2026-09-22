@@ -9,4 +9,4 @@ export const THREAD_LIST_STATUS = {
 } as const;
 
 export type ThreadListStatus = (typeof THREAD_LIST_STATUS)[keyof typeof THREAD_LIST_STATUS];
-export const ALL_TRIPS_BOTTOM_NAV_CLEARANCE = 104;
+export const BOTTOM_NAV_CLEARANCE = 104;

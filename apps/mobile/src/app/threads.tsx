@@ -1,14 +1,9 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 
 // Services
-import {
-  createRemoteThread,
-  deleteRemoteThread,
-  findEmptyThreadId,
-  generateThreadId,
-} from '../services';
+import { deleteRemoteThread } from '../services';
 
 // Constants
 import { CHAT_PATH, DASHBOARD_PATH } from '../constants';
@@ -17,7 +12,7 @@ import { CHAT_PATH, DASHBOARD_PATH } from '../constants';
 import { AllTripsScreen } from '../screens';
 
 // Hooks
-import { useActiveThreadId, useAllThreads } from '../hooks';
+import { useActiveThreadId, useAllThreads, useStartNewTrip } from '../hooks';
 
 // Types
 import type { ThreadItem } from '../services';
@@ -37,8 +32,11 @@ export default function ThreadsRoute() {
   const { markActive } = useActiveThreadId();
   const [deletingThreadId, setDeletingThreadId] = useState<string | null>(null);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
-  const [isStartingTrip, setIsStartingTrip] = useState(false);
-  const isStartingTripRef = useRef(false);
+  const { handleStartNewTrip, isStartingTrip } = useStartNewTrip({
+    markActive,
+    tag: 'threads',
+    threads,
+  });
 
   const handleOpenThread = useCallback(
     (threadId: string) => {
@@ -96,37 +94,6 @@ export default function ThreadsRoute() {
       },
     ]);
   }, [threads, refresh]);
-
-  const handleStartNewTrip = useCallback(async () => {
-    if (isStartingTripRef.current) return;
-
-    isStartingTripRef.current = true;
-    setIsStartingTrip(true);
-
-    try {
-      const emptyThreadId = findEmptyThreadId(threads);
-
-      if (emptyThreadId) {
-        router.push({ pathname: CHAT_PATH, params: { threadId: emptyThreadId } });
-        markActive(emptyThreadId);
-        return;
-      }
-
-      const threadId = generateThreadId();
-
-      router.push({ pathname: CHAT_PATH, params: { threadId } });
-      markActive(threadId);
-
-      try {
-        await createRemoteThread(threadId);
-      } catch (caught) {
-        console.warn('[dashboard] Failed to prewarm remote thread', caught);
-      }
-    } finally {
-      isStartingTripRef.current = false;
-      setIsStartingTrip(false);
-    }
-  }, [threads, router, markActive]);
 
   const handleAskByVoice = useCallback(() => {
     router.push({ pathname: CHAT_PATH, params: { focusVoice: '1' } });

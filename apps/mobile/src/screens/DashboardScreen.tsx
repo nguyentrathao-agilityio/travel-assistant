@@ -1,21 +1,15 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  ArrowRight,
-  AudioLines,
-  BotMessageSquare,
-  History,
-  House,
-  MessageCircleMore,
-} from 'lucide-react-native';
+import { ArrowRight, AudioLines, History, MessageCircleMore } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Constants
-import { GRID_ROW_HEIGHT, RECENT_ICONS, THREAD_LIST_STATUS } from '../constants';
+import { BOTTOM_NAV_CLEARANCE, GRID_ROW_HEIGHT, THREAD_LIST_STATUS } from '../constants';
 
 // Components
 import {
+  BottomNav,
   EmptyState,
   ErrorState,
   GridActionCard,
@@ -27,6 +21,7 @@ import {
 
 // Utils
 import { shellSpacing, useShellTheme } from '../theme';
+import { getRecentIcon, threadLabel } from '../utils/thread';
 
 // Types
 import type { ThreadListStatus } from '../constants';
@@ -45,7 +40,9 @@ interface DashboardScreenProps {
   onRetryRecentThreads: () => void;
 }
 
-const threadLabel = (thread: ThreadItem): string => thread.title ?? 'Untitled trip';
+// Already home — tapping the active "Home" tab here is a no-op, same as before this screen
+// used the shared BottomNav.
+const NOOP = () => {};
 
 export const DashboardScreen = ({
   recentThreadsStatus,
@@ -73,7 +70,10 @@ export const DashboardScreen = ({
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: insets.bottom + 104, paddingTop: insets.top + shellSpacing.lg },
+          {
+            paddingBottom: insets.bottom + BOTTOM_NAV_CLEARANCE,
+            paddingTop: insets.top + shellSpacing.lg,
+          },
         ]}
       >
         <View style={styles.greetingRow}>
@@ -133,7 +133,7 @@ export const DashboardScreen = ({
               onPress={() => onOpenThread(thread.id)}
               style={styles.recentRow}
             >
-              <IconBadge icon={RECENT_ICONS[index % RECENT_ICONS.length]} size={40} />
+              <IconBadge icon={getRecentIcon(index)} size={40} />
               <Text numberOfLines={1} style={styles.recentItemText}>
                 {threadLabel(thread)}
               </Text>
@@ -142,34 +142,13 @@ export const DashboardScreen = ({
           ))}
       </ScrollView>
 
-      <View style={[styles.bottomNav, { bottom: Math.max(insets.bottom, shellSpacing.md) }]}>
-        <LinearGradient
-          accessibilityLabel="Home"
-          colors={[colors.accentGradientStart, colors.accentGradientEnd]}
-          end={{ x: 1, y: 1 }}
-          start={{ x: 0, y: 0 }}
-          style={styles.bottomNavActive}
-        >
-          <House color={colors.textOnDark} size={20} strokeWidth={2.2} />
-        </LinearGradient>
-        <Pressable
-          accessibilityLabel="Open voice assistant"
-          accessibilityRole="button"
-          onPress={onAskByVoice}
-          style={styles.bottomNavButton}
-        >
-          <AudioLines color={colors.textOnDarkMuted} size={20} strokeWidth={2.2} />
-        </Pressable>
-        <Pressable
-          accessibilityLabel="Start new chat"
-          accessibilityRole="button"
-          disabled={isStartingTrip}
-          onPress={onStartNewTrip}
-          style={[styles.bottomNavButton, isStartingTrip && styles.bottomNavButtonDisabled]}
-        >
-          <BotMessageSquare color={colors.textOnDarkMuted} size={20} strokeWidth={2.2} />
-        </Pressable>
-      </View>
+      <BottomNav
+        activeTab="home"
+        isChatDisabled={isStartingTrip}
+        onAskByVoice={onAskByVoice}
+        onGoHome={NOOP}
+        onStartNewChat={onStartNewTrip}
+      />
     </LinearGradient>
   );
 };
@@ -246,36 +225,5 @@ const createStyles = (colors: ShellColors) =>
       color: colors.textOnDark,
       flex: 1,
       fontSize: 15,
-    },
-    bottomNav: {
-      alignItems: 'center',
-      alignSelf: 'center',
-      backgroundColor: '#21132f',
-      borderColor: colors.surfaceBorder,
-      borderRadius: 30,
-      borderWidth: 1,
-      flexDirection: 'row',
-      height: 60,
-      justifyContent: 'space-between',
-      padding: 4,
-      position: 'absolute',
-      width: 176,
-    },
-    bottomNavActive: {
-      alignItems: 'center',
-      borderRadius: 26,
-      height: 52,
-      justifyContent: 'center',
-      width: 52,
-    },
-    bottomNavButton: {
-      alignItems: 'center',
-      borderRadius: 24,
-      height: 48,
-      justifyContent: 'center',
-      width: 48,
-    },
-    bottomNavButtonDisabled: {
-      opacity: 0.5,
     },
   });

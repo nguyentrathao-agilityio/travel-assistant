@@ -1,12 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  ArrowLeft,
-  AudioLines,
-  BotMessageSquare,
-  House,
-  Search,
-  Trash2,
-} from 'lucide-react-native';
+import { Search, Trash2 } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -22,10 +15,18 @@ import { KeyboardChatScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Constants
-import { ALL_TRIPS_BOTTOM_NAV_CLEARANCE, RECENT_ICONS, THREAD_LIST_STATUS } from '../constants';
+import { BOTTOM_NAV_CLEARANCE, THREAD_LIST_STATUS } from '../constants';
 
 // Components
-import { EmptyState, ErrorState, IconBadge, LoadingState, ThemeToggleButton } from '../components';
+import {
+  BottomNav,
+  EmptyState,
+  ErrorState,
+  HeaderBackButton,
+  IconBadge,
+  LoadingState,
+  ThemeToggleButton,
+} from '../components';
 
 // Hooks
 import { useDebouncedValue } from '../hooks';
@@ -33,6 +34,7 @@ import { useDebouncedValue } from '../hooks';
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { groupThreadsByDate } from '../utils/groupThreadsByDate';
+import { getRecentIcon, threadLabel } from '../utils/thread';
 
 // Types
 import type { ThreadListStatus } from '../constants';
@@ -58,8 +60,6 @@ interface AllTripsScreenProps {
   onStartNewTrip: () => void;
   onBack: () => void;
 }
-
-const threadLabel = (thread: ThreadItem): string => thread.title ?? 'Untitled trip';
 
 const threadTime = (thread: ThreadItem): string =>
   new Date(thread.createdAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
@@ -89,7 +89,7 @@ export const AllTripsScreen = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
-  const listBottomClearance = insets.bottom + ALL_TRIPS_BOTTOM_NAV_CLEARANCE;
+  const listBottomClearance = insets.bottom + BOTTOM_NAV_CLEARANCE;
 
   const renderScrollComponent = useCallback(
     (props: ScrollViewProps) => (
@@ -121,15 +121,7 @@ export const AllTripsScreen = ({
       style={styles.container}
     >
       <View style={[styles.headerRow, { paddingTop: insets.top + shellSpacing.md }]}>
-        <Pressable
-          accessibilityLabel="Back"
-          accessibilityRole="button"
-          hitSlop={8}
-          onPress={onBack}
-          style={styles.headerBackButton}
-        >
-          <ArrowLeft color={colors.textOnDark} size={22} />
-        </Pressable>
+        <HeaderBackButton onPress={onBack} />
         <Text style={styles.headerTitleText}>All trips</Text>
         <View style={styles.headerSpacer} />
         <Pressable
@@ -200,7 +192,7 @@ export const AllTripsScreen = ({
                 onPress={() => onOpenThread(thread.id)}
                 style={styles.rowMain}
               >
-                <IconBadge icon={RECENT_ICONS[index % RECENT_ICONS.length]} size={40} />
+                <IconBadge icon={getRecentIcon(index)} size={40} />
                 <View style={styles.rowTextGroup}>
                   <Text numberOfLines={1} style={styles.rowTitle}>
                     {threadLabel(thread)}
@@ -232,40 +224,13 @@ export const AllTripsScreen = ({
       )}
 
       {!isSearchFocused && (
-        <View style={[styles.bottomNav, { bottom: Math.max(insets.bottom, shellSpacing.md) }]}>
-          <Pressable
-            accessibilityLabel="Home"
-            accessibilityRole="button"
-            onPress={onGoHome}
-            style={styles.bottomNavButton}
-          >
-            <House color={colors.textOnDarkMuted} size={20} strokeWidth={2.2} />
-          </Pressable>
-          <Pressable
-            accessibilityLabel="Open voice assistant"
-            accessibilityRole="button"
-            onPress={onAskByVoice}
-            style={styles.bottomNavButton}
-          >
-            <AudioLines color={colors.textOnDarkMuted} size={20} strokeWidth={2.2} />
-          </Pressable>
-          <Pressable
-            accessibilityLabel="Start new chat"
-            accessibilityRole="button"
-            disabled={isStartingTrip}
-            onPress={onStartNewTrip}
-            style={isStartingTrip && styles.bottomNavButtonDisabled}
-          >
-            <LinearGradient
-              colors={[colors.accentGradientStart, colors.accentGradientEnd]}
-              end={{ x: 1, y: 1 }}
-              start={{ x: 0, y: 0 }}
-              style={styles.bottomNavActive}
-            >
-              <BotMessageSquare color={colors.textOnDark} size={20} strokeWidth={2.2} />
-            </LinearGradient>
-          </Pressable>
-        </View>
+        <BottomNav
+          activeTab="chat"
+          isChatDisabled={isStartingTrip}
+          onAskByVoice={onAskByVoice}
+          onGoHome={onGoHome}
+          onStartNewChat={onStartNewTrip}
+        />
       )}
     </LinearGradient>
   );
@@ -282,12 +247,6 @@ const createStyles = (colors: ShellColors) =>
       gap: shellSpacing.sm,
       paddingBottom: shellSpacing.sm,
       paddingHorizontal: shellSpacing.md,
-    },
-    headerBackButton: {
-      alignItems: 'center',
-      height: 36,
-      justifyContent: 'center',
-      width: 36,
     },
     headerTitleText: {
       color: colors.textOnDark,
@@ -381,37 +340,5 @@ const createStyles = (colors: ShellColors) =>
     },
     deleteButtonBusy: {
       opacity: 0.4,
-    },
-    bottomNav: {
-      alignItems: 'center',
-      alignSelf: 'center',
-      backgroundColor: '#21132f',
-      borderColor: colors.surfaceBorder,
-      borderRadius: 30,
-      borderWidth: 1,
-      flexDirection: 'row',
-      gap: 4,
-      height: 60,
-      justifyContent: 'space-between',
-      padding: 4,
-      position: 'absolute',
-      width: 176,
-    },
-    bottomNavButton: {
-      alignItems: 'center',
-      borderRadius: 24,
-      height: 48,
-      justifyContent: 'center',
-      width: 48,
-    },
-    bottomNavActive: {
-      alignItems: 'center',
-      borderRadius: 26,
-      height: 52,
-      justifyContent: 'center',
-      width: 52,
-    },
-    bottomNavButtonDisabled: {
-      opacity: 0.5,
     },
   });

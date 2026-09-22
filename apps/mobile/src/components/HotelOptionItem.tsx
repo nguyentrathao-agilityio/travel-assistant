@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 
 // Types
 import type { HotelAvailability } from '@repo/types';
@@ -13,7 +13,7 @@ import { formatPrice } from '@repo/utils';
 import type { HotelBadge } from '../utils/hotel';
 
 // Components
-import { Typography } from './common';
+import { SelectControl, Typography } from './common';
 
 import type { ShellColors } from '../theme';
 
@@ -86,23 +86,13 @@ export const HotelOptionItem = ({
               {hotel.nights ? ` · ${hotel.nights} night${hotel.nights !== 1 ? 's' : ''}` : ''}
             </Typography>
           </View>
-          {onSelect &&
-            (isSelected ? (
-              <Typography color="muted" variant="meta" weight="medium">
-                Selected
-              </Typography>
-            ) : (
-              <Pressable
-                accessibilityRole="button"
-                disabled={isBookingLocked}
-                onPress={() => onSelect(hotel.id)}
-                style={[styles.selectButton, isBookingLocked && styles.selectButtonDisabled]}
-              >
-                <Typography variant="label" weight="semibold">
-                  Select
-                </Typography>
-              </Pressable>
-            ))}
+          {onSelect && (
+            <SelectControl
+              isBookingLocked={isBookingLocked}
+              isSelected={isSelected}
+              onSelect={() => onSelect(hotel.id)}
+            />
+          )}
         </View>
       </View>
     </View>
@@ -178,14 +168,5 @@ const createStyles = (colors: ShellColors) =>
     priceBlock: {
       flex: 1,
       gap: 2,
-    },
-    selectButton: {
-      backgroundColor: colors.accentGradientStart,
-      borderRadius: shellRadii.pill,
-      paddingHorizontal: shellSpacing.sm,
-      paddingVertical: shellSpacing.xs,
-    },
-    selectButtonDisabled: {
-      opacity: 0.4,
     },
   });

@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, ArrowRight, AudioLines, Send, Sparkles, Square } from 'lucide-react-native';
+import { ArrowRight, AudioLines, Send, Sparkles, Square } from 'lucide-react-native';
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -34,6 +34,7 @@ import {
 // Components
 import {
   ChatLayout,
+  HeaderBackButton,
   MessageBubble,
   ThemeToggleButton,
   ThinkingIndicator,
@@ -210,15 +211,7 @@ export const ChatScreen = ({
         backgroundColor="transparent"
         header={
           <View style={styles.headerRow}>
-            <Pressable
-              accessibilityLabel="Back"
-              accessibilityRole="button"
-              hitSlop={8}
-              onPress={onBack}
-              style={styles.headerBackButton}
-            >
-              <ArrowLeft color={colors.textOnDark} size={22} />
-            </Pressable>
+            <HeaderBackButton onPress={onBack} />
             <View style={styles.headerTitleWrap}>
               <Sparkles color={colors.textOnDark} size={18} strokeWidth={2.2} />
               <Text style={styles.headerTitleText}>AI Travel</Text>
@@ -414,12 +407,6 @@ const createStyles = (colors: ShellColors) =>
       alignItems: 'center',
       flexDirection: 'row',
       gap: shellSpacing.sm,
-    },
-    headerBackButton: {
-      alignItems: 'center',
-      height: 36,
-      justifyContent: 'center',
-      width: 36,
     },
     headerTitleWrap: {
       alignItems: 'center',

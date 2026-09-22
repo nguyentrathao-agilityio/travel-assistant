@@ -1,4 +1,5 @@
 export * from './useDebouncedValue';
+export * from './useStartNewTrip';
 export * from './useOnboardingSeen';
 export * from './useRecentThreads';
 export * from './useAllThreads';

@@ -1,11 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SystemUI from 'expo-system-ui';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 
+// Utils
 import { darkShellColors, lightShellColors } from './shellTheme';
 
+// Types
 import type { ShellColors } from './shellTheme';
-import type { ReactNode } from 'react';
 
 export type ThemeMode = 'light' | 'dark';
 

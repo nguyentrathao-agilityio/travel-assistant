@@ -1,17 +1,17 @@
 import { StyleSheet, View } from 'react-native';
 
-// Types
-import type { PlaceSearchResult } from '@repo/types';
-
 // Constants
 import { MAX_TRIP_PLACES } from '../constants';
-
-// Utils
-import { shellSpacing } from '../theme';
 
 // Components
 import { Typography } from './common';
 import { PlaceItem } from './PlaceItem';
+
+// Utils
+import { shellSpacing } from '../theme';
+
+// Types
+import type { PlaceSearchResult } from '@repo/types';
 
 interface TripPlacesSectionProps {
   places: PlaceSearchResult;

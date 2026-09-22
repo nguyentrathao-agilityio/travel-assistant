@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-// Types
-import type { TripState } from '@repo/types';
-
 // Constants
 import { TOOL_NAMES } from '@repo/constants';
 
@@ -15,6 +12,9 @@ import { TripSummaryCard } from '../components/TripSummaryCard';
 
 // Hooks
 import { useRenderToolResult } from './useRenderToolResult';
+
+// Types
+import type { TripState } from '@repo/types';
 
 const tripSummaryParameters = z.object({
   destination: z.string().optional(),

@@ -1,22 +1,21 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-// Types
-import type { Flight, FlightSearchResult } from '@repo/types';
-
 // Constants
 import { FLIGHT_TAB, type FlightTab } from '@repo/constants';
+
+// Components
+import { Card, ConfirmBanner, Typography } from './common';
+import { FlightOptionItem } from './FlightOptionItem';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { computeBadges } from '../utils/flight';
 import { formatDateFull, formatPrice, formatTime } from '@repo/utils';
 
-// Components
-import { Card, ConfirmBanner, Typography } from './common';
-import { FlightOptionItem } from './FlightOptionItem';
-
+// Types
 import type { ShellColors } from '../theme';
+import type { Flight, FlightSearchResult } from '@repo/types';
 
 interface FlightCardProps {
   data: FlightSearchResult;

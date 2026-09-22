@@ -1,18 +1,17 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-// Types
-import type { Flight } from '@repo/types';
-import type { SuggestedFlight } from '@repo/schemas';
-
-// Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../theme';
-
 // Components
 import { FlightOptionItem } from './FlightOptionItem';
 import { Typography } from './common';
 
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
+
+// Types
 import type { ShellColors } from '../theme';
+import type { Flight } from '@repo/types';
+import type { SuggestedFlight } from '@repo/schemas';
 
 interface TripFlightSectionProps {
   suggested?: SuggestedFlight | null;

@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 
-import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+// Components
 import { Card } from './Card';
 
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+
+// Types
 import type { ShellColors } from '../../theme';
 
 interface LoadingStateProps {

@@ -1,5 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
+// Constants
 import { OPENAI_API_KEY_STORE_KEY } from '../constants';
 
 export const getApiKey = (): Promise<string | null> =>

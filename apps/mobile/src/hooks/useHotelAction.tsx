@@ -1,9 +1,6 @@
 import { useCallback } from 'react';
 import { z } from 'zod';
 
-// Types
-import type { HotelAvailability, TripState } from '@repo/types';
-
 // Constants
 import { BOOKING_STATUSES, TOOL_NAMES } from '@repo/constants';
 
@@ -16,6 +13,9 @@ import { HotelCard } from '../components/HotelCard';
 
 // Hooks
 import { useRenderToolResult } from './useRenderToolResult';
+
+// Types
+import type { HotelAvailability, TripState } from '@repo/types';
 
 const hotelSearchParameters = z.object({
   city: z.string().optional(),

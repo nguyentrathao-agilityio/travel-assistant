@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+// Types
 import type { TripState } from '@repo/types';
 
 type TripStateStore = {

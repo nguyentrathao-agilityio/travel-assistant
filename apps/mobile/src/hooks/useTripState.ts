@@ -1,11 +1,11 @@
 import { useAgent } from '@copilotkit/react-native/headless';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-// Constants
-import { AGENT_NAME, SELECTION_STATUSES } from '@repo/constants';
-
 // Services
 import { fetchThreadValues } from '../services/threadHistory';
+
+// Constants
+import { AGENT_NAME, SELECTION_STATUSES } from '@repo/constants';
 
 // Stores
 import { useTripStateStore } from '../stores/tripStateStore';

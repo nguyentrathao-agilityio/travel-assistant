@@ -1,20 +1,19 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-// Types
-import type { TripCostEstimate } from '@repo/schemas';
-
 // Constants
 import { COST_ICON_MAP, DEFAULT_COST_ICON } from '../constants';
+
+// Components
+import { Typography } from './common';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatAmount } from '@repo/utils';
 
-// Components
-import { Typography } from './common';
-
+// Types
 import type { ShellColors } from '../theme';
+import type { TripCostEstimate } from '@repo/schemas';
 
 interface TripCostBreakdownProps {
   estimate: TripCostEstimate;

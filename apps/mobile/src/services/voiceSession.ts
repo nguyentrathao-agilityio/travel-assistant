@@ -1,5 +1,7 @@
+// Constants
 import { OPENAI_API_KEY_HEADER } from '@repo/constants';
 
+// Utils
 import { resolveRuntimeUrl } from '../config';
 import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 import { getApiKey } from './apiKeyStorage';

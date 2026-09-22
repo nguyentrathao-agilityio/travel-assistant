@@ -1,21 +1,20 @@
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-// Types
-import type { WeatherResult } from '@repo/types';
-
 // Constants
 import { WEATHER_FORECAST_MAX_DAYS } from '@repo/constants';
-
-// Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../theme';
-import { formatDayDate, getBestDayIndex } from '@repo/utils';
 
 // Components
 import { Card, Typography } from './common';
 import { WeatherDayCard } from './WeatherDayCard';
 
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
+import { formatDayDate, getBestDayIndex } from '@repo/utils';
+
+// Types
 import type { ShellColors } from '../theme';
+import type { WeatherResult } from '@repo/types';
 
 interface WeatherCardProps {
   data: WeatherResult;

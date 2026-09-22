@@ -1,9 +1,6 @@
 import { useMemo } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
-// Types
-import type { Place } from '@repo/types';
-
 // Constants
 import {
   PLACE_CATEGORY_LABELS,
@@ -11,13 +8,15 @@ import {
   PLACE_PRICE_LABELS,
 } from '@repo/constants';
 
-// Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../theme';
-
 // Components
 import { Typography } from './common';
 
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
+
+// Types
 import type { ShellColors } from '../theme';
+import type { Place } from '@repo/types';
 
 interface PlaceItemProps {
   place: Place;

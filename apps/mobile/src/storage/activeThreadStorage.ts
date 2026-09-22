@@ -1,4 +1,7 @@
+// Utils
 import { ACTIVE_THREAD_ID_KEY } from './keys';
+
+// Types
 import type { KeyValueStore } from './keyValueStore';
 
 export const getActiveThreadId = (store: KeyValueStore): Promise<string | null> =>

@@ -1,18 +1,17 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-// Types
-import type { DestinationExplorerResult } from '@repo/schemas';
-
-// Utils
-import { shellSpacing, useShellTheme } from '../theme';
-
 // Components
 import { Card, Typography } from './common';
 import { TripPlacesSection } from './TripPlacesSection';
 import { TripTipsSection } from './TripTipsSection';
 
+// Utils
+import { shellSpacing, useShellTheme } from '../theme';
+
+// Types
 import type { ShellColors } from '../theme';
+import type { DestinationExplorerResult } from '@repo/schemas';
 
 interface DestinationExplorerCardProps {
   data: DestinationExplorerResult;

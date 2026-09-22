@@ -1,20 +1,19 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-// Types
-import type { Booking } from '@repo/types';
-
 // Constants
 import { BOOKING_STATUSES } from '@repo/constants';
+
+// Components
+import { Card, Typography } from './common';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatPrice } from '@repo/utils';
 
-// Components
-import { Card, Typography } from './common';
-
+// Types
 import type { ShellColors } from '../theme';
+import type { Booking } from '@repo/types';
 
 interface BookingResultCardProps {
   booking: Booking;

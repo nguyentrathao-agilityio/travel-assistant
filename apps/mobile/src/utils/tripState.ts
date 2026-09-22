@@ -1,3 +1,4 @@
+// Types
 import type { TripState } from '@repo/types';
 
 const TRIP_STATE_KEYS: (keyof TripState)[] = [

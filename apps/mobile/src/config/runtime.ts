@@ -1,3 +1,4 @@
+// Constants
 import { LOCALHOST_HOSTNAMES, RUNTIME_URL_ERRORS } from '../constants/runtime';
 
 const platformOverride = (platform: string | undefined): string | undefined => {

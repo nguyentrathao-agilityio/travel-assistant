@@ -1,10 +1,14 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+// Components
 import { Card } from './Card';
+
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
 import { Typography } from './Typography';
 
+// Types
 import type { ShellColors } from '../../theme';
 
 interface ErrorStateProps {

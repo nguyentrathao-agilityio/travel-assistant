@@ -1,3 +1,4 @@
+// Types
 import type { ThreadItem } from '../services';
 
 export interface ThreadSection {

@@ -1,3 +1,4 @@
+// Types
 import type { TravelTransport } from '@repo/types';
 
 export const TRAVEL_TRANSPORT_LABELS: Record<TravelTransport, string> = {

@@ -1,9 +1,6 @@
 import { useCallback } from 'react';
 import { z } from 'zod';
 
-// Types
-import type { Flight, FlightSearchResult, SelectedFlight, TripState } from '@repo/types';
-
 // Constants
 import { BOOKING_STATUSES, TOOL_NAMES } from '@repo/constants';
 
@@ -13,6 +10,9 @@ import { FlightCard } from '../components/FlightCard';
 
 // Hooks
 import { useRenderToolResult } from './useRenderToolResult';
+
+// Types
+import type { Flight, FlightSearchResult, SelectedFlight, TripState } from '@repo/types';
 
 const flightSearchParameters = z.object({
   origin: z.string().optional(),

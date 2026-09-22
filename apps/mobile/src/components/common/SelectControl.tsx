@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
-// Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
-
 // Components
 import { Typography } from './Typography';
+
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
 
 // Types
 import type { ShellColors } from '../../theme';

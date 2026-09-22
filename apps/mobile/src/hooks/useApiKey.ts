@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
-// Constants
-import { API_KEY_STATUS } from '../constants';
-
 // Services
 import { clearApiKey, getApiKey, setApiKey } from '../services/apiKeyStorage';
 import { verifyOpenAiApiKey } from '../services/openaiApiKey';
+
+// Constants
+import { API_KEY_STATUS } from '../constants';
 
 type ApiKeyStatus =
   | { status: typeof API_KEY_STATUS.LOADING }

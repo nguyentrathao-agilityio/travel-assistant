@@ -1,19 +1,18 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-// Types
-import type { TipsResult } from '@repo/types';
-
 // Constants
 import { TIP_CATEGORY_LABELS } from '@repo/constants';
-
-// Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 
 // Components
 import { Card, EmptyState, Typography } from './common';
 
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
+
+// Types
 import type { ShellColors } from '../theme';
+import type { TipsResult } from '@repo/types';
 
 interface LocalTipsCardProps {
   data: TipsResult;

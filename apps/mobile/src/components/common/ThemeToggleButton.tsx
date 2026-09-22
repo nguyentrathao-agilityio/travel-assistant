@@ -1,9 +1,13 @@
 import { Moon, Sun } from 'lucide-react-native';
 import { Pressable, StyleSheet } from 'react-native';
 
+// Constants
 import { HEADER_ICON_SIZE } from '../../constants';
+
+// Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
 
+// Types
 import type { ShellColors } from '../../theme';
 
 export const ThemeToggleButton = () => {

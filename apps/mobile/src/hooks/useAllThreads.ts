@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
-// Constants
-import { THREAD_LIST_STATUS, THREAD_PAGE_SIZE } from '../constants';
-
 // Services
 import { fetchThreadsPage } from '../services';
+
+// Constants
+import { THREAD_LIST_STATUS, THREAD_PAGE_SIZE } from '../constants';
 
 // Types
 import type { ThreadListStatus } from '../constants';

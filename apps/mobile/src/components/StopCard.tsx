@@ -1,21 +1,20 @@
 import { useMemo } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
-// Types
-import type { LandmarkStop, TravelLeg } from '@repo/types';
-
 // Constants
 import { TRAVEL_TRANSPORT_LABELS } from '../constants';
+
+// Components
+import { Card, Typography } from './common';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatDuration } from '@repo/utils';
 import { toMapsUrl } from '../utils/route';
 
-// Components
-import { Card, Typography } from './common';
-
+// Types
 import type { ShellColors } from '../theme';
+import type { LandmarkStop, TravelLeg } from '@repo/types';
 
 interface StopCardProps {
   stop: LandmarkStop;

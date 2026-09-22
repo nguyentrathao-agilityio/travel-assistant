@@ -2,9 +2,13 @@ import { Mic, MicOff, Volume2 } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 
+// Constants
 import { HEADER_ICON_SIZE, VOICE_STATES } from '../constants';
+
+// Utils
 import { shellRadii, useShellTheme } from '../theme';
 
+// Types
 import type { VoiceState } from '../hooks';
 import type { ShellColors } from '../theme';
 

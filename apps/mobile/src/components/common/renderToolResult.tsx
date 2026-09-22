@@ -1,15 +1,15 @@
-// Types
-import type { ReactElement } from 'react';
-import type { z } from 'zod';
+// Components
+import { EmptyState } from './EmptyState';
+import { ErrorState } from './ErrorState';
+import { LoadingState } from './LoadingState';
 
 // Utils
 import { getToolError, getToolErrorMessage, safeParseToolResult } from '@repo/utils';
 import { isToolPending } from '../../utils/toolResult';
 
-// Components
-import { EmptyState } from './EmptyState';
-import { ErrorState } from './ErrorState';
-import { LoadingState } from './LoadingState';
+// Types
+import type { ReactElement } from 'react';
+import type { z } from 'zod';
 
 interface RenderToolResultOptions<Output> {
   status: string;

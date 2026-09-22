@@ -1,13 +1,14 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-// Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
-
 // Components
 import { Card } from './Card';
 import { Typography } from './Typography';
 
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+
+// Types
 import type { ShellColors } from '../../theme';
 
 interface ConfirmBannerProps {

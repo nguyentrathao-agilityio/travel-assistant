@@ -3,9 +3,11 @@ import type { LucideIcon } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
+// Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { IconBadge } from './IconBadge';
 
+// Types
 import type { ShellColors } from '../theme';
 
 interface PrimaryActionCardProps {

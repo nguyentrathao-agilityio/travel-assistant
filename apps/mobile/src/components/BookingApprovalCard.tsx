@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
-// Types
-import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
-
 // Constants
 import { BOOKING_ACTIONS, BOOKING_DECISIONS } from '@repo/constants';
 import {
@@ -13,14 +10,16 @@ import {
   SUBMIT_TIMEOUT_MS,
 } from '../constants';
 
+// Components
+import { Card, Typography } from './common';
+
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatPrice } from '@repo/utils';
 
-// Components
-import { Card, Typography } from './common';
-
+// Types
 import type { ShellColors } from '../theme';
+import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
 
 type EditableBookingDetails = Record<string, string | number | boolean | null>;
 

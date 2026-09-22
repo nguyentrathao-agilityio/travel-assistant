@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
-// Constants
-import { THREAD_LIST_STATUS } from '../constants';
-
 // Services
 import { fetchRecentThreads } from '../services';
+
+// Constants
+import { THREAD_LIST_STATUS } from '../constants';
 
 // Types
 import type { ThreadItem } from '../services';

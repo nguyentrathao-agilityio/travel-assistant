@@ -1,20 +1,19 @@
 import { useMemo } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 
-// Types
-import type { DailyForecast } from '@repo/types';
-
 // Constants
 import { DEFAULT_WEATHER_ICON, WEATHER_ICON_THRESHOLDS } from '../constants';
+
+// Components
+import { Typography } from './common';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatDayDate, toFahrenheit } from '@repo/utils';
 
-// Components
-import { Typography } from './common';
-
+// Types
 import type { ShellColors } from '../theme';
+import type { DailyForecast } from '@repo/types';
 
 interface WeatherDayCardProps {
   day: DailyForecast;

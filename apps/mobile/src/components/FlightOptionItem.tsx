@@ -1,22 +1,21 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-// Types
-import type { Flight } from '@repo/types';
-
 // Constants
 import { FLIGHT_LOW_SEATS_THRESHOLD } from '@repo/constants';
+
+// Components
+import { SelectControl, Typography } from './common';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatDuration } from '@repo/utils';
 import { formatPrice, formatTime } from '@repo/utils';
-import type { FlightBadge } from '../utils/flight';
 
-// Components
-import { SelectControl, Typography } from './common';
-
+// Types
 import type { ShellColors } from '../theme';
+import type { FlightBadge } from '../utils/flight';
+import type { Flight } from '@repo/types';
 
 interface FlightOptionItemProps {
   flight: Flight;

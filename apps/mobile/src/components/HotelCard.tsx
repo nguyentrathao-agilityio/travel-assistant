@@ -1,17 +1,17 @@
 import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-// Types
-import type { HotelAvailability, HotelSearchResult } from '@repo/types';
+// Components
+import { Card, ConfirmBanner, Typography } from './common';
+import { HotelOptionItem } from './HotelOptionItem';
 
 // Utils
 import { shellSpacing } from '../theme';
 import { computeHotelBadges } from '../utils/hotel';
 import { formatDateRange, formatPrice } from '@repo/utils';
 
-// Components
-import { Card, ConfirmBanner, Typography } from './common';
-import { HotelOptionItem } from './HotelOptionItem';
+// Types
+import type { HotelAvailability, HotelSearchResult } from '@repo/types';
 
 interface HotelCardProps {
   data: HotelSearchResult;

@@ -1,9 +1,11 @@
+import type { Message, Thread } from '@langchain/langgraph-sdk';
+
+// Constants
 import { AGENT_NAME, GRAPH_ID } from '@repo/constants';
 
+// Utils
 import { generateThreadId } from './generateThreadId';
 import { getLanggraphClient } from './langgraphClient';
-
-import type { Message, Thread } from '@langchain/langgraph-sdk';
 
 export interface ThreadItem {
   id: string;

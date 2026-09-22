@@ -2,6 +2,9 @@ import * as Speech from 'expo-speech';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 
+// Services
+import { fetchVoiceSessionToken } from '../services/voiceSession';
+
 // Constants
 import {
   REALTIME_VOICE_SAMPLE_RATE,
@@ -13,9 +16,6 @@ import {
   type VoiceState,
   type VoiceWebSocketPhase,
 } from '../constants';
-
-// Services
-import { fetchVoiceSessionToken } from '../services/voiceSession';
 
 // Utils
 import { arrayBufferToBase64 } from '../utils/base64Audio';

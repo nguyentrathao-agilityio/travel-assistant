@@ -1,18 +1,17 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-// Types
-import type { Hotel, HotelAvailability } from '@repo/types';
-import type { HotelAvailability as SuggestedHotel } from '@repo/schemas';
-
-// Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../theme';
-
 // Components
 import { HotelOptionItem } from './HotelOptionItem';
 import { Typography } from './common';
 
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
+
+// Types
 import type { ShellColors } from '../theme';
+import type { Hotel, HotelAvailability } from '@repo/types';
+import type { HotelAvailability as SuggestedHotel } from '@repo/schemas';
 
 interface TripHotelSectionProps {
   suggested?: SuggestedHotel | null;

@@ -1,4 +1,7 @@
+// Utils
 import { ONBOARDING_SEEN_KEY } from './keys';
+
+// Types
 import type { KeyValueStore } from './keyValueStore';
 
 export const getOnboardingSeen = async (store: KeyValueStore): Promise<boolean> => {

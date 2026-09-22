@@ -1,21 +1,20 @@
 import { useMemo } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
-// Types
-import type { HotelAvailability } from '@repo/types';
-
 // Constants
 import { HOTEL_AMENITIES_MAX_DISPLAY } from '@repo/constants';
-
-// Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../theme';
-import { formatPrice } from '@repo/utils';
-import type { HotelBadge } from '../utils/hotel';
 
 // Components
 import { SelectControl, Typography } from './common';
 
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../theme';
+import { formatPrice } from '@repo/utils';
+
+// Types
 import type { ShellColors } from '../theme';
+import type { HotelBadge } from '../utils/hotel';
+import type { HotelAvailability } from '@repo/types';
 
 interface HotelOptionItemProps {
   hotel: HotelAvailability;

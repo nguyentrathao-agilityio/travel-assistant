@@ -2,8 +2,10 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import type { ReactNode } from 'react';
 
+// Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
 
+// Types
 import type { ShellColors } from '../../theme';
 
 interface CardProps {

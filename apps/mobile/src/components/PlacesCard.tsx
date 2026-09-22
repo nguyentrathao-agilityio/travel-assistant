@@ -1,14 +1,14 @@
 import { StyleSheet, View } from 'react-native';
 
-// Types
-import type { PlaceSearchResult } from '@repo/types';
+// Components
+import { Card, EmptyState, Typography } from './common';
+import { PlaceItem } from './PlaceItem';
 
 // Utils
 import { shellSpacing } from '../theme';
 
-// Components
-import { Card, EmptyState, Typography } from './common';
-import { PlaceItem } from './PlaceItem';
+// Types
+import type { PlaceSearchResult } from '@repo/types';
 
 interface PlacesCardProps {
   data: PlaceSearchResult;

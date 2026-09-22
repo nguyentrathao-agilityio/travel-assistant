@@ -1,18 +1,17 @@
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-// Types
-import type { LandmarkStop, RouteResult } from '@repo/schemas';
+// Components
+import { Typography } from './common';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatDuration } from '@repo/utils';
 import { offsetDate } from '@repo/utils';
 
-// Components
-import { Typography } from './common';
-
+// Types
 import type { ShellColors } from '../theme';
+import type { LandmarkStop, RouteResult } from '@repo/schemas';
 
 interface TripRouteSectionProps {
   route?: RouteResult | null;

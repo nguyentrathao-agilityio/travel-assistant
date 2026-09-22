@@ -1,3 +1,4 @@
+// Constants
 import { BOOKING_ACTIONS } from '@repo/constants';
 
 // Not editable — changing them wouldn't re-run price/availability revalidation.

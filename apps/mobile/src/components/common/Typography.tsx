@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { Text, type TextProps, type TextStyle } from 'react-native';
 
+// Utils
 import { useShellTheme } from '../../theme';
 
+// Types
 import type { ShellColors } from '../../theme';
 
 type TypographyVariant = 'display' | 'heading' | 'title' | 'body' | 'meta' | 'label';

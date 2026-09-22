@@ -1,11 +1,11 @@
 import { UseAgentUpdate, useAgent, useCopilotKit } from '@copilotkit/react-native/headless';
 import { useCallback, useEffect, useState } from 'react';
 
-// Constants
-import { AGENT_NAME } from '@repo/constants';
-
 // Services
 import { generateThreadId } from '../services';
+
+// Constants
+import { AGENT_NAME } from '@repo/constants';
 
 // Types
 import type { Message } from '@copilotkit/react-native/headless';

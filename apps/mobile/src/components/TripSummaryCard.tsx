@@ -1,15 +1,6 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-// Types
-import type { Hotel, SelectedFlight } from '@repo/types';
-import type { TripSummaryResult } from '@repo/schemas';
-
-// Utils
-import { shellSpacing, useShellTheme } from '../theme';
-import { replaceCostEstimateWithBookings } from '@repo/utils';
-import { formatDisplayDate } from '@repo/utils';
-
 // Components
 import { Card, Typography } from './common';
 import { TripCostBreakdown } from './TripCostBreakdown';
@@ -17,7 +8,15 @@ import { TripFlightSection } from './TripFlightSection';
 import { TripHotelSection } from './TripHotelSection';
 import { TripRouteSection } from './TripRouteSection';
 
+// Utils
+import { shellSpacing, useShellTheme } from '../theme';
+import { replaceCostEstimateWithBookings } from '@repo/utils';
+import { formatDisplayDate } from '@repo/utils';
+
+// Types
 import type { ShellColors } from '../theme';
+import type { Hotel, SelectedFlight } from '@repo/types';
+import type { TripSummaryResult } from '@repo/schemas';
 
 interface TripSummaryCardProps {
   data: TripSummaryResult;

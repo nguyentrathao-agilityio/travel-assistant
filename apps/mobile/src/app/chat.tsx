@@ -40,10 +40,15 @@ export default function ChatRoute() {
   const { markActive } = useActiveThreadId();
 
   useEffect(() => {
-    createRemoteThread(threadId).catch(() => {
-      // Sending a message will surface the same failure via useChatAgent's
-      // error state — no need to duplicate the report here.
-    });
+    const prewarmThread = async () => {
+      try {
+        await createRemoteThread(threadId);
+      } catch (caught) {
+        console.warn('[chat] Failed to prewarm remote thread', caught);
+      }
+    };
+
+    prewarmThread();
     markActive(threadId);
   }, [threadId, markActive]);
 

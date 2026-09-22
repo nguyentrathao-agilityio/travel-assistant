@@ -8,7 +8,6 @@ type TripStateStore = {
   clearTripState: (threadId: string) => void;
 };
 
-// Mirrors web's tripStateStore: in-memory cache keyed by threadId, not the durable source of truth.
 export const useTripStateStore = create<TripStateStore>()((set) => ({
   tripStates: {},
   setTripState: (threadId, state) =>

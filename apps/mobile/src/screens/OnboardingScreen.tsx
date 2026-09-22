@@ -129,6 +129,7 @@ const createStyles = (colors: ShellColors) =>
       color: colors.textOnDark,
       fontSize: 22,
       fontWeight: '700',
+      paddingTop: shellSpacing.md,
     },
     illustrationArea: {
       alignItems: 'center',

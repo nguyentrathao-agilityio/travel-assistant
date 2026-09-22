@@ -49,9 +49,8 @@ export default function DashboardRoute() {
 
       try {
         await createRemoteThread(threadId);
-      } catch {
-        // The chat screen still opens with a client-generated id; it will surface
-        // the failure itself once it actually needs the thread to exist server-side.
+      } catch (caught) {
+        console.warn('[dashboard] Failed to prewarm remote thread', caught);
       }
     } finally {
       isStartingTripRef.current = false;

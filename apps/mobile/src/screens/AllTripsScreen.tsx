@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { Search, Trash2 } from 'lucide-react-native';
+import { Pencil, Search, Trash2 } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -25,6 +25,7 @@ import {
   HeaderBackButton,
   IconBadge,
   LoadingState,
+  RenameThreadModal,
   ThemeToggleButton,
 } from '../components';
 
@@ -38,7 +39,7 @@ import { getRecentIcon, threadLabel } from '../utils/thread';
 
 // Types
 import type { ThreadListStatus } from '../constants';
-import type { ThreadDeletionProps } from '../hooks';
+import type { ThreadDeletionProps, ThreadRenameProps } from '../hooks';
 import type { ThreadItem } from '../services';
 import type { ShellColors } from '../theme';
 
@@ -55,6 +56,7 @@ export interface AllTripsListProps {
 interface AllTripsScreenProps {
   list: AllTripsListProps;
   deletion: ThreadDeletionProps;
+  rename: ThreadRenameProps;
   isStartingTrip: boolean;
   onOpenThread: (threadId: string) => void;
   onStartNewTrip: () => void;
@@ -69,6 +71,7 @@ const threadTime = (thread: ThreadItem): string =>
 export const AllTripsScreen = ({
   list,
   deletion,
+  rename,
   isStartingTrip,
   onOpenThread,
   onStartNewTrip,
@@ -78,6 +81,7 @@ export const AllTripsScreen = ({
 }: AllTripsScreenProps) => {
   const { status, threads, isLoadingMore, hasMore, loadMoreFailed, onLoadMore, onRetry } = list;
   const { deletingThreadId, isDeletingAll, onDeleteAllTrips, onDeleteThread } = deletion;
+  const { renamingThread, isRenaming, onStartRename, onCancelRename, onConfirmRename } = rename;
   const { colors } = useShellTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
@@ -196,6 +200,15 @@ export const AllTripsScreen = ({
                 </View>
               </Pressable>
               <Pressable
+                accessibilityLabel="Rename trip"
+                accessibilityRole="button"
+                hitSlop={8}
+                onPress={() => onStartRename(thread)}
+                style={styles.deleteButton}
+              >
+                <Pencil color={colors.textOnDarkMuted} size={18} />
+              </Pressable>
+              <Pressable
                 accessibilityLabel="Delete trip"
                 accessibilityRole="button"
                 disabled={deletingThreadId === thread.id}
@@ -227,6 +240,14 @@ export const AllTripsScreen = ({
           onStartNewChat={onStartNewTrip}
         />
       )}
+
+      <RenameThreadModal
+        initialTitle={renamingThread?.title ?? ''}
+        isSaving={isRenaming}
+        onCancel={onCancelRename}
+        onSave={onConfirmRename}
+        visible={renamingThread !== null}
+      />
     </LinearGradient>
   );
 };

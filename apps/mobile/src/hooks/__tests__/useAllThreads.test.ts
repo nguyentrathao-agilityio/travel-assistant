@@ -152,6 +152,26 @@ test('removeThread filters the thread out of local state', async () => {
   });
 });
 
+test('renameThread updates the thread title in local state', async () => {
+  (fetchThreadsPage as jest.Mock).mockResolvedValue(makeThreads(3));
+
+  const { result } = await renderHook(() => useAllThreads(), { wrapper });
+
+  await waitFor(() => {
+    expect(result.current.status).toBe('ready');
+  });
+
+  await act(async () => {
+    result.current.renameThread('thread-1', 'Renamed trip');
+  });
+
+  await waitFor(() => {
+    const renamed = result.current.threads.find((thread) => thread.id === 'thread-1');
+
+    expect(renamed?.title).toBe('Renamed trip');
+  });
+});
+
 test('refresh resets state to loading and re-fetches from the start', async () => {
   (fetchThreadsPage as jest.Mock).mockResolvedValue(makeThreads(3));
 

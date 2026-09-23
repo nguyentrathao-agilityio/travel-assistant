@@ -2,6 +2,7 @@ export * from './useDebouncedValue';
 export * from './useConfirmedSelection';
 export * from './useStartNewTrip';
 export * from './useThreadDeletion';
+export * from './useThreadRename';
 export * from './useOnboardingSeen';
 export * from './useRecentThreads';
 export * from './useAllThreads';

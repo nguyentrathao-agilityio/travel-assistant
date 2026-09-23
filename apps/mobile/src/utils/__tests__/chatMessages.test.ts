@@ -1,4 +1,4 @@
-import { findToolMessage, renderableMessages } from '../chatMessages';
+import { buildToolMessageIndex, findToolMessage, renderableMessages } from '../chatMessages';
 
 import type { Message } from '@copilotkit/react-native/headless';
 
@@ -25,4 +25,19 @@ test('findToolMessage locates the tool result matching a tool call id', () => {
   expect(findToolMessage(messages, 'call-1')?.content).toBe('sunny');
   expect(findToolMessage(messages, 'call-2')?.content).toBe('rainy');
   expect(findToolMessage(messages, 'call-3')).toBeUndefined();
+});
+
+test('buildToolMessageIndex maps each tool result by its tool call id', () => {
+  const messages = [
+    { id: '1', role: 'assistant', content: '', toolCalls: [{ id: 'call-1' }] },
+    { id: '2', role: 'tool', content: 'sunny', toolCallId: 'call-1' },
+    { id: '3', role: 'tool', content: 'rainy', toolCallId: 'call-2' },
+  ] as unknown as Message[];
+
+  const index = buildToolMessageIndex(messages);
+
+  expect(index.get('call-1')?.content).toBe('sunny');
+  expect(index.get('call-2')?.content).toBe('rainy');
+  expect(index.get('call-3')).toBeUndefined();
+  expect(index.size).toBe(2);
 });

@@ -7,6 +7,7 @@ import { createDomainStateMiddleware } from './domain-state';
 import { createModerationMiddleware } from './moderation';
 import { createObservabilityMiddleware } from './observability';
 import { richUiModelMiddleware } from './rich-ui';
+import { createSummarizationMiddleware } from './summarization';
 import { createSystemPromptMiddleware } from './system-prompt';
 
 type AgentModel = Parameters<typeof createModerationMiddleware>[0];
@@ -23,6 +24,7 @@ export const createAgentMiddleware = ({
   fallbackModel,
 }: CreateAgentMiddlewareOptions) => [
   createCopilotkitMiddleware(),
+  createSummarizationMiddleware(model),
   createModerationMiddleware(model),
   createDomainStateMiddleware(config.name),
   ...createApprovalMiddleware(config.approvalTools),

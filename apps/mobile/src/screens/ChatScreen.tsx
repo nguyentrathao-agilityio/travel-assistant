@@ -45,7 +45,7 @@ import {
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
-import { messageText, renderableMessages } from '../utils/chatMessages';
+import { buildToolMessageIndex, messageText, renderableMessages } from '../utils/chatMessages';
 
 // Types
 import type { ChatVoiceProps } from '../hooks';
@@ -128,6 +128,7 @@ export const ChatScreen = ({
 
   const listRef = useRef<FlatList<RenderableMessage>>(null);
   const rows = renderableMessages(messages);
+  const toolMessageIndex = useMemo(() => buildToolMessageIndex(messages), [messages]);
   const lastRow = rows.at(-1);
   const hasEmptyAssistantRow =
     lastRow?.role === 'assistant' &&
@@ -304,7 +305,9 @@ export const ChatScreen = ({
                 </>
               }
               ref={listRef}
-              renderItem={({ item }) => <MessageBubble allMessages={messages} message={item} />}
+              renderItem={({ item }) => (
+                <MessageBubble message={item} toolMessageIndex={toolMessageIndex} />
+              )}
               renderScrollComponent={renderScrollComponent}
               style={styles.list}
             />

@@ -6,6 +6,7 @@ import { createAgentMiddleware } from '@/agent/middleware/create-middleware';
 
 const {
   createCopilotkitMiddlewareMock,
+  createSummarizationMiddlewareMock,
   createModerationMiddlewareMock,
   createApprovalMiddlewareMock,
   createObservabilityMiddlewareMock,
@@ -14,6 +15,7 @@ const {
   modelFallbackMiddlewareMock,
 } = vi.hoisted(() => ({
   createCopilotkitMiddlewareMock: vi.fn(() => 'copilotkit'),
+  createSummarizationMiddlewareMock: vi.fn(() => 'summarization'),
   createModerationMiddlewareMock: vi.fn(() => 'moderation'),
   createApprovalMiddlewareMock: vi.fn(() => ['approval']),
   createObservabilityMiddlewareMock: vi.fn(() => 'observability'),
@@ -28,6 +30,10 @@ vi.mock('langchain', () => ({
 
 vi.mock('@copilotkit/sdk-js/langgraph', () => ({
   createCopilotkitMiddleware: createCopilotkitMiddlewareMock,
+}));
+
+vi.mock('@/agent/middleware/summarization', () => ({
+  createSummarizationMiddleware: createSummarizationMiddlewareMock,
 }));
 
 vi.mock('@/agent/middleware/moderation', () => ({
@@ -71,6 +77,7 @@ describe('createAgentMiddleware', () => {
 
     expect(createAgentMiddleware({ config, model, fallbackModel })).toEqual([
       'copilotkit',
+      'summarization',
       'moderation',
       'domain-state',
       'approval',
@@ -79,6 +86,7 @@ describe('createAgentMiddleware', () => {
       'system-prompt',
       'model-fallback',
     ]);
+    expect(createSummarizationMiddlewareMock).toHaveBeenCalledWith(model);
     expect(createModerationMiddlewareMock).toHaveBeenCalledWith(model);
     expect(createApprovalMiddlewareMock).toHaveBeenCalledWith(config.approvalTools);
     expect(createSystemPromptMiddlewareMock).toHaveBeenCalledWith(config.prompt);

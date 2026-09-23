@@ -74,6 +74,7 @@ const baseProps: Parameters<typeof ChatScreen>[0] = {
   onBack: jest.fn(),
   onSend: jest.fn(),
   onStop: jest.fn(),
+  suggestions: [],
   voice: baseVoice,
 };
 

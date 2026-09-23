@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 
 import { AGENT_NAME } from '@repo/constants';
 
+import { STOP_GENERATION_RETRY_DELAY_MS } from '../../constants';
 import { useChatAgent } from '../useChatAgent';
 
 jest.mock('@copilotkit/react-native/headless', () => ({
@@ -136,17 +137,60 @@ test('sendMessage falls back to a generic error for a non-Error rejection', asyn
   });
 });
 
+// Stubs setTimeout so `stop()`'s retry never becomes a real pending timer — only its
+// scheduling and callback logic are exercised, invoked directly.
+const stubSetTimeout = () =>
+  jest.spyOn(global, 'setTimeout').mockImplementation((fn) => {
+    (fn as () => void)();
+    return 0 as unknown as ReturnType<typeof setTimeout>;
+  });
+
 test('stop aborts the current run', async () => {
   const agent = makeAgent();
   setup(agent);
 
   const { result } = await renderHook(() => useChatAgent('thread-1'));
+  const setTimeoutSpy = stubSetTimeout();
 
   await act(async () => {
     result.current.stop();
   });
 
   expect(agent.abortRun).toHaveBeenCalledTimes(1);
+  setTimeoutSpy.mockRestore();
+});
+
+test('stop retries once if the run is still active after the retry delay', async () => {
+  const agent = makeAgent();
+  agent.isRunning = true;
+  setup(agent);
+
+  const { result } = await renderHook(() => useChatAgent('thread-1'));
+  const setTimeoutSpy = stubSetTimeout();
+
+  await act(async () => {
+    result.current.stop();
+  });
+
+  expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), STOP_GENERATION_RETRY_DELAY_MS);
+  expect(agent.abortRun).toHaveBeenCalledTimes(2);
+  setTimeoutSpy.mockRestore();
+});
+
+test('stop does not retry once the run has already stopped', async () => {
+  const agent = makeAgent();
+  agent.isRunning = false;
+  setup(agent);
+
+  const { result } = await renderHook(() => useChatAgent('thread-1'));
+  const setTimeoutSpy = stubSetTimeout();
+
+  await act(async () => {
+    result.current.stop();
+  });
+
+  expect(agent.abortRun).toHaveBeenCalledTimes(1);
+  setTimeoutSpy.mockRestore();
 });
 
 test('sets an error when the subscription reports one for this agent', async () => {

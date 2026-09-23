@@ -1,11 +1,12 @@
 import { UseAgentUpdate, useAgent, useCopilotKit } from '@copilotkit/react-native/headless';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Services
 import { generateThreadId } from '../services';
 
 // Constants
 import { AGENT_NAME } from '@repo/constants';
+import { STOP_GENERATION_RETRY_DELAY_MS } from '../constants';
 
 // Types
 import type { Message } from '@copilotkit/react-native/headless';
@@ -26,10 +27,16 @@ export const useChatAgent = (threadId: string): UseChatAgentResult => {
   });
   const { copilotkit } = useCopilotKit();
   const [error, setError] = useState<string | null>(null);
+  const isRunningRef = useRef(agent.isRunning);
+  const stopRetryTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  isRunningRef.current = agent.isRunning;
 
   useEffect(() => {
     agent.threadId = threadId;
   }, [agent, threadId]);
+
+  useEffect(() => () => clearTimeout(stopRetryTimeoutRef.current), []);
 
   useEffect(() => {
     const subscription = copilotkit.subscribe({
@@ -63,8 +70,13 @@ export const useChatAgent = (threadId: string): UseChatAgentResult => {
     [agent, copilotkit]
   );
 
+  // Retries once — the client can silently drop the cancel request otherwise.
   const stop = useCallback(() => {
     agent.abortRun();
+    clearTimeout(stopRetryTimeoutRef.current);
+    stopRetryTimeoutRef.current = setTimeout(() => {
+      if (isRunningRef.current) agent.abortRun();
+    }, STOP_GENERATION_RETRY_DELAY_MS);
   }, [agent]);
 
   return {

@@ -59,12 +59,18 @@ export const firstHumanMessageText = (messages: Message[] | undefined): string |
   return null;
 };
 
+const customTitle = (metadata: Thread['metadata']): string | null => {
+  const value = (metadata as { customTitle?: unknown } | undefined)?.customTitle;
+
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+};
+
 export const toThreadItem = (thread: Thread): ThreadItem => {
   const { messages } = (thread.values as { messages?: Message[] } | undefined) ?? {};
 
   return {
     id: thread.thread_id,
-    title: firstHumanMessageText(messages),
+    title: customTitle(thread.metadata) ?? firstHumanMessageText(messages),
     createdAt: thread.created_at,
   };
 };
@@ -114,6 +120,14 @@ export const fetchThreadValues = async (
 
 export const deleteRemoteThread = (threadId: string): Promise<void> =>
   getLanggraphClient().threads.delete(threadId);
+
+// Keeps resourceId so the thread stays discoverable by fetchRecentThreads/fetchThreadsPage's search filter.
+export const renameRemoteThread = (threadId: string, title: string): Promise<void> =>
+  getLanggraphClient()
+    .threads.update(threadId, {
+      metadata: { resourceId: AGENT_NAME, customTitle: title.trim() },
+    })
+    .then(() => undefined);
 
 // Deletes `threadId` and creates a fresh one in its place — mirrors web's `resetThread`.
 export const resetRemoteThread = async (threadId: string): Promise<string> => {

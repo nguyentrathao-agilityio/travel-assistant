@@ -8,7 +8,13 @@ import { CHAT_PATH, DASHBOARD_PATH } from '../constants';
 import { AllTripsScreen } from '../screens';
 
 // Hooks
-import { useActiveThreadId, useAllThreads, useStartNewTrip, useThreadDeletion } from '../hooks';
+import {
+  useActiveThreadId,
+  useAllThreads,
+  useStartNewTrip,
+  useThreadDeletion,
+  useThreadRename,
+} from '../hooks';
 
 export default function ThreadsRoute() {
   const router = useRouter();
@@ -21,6 +27,7 @@ export default function ThreadsRoute() {
     fetchMore,
     refresh,
     removeThread,
+    renameThread,
   } = useAllThreads();
   const { markActive } = useActiveThreadId();
   const { handleStartNewTrip, isStartingTrip } = useStartNewTrip({
@@ -29,6 +36,7 @@ export default function ThreadsRoute() {
     threads,
   });
   const deletion = useThreadDeletion({ refresh, removeThread, threads });
+  const rename = useThreadRename({ renameThread });
 
   const handleOpenThread = useCallback(
     (threadId: string) => {
@@ -67,6 +75,7 @@ export default function ThreadsRoute() {
       onGoHome={handleGoHome}
       onOpenThread={handleOpenThread}
       onStartNewTrip={handleStartNewTrip}
+      rename={rename}
     />
   );
 }

@@ -6,7 +6,7 @@ import { ThemeProvider } from '../../theme';
 import { makeThread, SAFE_AREA_INITIAL_METRICS } from '../../test/fixtures';
 
 import type { AllTripsListProps } from '../AllTripsScreen';
-import type { ThreadDeletionProps } from '../../hooks';
+import type { ThreadDeletionProps, ThreadRenameProps } from '../../hooks';
 import type { ThreadItem } from '../../services';
 
 jest.mock('react-native-reanimated', () => {
@@ -49,6 +49,14 @@ const baseDeletion: ThreadDeletionProps = {
   onDeleteThread: jest.fn(),
 };
 
+const baseRename: ThreadRenameProps = {
+  isRenaming: false,
+  onCancelRename: jest.fn(),
+  onConfirmRename: jest.fn(),
+  onStartRename: jest.fn(),
+  renamingThread: null,
+};
+
 const baseProps: Parameters<typeof AllTripsScreen>[0] = {
   deletion: baseDeletion,
   isStartingTrip: false,
@@ -58,20 +66,28 @@ const baseProps: Parameters<typeof AllTripsScreen>[0] = {
   onGoHome: jest.fn(),
   onOpenThread: jest.fn(),
   onStartNewTrip: jest.fn(),
+  rename: baseRename,
 };
 
 const renderScreen = async (
-  props: Partial<Omit<Parameters<typeof AllTripsScreen>[0], 'list' | 'deletion'>> & {
+  props: Partial<Omit<Parameters<typeof AllTripsScreen>[0], 'list' | 'deletion' | 'rename'>> & {
     list?: Partial<AllTripsListProps>;
     deletion?: Partial<ThreadDeletionProps>;
+    rename?: Partial<ThreadRenameProps>;
   } = {}
 ) => {
-  const { list: listOverrides, deletion: deletionOverrides, ...rest } = props;
+  const {
+    list: listOverrides,
+    deletion: deletionOverrides,
+    rename: renameOverrides,
+    ...rest
+  } = props;
   const merged = {
     ...baseProps,
     ...rest,
     deletion: { ...baseDeletion, ...deletionOverrides },
     list: { ...baseList, ...listOverrides },
+    rename: { ...baseRename, ...renameOverrides },
   };
 
   await render(
@@ -193,6 +209,37 @@ test('pressing delete on a non-busy trip calls onDeleteThread', async () => {
   await user.press(screen.getByLabelText('Delete trip'));
 
   expect(deletion.onDeleteThread).toHaveBeenCalledWith(busyThread);
+});
+
+test('pressing rename opens the rename dialog for that trip', async () => {
+  const user = userEvent.setup();
+  const trip = makeThread('1', 'Da Nang trip', { createdAt: today() });
+  const { rename } = await renderScreen({ list: { status: 'ready', threads: [trip] } });
+
+  await user.press(screen.getByLabelText('Rename trip'));
+
+  expect(rename.onStartRename).toHaveBeenCalledWith(trip);
+});
+
+test('rename dialog saves the new title and dismisses on cancel', async () => {
+  const user = userEvent.setup();
+  const trip = makeThread('1', 'Da Nang trip', { createdAt: today() });
+  const { rename } = await renderScreen({
+    list: { status: 'ready', threads: [trip] },
+    rename: { renamingThread: trip },
+  });
+
+  const input = screen.getByDisplayValue('Da Nang trip');
+
+  await user.clear(input);
+  await user.type(input, 'Hoi An getaway');
+  await user.press(screen.getByText('Save'));
+
+  expect(rename.onConfirmRename).toHaveBeenCalledWith('Hoi An getaway');
+
+  await user.press(screen.getByText('Cancel'));
+
+  expect(rename.onCancelRename).toHaveBeenCalledTimes(1);
 });
 
 test('shows a retry affordance when loading more fails', async () => {

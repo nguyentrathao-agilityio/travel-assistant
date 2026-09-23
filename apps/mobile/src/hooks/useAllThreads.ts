@@ -50,6 +50,19 @@ export const useAllThreads = () => {
     );
   };
 
+  const renameThread = (threadId: string, title: string) => {
+    queryClient.setQueryData<InfiniteData<ThreadItem[]>>(
+      threadQueryKeys.list(),
+      (current) =>
+        current && {
+          ...current,
+          pages: current.pages.map((page) =>
+            page.map((thread) => (thread.id === threadId ? { ...thread, title } : thread))
+          ),
+        }
+    );
+  };
+
   return {
     fetchMore: query.fetchNextPage,
     hasMore: query.hasNextPage,
@@ -57,6 +70,7 @@ export const useAllThreads = () => {
     loadMoreFailed: query.isFetchNextPageError,
     refresh: query.refetch,
     removeThread,
+    renameThread,
     status,
     threads: query.data ? dedupeThreads(query.data.pages) : [],
   };

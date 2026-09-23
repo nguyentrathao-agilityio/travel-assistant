@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react-native';
 
 import { MessageBubble } from '../MessageBubble';
 import { ThemeProvider } from '../../theme';
+import { buildToolMessageIndex } from '../../utils/chatMessages';
 
 import type { Message } from '@copilotkit/react-native/headless';
 
@@ -21,7 +22,10 @@ beforeEach(() => {
 const renderBubble = async (message: Message, allMessages: Message[] = [message]) => {
   await render(
     <ThemeProvider>
-      <MessageBubble allMessages={allMessages} message={message as never} />
+      <MessageBubble
+        message={message as never}
+        toolMessageIndex={buildToolMessageIndex(allMessages)}
+      />
     </ThemeProvider>
   );
 };

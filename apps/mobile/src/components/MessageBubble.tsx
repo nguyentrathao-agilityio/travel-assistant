@@ -4,16 +4,16 @@ import { AccessibilityInfo, Animated, StyleSheet, Text, View } from 'react-nativ
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
-import { findToolMessage, messageText } from '../utils/chatMessages';
+import { messageText } from '../utils/chatMessages';
 
 // Types
-import type { Message } from '@copilotkit/react-native/headless';
+import type { Message, ToolMessage } from '@copilotkit/react-native/headless';
 import type { ShellColors } from '../theme';
 import type { RenderableMessage } from '../utils/chatMessages';
 
 interface MessageBubbleProps {
   message: RenderableMessage;
-  allMessages: Message[];
+  toolMessageIndex: Map<string, ToolMessage>;
 }
 
 const ToolCallFallback = ({ name }: { name: string }) => {
@@ -74,13 +74,13 @@ export const ThinkingIndicator = () => {
 
 const ToolCallRow = ({
   toolCall,
-  allMessages,
+  toolMessageIndex,
 }: {
   toolCall: NonNullable<Extract<Message, { role: 'assistant' }>['toolCalls']>[number];
-  allMessages: Message[];
+  toolMessageIndex: Map<string, ToolMessage>;
 }) => {
   const renderToolCall = useRenderToolCall();
-  const toolMessage = findToolMessage(allMessages, toolCall.id);
+  const toolMessage = toolMessageIndex.get(toolCall.id);
   const rendered = renderToolCall({ toolCall, toolMessage });
   const { colors } = useShellTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -92,7 +92,7 @@ const ToolCallRow = ({
   );
 };
 
-export const MessageBubble = ({ message, allMessages }: MessageBubbleProps) => {
+export const MessageBubble = ({ message, toolMessageIndex }: MessageBubbleProps) => {
   const isUser = message.role === 'user';
   const text = messageText(message.content).trim();
   const toolCalls = message.role === 'assistant' ? message.toolCalls : undefined;
@@ -110,7 +110,7 @@ export const MessageBubble = ({ message, allMessages }: MessageBubbleProps) => {
         </View>
       ) : null}
       {toolCalls?.map((toolCall) => (
-        <ToolCallRow allMessages={allMessages} key={toolCall.id} toolCall={toolCall} />
+        <ToolCallRow key={toolCall.id} toolCall={toolCall} toolMessageIndex={toolMessageIndex} />
       ))}
     </View>
   );

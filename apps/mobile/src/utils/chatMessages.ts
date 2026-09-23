@@ -15,6 +15,17 @@ export const findToolMessage = (messages: Message[], toolCallId: string): ToolMe
       message.role === 'tool' && message.toolCallId === toolCallId
   );
 
+// One pass instead of a linear scan per tool-call row — build once per messages change.
+export const buildToolMessageIndex = (messages: Message[]): Map<string, ToolMessage> => {
+  const index = new Map<string, ToolMessage>();
+
+  for (const message of messages) {
+    if (message.role === 'tool') index.set(message.toolCallId, message);
+  }
+
+  return index;
+};
+
 /** A message's `content` is either plain text or an array of typed parts
  * (text/image/audio/...) — only the text parts render as chat-bubble text. */
 export const messageText = (content: RenderableMessage['content']): string => {

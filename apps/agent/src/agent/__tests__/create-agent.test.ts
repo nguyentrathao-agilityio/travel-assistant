@@ -14,6 +14,7 @@ const {
   createCopilotkitMiddlewareMock,
   createChatModelMock,
   createDomainStateMiddlewareMock,
+  summarizationMiddlewareMock,
   openAIModerationMiddlewareMock,
   createObservabilityMiddlewareMock,
   modelFallbackMiddlewareMock,
@@ -29,6 +30,7 @@ const {
   createDomainStateMiddlewareMock: vi.fn(
     (taskName: string) => `domain-state-middleware:${taskName}`
   ),
+  summarizationMiddlewareMock: vi.fn(() => 'summarization-middleware'),
   openAIModerationMiddlewareMock: vi.fn(() => 'moderation-middleware'),
   createObservabilityMiddlewareMock: vi.fn(
     (taskName: string) => `observability-middleware:${taskName}`
@@ -40,6 +42,7 @@ vi.mock('langchain', () => ({
   createAgent: createAgentMock,
   dynamicSystemPromptMiddleware: dynamicSystemPromptMiddlewareMock,
   humanInTheLoopMiddleware: humanInTheLoopMiddlewareMock,
+  summarizationMiddleware: summarizationMiddlewareMock,
   openAIModerationMiddleware: openAIModerationMiddlewareMock,
   modelFallbackMiddleware: modelFallbackMiddlewareMock,
 }));
@@ -118,6 +121,7 @@ describe('createSpecializedAgent', () => {
     expect(call.stateSchema).toBe('fake-graph-state');
     expect(call.middleware).toEqual([
       'copilotkit-middleware',
+      'summarization-middleware',
       'moderation-middleware',
       'domain-state-middleware:general',
       'observability-middleware:general',
@@ -126,6 +130,11 @@ describe('createSpecializedAgent', () => {
       'model-fallback-middleware',
     ]);
     expect(modelFallbackMiddlewareMock).toHaveBeenCalledWith('fake-model');
+    expect(summarizationMiddlewareMock).toHaveBeenCalledWith({
+      model: 'fake-model',
+      trigger: { messages: 20 },
+      keep: { messages: 10 },
+    });
     expect(openAIModerationMiddlewareMock).toHaveBeenCalledWith({
       model: 'fake-model',
       moderationModel: 'omni-moderation-latest',
@@ -144,7 +153,7 @@ describe('createSpecializedAgent', () => {
       config({ name: 'plan', prompt: { ...sections, includeMemoryContext: true } }),
       'sk-request'
     );
-    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[5].fn;
+    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[6].fn;
 
     const fakeState = { messages: [] };
 
@@ -207,7 +216,7 @@ describe('createSpecializedAgent', () => {
 
   it('skips memory lookup and passes an empty memories list when includeMemoryContext is not set', async () => {
     createSpecializedAgent(config(), 'sk-request');
-    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[5].fn;
+    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[6].fn;
 
     const fakeState = { messages: [] };
 

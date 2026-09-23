@@ -6,6 +6,7 @@ export * from './useOnboardingSeen';
 export * from './useRecentThreads';
 export * from './useAllThreads';
 export * from './useChatAgent';
+export * from './useChatSuggestions';
 export * from './useThreadHistory';
 export * from './useSeedAgentHistory';
 export * from './useApiKey';

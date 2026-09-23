@@ -11,6 +11,7 @@ import { ChatScreen } from '../screens';
 import {
   useActiveThreadId,
   useChatAgent,
+  useChatSuggestions,
   useChatVoice,
   useInterruptElement,
   useSeedAgentHistory,
@@ -47,6 +48,13 @@ export default function ChatRoute() {
   useSeedAgentHistory(threadId, persistedMessages, isHistoryLoading);
   useTravelActions({ selectFlight, selectHotel, sendMessage, state: tripState });
 
+  const { suggestions } = useChatSuggestions({
+    isAwaitingApproval: interruptElement !== null,
+    isRunning,
+    messageCount: messages.length,
+    state: tripState,
+  });
+
   const voice = useChatVoice({
     autoStart: params.focusVoice === '1',
     isHistoryLoading,
@@ -66,6 +74,7 @@ export default function ChatRoute() {
       onBack={router.back}
       onSend={sendMessage}
       onStop={stop}
+      suggestions={suggestions}
       voice={voice}
     />
   );

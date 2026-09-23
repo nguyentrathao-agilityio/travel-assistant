@@ -11,6 +11,10 @@ export const CHAT_COMPOSER_INPUT_NATIVE_ID = 'chat-composer-input';
 export const MIN_COMPOSER_INPUT_HEIGHT = 40;
 export const COMPOSER_BOTTOM_MARGIN = shellSpacing.xs;
 
+export const STOP_GENERATION_RETRY_DELAY_MS = 1_200;
+
+export const MAX_VISIBLE_SUGGESTIONS = 3;
+
 export const EMPTY_STATE_SUGGESTIONS: Array<{
   description: string;
   icon: LucideIcon;

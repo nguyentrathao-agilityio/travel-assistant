@@ -5,6 +5,7 @@ export * from './IconBadge';
 export * from './GridActionCard';
 export * from './PrimaryActionCard';
 export * from './MessageBubble';
+export * from './SuggestionChips';
 export * from './VoiceButton';
 export * from './VoiceModeOverlay';
 export * from './WeatherDayCard';

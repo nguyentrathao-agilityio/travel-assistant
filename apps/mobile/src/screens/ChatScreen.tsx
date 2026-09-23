@@ -36,6 +36,7 @@ import {
   ChatLayout,
   HeaderBackButton,
   MessageBubble,
+  SuggestionChips,
   ThemeToggleButton,
   ThinkingIndicator,
   VoiceButton,
@@ -50,7 +51,7 @@ import { messageText, renderableMessages } from '../utils/chatMessages';
 import type { ChatVoiceProps } from '../hooks';
 import type { ShellColors } from '../theme';
 import type { RenderableMessage } from '../utils/chatMessages';
-import type { Message } from '@copilotkit/react-native/headless';
+import type { Message, Suggestion } from '@copilotkit/react-native/headless';
 import type { KeyboardChatScrollViewProps } from 'react-native-keyboard-controller';
 import type { ReactElement } from 'react';
 
@@ -81,6 +82,7 @@ interface ChatScreenProps {
   isRunning: boolean;
   error: string | null;
   interruptElement: ReactElement | null;
+  suggestions: Suggestion[];
   voice: ChatVoiceProps;
   onBack: () => void;
   onSend: (text: string) => void;
@@ -93,6 +95,7 @@ export const ChatScreen = ({
   isRunning,
   error,
   interruptElement,
+  suggestions,
   voice,
   onBack,
   onSend,
@@ -294,6 +297,9 @@ export const ChatScreen = ({
                   ) : null}
                   {interruptElement ? (
                     <View style={styles.interruptWrap}>{interruptElement}</View>
+                  ) : null}
+                  {!isRunning && !isAwaitingApproval && suggestions.length > 0 ? (
+                    <SuggestionChips suggestions={suggestions} onSelect={handleSuggestionPress} />
                   ) : null}
                 </>
               }

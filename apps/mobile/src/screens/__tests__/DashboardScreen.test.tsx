@@ -41,6 +41,7 @@ const baseProps: Parameters<typeof DashboardScreen>[0] = {
   onStartNewTrip: jest.fn(),
   recentThreads: [] as ThreadItem[],
   recentThreadsStatus: 'ready' as const,
+  recentThreadsSyncFailed: false,
 };
 
 const renderScreen = async (props: Partial<Parameters<typeof DashboardScreen>[0]> = {}) => {
@@ -157,6 +158,21 @@ test('renders recent trips and opens one on press', async () => {
   await user.press(screen.getByText('Hoi An weekend'));
 
   expect(onOpenThread).toHaveBeenCalledWith('r1');
+});
+
+test('shows a retry notice without hiding stale recent trips when sync fails', async () => {
+  const user = userEvent.setup();
+  const { onRetryRecentThreads } = await renderScreen({
+    recentThreads: [makeThread('r1', 'Hoi An weekend')],
+    recentThreadsSyncFailed: true,
+  });
+
+  expect(screen.getByText("Couldn't refresh recent trips.")).toBeOnTheScreen();
+  expect(screen.getByText('Hoi An weekend')).toBeOnTheScreen();
+
+  await user.press(screen.getByRole('button', { name: 'Retry' }));
+
+  expect(onRetryRecentThreads).toHaveBeenCalledTimes(1);
 });
 
 test('pressing "See all" calls onSeeAll', async () => {

@@ -65,6 +65,30 @@ test('resolves to error status when the fetch rejects', async () => {
   expect(result.current.threads).toEqual([]);
 });
 
+test('keeps stale threads ready when a refresh fails', async () => {
+  const threads = [{ id: 't1', title: 'Trip to Hanoi', createdAt: '2026-09-01T00:00:00Z' }];
+
+  (fetchRecentThreads as jest.Mock).mockResolvedValueOnce(threads);
+
+  const { result } = await renderHook(() => useRecentThreads(), { wrapper });
+
+  await waitFor(() => {
+    expect(result.current.status).toBe('ready');
+  });
+
+  (fetchRecentThreads as jest.Mock).mockRejectedValueOnce(new Error('network down'));
+
+  await act(async () => {
+    await result.current.refresh();
+  });
+
+  await waitFor(() => {
+    expect(result.current.status).toBe('ready');
+    expect(result.current.syncFailed).toBe(true);
+  });
+  expect(result.current.threads).toEqual(threads);
+});
+
 test('refresh re-fetches and resets to loading first', async () => {
   (fetchRecentThreads as jest.Mock).mockResolvedValue([]);
 

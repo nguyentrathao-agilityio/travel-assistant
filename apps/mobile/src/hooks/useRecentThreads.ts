@@ -19,9 +19,11 @@ export const useRecentThreads = (limit: number = RECENT_THREADS_LIMIT) => {
     queryKey: threadQueryKeys.recent(limit),
   });
 
+  const hasCachedData = query.data !== undefined;
+  const syncFailed = query.isError && hasCachedData;
   const status = query.isPending
     ? THREAD_LIST_STATUS.LOADING
-    : query.isError
+    : query.isError && !hasCachedData
       ? THREAD_LIST_STATUS.ERROR
       : THREAD_LIST_STATUS.READY;
 
@@ -31,5 +33,5 @@ export const useRecentThreads = (limit: number = RECENT_THREADS_LIMIT) => {
     );
   };
 
-  return { status, threads: query.data ?? [], refresh: query.refetch, removeThread };
+  return { status, syncFailed, threads: query.data ?? [], refresh: query.refetch, removeThread };
 };

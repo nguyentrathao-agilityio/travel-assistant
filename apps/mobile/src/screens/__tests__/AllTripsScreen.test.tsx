@@ -39,6 +39,7 @@ const baseList: AllTripsListProps = {
   onLoadMore: jest.fn(),
   onRetry: jest.fn(),
   status: 'ready',
+  syncFailed: false,
   threads: [] as ThreadItem[],
 };
 
@@ -131,6 +132,23 @@ test('shows an error state and retries on press', async () => {
   const { list } = await renderScreen({ list: { status: 'error' } });
 
   expect(screen.getByText("Couldn't load your trips.")).toBeOnTheScreen();
+
+  await user.press(screen.getByRole('button', { name: 'Retry' }));
+
+  expect(list.onRetry).toHaveBeenCalledTimes(1);
+});
+
+test('shows a retry notice without hiding stale trips when sync fails', async () => {
+  const user = userEvent.setup();
+  const { list } = await renderScreen({
+    list: {
+      syncFailed: true,
+      threads: [makeThread('1', 'Da Nang trip', { createdAt: today() })],
+    },
+  });
+
+  expect(screen.getByText("Couldn't refresh your trips.")).toBeOnTheScreen();
+  expect(screen.getByText('Da Nang trip')).toBeOnTheScreen();
 
   await user.press(screen.getByRole('button', { name: 'Retry' }));
 

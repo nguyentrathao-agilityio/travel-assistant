@@ -12,7 +12,7 @@ import { useActiveThreadId, useRecentThreads, useStartNewTrip } from '../hooks';
 
 export default function DashboardRoute() {
   const router = useRouter();
-  const { status, threads, refresh } = useRecentThreads();
+  const { status, syncFailed, threads, refresh } = useRecentThreads();
   const { activeThreadId, markActive, refresh: refreshActiveThreadId } = useActiveThreadId();
   const { handleStartNewTrip, isStartingTrip } = useStartNewTrip({
     markActive,
@@ -51,6 +51,7 @@ export default function DashboardRoute() {
       onStartNewTrip={handleStartNewTrip}
       recentThreads={threads}
       recentThreadsStatus={status}
+      recentThreadsSyncFailed={syncFailed}
     />
   );
 }

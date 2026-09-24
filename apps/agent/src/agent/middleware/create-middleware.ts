@@ -4,11 +4,13 @@ import { modelFallbackMiddleware } from 'langchain';
 import type { SpecializedAgentConfig } from '@/constants/agent-config';
 import { createApprovalMiddleware } from './approval';
 import { createDomainStateMiddleware } from './domain-state';
+import { createModelRetryMiddleware } from './model-retry';
 import { createModerationMiddleware } from './moderation';
 import { createObservabilityMiddleware } from './observability';
 import { richUiModelMiddleware } from './rich-ui';
 import { createSummarizationMiddleware } from './summarization';
 import { createSystemPromptMiddleware } from './system-prompt';
+import { createToolCallLimitMiddleware } from './tool-call-limit';
 
 type AgentModel = Parameters<typeof createModerationMiddleware>[0];
 
@@ -27,9 +29,11 @@ export const createAgentMiddleware = ({
   createSummarizationMiddleware(model),
   createModerationMiddleware(model),
   createDomainStateMiddleware(config.name),
+  createToolCallLimitMiddleware(),
   ...createApprovalMiddleware(config.approvalTools),
   createObservabilityMiddleware(config.name),
   richUiModelMiddleware,
   createSystemPromptMiddleware(config.prompt),
   modelFallbackMiddleware(fallbackModel),
+  createModelRetryMiddleware(),
 ];

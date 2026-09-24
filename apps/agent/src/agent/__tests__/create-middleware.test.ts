@@ -12,6 +12,8 @@ const {
   createObservabilityMiddlewareMock,
   createDomainStateMiddlewareMock,
   createSystemPromptMiddlewareMock,
+  createToolCallLimitMiddlewareMock,
+  createModelRetryMiddlewareMock,
   modelFallbackMiddlewareMock,
 } = vi.hoisted(() => ({
   createCopilotkitMiddlewareMock: vi.fn(() => 'copilotkit'),
@@ -21,6 +23,8 @@ const {
   createObservabilityMiddlewareMock: vi.fn(() => 'observability'),
   createDomainStateMiddlewareMock: vi.fn(() => 'domain-state'),
   createSystemPromptMiddlewareMock: vi.fn(() => 'system-prompt'),
+  createToolCallLimitMiddlewareMock: vi.fn(() => 'tool-call-limit'),
+  createModelRetryMiddlewareMock: vi.fn(() => 'model-retry'),
   modelFallbackMiddlewareMock: vi.fn(() => 'model-fallback'),
 }));
 
@@ -34,6 +38,14 @@ vi.mock('@copilotkit/sdk-js/langgraph', () => ({
 
 vi.mock('@/agent/middleware/summarization', () => ({
   createSummarizationMiddleware: createSummarizationMiddlewareMock,
+}));
+
+vi.mock('@/agent/middleware/tool-call-limit', () => ({
+  createToolCallLimitMiddleware: createToolCallLimitMiddlewareMock,
+}));
+
+vi.mock('@/agent/middleware/model-retry', () => ({
+  createModelRetryMiddleware: createModelRetryMiddlewareMock,
 }));
 
 vi.mock('@/agent/middleware/moderation', () => ({
@@ -80,11 +92,13 @@ describe('createAgentMiddleware', () => {
       'summarization',
       'moderation',
       'domain-state',
+      'tool-call-limit',
       'approval',
       'observability',
       'rich-ui',
       'system-prompt',
       'model-fallback',
+      'model-retry',
     ]);
     expect(createSummarizationMiddlewareMock).toHaveBeenCalledWith(model);
     expect(createModerationMiddlewareMock).toHaveBeenCalledWith(model);

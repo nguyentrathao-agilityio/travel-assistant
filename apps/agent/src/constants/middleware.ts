@@ -17,3 +17,6 @@ export const RICH_UI_MIDDLEWARE_NAME = 'RichUiModelContent';
 
 export const SUMMARIZATION_TRIGGER_MESSAGES = 20;
 export const SUMMARIZATION_KEEP_MESSAGES = 10;
+
+export const MODEL_RETRY_MAX_RETRIES = 1;
+export const TOOL_CALL_RUN_LIMIT = 15;

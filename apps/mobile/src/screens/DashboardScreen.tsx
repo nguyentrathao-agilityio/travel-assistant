@@ -1,27 +1,23 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowRight, AudioLines, History, MessageCircleMore } from 'lucide-react-native';
+import { AudioLines, History, MessageCircleMore } from 'lucide-react-native';
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Constants
-import { BOTTOM_NAV_CLEARANCE, GRID_ROW_HEIGHT, THREAD_LIST_STATUS } from '../constants';
+import { BOTTOM_NAV_CLEARANCE, GRID_ROW_HEIGHT } from '../constants';
 
 // Components
 import {
   BottomNav,
-  EmptyState,
-  ErrorState,
   GridActionCard,
-  IconBadge,
-  LoadingState,
   PrimaryActionCard,
+  RecentThreadsSection,
   ThemeToggleButton,
 } from '../components';
 
 // Utils
 import { shellSpacing, useShellTheme } from '../theme';
-import { getRecentIcon, threadLabel } from '../utils/thread';
 
 // Types
 import type { ThreadListStatus } from '../constants';
@@ -40,10 +36,6 @@ interface DashboardScreenProps {
   onSeeAll: () => void;
   onRetryRecentThreads: () => void;
 }
-
-// Already home — tapping the active "Home" tab here is a no-op, same as before this screen
-// used the shared BottomNav.
-const NOOP = () => {};
 
 export const DashboardScreen = ({
   recentThreadsStatus,
@@ -113,45 +105,21 @@ export const DashboardScreen = ({
           </View>
         </View>
 
-        <View style={styles.recentHeader}>
-          <Text style={styles.recentTitle}>Recent searches</Text>
-          <Pressable accessibilityRole="button" onPress={onSeeAll}>
-            <Text style={styles.seeAll}>See all</Text>
-          </Pressable>
-        </View>
-
-        {recentThreadsStatus === THREAD_LIST_STATUS.LOADING && <LoadingState />}
-        {recentThreadsStatus === THREAD_LIST_STATUS.ERROR && (
-          <ErrorState message="Couldn't load recent trips." onRetry={onRetryRecentThreads} />
-        )}
-        {recentThreadsStatus === THREAD_LIST_STATUS.READY && recentThreadsSyncFailed && (
-          <ErrorState message="Couldn't refresh recent trips." onRetry={onRetryRecentThreads} />
-        )}
-        {recentThreadsStatus === THREAD_LIST_STATUS.READY && recentThreads.length === 0 && (
-          <EmptyState icon="🧳" message="Your trips will show up here." />
-        )}
-        {recentThreadsStatus === THREAD_LIST_STATUS.READY &&
-          recentThreads.map((thread, index) => (
-            <Pressable
-              accessibilityRole="button"
-              key={thread.id}
-              onPress={() => onOpenThread(thread.id)}
-              style={styles.recentRow}
-            >
-              <IconBadge icon={getRecentIcon(index)} size={40} />
-              <Text numberOfLines={1} style={styles.recentItemText}>
-                {threadLabel(thread)}
-              </Text>
-              <ArrowRight color={colors.textOnDarkMuted} size={18} />
-            </Pressable>
-          ))}
+        <RecentThreadsSection
+          onOpenThread={onOpenThread}
+          onRetry={onRetryRecentThreads}
+          onSeeAll={onSeeAll}
+          status={recentThreadsStatus}
+          syncFailed={recentThreadsSyncFailed}
+          threads={recentThreads}
+        />
       </ScrollView>
 
       <BottomNav
         activeTab="home"
         isChatDisabled={isStartingTrip}
         onAskByVoice={onAskByVoice}
-        onGoHome={NOOP}
+        onGoHome={() => {}}
         onStartNewChat={onStartNewTrip}
       />
     </LinearGradient>
@@ -197,38 +165,5 @@ const createStyles = (colors: ShellColors) =>
     },
     gridRightItem: {
       flex: 1,
-    },
-    recentHeader: {
-      alignItems: 'center',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: shellSpacing.md,
-    },
-    recentTitle: {
-      color: colors.textOnDark,
-      fontSize: 20,
-      fontWeight: '600',
-    },
-    seeAll: {
-      color: colors.textOnDarkFaint,
-      fontSize: 15,
-    },
-    recentRow: {
-      alignItems: 'center',
-      backgroundColor: colors.surface,
-      borderColor: colors.surfaceBorder,
-      borderRadius: 18,
-      borderWidth: 1,
-      flexDirection: 'row',
-      gap: shellSpacing.sm,
-      marginBottom: shellSpacing.sm,
-      paddingHorizontal: shellSpacing.md,
-      minHeight: 64,
-      paddingVertical: shellSpacing.sm,
-    },
-    recentItemText: {
-      color: colors.textOnDark,
-      flex: 1,
-      fontSize: 15,
     },
   });

@@ -6,6 +6,7 @@ import { CHAT_PATH, DASHBOARD_PATH } from '../constants';
 
 // Components
 import { AllTripsScreen } from '../screens';
+import { goBackOrReplace } from '../utils/navigation';
 
 // Hooks
 import {
@@ -55,7 +56,7 @@ export default function ThreadsRoute() {
   }, [router]);
 
   const handleBack = useCallback(() => {
-    router.back();
+    goBackOrReplace(router, DASHBOARD_PATH);
   }, [router]);
 
   return (

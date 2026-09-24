@@ -1,8 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 // Services
 import { createRemoteThread, generateThreadId } from '../services';
+import { DASHBOARD_PATH } from '../constants';
+import { goBackOrReplace } from '../utils/navigation';
 
 // Components
 import { ChatScreen } from '../screens';
@@ -64,6 +66,10 @@ export default function ChatRoute() {
     sendMessage,
   });
 
+  const handleBack = useCallback(() => {
+    goBackOrReplace(router, DASHBOARD_PATH);
+  }, [router]);
+
   return (
     <ChatScreen
       error={error}
@@ -71,7 +77,7 @@ export default function ChatRoute() {
       isReady={isReady && !isHistoryLoading}
       isRunning={isRunning}
       messages={messages}
-      onBack={router.back}
+      onBack={handleBack}
       onSend={sendMessage}
       onStop={stop}
       suggestions={suggestions}

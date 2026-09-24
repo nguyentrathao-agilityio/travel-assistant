@@ -33,9 +33,11 @@ export const useAllThreads = () => {
     queryKey: threadQueryKeys.list(),
   });
 
+  const hasCachedData = query.data !== undefined;
+  const syncFailed = query.isError && hasCachedData;
   const status = query.isPending
     ? THREAD_LIST_STATUS.LOADING
-    : query.isError
+    : query.isError && !hasCachedData
       ? THREAD_LIST_STATUS.ERROR
       : THREAD_LIST_STATUS.READY;
 
@@ -72,6 +74,7 @@ export const useAllThreads = () => {
     removeThread,
     renameThread,
     status,
+    syncFailed,
     threads: query.data ? dedupeThreads(query.data.pages) : [],
   };
 };

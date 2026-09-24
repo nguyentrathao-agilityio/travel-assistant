@@ -49,6 +49,7 @@ export interface AllTripsListProps {
   isLoadingMore: boolean;
   hasMore: boolean;
   loadMoreFailed: boolean;
+  syncFailed: boolean;
   onLoadMore: () => void;
   onRetry: () => void;
 }
@@ -79,7 +80,16 @@ export const AllTripsScreen = ({
   onAskByVoice,
   onBack,
 }: AllTripsScreenProps) => {
-  const { status, threads, isLoadingMore, hasMore, loadMoreFailed, onLoadMore, onRetry } = list;
+  const {
+    status,
+    threads,
+    isLoadingMore,
+    hasMore,
+    loadMoreFailed,
+    syncFailed,
+    onLoadMore,
+    onRetry,
+  } = list;
   const { deletingThreadId, isDeletingAll, onDeleteAllTrips, onDeleteThread } = deletion;
   const { renamingThread, isRenaming, onStartRename, onCancelRename, onConfirmRename } = rename;
   const { colors } = useShellTheme();
@@ -158,6 +168,11 @@ export const AllTripsScreen = ({
       {status === THREAD_LIST_STATUS.ERROR && (
         <View style={styles.list}>
           <ErrorState message="Couldn't load your trips." onRetry={onRetry} />
+        </View>
+      )}
+      {status === THREAD_LIST_STATUS.READY && syncFailed && (
+        <View style={styles.syncError}>
+          <ErrorState message="Couldn't refresh your trips." onRetry={onRetry} />
         </View>
       )}
       {status === THREAD_LIST_STATUS.READY && threads.length === 0 && (
@@ -304,6 +319,10 @@ const createStyles = (colors: ShellColors) =>
     },
     list: {
       padding: shellSpacing.lg,
+    },
+    syncError: {
+      paddingHorizontal: shellSpacing.lg,
+      paddingTop: shellSpacing.md,
     },
     footer: {
       gap: shellSpacing.sm,

@@ -69,6 +69,30 @@ test('sets error status when the initial fetch fails', async () => {
   expect(result.current.threads).toEqual([]);
 });
 
+test('keeps stale threads ready when a refresh fails', async () => {
+  const threads = makeThreads(3);
+
+  (fetchThreadsPage as jest.Mock).mockResolvedValueOnce(threads);
+
+  const { result } = await renderHook(() => useAllThreads(), { wrapper });
+
+  await waitFor(() => {
+    expect(result.current.status).toBe('ready');
+  });
+
+  (fetchThreadsPage as jest.Mock).mockRejectedValueOnce(new Error('network down'));
+
+  await act(async () => {
+    await result.current.refresh();
+  });
+
+  await waitFor(() => {
+    expect(result.current.status).toBe('ready');
+    expect(result.current.syncFailed).toBe(true);
+  });
+  expect(result.current.threads).toEqual(threads);
+});
+
 test('fetchMore appends the next page and de-duplicates by id', async () => {
   (fetchThreadsPage as jest.Mock).mockResolvedValueOnce(makeThreads(FULL_PAGE));
 

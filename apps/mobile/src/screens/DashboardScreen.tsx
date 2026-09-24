@@ -30,6 +30,7 @@ import type { ShellColors } from '../theme';
 
 interface DashboardScreenProps {
   recentThreadsStatus: ThreadListStatus;
+  recentThreadsSyncFailed: boolean;
   recentThreads: ThreadItem[];
   continueThreadId: string | null;
   isStartingTrip: boolean;
@@ -46,6 +47,7 @@ const NOOP = () => {};
 
 export const DashboardScreen = ({
   recentThreadsStatus,
+  recentThreadsSyncFailed,
   recentThreads,
   continueThreadId,
   isStartingTrip,
@@ -121,6 +123,9 @@ export const DashboardScreen = ({
         {recentThreadsStatus === THREAD_LIST_STATUS.LOADING && <LoadingState />}
         {recentThreadsStatus === THREAD_LIST_STATUS.ERROR && (
           <ErrorState message="Couldn't load recent trips." onRetry={onRetryRecentThreads} />
+        )}
+        {recentThreadsStatus === THREAD_LIST_STATUS.READY && recentThreadsSyncFailed && (
+          <ErrorState message="Couldn't refresh recent trips." onRetry={onRetryRecentThreads} />
         )}
         {recentThreadsStatus === THREAD_LIST_STATUS.READY && recentThreads.length === 0 && (
           <EmptyState icon="🧳" message="Your trips will show up here." />

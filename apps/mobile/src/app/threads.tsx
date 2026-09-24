@@ -24,6 +24,7 @@ export default function ThreadsRoute() {
     isLoadingMore,
     hasMore,
     loadMoreFailed,
+    syncFailed,
     fetchMore,
     refresh,
     removeThread,
@@ -68,6 +69,7 @@ export default function ThreadsRoute() {
         onLoadMore: fetchMore,
         onRetry: refresh,
         status,
+        syncFailed,
         threads,
       }}
       onAskByVoice={handleAskByVoice}

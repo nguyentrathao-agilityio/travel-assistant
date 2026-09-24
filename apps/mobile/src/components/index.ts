@@ -29,3 +29,8 @@ export * from './TripHotelSection';
 export * from './TripRouteSection';
 export * from './TripCostBreakdown';
 export * from './TripSummaryCard';
+export * from './dashboard/RecentThreadsSection';
+export * from './trips/AllTripsHeader';
+export * from './trips/TripRow';
+export * from './trips/TripsList';
+export * from './trips/TripsSearchBar';

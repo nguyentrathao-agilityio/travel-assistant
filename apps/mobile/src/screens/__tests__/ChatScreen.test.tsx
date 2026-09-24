@@ -136,6 +136,16 @@ test('shows the empty-state suggestions when ready with no messages', async () =
   expect(screen.getByText('Find flights')).toBeOnTheScreen();
 });
 
+test('shows the empty state when history contains only non-renderable tool messages', async () => {
+  const messages = [
+    { id: 'tool-1', role: 'tool', content: '{}', toolCallId: 'call-1' },
+  ] as unknown as Message[];
+
+  await renderScreen({ messages });
+
+  expect(screen.getByText('Where to next?')).toBeOnTheScreen();
+});
+
 test('pressing a destination pill sends a plan-a-trip message', async () => {
   const user = userEvent.setup();
   const { onSend } = await renderScreen({ messages: [] });

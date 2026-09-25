@@ -7,6 +7,7 @@ import { fetchVoiceSessionToken } from '../services/voiceSession';
 
 // Constants
 import {
+  MIC_LEVEL_GAIN,
   REALTIME_VOICE_SAMPLE_RATE,
   REALTIME_VOICE_WS_URL,
   VOICE_CONNECTING_TIMEOUT_MS,
@@ -18,12 +19,14 @@ import {
 } from '../constants';
 
 // Utils
-import { arrayBufferToBase64 } from '../utils/base64Audio';
 import {
+  arrayBufferToBase64,
+  calculateMicLevel,
   extractFinalTranscript,
   extractRealtimeErrorMessage,
   extractTranscriptDelta,
-} from '../utils/realtimeVoiceEvents';
+  resolveVoiceState,
+} from '../utils/voice';
 
 // Types
 import type { AudioStream, AudioStreamBuffer, AudioStreamResult } from 'expo-audio';
@@ -60,33 +63,6 @@ const useAudioStream: (
 
 export type { VoiceState } from '../constants';
 
-// int16 speech samples rarely approach full scale, so RMS/32768 alone reads as
-// near-silent — this gain brings typical speaking volume up into a usable 0..1
-// range for the waveform. Approximate; may need retuning against real devices.
-const MIC_LEVEL_GAIN = 5;
-
-interface VoiceStateContext {
-  errorMessage: string | null;
-  isAgentRunning: boolean;
-  isSpeaking: boolean;
-  isVoiceTurnActive: boolean;
-  wsPhase: VoiceWebSocketPhase;
-}
-
-const VOICE_STATE_RULES: Record<VoiceState, (context: VoiceStateContext) => boolean> = {
-  [VOICE_STATES.ERROR]: ({ errorMessage }) => Boolean(errorMessage),
-  [VOICE_STATES.SPEAKING]: ({ isSpeaking }) => isSpeaking,
-  [VOICE_STATES.CONNECTING]: ({ wsPhase }) => wsPhase === VOICE_STATES.CONNECTING,
-  [VOICE_STATES.LISTENING]: ({ wsPhase }) => wsPhase === VOICE_STATES.LISTENING,
-  [VOICE_STATES.THINKING]: ({ isAgentRunning, isVoiceTurnActive }) =>
-    isVoiceTurnActive && isAgentRunning,
-  [VOICE_STATES.IDLE]: () => true,
-};
-
-const resolveVoiceState = (context: VoiceStateContext): VoiceState =>
-  (Object.entries(VOICE_STATE_RULES).find(([, matches]) => matches(context))?.[0] as VoiceState) ??
-  VOICE_STATES.IDLE;
-
 interface UseVoiceAssistantOptions {
   isAgentRunning: boolean;
   isVoiceModeActiveRef: RefObject<boolean>;
@@ -99,21 +75,14 @@ interface UseVoiceAssistantResult {
   isPermissionDenied: boolean;
   partialTranscript: string;
   micLevel: SharedValue<number>;
+  enqueueSpeech: (text: string) => void;
+  flushSpeech: () => void;
   startListening: () => void;
   stopListening: () => void;
-  speak: (text: string) => void;
   stopSpeaking: () => void;
 }
 
-/**
- * Voice state machine over the existing chat-send path: STT runs on an OpenAI
- * Realtime transcription session (WebSocket, server VAD, never auto-replies by
- * design), transcripts feed the same `onTranscript`/send path as typed text, and
- * `speak` reads the agent's reply via on-device TTS — no parallel pipeline.
- * `thinking` only fires for turns handed off while `isVoiceModeActiveRef` is
- * true — a dictated transcript the user reviews and sends manually doesn't
- * count, since by then they're back to driving the composer themselves.
- */
+/** Coordinates realtime STT, queued device TTS, and voice state for the existing chat flow. */
 export const useVoiceAssistant = ({
   isAgentRunning,
   isVoiceModeActiveRef,
@@ -132,6 +101,9 @@ export const useVoiceAssistant = ({
   const wasAgentRunningRef = useRef(isAgentRunning);
   const connectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isAudioStreamStoppedRef = useRef(true);
+  const speechQueueRef = useRef<string[]>([]);
+  const speechGenerationRef = useRef(0);
+  const isSpeechActiveRef = useRef(false);
 
   useEffect(() => {
     const wasRunning = wasAgentRunningRef.current;
@@ -155,15 +127,9 @@ export const useVoiceAssistant = ({
         })
       );
 
-      const sampleCount = Math.floor(buffer.data.byteLength / 2);
-      const samples = new Int16Array(buffer.data, 0, sampleCount);
-      let sumSquares = 0;
-
-      for (let i = 0; i < samples.length; i++) sumSquares += samples[i] * samples[i];
-
-      const rms = samples.length > 0 ? Math.sqrt(sumSquares / samples.length) / 32768 : 0;
-
-      micLevel.value = withTiming(Math.min(rms * MIC_LEVEL_GAIN, 1), { duration: 80 });
+      micLevel.value = withTiming(calculateMicLevel(buffer.data, MIC_LEVEL_GAIN), {
+        duration: 80,
+      });
     },
     [micLevel]
   );
@@ -175,11 +141,7 @@ export const useVoiceAssistant = ({
     sampleRate: REALTIME_VOICE_SAMPLE_RATE,
   });
 
-  // Both closeSession and the ws onclose handler stop the stream. AudioStream
-  // releases its native shared object after .stop(), so this must be idempotent.
-  // The ref covers same-instance double calls (onclose + closeSession); the
-  // try/catch covers the object being invalidated out from under us by a Fast
-  // Refresh remount, which the ref can't observe.
+  // Multiple cleanup paths can stop and release the native stream, so keep this idempotent.
   const stopAudioStream = useCallback(() => {
     if (isAudioStreamStoppedRef.current) return;
 
@@ -188,8 +150,8 @@ export const useVoiceAssistant = ({
 
     try {
       audioStream.stop();
-    } catch {
-      // Already stopped/released.
+    } catch (error) {
+      console.warn('Failed to stop audio stream during cleanup.', error);
     }
   }, [audioStream, micLevel]);
 
@@ -235,12 +197,73 @@ export const useVoiceAssistant = ({
 
   useEffect(() => clearConnectTimeout, [clearConnectTimeout]);
 
+  const finishSpeechGeneration = useCallback((generation: number) => {
+    if (generation !== speechGenerationRef.current) return;
+
+    speechQueueRef.current = [];
+    isSpeechActiveRef.current = false;
+    setIsSpeaking(false);
+  }, []);
+
+  const playNextSpeech = useCallback(
+    function playNext(generation: number): void {
+      if (generation !== speechGenerationRef.current || isSpeechActiveRef.current) return;
+
+      const text = speechQueueRef.current.shift();
+
+      if (!text) {
+        setIsSpeaking(false);
+        return;
+      }
+
+      isSpeechActiveRef.current = true;
+      setIsSpeaking(true);
+      Speech.speak(text, {
+        language: VOICE_LOCALE,
+        onDone: () => {
+          if (generation !== speechGenerationRef.current) return;
+
+          isSpeechActiveRef.current = false;
+          playNext(generation);
+        },
+        onError: () => {
+          if (generation !== speechGenerationRef.current) return;
+
+          finishSpeechGeneration(generation);
+          setErrorMessage(VOICE_ERROR_MESSAGES.TTS_FAILED);
+        },
+        onStopped: () => finishSpeechGeneration(generation),
+      });
+    },
+    [finishSpeechGeneration]
+  );
+
+  const enqueueSpeech = useCallback((text: string) => {
+    const normalized = text.replace(/\s+/g, ' ').trim();
+
+    if (normalized) speechQueueRef.current.push(normalized);
+  }, []);
+
+  const flushSpeech = useCallback(() => {
+    if (speechQueueRef.current.length === 0) return;
+
+    setErrorMessage(null);
+    playNextSpeech(speechGenerationRef.current);
+  }, [playNextSpeech]);
+
+  const stopSpeaking = useCallback(() => {
+    speechGenerationRef.current += 1;
+    speechQueueRef.current = [];
+    isSpeechActiveRef.current = false;
+    Speech.stop();
+    setIsSpeaking(false);
+  }, []);
+
   const startListening = useCallback(() => {
     if (wsPhaseRef.current !== VOICE_STATES.IDLE) return;
 
     setErrorMessage(null);
-    Speech.stop();
-    setIsSpeaking(false);
+    stopSpeaking();
     setPhase(VOICE_STATES.CONNECTING);
 
     requestRecordingPermissionsAsync()
@@ -350,34 +373,13 @@ export const useVoiceAssistant = ({
         setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
         setPhase(VOICE_STATES.IDLE);
       });
-  }, [audioStream, closeSession, onTranscript, setPhase, stopAudioStream]);
+  }, [audioStream, closeSession, onTranscript, setPhase, stopAudioStream, stopSpeaking]);
 
   const stopListening = useCallback(() => {
     hasFinalizedRef.current = true;
     closeSession();
     setPhase(VOICE_STATES.IDLE);
   }, [closeSession, setPhase]);
-
-  const speak = useCallback((text: string) => {
-    if (!text.trim()) return;
-
-    setErrorMessage(null);
-    setIsSpeaking(true);
-    Speech.speak(text, {
-      language: VOICE_LOCALE,
-      onDone: () => setIsSpeaking(false),
-      onError: () => {
-        setIsSpeaking(false);
-        setErrorMessage(VOICE_ERROR_MESSAGES.TTS_FAILED);
-      },
-      onStopped: () => setIsSpeaking(false),
-    });
-  }, []);
-
-  const stopSpeaking = useCallback(() => {
-    Speech.stop();
-    setIsSpeaking(false);
-  }, []);
 
   useEffect(() => stopSpeaking, [stopSpeaking]);
 
@@ -390,11 +392,12 @@ export const useVoiceAssistant = ({
   });
 
   return {
+    enqueueSpeech,
     errorMessage,
+    flushSpeech,
     isPermissionDenied,
     micLevel,
     partialTranscript,
-    speak,
     startListening,
     stopListening,
     stopSpeaking,

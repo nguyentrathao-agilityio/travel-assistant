@@ -77,6 +77,23 @@ global.WebSocket = MockWebSocket;
 
 const latestSocket = () => MockWebSocket.instances[MockWebSocket.instances.length - 1];
 
+type SpeechOptions = {
+  onDone?: () => void;
+  onError?: () => void;
+  onStopped?: () => void;
+};
+
+const speechOptions = (call: number): SpeechOptions => mockSpeak.mock.calls[call][1];
+
+const renderVoiceAssistant = () =>
+  renderHook(() =>
+    useVoiceAssistant({
+      isAgentRunning: false,
+      isVoiceModeActiveRef: { current: true },
+      onTranscript: jest.fn(),
+    })
+  );
+
 const startAndOpenSession = async (
   onTranscript: (transcript: string) => void = jest.fn(),
   isVoiceModeActiveRef: { current: boolean } = { current: true }
@@ -413,63 +430,95 @@ test('streams audio buffers over the open socket', async () => {
   expect(sentAudioMessage).toBeDefined();
 });
 
-test('speak plays text through expo-speech and reaches speaking state', async () => {
-  const { result } = await renderHook(() =>
-    useVoiceAssistant({
-      isAgentRunning: false,
-      isVoiceModeActiveRef: { current: true },
-      onTranscript: jest.fn(),
-    })
-  );
+test('plays queued speech one segment at a time in source order', async () => {
+  const { result } = await renderVoiceAssistant();
 
   await act(async () => {
-    result.current.speak('Hello there');
+    result.current.enqueueSpeech('First sentence.');
+    result.current.enqueueSpeech('Second sentence.');
+    result.current.flushSpeech();
   });
 
-  expect(mockSpeak).toHaveBeenCalledWith(
-    'Hello there',
-    expect.objectContaining({ language: 'en-US' })
-  );
+  expect(mockSpeak).toHaveBeenCalledTimes(1);
+  expect(mockSpeak.mock.calls[0][0]).toBe('First sentence.');
+  expect(mockSpeak.mock.calls[0][1]).toEqual(expect.objectContaining({ language: 'en-US' }));
+
+  await act(async () => speechOptions(0).onDone?.());
+
+  expect(mockSpeak).toHaveBeenCalledTimes(2);
+  expect(mockSpeak.mock.calls[1][0]).toBe('Second sentence.');
   expect(result.current.voiceState).toBe('speaking');
+
+  await act(async () => speechOptions(1).onDone?.());
+  expect(result.current.voiceState).toBe('idle');
 });
 
-test('speak ignores empty/whitespace text', async () => {
-  const { result } = await renderHook(() =>
-    useVoiceAssistant({
-      isAgentRunning: false,
-      isVoiceModeActiveRef: { current: true },
-      onTranscript: jest.fn(),
-    })
-  );
+test('speech queue ignores empty/whitespace text', async () => {
+  const { result } = await renderVoiceAssistant();
 
   await act(async () => {
-    result.current.speak('   ');
+    result.current.enqueueSpeech('   ');
+    result.current.flushSpeech();
   });
 
   expect(mockSpeak).not.toHaveBeenCalled();
   expect(result.current.voiceState).toBe('idle');
 });
 
-test('stopSpeaking stops expo-speech and returns to idle', async () => {
-  const { result } = await renderHook(() =>
-    useVoiceAssistant({
-      isAgentRunning: false,
-      isVoiceModeActiveRef: { current: true },
-      onTranscript: jest.fn(),
-    })
-  );
+test('stopSpeaking clears pending speech and ignores a stale completion callback', async () => {
+  const { result } = await renderVoiceAssistant();
 
   await act(async () => {
-    result.current.speak('Hello there');
+    result.current.enqueueSpeech('First.');
+    result.current.enqueueSpeech('Must not play.');
+    result.current.flushSpeech();
   });
-  expect(result.current.voiceState).toBe('speaking');
+  const staleDone = speechOptions(0).onDone;
 
-  await act(async () => {
-    result.current.stopSpeaking();
-  });
+  await act(async () => result.current.stopSpeaking());
+  await act(async () => staleDone?.());
 
+  expect(mockSpeak).toHaveBeenCalledTimes(1);
   expect(mockStop).toHaveBeenCalled();
   expect(result.current.voiceState).toBe('idle');
+});
+
+test('ignores stale stopped and error callbacks after a new generation starts', async () => {
+  const { result } = await renderVoiceAssistant();
+
+  await act(async () => {
+    result.current.enqueueSpeech('Old.');
+    result.current.flushSpeech();
+  });
+  const oldOptions = speechOptions(0);
+
+  await act(async () => result.current.stopSpeaking());
+  await act(async () => {
+    result.current.enqueueSpeech('New.');
+    result.current.flushSpeech();
+  });
+  await act(async () => {
+    oldOptions.onStopped?.();
+    oldOptions.onError?.();
+  });
+
+  expect(result.current.voiceState).toBe('speaking');
+  expect(result.current.errorMessage).toBeNull();
+});
+
+test('a current TTS error clears the queue and surfaces the playback error', async () => {
+  const { result } = await renderVoiceAssistant();
+
+  await act(async () => {
+    result.current.enqueueSpeech('Fails.');
+    result.current.enqueueSpeech('Must be cleared.');
+    result.current.flushSpeech();
+  });
+  await act(async () => speechOptions(0).onError?.());
+
+  expect(mockSpeak).toHaveBeenCalledTimes(1);
+  expect(result.current.voiceState).toBe('error');
+  expect(result.current.errorMessage).toMatch(/Couldn't play/);
 });
 
 test('reaches thinking state once a voice-started turn hands off to the agent', async () => {

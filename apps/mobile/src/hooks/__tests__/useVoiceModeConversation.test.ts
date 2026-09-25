@@ -8,14 +8,16 @@ import type { Message } from '@copilotkit/react-native/headless';
 type Voice = ReturnType<typeof useVoiceAssistant>;
 
 interface Spies {
-  speak: jest.Mock;
+  enqueueSpeech: jest.Mock;
+  flushSpeech: jest.Mock;
   startListening: jest.Mock;
   stopListening: jest.Mock;
   stopSpeaking: jest.Mock;
 }
 
 const makeSpies = (): Spies => ({
-  speak: jest.fn(),
+  enqueueSpeech: jest.fn(),
+  flushSpeech: jest.fn(),
   startListening: jest.fn(),
   stopListening: jest.fn(),
   stopSpeaking: jest.fn(),
@@ -69,7 +71,7 @@ test('stop deactivates the loop and halts listening/speaking', async () => {
   expect(spies.stopSpeaking).toHaveBeenCalledTimes(1);
 });
 
-test('speaks the last assistant reply once the agent finishes running, while active', async () => {
+test('enqueues a completed sentence while the agent is still running', async () => {
   const spies = makeSpies();
   const voice = makeVoice(spies);
   const { result, rerender } = await renderConversation({
@@ -83,14 +85,139 @@ test('speaks the last assistant reply once the agent finishes running, while act
   });
 
   const messages = [
-    { id: '1', role: 'user', content: 'Plan a trip to Hue' },
-    { id: '2', role: 'assistant', content: 'Sure, here is a plan!' },
+    { id: 'assistant-1', role: 'assistant', content: 'First sentence. Still writing' },
   ] as unknown as Message[];
 
   await rerender({ voice, messages, isRunning: true });
-  await rerender({ voice, messages, isRunning: false });
 
-  expect(spies.speak).toHaveBeenCalledWith('Sure, here is a plan!');
+  expect(spies.enqueueSpeech).toHaveBeenCalledWith('First sentence.');
+  expect(spies.flushSpeech).toHaveBeenCalledTimes(1);
+});
+
+test('does not enqueue a completed sentence twice on repeated renders', async () => {
+  const spies = makeSpies();
+  const voice = makeVoice(spies);
+  const { result, rerender } = await renderConversation({
+    voice,
+    messages: [],
+    isRunning: false,
+  });
+
+  await act(async () => result.current.start());
+
+  const messages = [
+    { id: 'assistant-1', role: 'assistant', content: 'Only once.' },
+  ] as unknown as Message[];
+
+  await rerender({ voice, messages, isRunning: true });
+  await rerender({ voice, messages: [...messages], isRunning: true });
+
+  expect(spies.enqueueSpeech).toHaveBeenCalledTimes(1);
+  expect(spies.enqueueSpeech).toHaveBeenCalledWith('Only once.');
+});
+
+test('flushes the final unpunctuated remainder when the agent finishes', async () => {
+  const spies = makeSpies();
+  const voice = makeVoice(spies);
+  const { result, rerender } = await renderConversation({
+    voice,
+    messages: [],
+    isRunning: false,
+  });
+
+  await act(async () => result.current.start());
+
+  const messages = [
+    { id: 'assistant-1', role: 'assistant', content: 'Final detail' },
+  ] as unknown as Message[];
+
+  await rerender({ voice, messages, isRunning: true });
+  expect(spies.enqueueSpeech).not.toHaveBeenCalled();
+
+  await rerender({ voice, messages, isRunning: false });
+  await rerender({ voice, messages: [...messages], isRunning: false });
+
+  expect(spies.enqueueSpeech).toHaveBeenCalledTimes(1);
+  expect(spies.enqueueSpeech).toHaveBeenCalledWith('Final detail');
+  expect(spies.flushSpeech).toHaveBeenCalledTimes(1);
+});
+
+test('enqueues multiple completed sentences in source order', async () => {
+  const spies = makeSpies();
+  const voice = makeVoice(spies);
+  const { result, rerender } = await renderConversation({
+    voice,
+    messages: [],
+    isRunning: false,
+  });
+
+  await act(async () => result.current.start());
+
+  const messages = [
+    { id: 'assistant-1', role: 'assistant', content: 'First. Second! Third?' },
+  ] as unknown as Message[];
+
+  await rerender({ voice, messages, isRunning: true });
+
+  expect(spies.enqueueSpeech.mock.calls.map(([text]) => text)).toEqual([
+    'First.',
+    'Second!',
+    'Third?',
+  ]);
+  expect(spies.flushSpeech).toHaveBeenCalledTimes(1);
+});
+
+test('waits for the agent to finish when speech drains before the stream', async () => {
+  const spies = makeSpies();
+  const { result, rerender } = await renderConversation({
+    voice: makeVoice(spies),
+    messages: [],
+    isRunning: false,
+  });
+
+  await act(async () => result.current.start());
+  spies.startListening.mockClear();
+
+  const messages = [
+    { id: 'assistant-1', role: 'assistant', content: 'A short sentence.' },
+  ] as unknown as Message[];
+
+  await rerender({ voice: makeVoice(spies), messages, isRunning: true });
+  await rerender({ voice: makeVoice(spies, 'speaking'), messages, isRunning: true });
+  await rerender({ voice: makeVoice(spies, 'idle'), messages, isRunning: true });
+
+  expect(spies.startListening).not.toHaveBeenCalled();
+
+  await rerender({ voice: makeVoice(spies, 'idle'), messages, isRunning: false });
+
+  expect(spies.startListening).toHaveBeenCalledTimes(1);
+});
+
+test('stop resets streaming state and ignores later snapshots', async () => {
+  const spies = makeSpies();
+  const voice = makeVoice(spies);
+  const { result, rerender } = await renderConversation({
+    voice,
+    messages: [],
+    isRunning: false,
+  });
+
+  await act(async () => result.current.start());
+
+  const first = [
+    { id: 'assistant-1', role: 'assistant', content: 'Before stop.' },
+  ] as unknown as Message[];
+
+  await rerender({ voice, messages: first, isRunning: true });
+  await act(async () => result.current.stop());
+
+  const afterStop = [
+    { id: 'assistant-1', role: 'assistant', content: 'Before stop. After stop.' },
+  ] as unknown as Message[];
+
+  await rerender({ voice, messages: afterStop, isRunning: true });
+
+  expect(spies.enqueueSpeech.mock.calls.map(([text]) => text)).toEqual(['Before stop.']);
 });
 
 test('skips speaking and resumes listening when the finished turn has no assistant text', async () => {
@@ -113,7 +240,7 @@ test('skips speaking and resumes listening when the finished turn has no assista
   await rerender({ voice, messages, isRunning: true });
   await rerender({ voice, messages, isRunning: false });
 
-  expect(spies.speak).not.toHaveBeenCalled();
+  expect(spies.enqueueSpeech).not.toHaveBeenCalled();
   expect(spies.startListening).toHaveBeenCalledTimes(2); // once from start(), once from the resume
 });
 
@@ -127,7 +254,7 @@ test('does not react to the agent finishing while inactive', async () => {
   await rerender({ voice, messages, isRunning: true });
   await rerender({ voice, messages, isRunning: false });
 
-  expect(spies.speak).not.toHaveBeenCalled();
+  expect(spies.enqueueSpeech).not.toHaveBeenCalled();
 });
 
 test('resumes listening once speaking finishes, while active', async () => {

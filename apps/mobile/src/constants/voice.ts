@@ -19,6 +19,9 @@ export const REALTIME_VOICE_WS_URL = 'wss://api.openai.com/v1/realtime';
 export const REALTIME_VOICE_SAMPLE_RATE = 24000;
 export const VOICE_CONNECTING_TIMEOUT_MS = 15000;
 
+// Amplifies normalized PCM RMS into a useful 0..1 range for the waveform.
+export const MIC_LEVEL_GAIN = 5;
+
 export const VOICE_ERROR_MESSAGES = {
   CONNECTING_TIMEOUT: 'Connecting is taking too long. Please try again.',
   NO_SPEECH: "Didn't catch that — try again or type your question.",

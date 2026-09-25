@@ -1,4 +1,4 @@
-import { arrayBufferToBase64 } from '../base64Audio';
+import { arrayBufferToBase64 } from '../voice';
 
 const toArrayBuffer = (bytes: number[]): ArrayBuffer => new Uint8Array(bytes).buffer;
 

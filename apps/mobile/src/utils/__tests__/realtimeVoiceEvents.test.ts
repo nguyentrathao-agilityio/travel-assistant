@@ -2,7 +2,7 @@ import {
   extractFinalTranscript,
   extractRealtimeErrorMessage,
   extractTranscriptDelta,
-} from '../realtimeVoiceEvents';
+} from '../voice';
 
 describe('extractFinalTranscript', () => {
   test('extracts the transcript from a top-level transcript field', () => {

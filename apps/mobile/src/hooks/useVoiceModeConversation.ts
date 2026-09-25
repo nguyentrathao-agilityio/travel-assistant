@@ -5,6 +5,11 @@ import { VOICE_STATES } from '../constants';
 
 // Utils
 import { messageText, renderableMessages } from '../utils/chatMessages';
+import {
+  collectStreamingSpeech,
+  createStreamingSpeechState,
+  resetStreamingSpeech,
+} from '../utils/voice';
 
 // Types
 import type { useVoiceAssistant } from './useVoiceAssistant';
@@ -22,8 +27,9 @@ interface UseVoiceModeConversationResult {
   stop: () => void;
 }
 
-// Hands-free loop: a finished agent turn is spoken aloud, then speaking done
-// resumes listening. Doesn't auto-retry from the `error` voice state.
+// Hands-free loop: completed sentences are spoken while the agent streams, and
+// listening resumes only after both the agent and speech queue finish. Doesn't
+// auto-retry from the `error` voice state.
 export const useVoiceModeConversation = ({
   voice,
   messages,
@@ -34,43 +40,66 @@ export const useVoiceModeConversation = ({
   isActiveRef.current = isActive;
 
   const wasRunningRef = useRef(isRunning);
+  const speechStateRef = useRef(createStreamingSpeechState());
+  const { enqueueSpeech, flushSpeech, startListening, stopListening, stopSpeaking, voiceState } =
+    voice;
 
   useEffect(() => {
     const wasRunning = wasRunningRef.current;
     wasRunningRef.current = isRunning;
 
-    if (!isActiveRef.current || !wasRunning || isRunning) return;
+    if (!isActiveRef.current || (!wasRunning && !isRunning)) return;
 
     const lastMessage = renderableMessages(messages).at(-1);
-    const text = lastMessage?.role === 'assistant' ? messageText(lastMessage.content).trim() : '';
 
-    if (text) {
-      voice.speak(text);
-    } else {
-      voice.startListening();
+    if (lastMessage?.role !== 'assistant') {
+      if (wasRunning && !isRunning) startListening();
+      return;
     }
-  }, [isRunning, messages, voice]);
 
-  const wasSpeakingRef = useRef(voice.voiceState === VOICE_STATES.SPEAKING);
+    const update = collectStreamingSpeech(speechStateRef.current, {
+      isComplete: !isRunning,
+      messageId: lastMessage.id,
+      text: messageText(lastMessage.content),
+    });
+    speechStateRef.current = update.state;
+
+    for (const segment of update.segments) enqueueSpeech(segment);
+    if (update.segments.length > 0) flushSpeech();
+
+    const finishedWithNoPendingSpeech =
+      wasRunning &&
+      !isRunning &&
+      update.segments.length === 0 &&
+      voiceState !== VOICE_STATES.SPEAKING;
+
+    if (finishedWithNoPendingSpeech) startListening();
+  }, [enqueueSpeech, flushSpeech, isRunning, messages, startListening, voiceState]);
+
+  const wasSpeakingRef = useRef(voiceState === VOICE_STATES.SPEAKING);
 
   useEffect(() => {
     const wasSpeaking = wasSpeakingRef.current;
-    wasSpeakingRef.current = voice.voiceState === VOICE_STATES.SPEAKING;
+    wasSpeakingRef.current = voiceState === VOICE_STATES.SPEAKING;
 
-    if (!isActiveRef.current || !wasSpeaking) return;
-    if (voice.voiceState === VOICE_STATES.IDLE) voice.startListening();
-  }, [voice]);
+    if (!isActiveRef.current || !wasSpeaking || isRunning) return;
+    if (voiceState === VOICE_STATES.IDLE) startListening();
+  }, [isRunning, startListening, voiceState]);
 
   const start = useCallback(() => {
+    speechStateRef.current = resetStreamingSpeech();
+    wasRunningRef.current = isRunning;
     setIsActive(true);
-    voice.startListening();
-  }, [voice]);
+    startListening();
+  }, [isRunning, startListening]);
 
   const stop = useCallback(() => {
+    speechStateRef.current = resetStreamingSpeech();
+    wasRunningRef.current = isRunning;
     setIsActive(false);
-    voice.stopListening();
-    voice.stopSpeaking();
-  }, [voice]);
+    stopListening();
+    stopSpeaking();
+  }, [isRunning, stopListening, stopSpeaking]);
 
   return { isActive, start, stop };
 };

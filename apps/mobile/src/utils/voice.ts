@@ -1,6 +1,13 @@
-import { VOICE_STATES, type VoiceState, type VoiceWebSocketPhase } from '../constants';
+import {
+  VIETNAMESE_VOICE_LOCALE,
+  VOICE_LOCALE,
+  VOICE_STATES,
+  type VoiceState,
+  type VoiceWebSocketPhase,
+} from '../constants';
 
 const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+const VIETNAMESE_TEXT_PATTERN = /[ĂăÂâĐđÊêÔôƠơƯư\u1EA0-\u1EF9]/u;
 
 interface RealtimeVoiceMessage {
   type?: unknown;
@@ -41,6 +48,7 @@ const VOICE_STATE_RULES: Record<VoiceState, (context: VoiceStateContext) => bool
   [VOICE_STATES.SPEAKING]: ({ isSpeaking }) => isSpeaking,
   [VOICE_STATES.CONNECTING]: ({ wsPhase }) => wsPhase === VOICE_STATES.CONNECTING,
   [VOICE_STATES.LISTENING]: ({ wsPhase }) => wsPhase === VOICE_STATES.LISTENING,
+  [VOICE_STATES.PROCESSING]: ({ wsPhase }) => wsPhase === VOICE_STATES.PROCESSING,
   [VOICE_STATES.THINKING]: ({ isAgentRunning, isVoiceTurnActive }) =>
     isVoiceTurnActive && isAgentRunning,
   [VOICE_STATES.IDLE]: () => true,
@@ -104,6 +112,9 @@ export const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
   return result;
 };
 
+export const voiceLocaleForText = (text: string): string =>
+  VIETNAMESE_TEXT_PATTERN.test(text) ? VIETNAMESE_VOICE_LOCALE : VOICE_LOCALE;
+
 // Extracts the final transcript from a realtime provider event.
 export const extractFinalTranscript = (raw: string): string | null => {
   let message: RealtimeVoiceMessage;
@@ -123,6 +134,20 @@ export const extractFinalTranscript = (raw: string): string | null => {
       : message.item?.content?.find((part) => typeof part.transcript === 'string')?.transcript;
 
   return typeof transcript === 'string' && transcript.trim().length > 0 ? transcript.trim() : null;
+};
+
+export const isFinalTranscriptEvent = (raw: string): boolean => {
+  try {
+    const message = JSON.parse(raw) as RealtimeVoiceMessage;
+
+    return (
+      typeof message.type === 'string' &&
+      message.type.includes('transcription') &&
+      message.type.endsWith('completed')
+    );
+  } catch {
+    return false;
+  }
 };
 
 // Extracts an append-only partial transcript from a realtime event.

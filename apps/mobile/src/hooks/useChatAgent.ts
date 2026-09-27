@@ -54,7 +54,7 @@ export const useChatAgent = (threadId: string): UseChatAgentResult => {
     async (text: string) => {
       const trimmed = text.trim();
 
-      if (!trimmed) return;
+      if (!trimmed || isRunningRef.current) return;
 
       setError(null);
       agent.addMessage({ id: generateThreadId(), role: 'user', content: trimmed });

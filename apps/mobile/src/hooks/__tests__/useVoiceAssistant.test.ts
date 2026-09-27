@@ -1,4 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { StrictMode } from 'react';
 
 import { REALTIME_VOICE_WS_URL } from '../../constants';
 import { useVoiceAssistant } from '../useVoiceAssistant';
@@ -85,6 +86,15 @@ type SpeechOptions = {
 
 const speechOptions = (call: number): SpeechOptions => mockSpeak.mock.calls[call][1];
 
+const deferred = <T>() => {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+
+  return { promise, resolve };
+};
+
 const renderVoiceAssistant = () =>
   renderHook(() =>
     useVoiceAssistant({
@@ -144,6 +154,24 @@ test('starts idle', async () => {
   expect(result.current.voiceState).toBe('idle');
   expect(result.current.errorMessage).toBeNull();
   expect(result.current.isPermissionDenied).toBe(false);
+});
+
+test('can start listening after the Strict Mode effect replay', async () => {
+  mockRequestRecordingPermissionsAsync.mockResolvedValue({ granted: true });
+  mockFetchVoiceSessionToken.mockResolvedValue({ token: 'tok-123', model: 'gpt-realtime' });
+  const { result } = await renderHook(
+    () =>
+      useVoiceAssistant({
+        isAgentRunning: false,
+        isVoiceModeActiveRef: { current: true },
+        onTranscript: jest.fn(),
+      }),
+    { wrapper: StrictMode }
+  );
+
+  await act(async () => result.current.startListening());
+
+  await waitFor(() => expect(MockWebSocket.instances).toHaveLength(1));
 });
 
 test('denied microphone permission surfaces an error and stays idle-ish', async () => {
@@ -380,16 +408,155 @@ test('an unexpected close with no transcript surfaces "didn\'t catch that"', asy
   expect(result.current.errorMessage).toMatch(/Didn.t catch that/);
 });
 
-test('stopListening closes the session and returns to idle without an error', async () => {
-  const { result } = await startAndOpenSession();
+test('stopListening commits buffered audio and waits for the final transcript', async () => {
+  const { onTranscript, result } = await startAndOpenSession();
 
   await act(async () => {
     result.current.stopListening();
   });
 
-  expect(result.current.voiceState).toBe('idle');
+  expect(latestSocket().sent).toContain(JSON.stringify({ type: 'input_audio_buffer.commit' }));
+  expect(mockAudioStreamStop).toHaveBeenCalledTimes(1);
+  expect(latestSocket().readyState).toBe(MockWebSocket.OPEN);
+  expect(onTranscript).not.toHaveBeenCalled();
   expect(result.current.errorMessage).toBeNull();
+  expect(result.current.voiceState).toBe('processing');
+});
+
+test('stopListening commits buffered audio only once', async () => {
+  const { result } = await startAndOpenSession();
+
+  await act(async () => {
+    result.current.stopListening();
+    result.current.stopListening();
+  });
+
+  expect(
+    latestSocket().sent.filter(
+      (message) => message === JSON.stringify({ type: 'input_audio_buffer.commit' })
+    )
+  ).toHaveLength(1);
+});
+
+test('a completed transcript is submitted only once', async () => {
+  const { onTranscript } = await startAndOpenSession();
+  const completed = {
+    data: JSON.stringify({
+      type: 'conversation.item.input_audio_transcription.completed',
+      transcript: 'Plan a trip to Hue',
+    }),
+  };
+
+  await act(async () => {
+    latestSocket().onmessage?.(completed);
+    latestSocket().onmessage?.(completed);
+  });
+
+  expect(onTranscript).toHaveBeenCalledTimes(1);
+});
+
+test('an empty completed transcript closes the session without submitting', async () => {
+  const { onTranscript, result } = await startAndOpenSession();
+
+  await act(async () => result.current.stopListening());
+  await act(async () => {
+    latestSocket().onmessage?.({
+      data: JSON.stringify({
+        type: 'conversation.item.input_audio_transcription.completed',
+        transcript: '   ',
+      }),
+    });
+  });
+
+  expect(onTranscript).not.toHaveBeenCalled();
   expect(latestSocket().readyState).toBe(MockWebSocket.CLOSED);
+  expect(result.current.voiceState).toBe('idle');
+});
+
+test('cancelListening closes the session and ignores a late final transcript', async () => {
+  const { onTranscript, result } = await startAndOpenSession();
+  const socket = latestSocket();
+
+  await act(async () => {
+    (
+      result.current as typeof result.current & { cancelListening?: () => void }
+    ).cancelListening?.();
+  });
+  await act(async () => {
+    socket.onmessage?.({
+      data: JSON.stringify({
+        type: 'conversation.item.input_audio_transcription.completed',
+        transcript: 'Must be discarded',
+      }),
+    });
+  });
+
+  expect(socket.readyState).toBe(MockWebSocket.CLOSED);
+  expect(onTranscript).not.toHaveBeenCalled();
+  expect(result.current.voiceState).toBe('idle');
+});
+
+test('cancelling while the token is loading prevents the session from opening', async () => {
+  const token = deferred<{ token: string; model: string }>();
+  mockRequestRecordingPermissionsAsync.mockResolvedValue({ granted: true });
+  mockFetchVoiceSessionToken.mockReturnValue(token.promise);
+  const { result } = await renderVoiceAssistant();
+
+  await act(async () => {
+    result.current.startListening();
+    await Promise.resolve();
+  });
+  await waitFor(() => expect(mockFetchVoiceSessionToken).toHaveBeenCalledTimes(1));
+
+  await act(async () => {
+    (
+      result.current as typeof result.current & { cancelListening?: () => void }
+    ).cancelListening?.();
+  });
+  await act(async () => {
+    token.resolve({ token: 'late-token', model: 'gpt-realtime' });
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+
+  expect(MockWebSocket.instances).toHaveLength(0);
+  expect(result.current.voiceState).toBe('idle');
+});
+
+test('unmounting while the token is loading prevents the session from opening', async () => {
+  const token = deferred<{ token: string; model: string }>();
+  mockRequestRecordingPermissionsAsync.mockResolvedValue({ granted: true });
+  mockFetchVoiceSessionToken.mockReturnValue(token.promise);
+  const { result, unmount } = await renderVoiceAssistant();
+
+  await act(async () => {
+    result.current.startListening();
+    await Promise.resolve();
+  });
+  await waitFor(() => expect(mockFetchVoiceSessionToken).toHaveBeenCalledTimes(1));
+  await act(async () => unmount());
+  await act(async () => {
+    token.resolve({ token: 'late-token', model: 'gpt-realtime' });
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+
+  expect(MockWebSocket.instances).toHaveLength(0);
+});
+
+test('startListening does nothing while the agent is running', async () => {
+  const { result } = await renderHook(() =>
+    useVoiceAssistant({
+      isAgentRunning: true,
+      isVoiceModeActiveRef: { current: true },
+      onTranscript: jest.fn(),
+    })
+  );
+
+  await act(async () => result.current.startListening());
+
+  expect(mockRequestRecordingPermissionsAsync).not.toHaveBeenCalled();
+  expect(result.current.voiceState).toBe('idle');
 });
 
 test('a token fetch failure surfaces the unavailable message', async () => {
@@ -451,6 +618,17 @@ test('plays queued speech one segment at a time in source order', async () => {
 
   await act(async () => speechOptions(1).onDone?.());
   expect(result.current.voiceState).toBe('idle');
+});
+
+test('uses a Vietnamese TTS voice for Vietnamese assistant text', async () => {
+  const { result } = await renderVoiceAssistant();
+
+  await act(async () => {
+    result.current.enqueueSpeech('Bạn muốn đi du lịch ở đâu?');
+    result.current.flushSpeech();
+  });
+
+  expect(mockSpeak.mock.calls[0][1]).toEqual(expect.objectContaining({ language: 'vi-VN' }));
 });
 
 test('speech queue ignores empty/whitespace text', async () => {

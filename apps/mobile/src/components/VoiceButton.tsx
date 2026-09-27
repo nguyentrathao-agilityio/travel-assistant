@@ -41,7 +41,12 @@ export const VoiceButton = ({
       return;
     }
 
-    if (disabled || voiceState === VOICE_STATES.CONNECTING || voiceState === VOICE_STATES.THINKING)
+    if (
+      disabled ||
+      voiceState === VOICE_STATES.CONNECTING ||
+      voiceState === VOICE_STATES.PROCESSING ||
+      voiceState === VOICE_STATES.THINKING
+    )
       return;
 
     onStart();
@@ -50,7 +55,10 @@ export const VoiceButton = ({
   // A pending approval or an in-flight run still allow cancelling an
   // already-active listen/speak session — only starting a new one is blocked.
   const isStartBlocked =
-    disabled || voiceState === VOICE_STATES.CONNECTING || voiceState === VOICE_STATES.THINKING;
+    disabled ||
+    voiceState === VOICE_STATES.CONNECTING ||
+    voiceState === VOICE_STATES.PROCESSING ||
+    voiceState === VOICE_STATES.THINKING;
   const canCancel = voiceState === VOICE_STATES.LISTENING || voiceState === VOICE_STATES.SPEAKING;
 
   return (
@@ -73,6 +81,7 @@ const VoiceIcon = ({ voiceState }: { voiceState: VoiceState }) => {
     case VOICE_STATES.LISTENING:
       return <Mic color={colors.textOnDark} size={HEADER_ICON_SIZE} />;
     case VOICE_STATES.CONNECTING:
+    case VOICE_STATES.PROCESSING:
     case VOICE_STATES.THINKING:
       return <ActivityIndicator color={colors.textOnDarkMuted} />;
     case VOICE_STATES.SPEAKING:
@@ -92,6 +101,8 @@ const voiceLabel = (voiceState: VoiceState): string => {
       return 'Stop speaking';
     case VOICE_STATES.CONNECTING:
       return 'Connecting to voice session';
+    case VOICE_STATES.PROCESSING:
+      return 'Processing voice input';
     case VOICE_STATES.THINKING:
       return 'Waiting for the response';
     case VOICE_STATES.ERROR:

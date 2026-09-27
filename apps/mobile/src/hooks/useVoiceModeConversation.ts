@@ -41,7 +41,7 @@ export const useVoiceModeConversation = ({
 
   const wasRunningRef = useRef(isRunning);
   const speechStateRef = useRef(createStreamingSpeechState());
-  const { enqueueSpeech, flushSpeech, startListening, stopListening, stopSpeaking, voiceState } =
+  const { cancelListening, enqueueSpeech, flushSpeech, startListening, stopSpeaking, voiceState } =
     voice;
 
   useEffect(() => {
@@ -97,9 +97,9 @@ export const useVoiceModeConversation = ({
     speechStateRef.current = resetStreamingSpeech();
     wasRunningRef.current = isRunning;
     setIsActive(false);
-    stopListening();
+    cancelListening();
     stopSpeaking();
-  }, [isRunning, stopListening, stopSpeaking]);
+  }, [cancelListening, isRunning, stopSpeaking]);
 
   return { isActive, start, stop };
 };

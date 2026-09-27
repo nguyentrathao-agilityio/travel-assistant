@@ -2,6 +2,7 @@ export const VOICE_STATES = {
   IDLE: 'idle',
   CONNECTING: 'connecting',
   LISTENING: 'listening',
+  PROCESSING: 'processing',
   THINKING: 'thinking',
   SPEAKING: 'speaking',
   ERROR: 'error',
@@ -11,9 +12,11 @@ export type VoiceState = (typeof VOICE_STATES)[keyof typeof VOICE_STATES];
 export type VoiceWebSocketPhase =
   | typeof VOICE_STATES.IDLE
   | typeof VOICE_STATES.CONNECTING
-  | typeof VOICE_STATES.LISTENING;
+  | typeof VOICE_STATES.LISTENING
+  | typeof VOICE_STATES.PROCESSING;
 
 export const VOICE_LOCALE = 'en-US';
+export const VIETNAMESE_VOICE_LOCALE = 'vi-VN';
 
 export const REALTIME_VOICE_WS_URL = 'wss://api.openai.com/v1/realtime';
 export const REALTIME_VOICE_SAMPLE_RATE = 24000;
@@ -36,6 +39,7 @@ export const VOICE_STATE_LABEL: Record<VoiceState, string> = {
   [VOICE_STATES.ERROR]: 'Something went wrong',
   [VOICE_STATES.IDLE]: 'Tap the mic to talk',
   [VOICE_STATES.LISTENING]: 'Listening…',
+  [VOICE_STATES.PROCESSING]: 'Processing…',
   [VOICE_STATES.SPEAKING]: 'Speaking…',
   [VOICE_STATES.THINKING]: 'Thinking…',
 };

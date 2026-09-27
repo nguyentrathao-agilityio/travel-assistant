@@ -5,6 +5,11 @@ import { bookingAgent } from '@/nodes/booking';
 import type { GraphStateType } from '@/state';
 
 const createSpecializedAgentMock = vi.hoisted(() => vi.fn());
+const withLangfuseTracingMock = vi.hoisted(() =>
+  vi.fn((_config: unknown, _runName: string, run: (config: unknown) => Promise<unknown>) =>
+    run({ callbacks: ['langfuse'] })
+  )
+);
 
 vi.mock('@/agent/create-agent', () => ({
   createSpecializedAgent: createSpecializedAgentMock,
@@ -13,6 +18,10 @@ vi.mock('@/agent/create-agent', () => ({
 vi.mock('@/infrastructure/llm', () => ({
   openAiApiKeyFromConfig: vi.fn(() => 'sk-request'),
   withOpenAiApiKey: <T>(_apiKey: string, callback: () => T) => callback(),
+}));
+
+vi.mock('@/infrastructure/observability', () => ({
+  withLangfuseTracing: withLangfuseTracingMock,
 }));
 
 describe('bookingAgent', () => {
@@ -67,8 +76,15 @@ describe('bookingAgent', () => {
       },
     } as GraphStateType;
 
-    await bookingAgent(state);
+    const config = { configurable: { thread_id: 'thread-123' } };
 
-    expect(invoke).toHaveBeenCalledWith(state, undefined);
+    await bookingAgent(state, config);
+
+    expect(withLangfuseTracingMock).toHaveBeenCalledWith(
+      config,
+      'booking-agent',
+      expect.any(Function)
+    );
+    expect(invoke).toHaveBeenCalledWith(state, { callbacks: ['langfuse'] });
   });
 });

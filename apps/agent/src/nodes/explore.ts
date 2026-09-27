@@ -6,6 +6,7 @@ import { AGENT_CONFIGS } from '@/constants/agent-config';
 // Infrastructure
 import { createSpecializedAgent } from '@/agent/create-agent';
 import { openAiApiKeyFromConfig, withOpenAiApiKey } from '@/infrastructure/llm';
+import { withLangfuseTracing } from '@/infrastructure/observability';
 
 // State
 import type { GraphStateType } from '@/state';
@@ -16,5 +17,9 @@ export const createExploreAgent = (apiKey: string) =>
 export const exploreAgent = (state: GraphStateType, config?: RunnableConfig) => {
   const apiKey = openAiApiKeyFromConfig(config);
 
-  return withOpenAiApiKey(apiKey, () => createExploreAgent(apiKey).invoke(state, config));
+  return withOpenAiApiKey(apiKey, () =>
+    withLangfuseTracing(config, 'explore-agent', (tracedConfig) =>
+      createExploreAgent(apiKey).invoke(state, tracedConfig)
+    )
+  );
 };

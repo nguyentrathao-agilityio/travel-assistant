@@ -9,6 +9,7 @@ import { BOOKING_STATUSES } from '@repo/constants';
 // Infrastructure
 import { createSpecializedAgent } from '@/agent/create-agent';
 import { openAiApiKeyFromConfig, withOpenAiApiKey } from '@/infrastructure/llm';
+import { withLangfuseTracing } from '@/infrastructure/observability';
 
 // State
 import type { GraphStateType, GraphStateUpdate } from '@/state';
@@ -49,5 +50,9 @@ export const bookingAgent = (state: GraphStateType, config?: RunnableConfig) => 
 
   const apiKey = openAiApiKeyFromConfig(config);
 
-  return withOpenAiApiKey(apiKey, () => createBookingAgent(apiKey).invoke(state, config));
+  return withOpenAiApiKey(apiKey, () =>
+    withLangfuseTracing(config, 'booking-agent', (tracedConfig) =>
+      createBookingAgent(apiKey).invoke(state, tracedConfig)
+    )
+  );
 };

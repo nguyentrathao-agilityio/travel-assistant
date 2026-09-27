@@ -6,6 +6,7 @@ import { MAX_EXTRACT_MEMORY_MESSAGES } from '@/constants';
 
 // Infrastructure
 import { createChatModel, openAiApiKeyFromConfig } from '@/infrastructure/llm';
+import { withLangfuseTracing } from '@/infrastructure/observability';
 import { memoryStore } from '@/infrastructure/persistence';
 
 // Prompts
@@ -45,9 +46,14 @@ export const saveMemoryNode = async (
       apiKey: openAiApiKeyFromConfig(config),
     }).withStructuredOutput(MemoryExtractionSchema);
 
-    const result = await extractionModel.invoke(
-      [new SystemMessage({ content: EXTRACT_MEMORY_SYSTEM_PROMPT }), ...recentMessages],
-      { metadata: { 'copilotkit:emit-messages': false } }
+    const result = await withLangfuseTracing(
+      { ...config, metadata: { ...config?.metadata, 'copilotkit:emit-messages': false } },
+      'memory-extraction',
+      (tracedConfig) =>
+        extractionModel.invoke(
+          [new SystemMessage({ content: EXTRACT_MEMORY_SYSTEM_PROMPT }), ...recentMessages],
+          tracedConfig
+        )
     );
 
     if (result.memory && result.memory !== 'null') await saveMemory(memoryStore, result.memory);

@@ -21,6 +21,7 @@ import {
 
 // Infrastructure
 import { createChatModel, openAiApiKeyFromConfig } from '@/infrastructure/llm';
+import { withLangfuseTracing } from '@/infrastructure/observability';
 
 // Prompts
 import { CLASSIFY_SYSTEM_PROMPT } from '@/prompts';
@@ -207,11 +208,18 @@ const fallbackCommand = (state: GraphStateType): ClassifyCommand =>
   });
 
 /** Invokes the classifier, retrying once against FALLBACK_MODEL for non-parsing errors. */
-const invokeClassifier = async (apiKey: string, messages: BaseMessage[]): Promise<unknown> => {
+const invokeClassifier = async (
+  apiKey: string,
+  messages: BaseMessage[],
+  config?: RunnableConfig
+): Promise<unknown> => {
   const classify = (model: ChatOpenAI) =>
-    model
-      .withStructuredOutput(IntentClassificationSchema)
-      .invoke(messages, { metadata: { 'copilotkit:emit-messages': false } });
+    withLangfuseTracing(
+      { ...config, metadata: { ...config?.metadata, 'copilotkit:emit-messages': false } },
+      'intent-classifier',
+      (tracedConfig) =>
+        model.withStructuredOutput(IntentClassificationSchema).invoke(messages, tracedConfig)
+    );
 
   try {
     return await classify(createChatModel({ apiKey }));
@@ -257,11 +265,11 @@ export const classifyNode = async (
   });
 
   try {
-    const rawResult = await invokeClassifier(openAiApiKeyFromConfig(config), [
-      new SystemMessage({ content: CLASSIFY_SYSTEM_PROMPT }),
-      contextMessage,
-      ...recentMessages,
-    ]);
+    const rawResult = await invokeClassifier(
+      openAiApiKeyFromConfig(config),
+      [new SystemMessage({ content: CLASSIFY_SYSTEM_PROMPT }), contextMessage, ...recentMessages],
+      config
+    );
     const result = IntentClassificationSchema.safeParse(rawResult);
 
     return result.success ? toCommand(state, result.data) : fallbackCommand(state);

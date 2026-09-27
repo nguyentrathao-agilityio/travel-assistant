@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react-native';
 
 import { BOOKING_STATUSES, FLIGHT_TAB, TOOL_NAMES, type FlightTab } from '@repo/constants';
 
-import { useFlightAction } from '../useFlightAction';
+import { useTravelBookingActions } from '../useTravelBookingActions';
 import { makeFlight } from '../../test/fixtures';
 
 import type { Flight, TripState } from '@repo/types';
@@ -58,9 +58,11 @@ test('registers a renderer for the flights tool', async () => {
   const selectFlight = jest.fn();
   const sendMessage = jest.fn();
 
-  await renderHook(() => useFlightAction({ state: {}, selectFlight, sendMessage }));
+  await renderHook(() =>
+    useTravelBookingActions({ state: {}, selectFlight, selectHotel: jest.fn(), sendMessage })
+  );
 
-  expect(addHookRenderToolCall).toHaveBeenCalledTimes(1);
+  expect(addHookRenderToolCall).toHaveBeenCalledTimes(2);
   expect(getRenderer(addHookRenderToolCall).name).toBe(TOOL_NAMES.FLIGHTS);
 });
 
@@ -68,7 +70,12 @@ test('renders a loading state while the tool call is in progress', async () => {
   const { addHookRenderToolCall } = setup();
 
   await renderHook(() =>
-    useFlightAction({ state: {}, selectFlight: jest.fn(), sendMessage: jest.fn() })
+    useTravelBookingActions({
+      state: {},
+      selectFlight: jest.fn(),
+      selectHotel: jest.fn(),
+      sendMessage: jest.fn(),
+    })
   );
 
   const element = getRenderer(addHookRenderToolCall).render({
@@ -84,7 +91,12 @@ test('renders an explicit empty state when no flights matched', async () => {
   const { addHookRenderToolCall } = setup();
 
   await renderHook(() =>
-    useFlightAction({ state: {}, selectFlight: jest.fn(), sendMessage: jest.fn() })
+    useTravelBookingActions({
+      state: {},
+      selectFlight: jest.fn(),
+      selectHotel: jest.fn(),
+      sendMessage: jest.fn(),
+    })
   );
 
   const element = getRenderer(addHookRenderToolCall).render({
@@ -100,7 +112,12 @@ test('renders an error state for a malformed result', async () => {
   const { addHookRenderToolCall } = setup();
 
   await renderHook(() =>
-    useFlightAction({ state: {}, selectFlight: jest.fn(), sendMessage: jest.fn() })
+    useTravelBookingActions({
+      state: {},
+      selectFlight: jest.fn(),
+      selectHotel: jest.fn(),
+      sendMessage: jest.fn(),
+    })
   );
 
   const element = getRenderer(addHookRenderToolCall).render({
@@ -133,7 +150,12 @@ test('renders the flight card wired to the current selection and booking lock st
   };
 
   await renderHook(() =>
-    useFlightAction({ state, selectFlight: jest.fn(), sendMessage: jest.fn() })
+    useTravelBookingActions({
+      state,
+      selectFlight: jest.fn(),
+      selectHotel: jest.fn(),
+      sendMessage: jest.fn(),
+    })
   );
 
   const element = getRenderer(addHookRenderToolCall).render({
@@ -156,7 +178,14 @@ test('onContinueBooking sends a message naming the selected flights', async () =
   const departure = makeFlight({ id: 'dep1', flightNumber: 'VN100' });
   const returnFlight = makeFlight({ id: 'ret1', flightNumber: 'VN200' });
 
-  await renderHook(() => useFlightAction({ state: {}, selectFlight: jest.fn(), sendMessage }));
+  await renderHook(() =>
+    useTravelBookingActions({
+      state: {},
+      selectFlight: jest.fn(),
+      selectHotel: jest.fn(),
+      sendMessage,
+    })
+  );
 
   const element = getRenderer(addHookRenderToolCall).render({
     status: 'complete',
@@ -175,7 +204,14 @@ test('onSelect forwards the flight to selectFlight', async () => {
   const selectFlight = jest.fn();
   const flight = makeFlight();
 
-  await renderHook(() => useFlightAction({ state: {}, selectFlight, sendMessage: jest.fn() }));
+  await renderHook(() =>
+    useTravelBookingActions({
+      state: {},
+      selectFlight,
+      selectHotel: jest.fn(),
+      sendMessage: jest.fn(),
+    })
+  );
 
   const element = getRenderer(addHookRenderToolCall).render({
     status: 'complete',

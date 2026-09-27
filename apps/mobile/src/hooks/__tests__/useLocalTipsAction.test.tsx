@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react-native';
 
 import { TOOL_NAMES } from '@repo/constants';
 
-import { useLocalTipsAction } from '../useLocalTipsAction';
+import { useTravelInfoActions } from '../useTravelInfoActions';
 
 jest.mock('@copilotkit/react-native/headless', () => ({
   ToolCallStatus: { InProgress: 'inProgress', Executing: 'executing', Complete: 'complete' },
@@ -30,7 +30,9 @@ const setup = () => {
 };
 
 const getRenderer = (addHookRenderToolCall: jest.Mock): RegisteredRenderer =>
-  addHookRenderToolCall.mock.calls[0][0] as RegisteredRenderer;
+  addHookRenderToolCall.mock.calls.find(
+    ([renderer]: [RegisteredRenderer]) => renderer.name === TOOL_NAMES.LOCAL_TIPS
+  )?.[0] as RegisteredRenderer;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -39,16 +41,16 @@ beforeEach(() => {
 test('registers a renderer for the local tips tool', async () => {
   const { addHookRenderToolCall } = setup();
 
-  await renderHook(() => useLocalTipsAction());
+  await renderHook(() => useTravelInfoActions());
 
-  expect(addHookRenderToolCall).toHaveBeenCalledTimes(1);
+  expect(addHookRenderToolCall).toHaveBeenCalledTimes(5);
   expect(getRenderer(addHookRenderToolCall).name).toBe(TOOL_NAMES.LOCAL_TIPS);
 });
 
 test('renders a loading state while the tool call is executing', async () => {
   const { addHookRenderToolCall } = setup();
 
-  await renderHook(() => useLocalTipsAction());
+  await renderHook(() => useTravelInfoActions());
 
   const element = getRenderer(addHookRenderToolCall).render({
     status: 'executing',
@@ -62,7 +64,7 @@ test('renders a loading state while the tool call is executing', async () => {
 test('renders an explicit empty state when there are no tips', async () => {
   const { addHookRenderToolCall } = setup();
 
-  await renderHook(() => useLocalTipsAction());
+  await renderHook(() => useTravelInfoActions());
 
   const data = { country: 'Japan', count: 0, summary: 'No tips found', tips: [] };
   const element = getRenderer(addHookRenderToolCall).render({
@@ -77,7 +79,7 @@ test('renders an explicit empty state when there are no tips', async () => {
 test('renders an error state for a malformed result', async () => {
   const { addHookRenderToolCall } = setup();
 
-  await renderHook(() => useLocalTipsAction());
+  await renderHook(() => useTravelInfoActions());
 
   const element = getRenderer(addHookRenderToolCall).render({
     status: 'complete',
@@ -91,7 +93,7 @@ test('renders an error state for a malformed result', async () => {
 test('renders the local tips card with the parsed result', async () => {
   const { addHookRenderToolCall } = setup();
 
-  await renderHook(() => useLocalTipsAction());
+  await renderHook(() => useTravelInfoActions());
 
   const data = {
     country: 'Japan',

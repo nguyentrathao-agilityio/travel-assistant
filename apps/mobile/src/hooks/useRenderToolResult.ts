@@ -1,5 +1,5 @@
 import { defineToolCallRenderer, useCopilotKit } from '@copilotkit/react-native/headless';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 // Types
 import type { ToolCallStatus } from '@copilotkit/react-native/headless';
@@ -23,16 +23,20 @@ export const useRenderToolResult = <Output>(
   deps: ReadonlyArray<unknown> = []
 ): void => {
   const { copilotkit } = useCopilotKit();
+  const renderRef = useRef(render);
+
+  renderRef.current = render;
 
   useEffect(() => {
     copilotkit.addHookRenderToolCall(
       defineToolCallRenderer({
         name,
         args: schema,
-        render: (props) => render({ status: props.status, result: props.result, args: props.args }),
+        render: (props) =>
+          renderRef.current({ status: props.status, result: props.result, args: props.args }),
       })
     );
-    // `render` is intentionally excluded — it's captured at registration and only
-    // refreshed when `deps` changes, matching @copilotkit/react-core's own useRenderTool.
+    // Registration changes only when its identity/schema/deps change. The ref keeps
+    // callbacks and other render-time values fresh without re-registering every render.
   }, [name, copilotkit, schema, JSON.stringify(deps)]);
 };

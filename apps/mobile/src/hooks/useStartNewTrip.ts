@@ -1,13 +1,9 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 
-// Services
+import { CHAT_PATH } from '../constants';
 import { createRemoteThread, findEmptyThreadId, generateThreadId } from '../services';
 
-// Constants
-import { CHAT_PATH } from '../constants';
-
-// Types
 import type { ThreadItem } from '../services';
 
 interface UseStartNewTripOptions {
@@ -16,16 +12,7 @@ interface UseStartNewTripOptions {
   threads: ThreadItem[];
 }
 
-interface UseStartNewTripResult {
-  handleStartNewTrip: () => Promise<void>;
-  isStartingTrip: boolean;
-}
-
-export const useStartNewTrip = ({
-  markActive,
-  tag,
-  threads,
-}: UseStartNewTripOptions): UseStartNewTripResult => {
+export const useStartNewTrip = ({ markActive, tag, threads }: UseStartNewTripOptions) => {
   const router = useRouter();
   const [isStartingTrip, setIsStartingTrip] = useState(false);
   const isStartingTripRef = useRef(false);

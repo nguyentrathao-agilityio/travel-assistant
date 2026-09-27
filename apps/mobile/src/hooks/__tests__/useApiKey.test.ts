@@ -2,13 +2,13 @@ import { renderHook, waitFor } from '@testing-library/react-native';
 
 import { useApiKey } from '../useApiKey';
 
-jest.mock('../../services/apiKeyStorage', () => ({
+jest.mock('../../storage', () => ({
   clearApiKey: jest.fn(),
   getApiKey: jest.fn(),
   setApiKey: jest.fn(),
 }));
 
-import { getApiKey } from '../../services/apiKeyStorage';
+import { getApiKey } from '../../storage';
 
 test('reports missing status once no stored key resolves', async () => {
   (getApiKey as jest.Mock).mockResolvedValue(null);

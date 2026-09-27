@@ -1,15 +1,14 @@
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 
-// Services
-import { deleteRemoteThread } from '../services';
+import { deleteRemoteThread, renameRemoteThread } from '../services';
 
-// Types
 import type { ThreadItem } from '../services';
 
-interface UseThreadDeletionOptions {
+interface UseThreadActionsOptions {
   refresh: () => void;
   removeThread: (threadId: string) => void;
+  renameThread: (threadId: string, title: string) => void;
   threads: ThreadItem[];
 }
 
@@ -20,15 +19,24 @@ export interface ThreadDeletionProps {
   onDeleteThread: (thread: ThreadItem) => void;
 }
 
-// Owns the delete-one / delete-all confirm-then-call flow for the All trips screen.
-export const useThreadDeletion = ({
+export interface ThreadRenameProps {
+  renamingThread: ThreadItem | null;
+  isRenaming: boolean;
+  onStartRename: (thread: ThreadItem) => void;
+  onCancelRename: () => void;
+  onConfirmRename: (title: string) => void;
+}
+
+export const useThreadActions = ({
   refresh,
   removeThread,
+  renameThread,
   threads,
-}: UseThreadDeletionOptions): ThreadDeletionProps => {
+}: UseThreadActionsOptions) => {
   const [deletingThreadId, setDeletingThreadId] = useState<string | null>(null);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
-
+  const [renamingThread, setRenamingThread] = useState<ThreadItem | null>(null);
+  const [isRenaming, setIsRenaming] = useState(false);
   const onDeleteThread = useCallback(
     (thread: ThreadItem) => {
       Alert.alert('Delete trip?', 'This removes the conversation permanently.', [
@@ -79,5 +87,29 @@ export const useThreadDeletion = ({
     ]);
   }, [threads, refresh]);
 
-  return { deletingThreadId, isDeletingAll, onDeleteAllTrips, onDeleteThread };
+  const onStartRename = useCallback((thread: ThreadItem) => setRenamingThread(thread), []);
+  const onCancelRename = useCallback(() => setRenamingThread(null), []);
+  const onConfirmRename = useCallback(
+    async (title: string) => {
+      if (!renamingThread) return;
+
+      setIsRenaming(true);
+
+      try {
+        await renameRemoteThread(renamingThread.id, title);
+        renameThread(renamingThread.id, title);
+        setRenamingThread(null);
+      } catch {
+        Alert.alert('Couldn’t rename this trip', 'Please try again.');
+      } finally {
+        setIsRenaming(false);
+      }
+    },
+    [renamingThread, renameThread]
+  );
+
+  return {
+    deletion: { deletingThreadId, isDeletingAll, onDeleteAllTrips, onDeleteThread },
+    rename: { renamingThread, isRenaming, onStartRename, onCancelRename, onConfirmRename },
+  };
 };

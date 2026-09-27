@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react-native';
 
 import { BOOKING_STATUSES, TOOL_NAMES } from '@repo/constants';
 
-import { useHotelAction } from '../useHotelAction';
+import { useTravelBookingActions } from '../useTravelBookingActions';
 import { makeSchemaHotel as makeHotel } from '../../test/fixtures';
 
 import type { TripState } from '@repo/types';
@@ -62,7 +62,9 @@ const setup = () => {
 };
 
 const getRenderer = (addHookRenderToolCall: jest.Mock): RegisteredRenderer =>
-  addHookRenderToolCall.mock.calls[0][0] as RegisteredRenderer;
+  addHookRenderToolCall.mock.calls.find(
+    ([renderer]: [RegisteredRenderer]) => renderer.name === TOOL_NAMES.HOTEL
+  )?.[0] as RegisteredRenderer;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -72,10 +74,15 @@ test('registers a renderer for the hotel tool', async () => {
   const { addHookRenderToolCall } = setup();
 
   await renderHook(() =>
-    useHotelAction({ state: {}, selectHotel: jest.fn(), sendMessage: jest.fn() })
+    useTravelBookingActions({
+      state: {},
+      selectFlight: jest.fn(),
+      selectHotel: jest.fn(),
+      sendMessage: jest.fn(),
+    })
   );
 
-  expect(addHookRenderToolCall).toHaveBeenCalledTimes(1);
+  expect(addHookRenderToolCall).toHaveBeenCalledTimes(2);
   expect(getRenderer(addHookRenderToolCall).name).toBe(TOOL_NAMES.HOTEL);
 });
 
@@ -83,7 +90,12 @@ test('renders a loading state while the tool call is in progress', async () => {
   const { addHookRenderToolCall } = setup();
 
   await renderHook(() =>
-    useHotelAction({ state: {}, selectHotel: jest.fn(), sendMessage: jest.fn() })
+    useTravelBookingActions({
+      state: {},
+      selectFlight: jest.fn(),
+      selectHotel: jest.fn(),
+      sendMessage: jest.fn(),
+    })
   );
 
   const element = getRenderer(addHookRenderToolCall).render({
@@ -99,7 +111,12 @@ test('renders an explicit empty state when no hotels matched', async () => {
   const { addHookRenderToolCall } = setup();
 
   await renderHook(() =>
-    useHotelAction({ state: {}, selectHotel: jest.fn(), sendMessage: jest.fn() })
+    useTravelBookingActions({
+      state: {},
+      selectFlight: jest.fn(),
+      selectHotel: jest.fn(),
+      sendMessage: jest.fn(),
+    })
   );
 
   const element = getRenderer(addHookRenderToolCall).render({
@@ -115,7 +132,12 @@ test('renders an error state for a malformed result', async () => {
   const { addHookRenderToolCall } = setup();
 
   await renderHook(() =>
-    useHotelAction({ state: {}, selectHotel: jest.fn(), sendMessage: jest.fn() })
+    useTravelBookingActions({
+      state: {},
+      selectFlight: jest.fn(),
+      selectHotel: jest.fn(),
+      sendMessage: jest.fn(),
+    })
   );
 
   const element = getRenderer(addHookRenderToolCall).render({
@@ -147,7 +169,14 @@ test('renders the hotel card wired to the current selection and booking lock sta
     },
   };
 
-  await renderHook(() => useHotelAction({ state, selectHotel: jest.fn(), sendMessage: jest.fn() }));
+  await renderHook(() =>
+    useTravelBookingActions({
+      state,
+      selectFlight: jest.fn(),
+      selectHotel: jest.fn(),
+      sendMessage: jest.fn(),
+    })
+  );
 
   const element = getRenderer(addHookRenderToolCall).render({
     status: 'complete',
@@ -167,7 +196,14 @@ test('onContinueBooking sends a message naming the selected hotel', async () => 
   const sendMessage = jest.fn();
   const hotel = makeHotel({ id: 'h2', name: 'Ocean View' });
 
-  await renderHook(() => useHotelAction({ state: {}, selectHotel: jest.fn(), sendMessage }));
+  await renderHook(() =>
+    useTravelBookingActions({
+      state: {},
+      selectFlight: jest.fn(),
+      selectHotel: jest.fn(),
+      sendMessage,
+    })
+  );
 
   const element = getRenderer(addHookRenderToolCall).render({
     status: 'complete',
@@ -185,7 +221,14 @@ test('onSelect forwards the hotel to selectHotel', async () => {
   const selectHotel = jest.fn();
   const hotel = makeHotel();
 
-  await renderHook(() => useHotelAction({ state: {}, selectHotel, sendMessage: jest.fn() }));
+  await renderHook(() =>
+    useTravelBookingActions({
+      state: {},
+      selectFlight: jest.fn(),
+      selectHotel,
+      sendMessage: jest.fn(),
+    })
+  );
 
   const element = getRenderer(addHookRenderToolCall).render({
     status: 'complete',

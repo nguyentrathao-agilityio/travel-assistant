@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
 // Services
-import { clearApiKey, getApiKey, setApiKey } from '../services/apiKeyStorage';
 import { verifyOpenAiApiKey } from '../services/openaiApiKey';
+
+// Storage
+import { clearApiKey, getApiKey, setApiKey } from '../storage';
 
 // Constants
 import { API_KEY_STATUS } from '../constants';

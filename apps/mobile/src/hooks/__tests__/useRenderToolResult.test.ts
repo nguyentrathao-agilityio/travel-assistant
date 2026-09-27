@@ -62,6 +62,29 @@ test('does not re-register when rerendered with the same deps', async () => {
   expect(mockAddHookRenderToolCall).toHaveBeenCalledTimes(1);
 });
 
+test('delegates to the latest render callback without re-registering', async () => {
+  const firstRender = jest.fn((): ReactElement => null as unknown as ReactElement);
+  const latestRender = jest.fn((): ReactElement => null as unknown as ReactElement);
+
+  const { rerender } = await renderHook(
+    ({ render }: { render: typeof firstRender }) =>
+      useRenderToolResult({ name: 'weatherTool', schema, render }),
+    { initialProps: { render: firstRender } }
+  );
+  const registered = mockAddHookRenderToolCall.mock.calls[0][0];
+
+  await rerender({ render: latestRender });
+  registered.render({ status: 'complete', result: '{}', args: { city: 'Hanoi' } });
+
+  expect(firstRender).not.toHaveBeenCalled();
+  expect(latestRender).toHaveBeenCalledWith({
+    status: 'complete',
+    result: '{}',
+    args: { city: 'Hanoi' },
+  });
+  expect(mockAddHookRenderToolCall).toHaveBeenCalledTimes(1);
+});
+
 test('re-registers when deps change', async () => {
   const render = jest.fn();
 

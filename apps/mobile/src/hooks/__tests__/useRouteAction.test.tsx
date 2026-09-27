@@ -4,7 +4,7 @@ import { TOOL_NAMES } from '@repo/constants';
 
 import { EmptyState, ErrorState, LoadingState } from '../../components/common';
 import { RouteCard } from '../../components/RouteCard';
-import { useRouteAction } from '../useRouteAction';
+import { useTravelInfoActions } from '../useTravelInfoActions';
 
 const mockUseRenderToolResult = jest.fn();
 
@@ -16,6 +16,11 @@ beforeEach(() => {
   mockUseRenderToolResult.mockClear();
 });
 
+const getRenderer = () =>
+  mockUseRenderToolResult.mock.calls.find(
+    ([options]: [{ name: string }]) => options.name === TOOL_NAMES.ROUTE
+  )?.[0];
+
 const routeData = {
   city: 'Da Nang',
   totalDurationMin: 180,
@@ -24,7 +29,7 @@ const routeData = {
 };
 
 test('registers with the routeTool name', async () => {
-  await renderHook(() => useRouteAction());
+  await renderHook(() => useTravelInfoActions());
 
   expect(mockUseRenderToolResult).toHaveBeenCalledWith(
     expect.objectContaining({ name: TOOL_NAMES.ROUTE })
@@ -32,8 +37,8 @@ test('registers with the routeTool name', async () => {
 });
 
 test('render returns LoadingState while the tool call is in progress', async () => {
-  await renderHook(() => useRouteAction());
-  const { render } = mockUseRenderToolResult.mock.calls[0][0];
+  await renderHook(() => useTravelInfoActions());
+  const { render } = getRenderer();
 
   const result = render({ status: 'inProgress', result: undefined, args: {} });
 
@@ -41,8 +46,8 @@ test('render returns LoadingState while the tool call is in progress', async () 
 });
 
 test('render returns ErrorState when the schema fails to parse', async () => {
-  await renderHook(() => useRouteAction());
-  const { render } = mockUseRenderToolResult.mock.calls[0][0];
+  await renderHook(() => useTravelInfoActions());
+  const { render } = getRenderer();
 
   const result = render({ status: 'complete', result: { unexpected: true }, args: {} });
 
@@ -50,8 +55,8 @@ test('render returns ErrorState when the schema fails to parse', async () => {
 });
 
 test('render returns EmptyState when no route stops were found', async () => {
-  await renderHook(() => useRouteAction());
-  const { render } = mockUseRenderToolResult.mock.calls[0][0];
+  await renderHook(() => useTravelInfoActions());
+  const { render } = getRenderer();
 
   const result = render({
     status: 'complete',
@@ -63,8 +68,8 @@ test('render returns EmptyState when no route stops were found', async () => {
 });
 
 test('render returns RouteCard when parse succeeds with stops', async () => {
-  await renderHook(() => useRouteAction());
-  const { render } = mockUseRenderToolResult.mock.calls[0][0];
+  await renderHook(() => useTravelInfoActions());
+  const { render } = getRenderer();
 
   const result = render({ status: 'complete', result: routeData, args: {} });
 

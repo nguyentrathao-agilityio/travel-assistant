@@ -12,12 +12,11 @@ import { ChatScreen } from '../screens';
 // Hooks
 import {
   useActiveThreadId,
+  useAgentThreadHistory,
   useChatAgent,
   useChatSuggestions,
   useChatVoice,
   useInterruptElement,
-  useSeedAgentHistory,
-  useThreadHistory,
   useTravelActions,
   useTripState,
 } from '../hooks';
@@ -45,9 +44,7 @@ export default function ChatRoute() {
   const { state: tripState, selectFlight, selectHotel } = useTripState(threadId);
   const { messages, isReady, isRunning, error, sendMessage, stop } = useChatAgent(threadId);
   const interruptElement = useInterruptElement();
-  const { messages: persistedMessages, isLoading: isHistoryLoading } = useThreadHistory(threadId);
-
-  useSeedAgentHistory(threadId, persistedMessages, isHistoryLoading);
+  const { isLoading: isHistoryLoading } = useAgentThreadHistory(threadId);
   useTravelActions({ selectFlight, selectHotel, sendMessage, state: tripState });
 
   const { suggestions } = useChatSuggestions({

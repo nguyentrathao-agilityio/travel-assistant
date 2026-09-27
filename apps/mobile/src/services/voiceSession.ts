@@ -4,7 +4,9 @@ import { OPENAI_API_KEY_HEADER } from '@repo/constants';
 // Utils
 import { resolveRuntimeUrl } from '../config';
 import { fetchWithTimeout } from '../utils/fetchWithTimeout';
-import { getApiKey } from './apiKeyStorage';
+
+// Storage
+import { getApiKey } from '../storage';
 
 interface VoiceSessionToken {
   token: string;

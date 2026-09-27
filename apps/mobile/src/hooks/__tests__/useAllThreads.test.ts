@@ -26,8 +26,10 @@ let queryClient: QueryClient;
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   createElement(QueryClientProvider, { client: queryClient }, children);
 
-afterEach(() => {
-  queryClient.clear();
+afterEach(async () => {
+  await act(async () => {
+    queryClient.clear();
+  });
 });
 
 beforeEach(() => {

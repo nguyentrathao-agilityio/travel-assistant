@@ -9,13 +9,7 @@ import { AllTripsScreen } from '../screens';
 import { goBackOrReplace } from '../utils/navigation';
 
 // Hooks
-import {
-  useActiveThreadId,
-  useAllThreads,
-  useStartNewTrip,
-  useThreadDeletion,
-  useThreadRename,
-} from '../hooks';
+import { useActiveThreadId, useAllThreads, useStartNewTrip, useThreadActions } from '../hooks';
 
 export default function ThreadsRoute() {
   const router = useRouter();
@@ -37,8 +31,12 @@ export default function ThreadsRoute() {
     tag: 'threads',
     threads,
   });
-  const deletion = useThreadDeletion({ refresh, removeThread, threads });
-  const rename = useThreadRename({ renameThread });
+  const { deletion, rename } = useThreadActions({
+    refresh,
+    removeThread,
+    renameThread,
+    threads,
+  });
 
   const handleOpenThread = useCallback(
     (threadId: string) => {

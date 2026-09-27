@@ -4,7 +4,7 @@ import { TOOL_NAMES } from '@repo/constants';
 
 import { EmptyState, ErrorState, LoadingState } from '../../components/common';
 import { PlacesCard } from '../../components/PlacesCard';
-import { usePlacesAction } from '../usePlacesAction';
+import { useTravelInfoActions } from '../useTravelInfoActions';
 
 const mockUseRenderToolResult = jest.fn();
 
@@ -15,6 +15,11 @@ jest.mock('../useRenderToolResult', () => ({
 beforeEach(() => {
   mockUseRenderToolResult.mockClear();
 });
+
+const getRenderer = () =>
+  mockUseRenderToolResult.mock.calls.find(
+    ([options]: [{ name: string }]) => options.name === TOOL_NAMES.PLACES
+  )?.[0];
 
 const placesData = {
   total: 1,
@@ -39,7 +44,7 @@ const placesData = {
 };
 
 test('registers with the placesTool name', async () => {
-  await renderHook(() => usePlacesAction());
+  await renderHook(() => useTravelInfoActions());
 
   expect(mockUseRenderToolResult).toHaveBeenCalledWith(
     expect.objectContaining({ name: TOOL_NAMES.PLACES })
@@ -47,8 +52,8 @@ test('registers with the placesTool name', async () => {
 });
 
 test('render returns LoadingState while the tool call is in progress', async () => {
-  await renderHook(() => usePlacesAction());
-  const { render } = mockUseRenderToolResult.mock.calls[0][0];
+  await renderHook(() => useTravelInfoActions());
+  const { render } = getRenderer();
 
   const result = render({ status: 'inProgress', result: undefined, args: {} });
 
@@ -56,8 +61,8 @@ test('render returns LoadingState while the tool call is in progress', async () 
 });
 
 test('render returns ErrorState when the schema fails to parse', async () => {
-  await renderHook(() => usePlacesAction());
-  const { render } = mockUseRenderToolResult.mock.calls[0][0];
+  await renderHook(() => useTravelInfoActions());
+  const { render } = getRenderer();
 
   const result = render({ status: 'complete', result: { unexpected: true }, args: {} });
 
@@ -65,8 +70,8 @@ test('render returns ErrorState when the schema fails to parse', async () => {
 });
 
 test('render returns EmptyState when no places matched', async () => {
-  await renderHook(() => usePlacesAction());
-  const { render } = mockUseRenderToolResult.mock.calls[0][0];
+  await renderHook(() => useTravelInfoActions());
+  const { render } = getRenderer();
 
   const result = render({ status: 'complete', result: { total: 0, results: [] }, args: {} });
 
@@ -74,8 +79,8 @@ test('render returns EmptyState when no places matched', async () => {
 });
 
 test('render returns PlacesCard when parse succeeds with results', async () => {
-  await renderHook(() => usePlacesAction());
-  const { render } = mockUseRenderToolResult.mock.calls[0][0];
+  await renderHook(() => useTravelInfoActions());
+  const { render } = getRenderer();
 
   const result = render({ status: 'complete', result: placesData, args: {} });
 
@@ -84,8 +89,8 @@ test('render returns PlacesCard when parse succeeds with results', async () => {
 });
 
 test('render parses a persisted JSON string result before validating', async () => {
-  await renderHook(() => usePlacesAction());
-  const { render } = mockUseRenderToolResult.mock.calls[0][0];
+  await renderHook(() => useTravelInfoActions());
+  const { render } = getRenderer();
 
   const result = render({ status: 'complete', result: JSON.stringify(placesData), args: {} });
 

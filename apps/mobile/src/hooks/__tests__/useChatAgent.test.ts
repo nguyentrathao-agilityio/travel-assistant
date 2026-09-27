@@ -85,6 +85,21 @@ test('sendMessage ignores blank input', async () => {
   expect(copilotkit.runAgent).not.toHaveBeenCalled();
 });
 
+test('sendMessage ignores input while the agent is already running', async () => {
+  const agent = makeAgent();
+  agent.isRunning = true;
+  const { copilotkit } = setup(agent);
+
+  const { result } = await renderHook(() => useChatAgent('thread-1'));
+
+  await act(async () => {
+    await result.current.sendMessage('another message');
+  });
+
+  expect(agent.addMessage).not.toHaveBeenCalled();
+  expect(copilotkit.runAgent).not.toHaveBeenCalled();
+});
+
 test('sendMessage adds a trimmed user message and runs the agent', async () => {
   const agent = makeAgent();
   const { copilotkit } = setup(agent);

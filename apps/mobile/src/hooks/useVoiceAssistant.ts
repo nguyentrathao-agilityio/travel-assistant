@@ -12,7 +12,6 @@ import {
   REALTIME_VOICE_WS_URL,
   VOICE_CONNECTING_TIMEOUT_MS,
   VOICE_ERROR_MESSAGES,
-  VOICE_LOCALE,
   VOICE_STATES,
   type VoiceState,
   type VoiceWebSocketPhase,
@@ -23,9 +22,11 @@ import {
   arrayBufferToBase64,
   calculateMicLevel,
   extractFinalTranscript,
+  isFinalTranscriptEvent,
   extractRealtimeErrorMessage,
   extractTranscriptDelta,
   resolveVoiceState,
+  voiceLocaleForText,
 } from '../utils/voice';
 
 // Types
@@ -79,6 +80,7 @@ interface UseVoiceAssistantResult {
   flushSpeech: () => void;
   startListening: () => void;
   stopListening: () => void;
+  cancelListening: () => void;
   stopSpeaking: () => void;
 }
 
@@ -104,6 +106,12 @@ export const useVoiceAssistant = ({
   const speechQueueRef = useRef<string[]>([]);
   const speechGenerationRef = useRef(0);
   const isSpeechActiveRef = useRef(false);
+  const sessionGenerationRef = useRef(0);
+  const isMountedRef = useRef(true);
+  const isFinalizingRef = useRef(false);
+  const isAgentRunningRef = useRef(isAgentRunning);
+
+  isAgentRunningRef.current = isAgentRunning;
 
   useEffect(() => {
     const wasRunning = wasAgentRunningRef.current;
@@ -155,16 +163,35 @@ export const useVoiceAssistant = ({
     }
   }, [audioStream, micLevel]);
 
-  const closeSession = useCallback(() => {
-    stopAudioStream();
-    const socket = wsRef.current;
+  const closeSession = useCallback(
+    (targetSocket: WebSocket | null = wsRef.current) => {
+      stopAudioStream();
 
-    wsRef.current = null;
+      if (wsRef.current === targetSocket) wsRef.current = null;
 
-    if (socket && socket.readyState === WebSocket.OPEN) socket.close();
-  }, [stopAudioStream]);
+      if (
+        targetSocket &&
+        (targetSocket.readyState === WebSocket.CONNECTING ||
+          targetSocket.readyState === WebSocket.OPEN)
+      ) {
+        targetSocket.close();
+      }
+    },
+    [stopAudioStream]
+  );
 
-  useEffect(() => closeSession, [closeSession]);
+  const closeSessionRef = useRef(closeSession);
+  closeSessionRef.current = closeSession;
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      sessionGenerationRef.current += 1;
+      closeSessionRef.current();
+    };
+  }, []);
 
   const clearConnectTimeout = useCallback(() => {
     if (connectTimeoutRef.current) {
@@ -219,7 +246,7 @@ export const useVoiceAssistant = ({
       isSpeechActiveRef.current = true;
       setIsSpeaking(true);
       Speech.speak(text, {
-        language: VOICE_LOCALE,
+        language: voiceLocaleForText(text),
         onDone: () => {
           if (generation !== speechGenerationRef.current) return;
 
@@ -260,14 +287,22 @@ export const useVoiceAssistant = ({
   }, []);
 
   const startListening = useCallback(() => {
-    if (wsPhaseRef.current !== VOICE_STATES.IDLE) return;
+    if (wsPhaseRef.current !== VOICE_STATES.IDLE || isAgentRunningRef.current) return;
+
+    const generation = sessionGenerationRef.current + 1;
+    sessionGenerationRef.current = generation;
+    const isCurrentSession = () =>
+      isMountedRef.current && sessionGenerationRef.current === generation;
 
     setErrorMessage(null);
     stopSpeaking();
+    isFinalizingRef.current = false;
     setPhase(VOICE_STATES.CONNECTING);
 
     requestRecordingPermissionsAsync()
       .then((permission) => {
+        if (!isCurrentSession()) return;
+
         if (!permission.granted) {
           setIsPermissionDenied(true);
           setErrorMessage(VOICE_ERROR_MESSAGES.PERMISSION_DENIED);
@@ -278,6 +313,8 @@ export const useVoiceAssistant = ({
         setIsPermissionDenied(false);
 
         return fetchVoiceSessionToken().then(({ token }) => {
+          if (!isCurrentSession()) return;
+
           hasFinalizedRef.current = false;
           setPartialTranscript('');
 
@@ -289,6 +326,11 @@ export const useVoiceAssistant = ({
           wsRef.current = socket;
 
           socket.onopen = () => {
+            if (!isCurrentSession() || wsRef.current !== socket) {
+              closeSession(socket);
+              return;
+            }
+
             isAudioStreamStoppedRef.current = false;
             socket.send(
               JSON.stringify({
@@ -313,10 +355,14 @@ export const useVoiceAssistant = ({
           };
 
           socket.onmessage = (event) => {
+            if (!isCurrentSession() || wsRef.current !== socket) return;
+
             const data = typeof event.data === 'string' ? event.data : '';
             const transcript = extractFinalTranscript(data);
 
             if (transcript) {
+              if (hasFinalizedRef.current) return;
+
               hasFinalizedRef.current = true;
 
               if (isVoiceModeActiveRef.current) {
@@ -327,6 +373,14 @@ export const useVoiceAssistant = ({
               closeSession();
               setPhase(VOICE_STATES.IDLE);
               onTranscript(transcript);
+              return;
+            }
+
+            if (isFinalTranscriptEvent(data)) {
+              hasFinalizedRef.current = true;
+              setPartialTranscript('');
+              closeSession(socket);
+              setPhase(VOICE_STATES.IDLE);
               return;
             }
 
@@ -349,6 +403,8 @@ export const useVoiceAssistant = ({
           };
 
           socket.onerror = () => {
+            if (!isCurrentSession() || wsRef.current !== socket) return;
+
             hasFinalizedRef.current = true;
             setPartialTranscript('');
             closeSession();
@@ -357,6 +413,8 @@ export const useVoiceAssistant = ({
           };
 
           socket.onclose = () => {
+            if (!isCurrentSession() || wsRef.current !== socket) return;
+
             wsRef.current = null;
             stopAudioStream();
             setPartialTranscript('');
@@ -370,13 +428,35 @@ export const useVoiceAssistant = ({
         });
       })
       .catch(() => {
+        if (!isCurrentSession()) return;
+
         setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
         setPhase(VOICE_STATES.IDLE);
       });
   }, [audioStream, closeSession, onTranscript, setPhase, stopAudioStream, stopSpeaking]);
 
   const stopListening = useCallback(() => {
+    const socket = wsRef.current;
+
+    if (
+      wsPhaseRef.current !== VOICE_STATES.LISTENING ||
+      isFinalizingRef.current ||
+      socket?.readyState !== WebSocket.OPEN
+    ) {
+      return;
+    }
+
+    isFinalizingRef.current = true;
+    stopAudioStream();
+    socket.send(JSON.stringify({ type: 'input_audio_buffer.commit' }));
+    setPhase(VOICE_STATES.PROCESSING);
+  }, [setPhase, stopAudioStream]);
+
+  const cancelListening = useCallback(() => {
+    sessionGenerationRef.current += 1;
     hasFinalizedRef.current = true;
+    isFinalizingRef.current = false;
+    setPartialTranscript('');
     closeSession();
     setPhase(VOICE_STATES.IDLE);
   }, [closeSession, setPhase]);
@@ -393,6 +473,7 @@ export const useVoiceAssistant = ({
 
   return {
     enqueueSpeech,
+    cancelListening,
     errorMessage,
     flushSpeech,
     isPermissionDenied,

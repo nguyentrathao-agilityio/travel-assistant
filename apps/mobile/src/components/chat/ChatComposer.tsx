@@ -80,7 +80,7 @@ export const ChatComposer = ({
         )}
       <View style={styles.inputBar}>
         <VoiceButton
-          disabled={isAwaitingApproval || isVoiceModeActive}
+          disabled={isAwaitingApproval || isRunning || isVoiceModeActive}
           onStart={onStartListening}
           onStopListening={onStopListening}
           onStopSpeaking={onStopSpeaking}

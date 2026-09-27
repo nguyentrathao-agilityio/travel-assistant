@@ -296,6 +296,12 @@ test('the voice button is disabled from starting while awaiting approval', async
   expect(screen.getByLabelText('Ask by voice')).toBeDisabled();
 });
 
+test('the voice button is disabled from starting while the agent is running', async () => {
+  await renderScreen({ isRunning: true });
+
+  expect(screen.getByLabelText('Ask by voice')).toBeDisabled();
+});
+
 test('the voice button is disabled while voice mode is active', async () => {
   await renderScreen({ voice: { isVoiceModeActive: true } });
 

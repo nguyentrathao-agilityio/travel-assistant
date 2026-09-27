@@ -8,6 +8,7 @@ import type { Message } from '@copilotkit/react-native/headless';
 type Voice = ReturnType<typeof useVoiceAssistant>;
 
 interface Spies {
+  cancelListening: jest.Mock;
   enqueueSpeech: jest.Mock;
   flushSpeech: jest.Mock;
   startListening: jest.Mock;
@@ -16,6 +17,7 @@ interface Spies {
 }
 
 const makeSpies = (): Spies => ({
+  cancelListening: jest.fn(),
   enqueueSpeech: jest.fn(),
   flushSpeech: jest.fn(),
   startListening: jest.fn(),
@@ -67,7 +69,7 @@ test('stop deactivates the loop and halts listening/speaking', async () => {
   });
 
   expect(result.current.isActive).toBe(false);
-  expect(spies.stopListening).toHaveBeenCalledTimes(1);
+  expect(spies.cancelListening).toHaveBeenCalledTimes(1);
   expect(spies.stopSpeaking).toHaveBeenCalledTimes(1);
 });
 

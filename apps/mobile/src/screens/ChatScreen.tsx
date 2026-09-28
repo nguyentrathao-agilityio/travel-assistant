@@ -105,7 +105,7 @@ export const ChatScreen = ({
   const handleComposerSend = useCallback(
     (message: string) => {
       onSend(message);
-      requestAnimationFrame(() => messageListRef.current?.scrollToEnd());
+      requestAnimationFrame(() => messageListRef.current?.scrollToLatest());
     },
     [onSend]
   );

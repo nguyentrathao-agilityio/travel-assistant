@@ -1,8 +1,9 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import {
   CHAT_LIST_INITIAL_NUM_TO_RENDER,
+  CHAT_LIST_LOAD_OLDER_THRESHOLD,
   CHAT_LIST_MAX_TO_RENDER_PER_BATCH,
   CHAT_LIST_WINDOW_SIZE,
 } from '../../constants';
@@ -15,12 +16,8 @@ import { ChatScrollView } from './ChatScrollView';
 import type { RenderableMessage } from '../../utils/chatMessages';
 import type { Message, Suggestion } from '@copilotkit/react-native/headless';
 import type { ReactElement } from 'react';
-import type { NativeScrollEvent, NativeSyntheticEvent, ScrollViewProps } from 'react-native';
+import type { ScrollViewProps } from 'react-native';
 import type { SharedValue } from 'react-native-reanimated';
-
-// Distance from the top of the list, in points, at which the previous transcript page is requested.
-const LOAD_OLDER_THRESHOLD = 80;
-const MAINTAIN_VISIBLE_CONTENT_POSITION = { minIndexForVisible: 1 };
 
 export interface OlderHistoryProps {
   hasNewer: boolean;
@@ -33,7 +30,7 @@ export interface OlderHistoryProps {
 }
 
 export interface ChatMessageListHandle {
-  scrollToEnd: (animated?: boolean) => void;
+  scrollToLatest: (animated?: boolean) => void;
 }
 
 interface ChatMessageListProps extends OlderHistoryProps {
@@ -66,12 +63,8 @@ export const ChatMessageList = forwardRef<ChatMessageListHandle, ChatMessageList
   ) => {
     const { colors } = useShellTheme();
     const listRef = useRef<FlatList<RenderableMessage>>(null);
-    const isAtBottomRef = useRef(true);
-    const olderRequestedRef = useRef(false);
-    // True until the user first drags the list: the opened thread keeps snapping to its newest message.
-    const isInitialScrollRef = useRef(true);
-    const edgeIdsRef = useRef<{ first?: string; last?: string }>({});
-    const rows = renderableMessages(messages);
+    const rows = useMemo(() => renderableMessages(messages), [messages]);
+    const newestFirstRows = useMemo(() => [...rows].reverse(), [rows]);
     const toolMessageIndex = useMemo(() => buildToolMessageIndex(messages), [messages]);
     const lastRow = rows.at(-1);
     const hasEmptyAssistantRow =
@@ -79,69 +72,20 @@ export const ChatMessageList = forwardRef<ChatMessageListHandle, ChatMessageList
       !messageText(lastRow.content).trim() &&
       !lastRow.toolCalls?.length;
     const isAwaitingApproval = interruptElement !== null;
+    const canLoadOlder = hasOlder && !isLoadingOlder && !olderError;
 
     useImperativeHandle(ref, () => ({
-      scrollToEnd: (animated = true) => listRef.current?.scrollToEnd({ animated }),
+      scrollToLatest: (animated = true) => listRef.current?.scrollToOffset({ animated, offset: 0 }),
     }));
-
-    const firstRowId = rows[0]?.id;
-    const lastRowId = lastRow?.id;
-
-    // Auto-scrolls to new content only; a prepended older page keeps the last row and must not scroll.
-    useEffect(() => {
-      const previous = edgeIdsRef.current;
-      const isPrepend = previous.first !== firstRowId && previous.last === lastRowId;
-
-      edgeIdsRef.current = { first: firstRowId, last: lastRowId };
-
-      if (!isPrepend && rows.length > 0 && isAtBottomRef.current) {
-        listRef.current?.scrollToEnd({ animated: true });
-      }
-    }, [rows.length, messages, interruptElement, firstRowId, lastRowId, suggestions.length]);
-
-    useEffect(() => {
-      if (!isLoadingOlder) olderRequestedRef.current = false;
-    }, [isLoadingOlder]);
-
-    const handleContentSizeChange = useCallback(() => {
-      if (isInitialScrollRef.current) listRef.current?.scrollToEnd({ animated: false });
-    }, []);
-
-    const handleScrollBeginDrag = useCallback(() => {
-      isInitialScrollRef.current = false;
-    }, []);
-
-    const handleScroll = useCallback(
-      (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-        if (isInitialScrollRef.current) return;
-
-        if (event.nativeEvent.contentOffset.y > LOAD_OLDER_THRESHOLD) {
-          olderRequestedRef.current = false;
-          return;
-        }
-
-        if (!hasOlder || isLoadingOlder || olderError || olderRequestedRef.current) return;
-
-        olderRequestedRef.current = true;
-        onLoadOlder();
-      },
-      [hasOlder, isLoadingOlder, olderError, onLoadOlder]
-    );
 
     const renderScrollComponent = useCallback(
       (props: ScrollViewProps) => (
-        <ChatScrollView
-          {...props}
-          extraContentPadding={extraContentPadding}
-          onEndVisible={(visible) => {
-            isAtBottomRef.current = visible;
-          }}
-        />
+        <ChatScrollView {...props} extraContentPadding={extraContentPadding} inverted />
       ),
       [extraContentPadding]
     );
 
-    const olderHistoryHeader = isLoadingOlder ? (
+    const olderHistoryRow = isLoadingOlder ? (
       <View style={styles.olderHistoryRow}>
         <ActivityIndicator
           accessibilityLabel="Loading older messages"
@@ -168,19 +112,12 @@ export const ChatMessageList = forwardRef<ChatMessageListHandle, ChatMessageList
     return (
       <FlatList
         contentContainerStyle={styles.content}
-        data={rows}
+        data={newestFirstRows}
         initialNumToRender={CHAT_LIST_INITIAL_NUM_TO_RENDER}
+        inverted
         keyExtractor={(item) => item.id}
-        ListHeaderComponent={olderHistoryHeader}
-        maintainVisibleContentPosition={MAINTAIN_VISIBLE_CONTENT_POSITION}
-        maxToRenderPerBatch={CHAT_LIST_MAX_TO_RENDER_PER_BATCH}
-        onContentSizeChange={handleContentSizeChange}
-        onEndReached={hasNewer ? onLoadNewer : undefined}
-        onScroll={handleScroll}
-        onScrollBeginDrag={handleScrollBeginDrag}
-        scrollEventThrottle={100}
-        testID="chat-message-list"
-        ListFooterComponent={
+        ListFooterComponent={olderHistoryRow}
+        ListHeaderComponent={
           <>
             {isRunning && !hasEmptyAssistantRow ? (
               <View style={styles.typingIndicatorWrap}>
@@ -193,12 +130,17 @@ export const ChatMessageList = forwardRef<ChatMessageListHandle, ChatMessageList
             ) : null}
           </>
         }
+        maxToRenderPerBatch={CHAT_LIST_MAX_TO_RENDER_PER_BATCH}
+        onEndReached={canLoadOlder ? onLoadOlder : undefined}
+        onEndReachedThreshold={CHAT_LIST_LOAD_OLDER_THRESHOLD}
+        onStartReached={hasNewer ? onLoadNewer : undefined}
         ref={listRef}
         renderItem={({ item }) => (
           <MessageBubble message={item} toolMessageIndex={toolMessageIndex} />
         )}
         renderScrollComponent={renderScrollComponent}
         style={styles.list}
+        testID="chat-message-list"
         windowSize={CHAT_LIST_WINDOW_SIZE}
       />
     );
@@ -212,6 +154,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
+    flexGrow: 1,
+    justifyContent: 'flex-end',
     paddingHorizontal: shellSpacing.lg,
     paddingVertical: shellSpacing.xl,
   },

@@ -17,6 +17,7 @@ import {
   useChatSuggestions,
   useChatVoice,
   useInterruptElement,
+  useTranscriptHistory,
   useTravelActions,
   useTripState,
 } from '../hooks';
@@ -42,17 +43,31 @@ export default function ChatRoute() {
   }, [threadId, markActive]);
 
   const { state: tripState, selectFlight, selectHotel } = useTripState(threadId);
-  const { messages, isReady, isRunning, error, sendMessage, stop } = useChatAgent(threadId);
+  const {
+    messages: liveMessages,
+    isReady,
+    isRunning,
+    error,
+    sendMessage,
+    stop,
+  } = useChatAgent(threadId);
   const interruptElement = useInterruptElement();
-  const { isLoading: isHistoryLoading } = useAgentThreadHistory(threadId);
+  const { isLoading: isAgentHistoryLoading } = useAgentThreadHistory(threadId);
+  const {
+    fetchNewer,
+    fetchOlder,
+    hasNewer,
+    hasOlder,
+    isLoading: isTranscriptLoading,
+    isLoadingOlder,
+    messages,
+    olderError,
+    retryOlder,
+  } = useTranscriptHistory(threadId, liveMessages, isRunning);
+  const isHistoryLoading = isAgentHistoryLoading || isTranscriptLoading;
   useTravelActions({ selectFlight, selectHotel, sendMessage, state: tripState });
 
-  const { suggestions } = useChatSuggestions({
-    isAwaitingApproval: interruptElement !== null,
-    isRunning,
-    messageCount: messages.length,
-    state: tripState,
-  });
+  const { suggestions } = useChatSuggestions();
 
   const voice = useChatVoice({
     autoStart: params.focusVoice === '1',
@@ -70,14 +85,22 @@ export default function ChatRoute() {
   return (
     <ChatScreen
       error={error}
+      hasNewer={hasNewer}
+      hasOlder={hasOlder}
       interruptElement={interruptElement}
+      isLoadingOlder={isLoadingOlder}
       isReady={isReady && !isHistoryLoading}
       isRunning={isRunning}
       messages={messages}
+      olderError={olderError}
       onBack={handleBack}
+      onLoadNewer={fetchNewer}
+      onLoadOlder={fetchOlder}
+      onRetryOlder={retryOlder}
       onSend={sendMessage}
       onStop={stop}
       suggestions={suggestions}
+      threadId={threadId}
       voice={voice}
     />
   );

@@ -54,7 +54,7 @@ const createStyles = (colors: ShellColors) =>
     row: {
       flexDirection: 'row',
       gap: shellSpacing.sm,
-      paddingHorizontal: shellSpacing.lg,
+      paddingLeft: shellSpacing.lg,
     },
     chip: {
       alignItems: 'center',

@@ -3,6 +3,7 @@ import { AGENT_NAME } from '@repo/constants';
 import {
   findEmptyThreadId,
   keepNewestEmptyThread,
+  deleteRemoteThread,
   renameRemoteThread,
   toThreadItem,
 } from '../threadHistory';
@@ -83,4 +84,22 @@ test('renameRemoteThread updates metadata with the trimmed title and keeps resou
   expect(update).toHaveBeenCalledWith('t1', {
     metadata: { resourceId: AGENT_NAME, customTitle: 'Hoi An getaway' },
   });
+});
+
+test('deleteRemoteThread removes the LangGraph thread and its transcript', async () => {
+  const deleteThread = jest.fn().mockResolvedValue(undefined);
+  const fetchMock = jest
+    .spyOn(global, 'fetch')
+    .mockResolvedValue(new Response(null, { status: 204 }));
+  process.env.EXPO_PUBLIC_RUNTIME_URL = 'http://192.0.2.1:8123';
+  (getLanggraphClient as jest.Mock).mockReturnValue({ threads: { delete: deleteThread } });
+
+  await deleteRemoteThread('thread/1');
+
+  expect(deleteThread).toHaveBeenCalledWith('thread/1');
+  expect(fetchMock).toHaveBeenCalledWith(
+    'http://192.0.2.1:8123/threads/thread%2F1/messages',
+    expect.objectContaining({ method: 'DELETE' })
+  );
+  fetchMock.mockRestore();
 });

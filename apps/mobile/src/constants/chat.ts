@@ -48,3 +48,8 @@ export const EMPTY_STATE_SUGGESTIONS: Array<{
 ];
 
 export const DESTINATION_PILLS = ['Da Nang', 'Hanoi', 'Bangkok', 'Tokyo'] as const;
+
+// FlatList render window for chat: fewer mounted cards/images than the RN default (21 viewports).
+export const CHAT_LIST_WINDOW_SIZE = 7;
+export const CHAT_LIST_INITIAL_NUM_TO_RENDER = 12;
+export const CHAT_LIST_MAX_TO_RENDER_PER_BATCH = 8;

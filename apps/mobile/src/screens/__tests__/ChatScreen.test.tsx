@@ -66,12 +66,20 @@ const baseVoice: ChatVoiceProps = {
 };
 
 const baseProps: Parameters<typeof ChatScreen>[0] = {
+  threadId: 'thread-1',
   error: null,
+  hasNewer: false,
+  hasOlder: false,
   interruptElement: null as ReactElement | null,
+  isLoadingOlder: false,
   isReady: true,
   isRunning: false,
   messages: [] as Message[],
+  olderError: null,
   onBack: jest.fn(),
+  onLoadNewer: jest.fn(),
+  onLoadOlder: jest.fn(),
+  onRetryOlder: jest.fn(),
   onSend: jest.fn(),
   onStop: jest.fn(),
   suggestions: [],
@@ -192,6 +200,52 @@ test('renders message bubbles for the conversation', async () => {
 
   expect(screen.getByText('Plan a trip to Hue')).toBeOnTheScreen();
   expect(screen.getByText('Sure, one moment.')).toBeOnTheScreen();
+});
+
+test('remounts the message list when opening another thread', async () => {
+  const firstMessages = [
+    { id: '1', role: 'user', content: 'First thread' },
+  ] as unknown as Message[];
+  const secondMessages = [
+    { id: '2', role: 'assistant', content: 'Newest message in second thread' },
+  ] as unknown as Message[];
+  const tree = (threadId: string, messages: Message[]) => (
+    <SafeAreaProvider initialMetrics={SAFE_AREA_INITIAL_METRICS}>
+      <ThemeProvider>
+        <ChatScreen {...baseProps} messages={messages} threadId={threadId} />
+      </ThemeProvider>
+    </SafeAreaProvider>
+  );
+  const { rerender } = await render(tree('thread-1', firstMessages));
+  const firstList = screen.getByTestId('chat-message-list');
+
+  await rerender(tree('thread-2', secondMessages));
+
+  expect(screen.getByTestId('chat-message-list')).not.toBe(firstList);
+});
+
+test('shows older-history loading at the top without hiding current messages', async () => {
+  await renderScreen({
+    messages: [{ id: 'm20', role: 'user', content: 'Current message' }] as Message[],
+    isLoadingOlder: true,
+  });
+
+  expect(screen.getByLabelText('Loading older messages')).toBeOnTheScreen();
+  expect(screen.getByText('Current message')).toBeOnTheScreen();
+});
+
+test('offers a retry at the top when older history fails to load', async () => {
+  const user = userEvent.setup();
+  const { onRetryOlder } = await renderScreen({
+    messages: [{ id: 'm20', role: 'user', content: 'Current message' }] as Message[],
+    olderError: 'Could not load older messages.',
+  });
+
+  expect(screen.getByText('Could not load older messages.')).toBeOnTheScreen();
+  await user.press(screen.getByRole('button', { name: 'Retry loading older messages' }));
+
+  expect(onRetryOlder).toHaveBeenCalledTimes(1);
+  expect(screen.getByText('Current message')).toBeOnTheScreen();
 });
 
 test('shows the thinking indicator while running with a non-empty last turn', async () => {

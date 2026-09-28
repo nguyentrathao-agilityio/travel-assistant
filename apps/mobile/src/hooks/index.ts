@@ -15,3 +15,4 @@ export * from './useInterruptElement';
 export * from './useVoiceAssistant';
 export * from './useChatVoice';
 export * from './useTravelActions';
+export * from './useTranscriptHistory';

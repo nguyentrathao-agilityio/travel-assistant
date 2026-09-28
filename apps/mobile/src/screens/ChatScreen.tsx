@@ -9,7 +9,11 @@ import { ChatLayout, VoiceModeOverlay } from '../components';
 import { ChatComposer } from '../components/chat/ChatComposer';
 import { ChatEmptyState } from '../components/chat/ChatEmptyState';
 import { ChatHeader } from '../components/chat/ChatHeader';
-import { ChatMessageList, type ChatMessageListHandle } from '../components/chat/ChatMessageList';
+import {
+  ChatMessageList,
+  type ChatMessageListHandle,
+  type OlderHistoryProps,
+} from '../components/chat/ChatMessageList';
 import { shellSpacing, useShellTheme } from '../theme';
 import { renderableMessages } from '../utils/chatMessages';
 
@@ -18,7 +22,8 @@ import type { ShellColors } from '../theme';
 import type { Message, Suggestion } from '@copilotkit/react-native/headless';
 import type { ReactElement } from 'react';
 
-interface ChatScreenProps {
+interface ChatScreenProps extends OlderHistoryProps {
+  threadId: string;
   messages: Message[];
   isReady: boolean;
   isRunning: boolean;
@@ -32,6 +37,7 @@ interface ChatScreenProps {
 }
 
 export const ChatScreen = ({
+  threadId,
   messages,
   isReady,
   isRunning,
@@ -39,7 +45,14 @@ export const ChatScreen = ({
   interruptElement,
   suggestions,
   voice,
+  hasNewer,
+  hasOlder,
+  isLoadingOlder,
+  olderError,
   onBack,
+  onLoadNewer,
+  onLoadOlder,
+  onRetryOlder,
   onSend,
   onStop,
 }: ChatScreenProps) => {
@@ -118,11 +131,19 @@ export const ChatScreen = ({
     />
   ) : (
     <ChatMessageList
+      key={threadId}
       ref={messageListRef}
       extraContentPadding={extraContentPadding}
+      hasNewer={hasNewer}
+      hasOlder={hasOlder}
       interruptElement={interruptElement}
+      isLoadingOlder={isLoadingOlder}
       isRunning={isRunning}
       messages={messages}
+      olderError={olderError}
+      onLoadNewer={onLoadNewer}
+      onLoadOlder={onLoadOlder}
+      onRetryOlder={onRetryOlder}
       onSuggestionPress={handleSuggestionPress}
       suggestions={suggestions}
     />

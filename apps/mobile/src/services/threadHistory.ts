@@ -6,6 +6,7 @@ import { AGENT_NAME, GRAPH_ID } from '@repo/constants';
 // Utils
 import { generateThreadId } from './generateThreadId';
 import { getLanggraphClient } from './langgraphClient';
+import { deleteRemoteTranscript } from './transcript';
 
 export interface ThreadItem {
   id: string;
@@ -118,8 +119,10 @@ export const fetchThreadValues = async (
   return thread.values as Record<string, unknown> | undefined;
 };
 
-export const deleteRemoteThread = (threadId: string): Promise<void> =>
-  getLanggraphClient().threads.delete(threadId);
+export const deleteRemoteThread = async (threadId: string): Promise<void> => {
+  await getLanggraphClient().threads.delete(threadId);
+  await deleteRemoteTranscript(threadId);
+};
 
 // Keeps resourceId so the thread stays discoverable by fetchRecentThreads/fetchThreadsPage's search filter.
 export const renameRemoteThread = (threadId: string, title: string): Promise<void> =>
@@ -133,7 +136,7 @@ export const renameRemoteThread = (threadId: string, title: string): Promise<voi
 export const resetRemoteThread = async (threadId: string): Promise<string> => {
   const newThreadId = generateThreadId();
 
-  await getLanggraphClient().threads.delete(threadId);
+  await deleteRemoteThread(threadId);
   await createRemoteThread(newThreadId);
 
   return newThreadId;

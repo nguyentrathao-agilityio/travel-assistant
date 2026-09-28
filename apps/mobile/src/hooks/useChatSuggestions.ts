@@ -6,54 +6,33 @@ import { MAX_VISIBLE_SUGGESTIONS } from '../constants';
 
 // Types
 import type { Suggestion } from '@copilotkit/react-native/headless';
-import type { TripState } from '@repo/types';
-
-interface UseChatSuggestionsParams {
-  state: TripState;
-  isAwaitingApproval: boolean;
-  isRunning: boolean;
-  messageCount: number;
-}
 
 interface UseChatSuggestionsResult {
   suggestions: Suggestion[];
   isLoading: boolean;
 }
 
-const tripStateSummary = (state: TripState): string => {
-  const facts: string[] = [];
+const SUGGESTION_INSTRUCTIONS = `Suggest at most ${MAX_VISIBLE_SUGGESTIONS} short, natural next actions for
+  the user's trip planning, based on what the assistant just did in this conversation and the
+  current trip state. For example: after showing flights, suggest hotels or weather; after a hotel,
+  suggest local tips or nearby places; after a full itinerary, suggest local tips. Keep each
+  suggestion under 6 words.`;
 
-  if (state.destination) facts.push(`destination is ${state.destination}`);
-  if (state.flights?.departure) facts.push('a flight is already selected');
-  if (state.hotel) facts.push('a hotel is already selected');
-
-  return facts.length ? facts.join('; ') : 'no trip details confirmed yet';
-};
-
-// Suggestions come from CopilotKit's LLM engine, grounded in trip state — never a hardcoded list.
-export const useChatSuggestions = ({
-  state,
-  isAwaitingApproval,
-  isRunning,
-  messageCount,
-}: UseChatSuggestionsParams): UseChatSuggestionsResult => {
-  useConfigureSuggestions(
-    isAwaitingApproval || isRunning
-      ? null
-      : {
-          instructions: `Suggest at most ${MAX_VISIBLE_SUGGESTIONS} short, natural next actions for
-            the user's trip planning, based on what the assistant just did in this conversation and
-            the current trip state (${tripStateSummary(state)}). For example: after showing flights,
-            suggest hotels or weather; after a hotel, suggest local tips or nearby places; after a
-            full itinerary, suggest local tips. Keep each suggestion under 6 words.`,
-          minSuggestions: 1,
-          maxSuggestions: MAX_VISIBLE_SUGGESTIONS,
-          available: 'after-first-message',
-          providerAgentId: AGENT_NAME,
-          consumerAgentId: AGENT_NAME,
-        },
-    [state, messageCount, isRunning, isAwaitingApproval]
-  );
+/**
+ * Suggestions come from CopilotKit's LLM engine — never a hardcoded list. The config is constant:
+ * CopilotKit reloads suggestions once when each agent run ends and seeds that run with the agent's
+ * messages and trip state, while any config change (e.g. trip state embedded in the instructions)
+ * would start extra suggestion runs mid-run. The chat UI hides chips while running or awaiting approval.
+ */
+export const useChatSuggestions = (): UseChatSuggestionsResult => {
+  useConfigureSuggestions({
+    instructions: SUGGESTION_INSTRUCTIONS,
+    minSuggestions: 1,
+    maxSuggestions: MAX_VISIBLE_SUGGESTIONS,
+    available: 'after-first-message',
+    providerAgentId: AGENT_NAME,
+    consumerAgentId: AGENT_NAME,
+  });
 
   const { suggestions, isLoading } = useSuggestions({ agentId: AGENT_NAME });
 

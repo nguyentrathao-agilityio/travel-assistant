@@ -9,7 +9,7 @@ import { Card, ConfirmBanner, Typography } from './common';
 import { FlightOptionItem } from './FlightOptionItem';
 
 // Hooks
-import { useConfirmedSelection } from '../hooks';
+import { useConfirmedSelection } from '../hooks/useConfirmedSelection';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';

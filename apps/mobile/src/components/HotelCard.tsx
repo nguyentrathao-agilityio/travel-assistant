@@ -6,7 +6,7 @@ import { Card, ConfirmBanner, Typography } from './common';
 import { HotelOptionItem } from './HotelOptionItem';
 
 // Hooks
-import { useConfirmedSelection } from '../hooks';
+import { useConfirmedSelection } from '../hooks/useConfirmedSelection';
 
 // Utils
 import { shellSpacing } from '../theme';

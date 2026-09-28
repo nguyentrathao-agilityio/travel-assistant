@@ -14,7 +14,8 @@ export const OBSERVABILITY_STATUSES = {
 export const UNKNOWN_ERROR_TYPE = 'UnknownError';
 export const UNKNOWN_TOOL_NAME = 'unknownTool';
 export const RICH_UI_MIDDLEWARE_NAME = 'RichUiModelContent';
-
+export const TOOL_MESSAGE_ORDER_MIDDLEWARE_NAME = 'ToolMessageOrder';
+export const SUMMARIZATION_TRIGGER_CONTEXT_FRACTION = 0.75;
 export const SUMMARIZATION_TRIGGER_MESSAGES = 20;
 export const SUMMARIZATION_KEEP_MESSAGES = 10;
 

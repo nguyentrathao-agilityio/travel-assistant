@@ -1,6 +1,8 @@
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { SUMMARY_MESSAGE_PREFIX } from '@repo/constants';
+
 // Constants
 import type { SpecializedAgentConfig } from '@/constants/agent-config';
 
@@ -20,6 +22,7 @@ const {
   modelFallbackMiddlewareMock,
   modelRetryMiddlewareMock,
   toolCallLimitMiddlewareMock,
+  createTranscriptMiddlewareMock,
 } = vi.hoisted(() => ({
   createAgentMock: vi.fn(),
   dynamicSystemPromptMiddlewareMock: vi.fn((fn: unknown) => ({
@@ -40,6 +43,7 @@ const {
   modelFallbackMiddlewareMock: vi.fn(() => 'model-fallback-middleware'),
   modelRetryMiddlewareMock: vi.fn(() => 'model-retry-middleware'),
   toolCallLimitMiddlewareMock: vi.fn(() => 'tool-call-limit-middleware'),
+  createTranscriptMiddlewareMock: vi.fn(() => 'transcript-middleware'),
 }));
 
 vi.mock('langchain', () => ({
@@ -85,8 +89,16 @@ vi.mock('@/agent/middleware/rich-ui', () => ({
   richUiModelMiddleware: 'rich-ui-middleware',
 }));
 
+vi.mock('@/agent/middleware/tool-message-order', () => ({
+  toolMessageOrderMiddleware: 'tool-message-order-middleware',
+}));
+
 vi.mock('@/agent/middleware/observability', () => ({
   createObservabilityMiddleware: createObservabilityMiddlewareMock,
+}));
+
+vi.mock('@/agent/middleware/transcript', () => ({
+  createTranscriptMiddleware: createTranscriptMiddlewareMock,
 }));
 
 vi.mock('@/state', () => ({
@@ -128,10 +140,12 @@ describe('createSpecializedAgent', () => {
     expect(call.middleware).toEqual([
       'copilotkit-middleware',
       'summarization-middleware',
+      'transcript-middleware',
       'moderation-middleware',
       'domain-state-middleware:general',
       'tool-call-limit-middleware',
       'observability-middleware:general',
+      'tool-message-order-middleware',
       'rich-ui-middleware',
       { __type: 'dynamicSystemPromptMiddleware', fn: expect.any(Function) },
       'model-fallback-middleware',
@@ -145,8 +159,9 @@ describe('createSpecializedAgent', () => {
     });
     expect(summarizationMiddlewareMock).toHaveBeenCalledWith({
       model: 'fake-model',
-      trigger: { messages: 20 },
+      trigger: [{ fraction: 0.75 }, { messages: 20 }],
       keep: { messages: 10 },
+      summaryPrefix: SUMMARY_MESSAGE_PREFIX,
     });
     expect(openAIModerationMiddlewareMock).toHaveBeenCalledWith({
       model: 'fake-model',
@@ -166,7 +181,9 @@ describe('createSpecializedAgent', () => {
       config({ name: 'plan', prompt: { ...sections, includeMemoryContext: true } }),
       'sk-request'
     );
-    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[7].fn;
+    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware.find(
+      (entry: { __type?: string }) => entry?.__type === 'dynamicSystemPromptMiddleware'
+    ).fn;
 
     const fakeState = { messages: [] };
 
@@ -229,7 +246,9 @@ describe('createSpecializedAgent', () => {
 
   it('skips memory lookup and passes an empty memories list when includeMemoryContext is not set', async () => {
     createSpecializedAgent(config(), 'sk-request');
-    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware[7].fn;
+    const dynamicPromptFn = createAgentMock.mock.calls[0][0].middleware.find(
+      (entry: { __type?: string }) => entry?.__type === 'dynamicSystemPromptMiddleware'
+    ).fn;
 
     const fakeState = { messages: [] };
 

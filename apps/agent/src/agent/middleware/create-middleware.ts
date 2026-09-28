@@ -11,6 +11,8 @@ import { richUiModelMiddleware } from './rich-ui';
 import { createSummarizationMiddleware } from './summarization';
 import { createSystemPromptMiddleware } from './system-prompt';
 import { createToolCallLimitMiddleware } from './tool-call-limit';
+import { toolMessageOrderMiddleware } from './tool-message-order';
+import { createTranscriptMiddleware } from './transcript';
 
 type AgentModel = Parameters<typeof createModerationMiddleware>[0];
 
@@ -27,11 +29,13 @@ export const createAgentMiddleware = ({
 }: CreateAgentMiddlewareOptions) => [
   createCopilotkitMiddleware(),
   createSummarizationMiddleware(model),
+  createTranscriptMiddleware(),
   createModerationMiddleware(model),
   createDomainStateMiddleware(config.name),
   createToolCallLimitMiddleware(),
   ...createApprovalMiddleware(config.approvalTools),
   createObservabilityMiddleware(config.name),
+  toolMessageOrderMiddleware,
   richUiModelMiddleware,
   createSystemPromptMiddleware(config.prompt),
   modelFallbackMiddleware(fallbackModel),

@@ -5,7 +5,7 @@ import { PostgresStore } from '@langchain/langgraph-checkpoint-postgres/store';
 import { POSTGRES_URL } from '@/constants';
 
 // Infrastructure
-import { knowledgeStore } from '@/infrastructure/persistence';
+import { knowledgeStore, setupTranscriptStore } from '@/infrastructure/persistence';
 
 /** Runs checkpoint and memory-store migrations outside the request path. */
 const setupCheckpointer = async (): Promise<void> => {
@@ -24,5 +24,6 @@ const setupStore = async (): Promise<void> => {
 
 await setupCheckpointer();
 await setupStore();
+await setupTranscriptStore();
 await knowledgeStore.setup();
 await knowledgeStore.stop();

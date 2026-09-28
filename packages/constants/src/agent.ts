@@ -5,3 +5,6 @@ export const AGENT_NAME = 'travelAgent';
 // LangGraph graph id (must match `apps/agent/langgraph.json`'s `graphs` key) used
 // when creating a thread via `threads.create()`.
 export const GRAPH_ID = 'travel';
+
+// Prefix of the context-summary message the agent inserts; clients use it to hide the summary.
+export const SUMMARY_MESSAGE_PREFIX = '[conversation-summary]';

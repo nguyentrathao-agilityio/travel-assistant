@@ -52,7 +52,8 @@ export default function ChatRoute() {
     stop,
   } = useChatAgent(threadId);
   const interruptElement = useInterruptElement();
-  const { isLoading: isAgentHistoryLoading } = useAgentThreadHistory(threadId);
+  const { isLoading: isAgentHistoryLoading, messages: historyMessages } =
+    useAgentThreadHistory(threadId);
   const {
     fetchNewer,
     fetchOlder,
@@ -67,7 +68,13 @@ export default function ChatRoute() {
   const isHistoryLoading = isAgentHistoryLoading || isTranscriptLoading;
   useTravelActions({ selectFlight, selectHotel, sendMessage, state: tripState });
 
-  const { suggestions } = useChatSuggestions();
+  const { suggestions } = useChatSuggestions({
+    threadId,
+    historyMessageCount: historyMessages.length,
+    liveMessageCount: liveMessages.length,
+    isRunning,
+    isAwaitingApproval: interruptElement !== null,
+  });
 
   const voice = useChatVoice({
     autoStart: params.focusVoice === '1',

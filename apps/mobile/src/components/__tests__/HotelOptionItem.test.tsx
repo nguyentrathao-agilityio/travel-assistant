@@ -25,13 +25,25 @@ const baseHotel: HotelAvailability = {
   totalPrice: 2400000,
 };
 
-const findNodeByType = (node: unknown, type: string): boolean => {
-  if (!node) return false;
-  if (Array.isArray(node)) return node.some((child) => findNodeByType(child, type));
+interface JsonNode {
+  type?: string;
+  props?: Record<string, unknown>;
+  children?: unknown;
+}
 
-  const element = node as { type?: string; children?: unknown };
+const findNodeByType = (node: unknown, type: string): JsonNode | null => {
+  if (!node) return null;
+  if (Array.isArray(node)) {
+    for (const child of node) {
+      const match = findNodeByType(child, type);
+      if (match) return match;
+    }
+    return null;
+  }
 
-  if (element.type === type) return true;
+  const element = node as JsonNode;
+
+  if (element.type === type) return element;
 
   return findNodeByType(element.children, type);
 };
@@ -49,7 +61,7 @@ test('renders hotel details, ratings and limited amenities', async () => {
   expect(screen.getByText('Wifi')).toBeOnTheScreen();
   expect(screen.getByText('+1 more')).toBeOnTheScreen();
   expect(screen.getByText(/3 nights/)).toBeOnTheScreen();
-  expect(findNodeByType(result.toJSON(), 'Image')).toBe(false);
+  expect(findNodeByType(result.toJSON(), 'Image')).toBeNull();
 });
 
 test('renders a thumbnail image when one is given', async () => {
@@ -59,7 +71,17 @@ test('renders a thumbnail image when one is given', async () => {
     </ThemeProvider>
   );
 
-  expect(findNodeByType(result.toJSON(), 'Image')).toBe(true);
+  expect(findNodeByType(result.toJSON(), 'Image')).not.toBeNull();
+});
+
+test('downsamples remote hotel images before Android decodes them', async () => {
+  const result = await render(
+    <ThemeProvider>
+      <HotelOptionItem hotel={{ ...baseHotel, imageUrl: 'https://example.com/hotel.jpg' }} />
+    </ThemeProvider>
+  );
+
+  expect(findNodeByType(result.toJSON(), 'Image')?.props?.resizeMethod).toBe('resize');
 });
 
 test('renders a badge when given one', async () => {

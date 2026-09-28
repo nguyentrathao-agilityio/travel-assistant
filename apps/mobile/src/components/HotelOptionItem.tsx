@@ -39,7 +39,12 @@ export const HotelOptionItem = ({
   return (
     <View style={[styles.container, isSelected && styles.containerSelected]}>
       {hotel.imageUrl && (
-        <Image resizeMode="cover" source={{ uri: hotel.imageUrl }} style={styles.thumbnail} />
+        <Image
+          resizeMethod="resize"
+          resizeMode="cover"
+          source={{ uri: hotel.imageUrl }}
+          style={styles.thumbnail}
+        />
       )}
 
       <View style={styles.content}>

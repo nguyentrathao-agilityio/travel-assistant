@@ -6,6 +6,9 @@ import { Command } from '@langchain/langgraph';
 // Constants
 import { BOOKING_OPERATIONS, DOMAIN_NODE_NAME } from '@/constants';
 
+// Prompts
+import { buildFlightBookingHandoffPrompt, buildHotelBookingHandoffPrompt } from '@/prompts';
+
 // Schemas
 import { FlightBookingInputSchema, HotelBookingInputSchema } from '@/schemas';
 
@@ -33,15 +36,7 @@ export const transferToBookFlightTool = tool(
       update: {
         bookingOperation: BOOKING_OPERATIONS.FLIGHT,
         handoffTarget: DOMAIN_NODE_NAME.BOOKING,
-        messages: buildHandoffMessages(
-          runtime,
-          `Transferred to the booking agent for a flight. Call bookFlightTool now with exactly these ` +
-            `values — do not ask the user to restate them: flightId=${input.flightId}, ` +
-            `adults=${input.adults}, customerName=${input.customerName}, ` +
-            `customerEmail=${input.customerEmail}, customerPhone=${input.customerPhone}` +
-            (input.notes ? `, notes=${input.notes}` : '') +
-            '.'
-        ),
+        messages: buildHandoffMessages(runtime, buildFlightBookingHandoffPrompt(input)),
       },
     }),
   {
@@ -60,17 +55,7 @@ export const transferToBookHotelTool = tool(
       update: {
         bookingOperation: BOOKING_OPERATIONS.HOTEL,
         handoffTarget: DOMAIN_NODE_NAME.BOOKING,
-        messages: buildHandoffMessages(
-          runtime,
-          `Transferred to the booking agent for a hotel. Call bookHotelTool now with exactly these ` +
-            `values — do not ask the user to restate them: hotelId=${input.hotelId}, ` +
-            `city=${input.city}, checkIn=${input.checkIn}, checkOut=${input.checkOut}, ` +
-            `rooms=${input.rooms}, adults=${input.adults}, children=${input.children}, ` +
-            `customerName=${input.customerName}, customerEmail=${input.customerEmail}, ` +
-            `customerPhone=${input.customerPhone}` +
-            (input.notes ? `, notes=${input.notes}` : '') +
-            '.'
-        ),
+        messages: buildHandoffMessages(runtime, buildHotelBookingHandoffPrompt(input)),
       },
     }),
   {

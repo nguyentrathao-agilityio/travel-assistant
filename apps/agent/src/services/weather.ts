@@ -6,6 +6,9 @@ import { API_URL, ENDPOINTS } from '@/constants';
 // Infrastructure
 import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
 
+// Prompts
+import { buildWeatherTravelTipPrompt } from '@/prompts';
+
 // Schemas
 import { WeatherResponse, WeatherResponseSchema, WeatherResultSchema } from '@/schemas';
 
@@ -19,24 +22,24 @@ export const generateTravelTip = async (
   daily?: WeatherResponse['daily']
 ): Promise<string> => {
   try {
-    const weatherSummary = `
-      Current conditions:
-      - Temperature: ${current.temperature_c}°C (feels like ${current.apparent_temperature_c}°C)
-      - Humidity: ${current.relative_humidity}%
-      - Wind speed: ${current.wind_speed_kmh} km/h
-      - Conditions: ${current.description}
-
-      ${
-        daily && daily.length > 0
-          ? `Tomorrow's forecast: ${daily[0].description}, high ${daily[0].temp_max_c}°C,
-        precipitation chance ${daily[0].precipitation_probability_max}%`
-          : ''
-      }`;
+    const tomorrow = daily?.[0];
 
     const response = await getOpenAIClient().responses.create({
       model: OPENAI_CLIENT_MODEL,
-      input: `Generate a single, concise travel tip (max 15 words) for someone traveling in these weather conditions.
-        Focus on practical advice like clothing, hydration, or safety. Be direct and actionable. Weather data:\n${weatherSummary}`,
+      input: buildWeatherTravelTipPrompt({
+        apparentTemperatureC: current.apparent_temperature_c,
+        description: current.description,
+        humidity: current.relative_humidity,
+        temperatureC: current.temperature_c,
+        tomorrow: tomorrow
+          ? {
+              description: tomorrow.description,
+              precipitationChance: tomorrow.precipitation_probability_max,
+              temperatureMaxC: tomorrow.temp_max_c,
+            }
+          : undefined,
+        windSpeedKmh: current.wind_speed_kmh,
+      }),
     });
 
     return response.output_text.trim() || 'Check local weather conditions before heading out';

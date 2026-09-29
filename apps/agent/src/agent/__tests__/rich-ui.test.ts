@@ -2,7 +2,7 @@ import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { describe, expect, it } from 'vitest';
 
 // Constants
-import { TOOL_READY_OUTPUT } from '@/constants';
+import { RICH_UI_RESPONSE_INSTRUCTION } from '@/prompts';
 
 // Agent middleware
 import { buildRichUiToolSummary, richUiModelMiddleware } from '@/agent/middleware/rich-ui';
@@ -20,7 +20,7 @@ const invokeMiddleware = async (messages: unknown[]) => {
 };
 
 describe('richUiModelMiddleware', () => {
-  it('collapses a successful rich-card ToolMessage to TOOL_READY_OUTPUT', async () => {
+  it('collapses a successful rich-card ToolMessage to the rich-UI response instruction', async () => {
     const original = new ToolMessage({
       content: JSON.stringify({ location: { name: 'Tokyo' } }),
       tool_call_id: 'call_1',
@@ -31,7 +31,7 @@ describe('richUiModelMiddleware', () => {
     const [result] = await invokeMiddleware([original]);
 
     expect(result.content).toBe(
-      `Weather conditions and forecast are available. ${TOOL_READY_OUTPUT}`
+      `Weather conditions and forecast are available. ${RICH_UI_RESPONSE_INSTRUCTION}`
     );
     expect(result.artifact).toEqual({ location: { name: 'Tokyo' } });
     expect(result.tool_call_id).toBe('call_1');
@@ -49,7 +49,7 @@ describe('richUiModelMiddleware', () => {
 
     expect(result).toBe(original);
     expect(result.content).toContain('Flight not found');
-    expect(result.content).not.toBe(TOOL_READY_OUTPUT);
+    expect(result.content).not.toBe(RICH_UI_RESPONSE_INSTRUCTION);
   });
 
   it('replaces structured provider details with a user-safe model instruction', async () => {

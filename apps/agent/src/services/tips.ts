@@ -4,6 +4,9 @@ import { API_URL, ENDPOINTS, LLM_TIPS_COUNT, LLM_ESSENTIAL_TIPS_COUNT } from '@/
 // Infrastructure
 import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
 
+// Prompts
+import { buildTipsPrompt } from '@/prompts';
+
 // Schemas
 import {
   TipCategorySchema,
@@ -52,25 +55,15 @@ export const generateTipsFromLLM = async (
     const response = await getOpenAIClient().responses.create({
       model: OPENAI_CLIENT_MODEL,
       text: { format: { type: 'json_object' } },
-      input: `Generate ${LLM_TIPS_COUNT} practical travel tips for ${location}.
-              Background: ${summary}
-
-              Return a JSON object with this exact shape:
-              {
-                "tips": [
-                  {
-                    "id": "llm-1",
-                    "category": "<one of: ${TipCategorySchema.options.join(', ')}>",
-                    "scope": "${scope}",
-                    "title": "<short title, max 8 words>",
-                    "content": "<practical tip, 1-2 sentences>",
-                    "isEssential": <true or false>,
-                    "location": "${city ?? country}"
-                  }
-                ]
-              }
-
-              Cover a variety of categories. Mark exactly ${LLM_ESSENTIAL_TIPS_COUNT} tips as essential.`,
+      input: buildTipsPrompt({
+        categories: TipCategorySchema.options,
+        essentialTipCount: LLM_ESSENTIAL_TIPS_COUNT,
+        location,
+        locationLabel: city ?? country,
+        scope,
+        summary,
+        tipCount: LLM_TIPS_COUNT,
+      }),
     });
 
     const raw = JSON.parse(stripCodeFences(response.output_text.trim()));

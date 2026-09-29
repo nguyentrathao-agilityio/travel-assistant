@@ -6,6 +6,9 @@ import { FLIGHT_SORT, MAX_STOPS_LIMIT } from '@/constants';
 // Infrastructure
 import { getOpenAIClient, OPENAI_CLIENT_MODEL } from '@/infrastructure/llm';
 
+// Prompts
+import { buildDailyCostEstimatePrompt } from '@/prompts';
+
 // Schemas
 import {
   DailyRatesSchema,
@@ -30,7 +33,7 @@ const estimateDailyCosts = async (destination: string): Promise<DailyRates> => {
   try {
     const response = await getOpenAIClient().responses.create({
       model: OPENAI_CLIENT_MODEL,
-      input: `Estimate typical daily travel costs in USD for a tourist in ${destination}.`,
+      input: buildDailyCostEstimatePrompt(destination),
       text: {
         format: {
           type: 'json_schema',

@@ -3,7 +3,10 @@ import { createMiddleware } from 'langchain';
 
 // Constants
 import { TOOL_NAMES, WRITE_TOOL_NAMES } from '@repo/constants';
-import { RICH_UI_MIDDLEWARE_NAME, TOOL_READY_OUTPUT } from '@/constants';
+import { RICH_UI_MIDDLEWARE_NAME } from '@/constants';
+
+// Prompts
+import { buildToolErrorPrompt, RICH_UI_RESPONSE_INSTRUCTION } from '@/prompts';
 
 // Schemas
 import { ToolErrorSchema } from '@/schemas';
@@ -50,7 +53,7 @@ export const buildRichUiToolSummary = (name: string | undefined, artifact: unkno
   const count = typeof value?.count === 'number' ? value.count : results;
   const total = typeof value?.total === 'number' ? value.total : results;
 
-  return `${buildFact(name, value, count, total)} ${TOOL_READY_OUTPUT}`;
+  return `${buildFact(name, value, count, total)} ${RICH_UI_RESPONSE_INSTRUCTION}`;
 };
 
 const freshToolMessageCutoff = (messages: readonly unknown[]): number => {
@@ -65,11 +68,7 @@ const safeErrorContent = (artifact: unknown): string | undefined => {
   const parsed = ToolErrorSchema.safeParse(artifact);
 
   if (!parsed.success) return undefined;
-  const action = parsed.data.retryable
-    ? 'Tell the user they can try again; do not expose provider internals.'
-    : 'Tell the user the operation cannot be retried automatically; do not expose provider internals.';
-
-  return `The tool failed with ${parsed.data.code} from ${parsed.data.provider}. ${action}`;
+  return buildToolErrorPrompt(parsed.data.code, parsed.data.provider, parsed.data.retryable);
 };
 
 // Collapse fresh rich-card content to avoid duplicate text responses.

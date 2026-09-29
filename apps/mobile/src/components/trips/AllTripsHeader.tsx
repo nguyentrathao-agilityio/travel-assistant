@@ -6,7 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { HeaderBackButton, ThemeToggleButton } from '../common';
 
 // Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+import { shellOpacity, shellRadii, shellSpacing, useShellTheme } from '../../theme';
 
 // Types
 import type { ShellColors } from '../../theme';
@@ -67,5 +67,5 @@ const createStyles = (colors: ShellColors) =>
       marginRight: shellSpacing.xs,
       width: 36,
     },
-    disabled: { opacity: 0.4 },
+    disabled: { opacity: shellOpacity.disabledStrong },
   });

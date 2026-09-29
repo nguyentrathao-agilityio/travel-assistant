@@ -33,10 +33,16 @@ export const lightShellColors: ShellColors = {
 };
 
 export const shellRadii = {
+  actionCard: 18,
   card: 20,
   row: 28,
   pill: 999,
   button: 16,
+};
+
+export const shellOpacity = {
+  disabledStrong: 0.4,
+  disabledSoft: 0.5,
 };
 
 export const shellSpacing = {

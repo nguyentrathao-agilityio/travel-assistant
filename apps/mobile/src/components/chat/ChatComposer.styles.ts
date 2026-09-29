@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-import { shellRadii, shellSpacing } from '../../theme';
+import { shellOpacity, shellRadii, shellSpacing } from '../../theme';
 
 import type { ShellColors } from '../../theme';
 
@@ -52,7 +52,7 @@ export const createChatComposerStyles = (colors: ShellColors) =>
       width: 44,
     },
     sendButtonDisabled: {
-      opacity: 0.4,
+      opacity: shellOpacity.disabledStrong,
     },
     stopButton: {
       alignItems: 'center',

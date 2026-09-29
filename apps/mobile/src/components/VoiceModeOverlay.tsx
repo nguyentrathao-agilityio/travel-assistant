@@ -24,7 +24,7 @@ import {
 } from '../constants';
 
 // Utils
-import { shellSpacing, useShellTheme } from '../theme';
+import { shellOpacity, shellSpacing, useShellTheme } from '../theme';
 
 // Types
 import type { VoiceState } from '../hooks';
@@ -245,6 +245,6 @@ const createStyles = (colors: ShellColors) =>
       width: 80,
     },
     micButtonDisabled: {
-      opacity: 0.4,
+      opacity: shellOpacity.disabledStrong,
     },
   });

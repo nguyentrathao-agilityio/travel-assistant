@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
 // Utils
-import { shellSpacing, useShellTheme } from '../theme';
+import { shellOpacity, shellSpacing, useShellTheme } from '../theme';
 
 // Types
 import type { Suggestion } from '@copilotkit/react-native/headless';
@@ -67,7 +67,7 @@ const createStyles = (colors: ShellColors) =>
       paddingVertical: 6,
     },
     chipDisabled: {
-      opacity: 0.5,
+      opacity: shellOpacity.disabledSoft,
     },
     chipLabel: {
       color: colors.textOnDark,

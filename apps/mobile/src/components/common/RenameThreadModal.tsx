@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, Text, TextInput, View, StyleSheet } from 'react-native';
 
 // Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+import { shellOpacity, shellRadii, shellSpacing, useShellTheme } from '../../theme';
 
 // Types
 import type { ShellColors } from '../../theme';
@@ -116,7 +116,7 @@ const createStyles = (colors: ShellColors) =>
       paddingVertical: shellSpacing.sm,
     },
     buttonDisabled: {
-      opacity: 0.4,
+      opacity: shellOpacity.disabledStrong,
     },
     buttonLabel: {
       color: colors.textOnDark,

@@ -10,7 +10,7 @@ import { EmptyState, ErrorState, LoadingState } from '../common';
 import { IconBadge } from '../IconBadge';
 
 // Utils
-import { shellSpacing, useShellTheme } from '../../theme';
+import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
 import { getRecentIcon, threadLabel } from '../../utils/thread';
 
 // Types
@@ -89,7 +89,7 @@ const createStyles = (colors: ShellColors) =>
       alignItems: 'center',
       backgroundColor: colors.surface,
       borderColor: colors.surfaceBorder,
-      borderRadius: 18,
+      borderRadius: shellRadii.actionCard,
       borderWidth: 1,
       flexDirection: 'row',
       gap: shellSpacing.sm,

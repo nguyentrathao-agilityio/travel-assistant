@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
 
 // Constants
-import { CHAT_PATH, DASHBOARD_PATH } from '../constants';
+import { CHAT_PATH, DASHBOARD_PATH, FOCUS_VOICE_ENABLED } from '../constants';
 
 // Components
 import { AllTripsScreen } from '../screens';
@@ -46,7 +46,7 @@ export default function ThreadsRoute() {
   );
 
   const handleAskByVoice = useCallback(() => {
-    router.push({ pathname: CHAT_PATH, params: { focusVoice: '1' } });
+    router.push({ pathname: CHAT_PATH, params: { focusVoice: FOCUS_VOICE_ENABLED } });
   }, [router]);
 
   const handleGoHome = useCallback(() => {

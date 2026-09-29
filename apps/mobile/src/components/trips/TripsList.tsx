@@ -3,7 +3,7 @@ import { ActivityIndicator, SectionList, StyleSheet, Text, View } from 'react-na
 import { KeyboardChatScrollView } from 'react-native-keyboard-controller';
 
 // Constants
-import { THREAD_LIST_STATUS } from '../../constants';
+import { LIST_PAGINATION_THRESHOLD, THREAD_LIST_STATUS } from '../../constants';
 
 // Components
 import { EmptyState, ErrorState, LoadingState } from '../common';
@@ -112,7 +112,7 @@ export const TripsList = ({
             </View>
           }
           onEndReached={!isSearching && hasMore && !loadMoreFailed ? onLoadMore : undefined}
-          onEndReachedThreshold={0.5}
+          onEndReachedThreshold={LIST_PAGINATION_THRESHOLD}
           renderItem={({ item, index }) => (
             <TripRow
               deleting={deletingThreadId === item.id}

@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
 // Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../theme';
+import { shellOpacity, shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { IconBadge } from './IconBadge';
 
 // Types
@@ -70,7 +70,7 @@ const createStyles = (colors: ShellColors) =>
     card: {
       backgroundColor: colors.surface,
       borderColor: colors.surfaceBorder,
-      borderRadius: 18,
+      borderRadius: shellRadii.actionCard,
       borderWidth: 1,
       flex: 1,
       justifyContent: 'space-between',
@@ -112,7 +112,7 @@ const createStyles = (colors: ShellColors) =>
       paddingVertical: shellSpacing.sm + 2,
     },
     buttonDisabled: {
-      opacity: 0.5,
+      opacity: shellOpacity.disabledSoft,
     },
     buttonLabel: {
       color: colors.textOnDark,

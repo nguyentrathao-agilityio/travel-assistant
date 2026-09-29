@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 // Services
 import { createRemoteThread, generateThreadId } from '../services';
-import { DASHBOARD_PATH } from '../constants';
+import { DASHBOARD_PATH, FOCUS_VOICE_ENABLED } from '../constants';
 import { goBackOrReplace } from '../utils/navigation';
 
 // Components
@@ -78,8 +78,11 @@ export default function ChatRoute() {
     }),
     [hasNewer, hasOlder, isLoadingOlder, olderError, fetchNewer, fetchOlder, retryOlder]
   );
+
+  // Travel actions are used to update the trip state and send messages to the agent.
   useTravelActions({ selectFlight, selectHotel, sendMessage, state: tripState });
 
+  // Suggestions are generated based on the current thread state and messages.
   const { suggestions } = useChatSuggestions({
     threadId,
     historyMessageCount: historyMessages.length,
@@ -88,8 +91,9 @@ export default function ChatRoute() {
     isAwaitingApproval: interruptElement !== null,
   });
 
+  // Voice is used to handle voice input and output for the chat.
   const voice = useChatVoice({
-    autoStart: params.focusVoice === '1',
+    autoStart: params.focusVoice === FOCUS_VOICE_ENABLED,
     isHistoryLoading,
     isReady,
     isRunning,

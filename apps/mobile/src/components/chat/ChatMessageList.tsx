@@ -8,9 +8,9 @@ import type { SharedValue } from 'react-native-reanimated';
 // Constants
 import {
   CHAT_LIST_INITIAL_NUM_TO_RENDER,
-  CHAT_LIST_LOAD_OLDER_THRESHOLD,
   CHAT_LIST_MAX_TO_RENDER_PER_BATCH,
   CHAT_LIST_WINDOW_SIZE,
+  LIST_PAGINATION_THRESHOLD,
 } from '../../constants';
 
 // Components
@@ -138,7 +138,7 @@ export const ChatMessageList = forwardRef<ChatMessageListHandle, ChatMessageList
         }
         maxToRenderPerBatch={CHAT_LIST_MAX_TO_RENDER_PER_BATCH}
         onEndReached={canLoadOlder ? onLoadOlder : undefined}
-        onEndReachedThreshold={CHAT_LIST_LOAD_OLDER_THRESHOLD}
+        onEndReachedThreshold={LIST_PAGINATION_THRESHOLD}
         onStartReached={hasNewer ? onLoadNewer : undefined}
         ref={listRef}
         renderItem={({ item }) => (

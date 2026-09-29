@@ -6,7 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { IconBadge } from '../IconBadge';
 
 // Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+import { shellOpacity, shellRadii, shellSpacing, useShellTheme } from '../../theme';
 import { getRecentIcon, threadLabel } from '../../utils/thread';
 
 // Types
@@ -87,5 +87,5 @@ const createStyles = (colors: ShellColors) =>
     title: { color: colors.textOnDark, fontSize: 15, fontWeight: '600' },
     time: { color: colors.textOnDarkMuted, fontSize: 12 },
     actionButton: { alignItems: 'center', height: 44, justifyContent: 'center', width: 44 },
-    busy: { opacity: 0.4 },
+    busy: { opacity: shellOpacity.disabledStrong },
   });

@@ -5,7 +5,7 @@ import { Pressable, StyleSheet } from 'react-native';
 import { Typography } from './Typography';
 
 // Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+import { shellOpacity, shellRadii, shellSpacing, useShellTheme } from '../../theme';
 
 // Types
 import type { ShellColors } from '../../theme';
@@ -56,6 +56,6 @@ const createStyles = (colors: ShellColors) =>
       paddingVertical: shellSpacing.xs,
     },
     selectButtonDisabled: {
-      opacity: 0.4,
+      opacity: shellOpacity.disabledStrong,
     },
   });

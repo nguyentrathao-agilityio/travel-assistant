@@ -5,6 +5,7 @@ export const DASHBOARD_PATH = `/${DASHBOARD_ROUTE}` as const;
 
 export const CHAT_ROUTE = 'chat';
 export const CHAT_PATH = `/${CHAT_ROUTE}` as const;
+export const FOCUS_VOICE_ENABLED = '1';
 
 export const THREADS_ROUTE = 'threads';
 export const THREADS_PATH = `/${THREADS_ROUTE}` as const;

@@ -7,7 +7,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { API_KEY_KEYBOARD_BOTTOM_OFFSET, OPENAI_KEYS_URL } from '../constants';
 
 // Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../theme';
+import { shellOpacity, shellRadii, shellSpacing, useShellTheme } from '../theme';
 
 // Types
 import type { ShellColors } from '../theme';
@@ -166,7 +166,7 @@ const createStyles = (colors: ShellColors) =>
       paddingVertical: shellSpacing.md,
     },
     submitDisabled: {
-      opacity: 0.4,
+      opacity: shellOpacity.disabledStrong,
     },
     submitLabel: {
       color: colors.textOnDark,

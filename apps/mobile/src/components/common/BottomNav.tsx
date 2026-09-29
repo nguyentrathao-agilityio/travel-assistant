@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+import { shellOpacity, shellRadii, shellSpacing, useShellTheme } from '../../theme';
 
 // Types
 import type { ShellColors } from '../../theme';
@@ -115,6 +115,6 @@ const createStyles = (colors: ShellColors) =>
       width: 52,
     },
     bottomNavButtonDisabled: {
-      opacity: 0.5,
+      opacity: shellOpacity.disabledSoft,
     },
   });

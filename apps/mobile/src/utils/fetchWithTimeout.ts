@@ -1,4 +1,5 @@
-const DEFAULT_TIMEOUT_MS = 15000;
+// Constants
+import { DEFAULT_REQUEST_TIMEOUT_MS } from '../constants';
 
 export class FetchTimeoutError extends Error {
   constructor(message = 'The request timed out.') {
@@ -10,7 +11,7 @@ export class FetchTimeoutError extends Error {
 export const fetchWithTimeout = async (
   input: string,
   init: RequestInit = {},
-  timeoutMs: number = DEFAULT_TIMEOUT_MS
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
 ): Promise<Response> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);

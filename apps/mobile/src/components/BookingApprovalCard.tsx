@@ -14,7 +14,7 @@ import {
 import { Card, Typography } from './common';
 
 // Utils
-import { shellRadii, shellSpacing, useShellTheme } from '../theme';
+import { shellOpacity, shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { formatPrice } from '@repo/utils';
 
 // Types
@@ -259,6 +259,6 @@ const createStyles = (colors: ShellColors) =>
       paddingVertical: shellSpacing.sm,
     },
     buttonDisabled: {
-      opacity: 0.4,
+      opacity: shellOpacity.disabledStrong,
     },
   });

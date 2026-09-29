@@ -37,5 +37,6 @@ export type BookingOperation = (typeof BOOKING_OPERATIONS)[keyof typeof BOOKING_
 export const WRITE_AGENT_NODE_NAMES = ['booking'] as const satisfies readonly DomainAgentNodeName[];
 
 export const FINALIZATION_NODE_NAME = 'saveMemory' as const;
+export const PERSIST_TRANSCRIPT_NODE_NAME = 'persistTranscript' as const;
 
 export type SupervisorNextNode = DomainAgentNodeName | typeof FINALIZATION_NODE_NAME;

@@ -7,7 +7,7 @@ import { BOOKING_OPERATIONS, DOMAIN_NODE_NAME } from '@/constants';
 import { BOOKING_STATUSES } from '@repo/constants';
 
 // Infrastructure
-import { createSpecializedAgent } from '@/agent/create-agent';
+import { createSpecializedAgent, withSpecializedAgentConfig } from '@/agent/create-agent';
 import { openAiApiKeyFromConfig, withOpenAiApiKey } from '@/infrastructure/llm';
 import { withLangfuseTracing } from '@/infrastructure/observability';
 
@@ -52,7 +52,7 @@ export const bookingAgent = (state: GraphStateType, config?: RunnableConfig) => 
 
   return withOpenAiApiKey(apiKey, () =>
     withLangfuseTracing(config, 'booking-agent', (tracedConfig) =>
-      createBookingAgent(apiKey).invoke(state, tracedConfig)
+      createBookingAgent(apiKey).invoke(state, withSpecializedAgentConfig(tracedConfig))
     )
   );
 };

@@ -22,7 +22,6 @@ const {
   modelFallbackMiddlewareMock,
   modelRetryMiddlewareMock,
   toolCallLimitMiddlewareMock,
-  createTranscriptMiddlewareMock,
 } = vi.hoisted(() => ({
   createAgentMock: vi.fn(),
   dynamicSystemPromptMiddlewareMock: vi.fn((fn: unknown) => ({
@@ -43,7 +42,6 @@ const {
   modelFallbackMiddlewareMock: vi.fn(() => 'model-fallback-middleware'),
   modelRetryMiddlewareMock: vi.fn(() => 'model-retry-middleware'),
   toolCallLimitMiddlewareMock: vi.fn(() => 'tool-call-limit-middleware'),
-  createTranscriptMiddlewareMock: vi.fn(() => 'transcript-middleware'),
 }));
 
 vi.mock('langchain', () => ({
@@ -97,10 +95,6 @@ vi.mock('@/agent/middleware/observability', () => ({
   createObservabilityMiddleware: createObservabilityMiddlewareMock,
 }));
 
-vi.mock('@/agent/middleware/transcript', () => ({
-  createTranscriptMiddleware: createTranscriptMiddlewareMock,
-}));
-
 vi.mock('@/state', () => ({
   GraphState: 'fake-graph-state',
 }));
@@ -140,7 +134,6 @@ describe('createSpecializedAgent', () => {
     expect(call.middleware).toEqual([
       'copilotkit-middleware',
       'summarization-middleware',
-      'transcript-middleware',
       'moderation-middleware',
       'domain-state-middleware:general',
       'tool-call-limit-middleware',
@@ -155,7 +148,7 @@ describe('createSpecializedAgent', () => {
     expect(modelRetryMiddlewareMock).toHaveBeenCalledWith({ maxRetries: 1, onFailure: 'error' });
     expect(toolCallLimitMiddlewareMock).toHaveBeenCalledWith({
       runLimit: 15,
-      exitBehavior: 'continue',
+      exitBehavior: 'end',
     });
     expect(summarizationMiddlewareMock).toHaveBeenCalledWith({
       model: 'fake-model',

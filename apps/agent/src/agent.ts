@@ -2,7 +2,12 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 
 // Constants
-import { BRANCH_NAMES, EXTERNAL_API_RETRY_POLICY, POSTGRES_URL } from './constants';
+import {
+  BRANCH_NAMES,
+  EXTERNAL_API_RETRY_POLICY,
+  PERSIST_TRANSCRIPT_NODE_NAME,
+  POSTGRES_URL,
+} from './constants';
 
 // Nodes
 import {
@@ -12,6 +17,7 @@ import {
   exploreAgent,
   generalAgent,
   planningAgent,
+  persistTranscriptNode,
   refusalNode,
   routeAfterSupervisor,
   saveMemoryNode,
@@ -36,14 +42,16 @@ export const buildGraph = () =>
     .addNode('refusal', refusalNode)
     .addNode('supervise', supervisorNode)
     .addNode('saveMemory', saveMemoryNode)
+    .addNode(PERSIST_TRANSCRIPT_NODE_NAME, persistTranscriptNode)
     .addEdge(START, 'classify')
     .addEdge('explore', 'supervise')
     .addEdge('plan', 'supervise')
     .addEdge('booking', 'supervise')
     .addEdge('general', 'supervise')
-    .addEdge('refusal', END)
+    .addEdge('refusal', PERSIST_TRANSCRIPT_NODE_NAME)
     .addConditionalEdges('supervise', routeAfterSupervisor, SUPERVISOR_ROUTES)
-    .addEdge('saveMemory', END);
+    .addEdge('saveMemory', PERSIST_TRANSCRIPT_NODE_NAME)
+    .addEdge(PERSIST_TRANSCRIPT_NODE_NAME, END);
 
 export const graph = buildGraph().compile({
   checkpointer: PostgresSaver.fromConnString(POSTGRES_URL!),

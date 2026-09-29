@@ -14,7 +14,6 @@ const {
   createSystemPromptMiddlewareMock,
   createToolCallLimitMiddlewareMock,
   createModelRetryMiddlewareMock,
-  createTranscriptMiddlewareMock,
   modelFallbackMiddlewareMock,
 } = vi.hoisted(() => ({
   createCopilotkitMiddlewareMock: vi.fn(() => 'copilotkit'),
@@ -26,7 +25,6 @@ const {
   createSystemPromptMiddlewareMock: vi.fn(() => 'system-prompt'),
   createToolCallLimitMiddlewareMock: vi.fn(() => 'tool-call-limit'),
   createModelRetryMiddlewareMock: vi.fn(() => 'model-retry'),
-  createTranscriptMiddlewareMock: vi.fn(() => 'transcript'),
   modelFallbackMiddlewareMock: vi.fn(() => 'model-fallback'),
 }));
 
@@ -78,10 +76,6 @@ vi.mock('@/agent/middleware/system-prompt', () => ({
   createSystemPromptMiddleware: createSystemPromptMiddlewareMock,
 }));
 
-vi.mock('@/agent/middleware/transcript', () => ({
-  createTranscriptMiddleware: createTranscriptMiddlewareMock,
-}));
-
 afterEach(() => {
   vi.clearAllMocks();
 });
@@ -100,7 +94,6 @@ describe('createAgentMiddleware', () => {
     expect(createAgentMiddleware({ config, model, fallbackModel })).toEqual([
       'copilotkit',
       'summarization',
-      'transcript',
       'moderation',
       'domain-state',
       'tool-call-limit',

@@ -5,6 +5,9 @@ import { bookingAgent } from '@/nodes/booking';
 import type { GraphStateType } from '@/state';
 
 const createSpecializedAgentMock = vi.hoisted(() => vi.fn());
+const withSpecializedAgentConfigMock = vi.hoisted(() =>
+  vi.fn((config: Record<string, unknown>) => ({ ...config, recursionLimit: 120 }))
+);
 const withLangfuseTracingMock = vi.hoisted(() =>
   vi.fn((_config: unknown, _runName: string, run: (config: unknown) => Promise<unknown>) =>
     run({ callbacks: ['langfuse'] })
@@ -13,6 +16,7 @@ const withLangfuseTracingMock = vi.hoisted(() =>
 
 vi.mock('@/agent/create-agent', () => ({
   createSpecializedAgent: createSpecializedAgentMock,
+  withSpecializedAgentConfig: withSpecializedAgentConfigMock,
 }));
 
 vi.mock('@/infrastructure/llm', () => ({
@@ -85,6 +89,7 @@ describe('bookingAgent', () => {
       'booking-agent',
       expect.any(Function)
     );
-    expect(invoke).toHaveBeenCalledWith(state, { callbacks: ['langfuse'] });
+    expect(withSpecializedAgentConfigMock).toHaveBeenCalledWith({ callbacks: ['langfuse'] });
+    expect(invoke).toHaveBeenCalledWith(state, { callbacks: ['langfuse'], recursionLimit: 120 });
   });
 });

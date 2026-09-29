@@ -21,3 +21,6 @@ export const SUMMARIZATION_KEEP_MESSAGES = 10;
 
 export const MODEL_RETRY_MAX_RETRIES = 1;
 export const TOOL_CALL_RUN_LIMIT = 15;
+// Covers the 15-call hard limit plus the current node-style middleware topology and headroom.
+// Keep in sync with the provider-free recursion-budget regression test.
+export const SPECIALIZED_AGENT_RECURSION_LIMIT = 120;

@@ -4,7 +4,7 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import { AGENT_CONFIGS } from '@/constants/agent-config';
 
 // Infrastructure
-import { createSpecializedAgent } from '@/agent/create-agent';
+import { createSpecializedAgent, withSpecializedAgentConfig } from '@/agent/create-agent';
 import { openAiApiKeyFromConfig, withOpenAiApiKey } from '@/infrastructure/llm';
 import { withLangfuseTracing } from '@/infrastructure/observability';
 
@@ -19,7 +19,7 @@ export const generalAgent = (state: GraphStateType, config?: RunnableConfig) => 
 
   return withOpenAiApiKey(apiKey, () =>
     withLangfuseTracing(config, 'general-agent', (tracedConfig) =>
-      createGeneralAgent(apiKey).invoke(state, tracedConfig)
+      createGeneralAgent(apiKey).invoke(state, withSpecializedAgentConfig(tracedConfig))
     )
   );
 };

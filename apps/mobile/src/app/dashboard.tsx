@@ -2,7 +2,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback } from 'react';
 
 // Constants
-import { CHAT_PATH, THREADS_PATH } from '../constants';
+import { CHAT_PATH, DASHBOARD_THREAD_TAG, THREADS_PATH } from '../constants';
 
 // Components
 import { DashboardScreen } from '../screens';
@@ -16,7 +16,7 @@ export default function DashboardRoute() {
   const { activeThreadId, markActive, refresh: refreshActiveThreadId } = useActiveThreadId();
   const { handleStartNewTrip, isStartingTrip } = useStartNewTrip({
     markActive,
-    tag: 'dashboard',
+    tag: DASHBOARD_THREAD_TAG,
     threads,
   });
 

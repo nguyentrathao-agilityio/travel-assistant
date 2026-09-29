@@ -4,6 +4,7 @@ export * from './Card';
 export * from './HeaderBackButton';
 export * from './SelectControl';
 export * from './LoadingState';
+export * from './MarkdownText';
 export * from './ErrorState';
 export * from './EmptyState';
 export * from './ConfirmBanner';

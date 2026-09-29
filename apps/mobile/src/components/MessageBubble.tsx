@@ -2,6 +2,9 @@ import { useRenderToolCall } from '@copilotkit/react-native/headless';
 import { useEffect, useMemo, useRef } from 'react';
 import { AccessibilityInfo, Animated, StyleSheet, Text, View } from 'react-native';
 
+// Components
+import { MarkdownText } from './common/MarkdownText';
+
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
 import { messageText } from '../utils/chatMessages';
@@ -106,7 +109,7 @@ export const MessageBubble = ({ message, toolMessageIndex }: MessageBubbleProps)
         <ThinkingIndicator />
       ) : !!text ? (
         <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleAssistant]}>
-          <Text style={styles.bubbleText}>{text}</Text>
+          <MarkdownText style={styles.bubbleText}>{text}</MarkdownText>
         </View>
       ) : null}
       {toolCalls?.map((toolCall) => (

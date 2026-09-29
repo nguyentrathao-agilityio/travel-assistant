@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
 
 // Constants
-import { CHAT_PATH, DASHBOARD_PATH } from '../constants';
+import { CHAT_PATH, DASHBOARD_PATH, THREADS_THREAD_TAG } from '../constants';
 
 // Components
 import { AllTripsScreen } from '../screens';
@@ -28,7 +28,7 @@ export default function ThreadsRoute() {
   const { markActive } = useActiveThreadId();
   const { handleStartNewTrip, isStartingTrip } = useStartNewTrip({
     markActive,
-    tag: 'threads',
+    tag: THREADS_THREAD_TAG,
     threads,
   });
   const { deletion, rename } = useThreadActions({

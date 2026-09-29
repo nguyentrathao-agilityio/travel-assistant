@@ -92,8 +92,8 @@ export const useChatVoice = ({
     if (!autoStart || !isReady || isHistoryLoading) return;
 
     hasAutoStartedRef.current = true;
-    voice.startListening();
-  }, [autoStart, isReady, isHistoryLoading, voice.startListening]);
+    voiceMode.start();
+  }, [autoStart, isReady, isHistoryLoading, voiceMode.start]);
 
   return {
     dictatedTranscript,

@@ -2,10 +2,14 @@ import { Pencil, Trash2 } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
-import { getRecentIcon, threadLabel } from '../../utils/thread';
+// Components
 import { IconBadge } from '../IconBadge';
 
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+import { getRecentIcon, threadLabel } from '../../utils/thread';
+
+// Types
 import type { ThreadItem } from '../../services';
 import type { ShellColors } from '../../theme';
 

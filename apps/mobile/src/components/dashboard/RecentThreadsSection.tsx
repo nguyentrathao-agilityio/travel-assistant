@@ -2,12 +2,18 @@ import { ArrowRight } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+// Constants
 import { THREAD_LIST_STATUS } from '../../constants';
-import { shellSpacing, useShellTheme } from '../../theme';
-import { getRecentIcon, threadLabel } from '../../utils/thread';
+
+// Components
 import { EmptyState, ErrorState, LoadingState } from '../common';
 import { IconBadge } from '../IconBadge';
 
+// Utils
+import { shellSpacing, useShellTheme } from '../../theme';
+import { getRecentIcon, threadLabel } from '../../utils/thread';
+
+// Types
 import type { ThreadListStatus } from '../../constants';
 import type { ThreadItem } from '../../services';
 import type { ShellColors } from '../../theme';

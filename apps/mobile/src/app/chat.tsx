@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 // Services
 import { createRemoteThread, generateThreadId } from '../services';
@@ -66,6 +66,18 @@ export default function ChatRoute() {
     retryOlder,
   } = useTranscriptHistory(threadId, liveMessages, isRunning);
   const isHistoryLoading = isAgentHistoryLoading || isTranscriptLoading;
+  const history = useMemo(
+    () => ({
+      hasNewer,
+      hasOlder,
+      isLoadingOlder,
+      olderError,
+      onLoadNewer: fetchNewer,
+      onLoadOlder: fetchOlder,
+      onRetryOlder: retryOlder,
+    }),
+    [hasNewer, hasOlder, isLoadingOlder, olderError, fetchNewer, fetchOlder, retryOlder]
+  );
   useTravelActions({ selectFlight, selectHotel, sendMessage, state: tripState });
 
   const { suggestions } = useChatSuggestions({
@@ -92,18 +104,12 @@ export default function ChatRoute() {
   return (
     <ChatScreen
       error={error}
-      hasNewer={hasNewer}
-      hasOlder={hasOlder}
+      history={history}
       interruptElement={interruptElement}
-      isLoadingOlder={isLoadingOlder}
       isReady={isReady && !isHistoryLoading}
       isRunning={isRunning}
       messages={messages}
-      olderError={olderError}
       onBack={handleBack}
-      onLoadNewer={fetchNewer}
-      onLoadOlder={fetchOlder}
-      onRetryOlder={retryOlder}
       onSend={sendMessage}
       onStop={stop}
       suggestions={suggestions}

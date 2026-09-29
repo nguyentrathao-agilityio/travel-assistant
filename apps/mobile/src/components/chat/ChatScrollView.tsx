@@ -2,9 +2,13 @@ import { forwardRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeyboardChatScrollView } from 'react-native-keyboard-controller';
 
+// Constants
 import { COMPOSER_BOTTOM_MARGIN } from '../../constants';
+
+// Utils
 import { shellSpacing } from '../../theme';
 
+// Types
 import type { ScrollViewProps } from 'react-native';
 import type { KeyboardChatScrollViewProps } from 'react-native-keyboard-controller';
 

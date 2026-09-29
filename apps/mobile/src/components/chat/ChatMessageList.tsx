@@ -1,23 +1,29 @@
+import type { Message, Suggestion } from '@copilotkit/react-native/headless';
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
+import type { ReactElement } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import type { ScrollViewProps } from 'react-native';
+import type { SharedValue } from 'react-native-reanimated';
 
+// Constants
 import {
   CHAT_LIST_INITIAL_NUM_TO_RENDER,
   CHAT_LIST_LOAD_OLDER_THRESHOLD,
   CHAT_LIST_MAX_TO_RENDER_PER_BATCH,
   CHAT_LIST_WINDOW_SIZE,
 } from '../../constants';
+
+// Components
 import { MessageBubble, ThinkingIndicator } from '../MessageBubble';
 import { SuggestionChips } from '../SuggestionChips';
-import { shellSpacing, useShellTheme } from '../../theme';
-import { buildToolMessageIndex, messageText, renderableMessages } from '../../utils/chatMessages';
 import { ChatScrollView } from './ChatScrollView';
 
+// Utils
+import { shellSpacing, useShellTheme } from '../../theme';
+import { buildToolMessageIndex, messageText, renderableMessages } from '../../utils/chatMessages';
+
+// Types
 import type { RenderableMessage } from '../../utils/chatMessages';
-import type { Message, Suggestion } from '@copilotkit/react-native/headless';
-import type { ReactElement } from 'react';
-import type { ScrollViewProps } from 'react-native';
-import type { SharedValue } from 'react-native-reanimated';
 
 export interface OlderHistoryProps {
   hasNewer: boolean;

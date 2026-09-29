@@ -2,9 +2,13 @@ import { Sparkles } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+// Components
 import { HeaderBackButton, ThemeToggleButton } from '../common';
+
+// Utils
 import { shellSpacing, useShellTheme } from '../../theme';
 
+// Types
 import type { ShellColors } from '../../theme';
 
 export const ChatHeader = ({ onBack }: { onBack: () => void }) => {

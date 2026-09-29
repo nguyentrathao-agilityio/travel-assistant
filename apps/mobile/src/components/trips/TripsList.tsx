@@ -2,12 +2,18 @@ import { useCallback, useMemo } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, Text, View } from 'react-native';
 import { KeyboardChatScrollView } from 'react-native-keyboard-controller';
 
+// Constants
 import { THREAD_LIST_STATUS } from '../../constants';
-import { shellSpacing, useShellTheme } from '../../theme';
-import { groupThreadsByDate } from '../../utils/groupThreadsByDate';
+
+// Components
 import { EmptyState, ErrorState, LoadingState } from '../common';
 import { TripRow } from './TripRow';
 
+// Utils
+import { shellSpacing, useShellTheme } from '../../theme';
+import { groupThreadsByDate } from '../../utils/groupThreadsByDate';
+
+// Types
 import type { ThreadListStatus } from '../../constants';
 import type { ThreadItem } from '../../services';
 import type { ShellColors } from '../../theme';

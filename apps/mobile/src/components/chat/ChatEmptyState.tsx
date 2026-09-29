@@ -3,9 +3,14 @@ import { useMemo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useKeyboardState } from 'react-native-keyboard-controller';
 
+// Constants
 import { DESTINATION_PILLS, EMPTY_STATE_SUGGESTIONS } from '../../constants';
-import { useShellTheme } from '../../theme';
+
+// Components
 import { ChatScrollView } from './ChatScrollView';
+
+// Utils
+import { useShellTheme } from '../../theme';
 import { createChatEmptyStateStyles } from './ChatEmptyState.styles';
 
 interface ChatEmptyStateProps {

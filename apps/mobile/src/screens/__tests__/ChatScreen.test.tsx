@@ -9,6 +9,7 @@ import { ThemeProvider } from '../../theme';
 import { SAFE_AREA_INITIAL_METRICS } from '../../test/fixtures';
 
 import type { ChatVoiceProps } from '../../hooks';
+import type { OlderHistoryProps } from '../../components/chat/ChatMessageList';
 import type { Message } from '@copilotkit/react-native/headless';
 import type { ReactElement } from 'react';
 
@@ -65,21 +66,25 @@ const baseVoice: ChatVoiceProps = {
   voiceState: 'idle',
 };
 
-const baseProps: Parameters<typeof ChatScreen>[0] = {
-  threadId: 'thread-1',
-  error: null,
+const baseHistory: OlderHistoryProps = {
   hasNewer: false,
   hasOlder: false,
-  interruptElement: null as ReactElement | null,
   isLoadingOlder: false,
-  isReady: true,
-  isRunning: false,
-  messages: [] as Message[],
   olderError: null,
-  onBack: jest.fn(),
   onLoadNewer: jest.fn(),
   onLoadOlder: jest.fn(),
   onRetryOlder: jest.fn(),
+};
+
+const baseProps: Parameters<typeof ChatScreen>[0] = {
+  threadId: 'thread-1',
+  error: null,
+  history: baseHistory,
+  interruptElement: null as ReactElement | null,
+  isReady: true,
+  isRunning: false,
+  messages: [] as Message[],
+  onBack: jest.fn(),
   onSend: jest.fn(),
   onStop: jest.fn(),
   suggestions: [],
@@ -87,12 +92,18 @@ const baseProps: Parameters<typeof ChatScreen>[0] = {
 };
 
 const renderScreen = async (
-  props: Partial<Omit<Parameters<typeof ChatScreen>[0], 'voice'>> & {
+  props: Partial<Omit<Parameters<typeof ChatScreen>[0], 'voice' | 'history'>> & {
     voice?: Partial<ChatVoiceProps>;
+    history?: Partial<OlderHistoryProps>;
   } = {}
 ) => {
-  const { voice: voiceOverrides, ...rest } = props;
-  const merged = { ...baseProps, ...rest, voice: { ...baseVoice, ...voiceOverrides } };
+  const { voice: voiceOverrides, history: historyOverrides, ...rest } = props;
+  const merged = {
+    ...baseProps,
+    ...rest,
+    voice: { ...baseVoice, ...voiceOverrides },
+    history: { ...baseHistory, ...historyOverrides },
+  };
 
   await render(
     <SafeAreaProvider initialMetrics={SAFE_AREA_INITIAL_METRICS}>
@@ -227,7 +238,7 @@ test('remounts the message list when opening another thread', async () => {
 test('shows older-history loading at the top without hiding current messages', async () => {
   await renderScreen({
     messages: [{ id: 'm20', role: 'user', content: 'Current message' }] as Message[],
-    isLoadingOlder: true,
+    history: { isLoadingOlder: true },
   });
 
   expect(screen.getByLabelText('Loading older messages')).toBeOnTheScreen();
@@ -236,15 +247,15 @@ test('shows older-history loading at the top without hiding current messages', a
 
 test('offers a retry at the top when older history fails to load', async () => {
   const user = userEvent.setup();
-  const { onRetryOlder } = await renderScreen({
+  const { history } = await renderScreen({
     messages: [{ id: 'm20', role: 'user', content: 'Current message' }] as Message[],
-    olderError: 'Could not load older messages.',
+    history: { olderError: 'Could not load older messages.' },
   });
 
   expect(screen.getByText('Could not load older messages.')).toBeOnTheScreen();
   await user.press(screen.getByRole('button', { name: 'Retry loading older messages' }));
 
-  expect(onRetryOlder).toHaveBeenCalledTimes(1);
+  expect(history.onRetryOlder).toHaveBeenCalledTimes(1);
   expect(screen.getByText('Current message')).toBeOnTheScreen();
 });
 

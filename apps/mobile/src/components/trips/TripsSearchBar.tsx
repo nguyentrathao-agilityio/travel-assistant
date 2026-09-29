@@ -2,8 +2,10 @@ import { Search } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
+// Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
 
+// Types
 import type { ShellColors } from '../../theme';
 
 interface TripsSearchBarProps {

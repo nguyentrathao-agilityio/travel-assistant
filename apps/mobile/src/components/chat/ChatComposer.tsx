@@ -3,11 +3,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { KeyboardController } from 'react-native-keyboard-controller';
 
+// Constants
 import { CHAT_COMPOSER_INPUT_NATIVE_ID, VOICE_STATE_LABEL, VOICE_STATES } from '../../constants';
-import { useShellTheme } from '../../theme';
+
+// Components
 import { VoiceButton } from '../VoiceButton';
+
+// Utils
+import { useShellTheme } from '../../theme';
 import { createChatComposerStyles } from './ChatComposer.styles';
 
+// Types
 import type { ChatVoiceProps } from '../../hooks';
 import type { LayoutChangeEvent } from 'react-native';
 

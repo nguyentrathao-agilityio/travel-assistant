@@ -2,9 +2,13 @@ import { Trash2 } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+// Components
 import { HeaderBackButton, ThemeToggleButton } from '../common';
 
+// Utils
+import { shellRadii, shellSpacing, useShellTheme } from '../../theme';
+
+// Types
 import type { ShellColors } from '../../theme';
 
 interface AllTripsHeaderProps {

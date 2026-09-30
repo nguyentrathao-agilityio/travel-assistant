@@ -92,6 +92,7 @@ describe('getTripSummary', () => {
       endDate: '2026-08-12',
       travelers: 2,
       flightOrigin: 'HAN',
+      flightDestination: 'DAD',
     });
 
     expect(result.suggestedFlight?.id).toBe('FL1');
@@ -99,6 +100,42 @@ describe('getTripSummary', () => {
     expect(result.days).toBe(2);
     expect(result.costEstimate.flightTotal).toBe(120);
     expect(result.costEstimate.hotelTotal).toBe(180);
+  });
+
+  it('searches flights with the IATA destination, not the city name', async () => {
+    searchFlightsMock.mockResolvedValueOnce({ count: 1, results: [flight] });
+    getRouteMock.mockResolvedValueOnce(route);
+    createMock.mockResolvedValueOnce({
+      output_text: JSON.stringify({ food: 20, activities: 15, transport: 5 }),
+    });
+
+    await getTripSummary({
+      destination: 'Da Nang',
+      flightOrigin: 'HAN',
+      flightDestination: 'DAD',
+      skipHotel: true,
+    });
+
+    expect(searchFlightsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: 'HAN', destination: 'DAD' }),
+      expect.anything()
+    );
+  });
+
+  it('skips flights when the IATA destination is missing', async () => {
+    getRouteMock.mockResolvedValueOnce(route);
+    createMock.mockResolvedValueOnce({
+      output_text: JSON.stringify({ food: 20, activities: 15, transport: 5 }),
+    });
+
+    const result = await getTripSummary({
+      destination: 'Da Nang',
+      flightOrigin: 'HAN',
+      skipHotel: true,
+    });
+
+    expect(searchFlightsMock).not.toHaveBeenCalled();
+    expect(result.suggestedFlight ?? null).toBeNull();
   });
 
   it('skips flight search when skipFlights is set, leaving suggestedFlight null', async () => {

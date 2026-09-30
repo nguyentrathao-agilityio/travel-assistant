@@ -74,6 +74,7 @@ export const getTripSummary = async (
     endDate,
     travelers = 1,
     flightOrigin,
+    flightDestination,
     skipFlights = false,
     skipHotel = false,
   } = input;
@@ -89,11 +90,11 @@ export const getTripSummary = async (
   }
 
   const [flightResult, hotelResult, routeResult] = await Promise.allSettled([
-    !skipFlights && flightOrigin
+    !skipFlights && flightOrigin && flightDestination
       ? searchFlights(
           {
             origin: flightOrigin,
-            destination,
+            destination: flightDestination,
             departure_date: resolvedStart,
             adults: travelers,
             sort: FLIGHT_SORT.PRICE_ASC,

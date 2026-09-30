@@ -22,6 +22,12 @@ const TripSummaryInputShape = z.object({
     .describe('Trip end date YYYY-MM-DD'),
   travelers: z.number().int().optional().describe('Number of travelers (min 1)'),
   flightOrigin: z.string().optional().describe('IATA departure airport code, e.g. HAN'),
+  flightDestination: z
+    .string()
+    .optional()
+    .describe(
+      'IATA arrival airport code for the destination, e.g. DAD (nearest hub for cities without an airport)'
+    ),
   skipFlights: z
     .boolean()
     .optional()

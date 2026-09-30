@@ -67,3 +67,19 @@ test('keeps assistant replies when the end-of-run snapshot moves the tool result
 
   expect(ids(reconcileMessages(archived, live))).toEqual(['u1', 't1', 'a1', 'a2']);
 });
+
+test('keeps live messages older than the archived window before it', () => {
+  const archived: Message[] = [
+    { id: 'u3', role: 'user', content: 'three' },
+    { id: 'a3', role: 'assistant', content: 'three' },
+  ];
+  const live: Message[] = [
+    { id: 'u1', role: 'user', content: 'one' },
+    { id: 'a1', role: 'assistant', content: 'one' },
+    { id: 'u3', role: 'user', content: 'three' },
+    { id: 'a3', role: 'assistant', content: 'three' },
+    { id: 'u4', role: 'user', content: 'four' },
+  ];
+
+  expect(ids(reconcileMessages(archived, live))).toEqual(['u1', 'a1', 'u3', 'a3', 'u4']);
+});

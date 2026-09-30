@@ -11,6 +11,7 @@ import {
   CHAT_LIST_MAX_TO_RENDER_PER_BATCH,
   CHAT_LIST_WINDOW_SIZE,
   LIST_PAGINATION_THRESHOLD,
+  MAINTAIN_VISIBLE_CONTENT_POSITION,
 } from '../../constants';
 
 // Components
@@ -136,6 +137,7 @@ export const ChatMessageList = forwardRef<ChatMessageListHandle, ChatMessageList
             ) : null}
           </>
         }
+        maintainVisibleContentPosition={MAINTAIN_VISIBLE_CONTENT_POSITION}
         maxToRenderPerBatch={CHAT_LIST_MAX_TO_RENDER_PER_BATCH}
         onEndReached={canLoadOlder ? onLoadOlder : undefined}
         onEndReachedThreshold={LIST_PAGINATION_THRESHOLD}

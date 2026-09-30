@@ -104,16 +104,12 @@ test('keeps a short new chat aligned to the top like a normal list', async () =>
   });
 });
 
-test('does not rely on maintainVisibleContentPosition or scrollToEnd', async () => {
+test('keeps the visible message anchored while transcript pages change', async () => {
   const { captured, restore } = captureFlatListProps();
-  const scrollToEnd = jest.spyOn(FlatList.prototype, 'scrollToEnd').mockImplementation(() => {});
 
   await renderList();
-  await fireEvent(list(), 'contentSizeChange', 400, 2400);
 
-  expect(captured.props?.maintainVisibleContentPosition).toBeUndefined();
-  expect(scrollToEnd).not.toHaveBeenCalled();
-  scrollToEnd.mockRestore();
+  expect(captured.props?.maintainVisibleContentPosition).toEqual({ minIndexForVisible: 0 });
   restore();
 });
 

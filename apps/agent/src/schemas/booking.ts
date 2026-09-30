@@ -17,7 +17,13 @@ const ContactSchema = z.object({
 export const FlightBookingInputSchema = z.preprocess(
   stripNulls,
   ContactSchema.extend({
-    flightId: z.string().trim().min(1),
+    flightId: z
+      .string()
+      .trim()
+      .min(1)
+      .describe(
+        'The flight `id` from flightsTool or tripSummaryTool results, e.g. FL_HAN_DAD_20261110_01'
+      ),
     adults: z.number().int().min(1).default(1),
   })
 );
@@ -25,7 +31,13 @@ export const FlightBookingInputSchema = z.preprocess(
 export const HotelBookingInputSchema = z.preprocess(
   stripNulls,
   ContactSchema.extend({
-    hotelId: z.string().trim().min(1),
+    hotelId: z
+      .string()
+      .trim()
+      .min(1)
+      .describe(
+        'The hotel `id` (UUID) from hotelTool or tripSummaryTool results — never its `code` or `shortCode`'
+      ),
     city: z.string().trim().min(1),
     checkIn: z.string().refine(isValidIsoDate, 'Must be a valid YYYY-MM-DD date'),
     checkOut: z.string().refine(isValidIsoDate, 'Must be a valid YYYY-MM-DD date'),

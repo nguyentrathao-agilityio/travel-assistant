@@ -17,4 +17,14 @@ describe('outer agent graph topology', () => {
     expect(edges).not.toContainEqual(['saveMemory', END]);
     expect(edges).not.toContainEqual(['refusal', END]);
   });
+
+  it('ends suggestion runs without memory extraction or transcript persistence', () => {
+    const graph = buildGraph();
+    const edges = [...graph.edges];
+
+    expect(graph.nodes).toHaveProperty('suggest');
+    expect(edges).toContainEqual(['suggest', END]);
+    expect(edges).not.toContainEqual(['suggest', 'saveMemory']);
+    expect(edges).not.toContainEqual(['suggest', 'persistTranscript']);
+  });
 });

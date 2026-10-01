@@ -7,3 +7,4 @@ export * from './booking';
 export * from './general';
 export * from './refusal';
 export * from './persist-transcript';
+export * from './suggest';

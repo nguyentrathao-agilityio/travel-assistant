@@ -137,8 +137,9 @@ export const useTranscriptHistory = (
     () => [...toChatMessages(query.data?.pages ?? []), ...withoutSummaryMessages(retained)],
     [query.data, retained]
   );
-  const visibleLive = useMemo(() => withoutSummaryMessages(liveMessages), [liveMessages]);
-  const messages = useMemo(() => reconcileMessages(archived, visibleLive), [archived, visibleLive]);
+
+  const visibleLive = withoutSummaryMessages(liveMessages);
+  const messages = reconcileMessages(archived, visibleLive);
 
   return {
     fetchNewer,

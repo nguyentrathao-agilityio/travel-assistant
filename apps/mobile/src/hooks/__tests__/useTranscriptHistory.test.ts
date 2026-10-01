@@ -191,6 +191,17 @@ test('overlays live messages on the archive by stable ID', async () => {
   ]);
 });
 
+test('shows a user message pushed into the existing live array when a run starts', async () => {
+  const live: Message[] = [];
+  const { result, rerender } = await renderLiveHook({ live, running: false });
+  await waitFor(() => expect(result.current.pageCount).toBe(1));
+
+  live.push({ id: 'live-user', role: 'user', content: 'Plan a trip to Hue' });
+  await rerender({ live, running: true });
+
+  expect(ids(result.current.messages)).toEqual(['p0-user', 'p0-assistant', 'live-user']);
+});
+
 test('never renders the context summary appended by the end-of-run snapshot', async () => {
   const live: Message[] = [
     { id: 'p0-assistant', role: 'assistant', content: 'Answer 0' },

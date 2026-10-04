@@ -52,9 +52,12 @@ jest.mock('react-native-reanimated', () => {
 });
 
 const baseVoice: ChatVoiceProps = {
+  agentTranscript: '',
   dictatedTranscript: null,
   isVoiceModeActive: false,
+  isVoiceTurnRunning: false,
   micLevel: { value: 0 } as ChatVoiceProps['micLevel'],
+  onApprovalDecision: jest.fn(),
   onExitVoiceMode: jest.fn(),
   onStartListening: jest.fn(),
   onStartVoiceMode: jest.fn(),
@@ -62,6 +65,7 @@ const baseVoice: ChatVoiceProps = {
   onStopSpeaking: jest.fn(),
   onStopVoiceModeTurn: jest.fn(),
   partialTranscript: '',
+  pendingApproval: null,
   voiceErrorMessage: null,
   voiceState: 'idle',
 };

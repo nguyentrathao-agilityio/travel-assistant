@@ -13,14 +13,6 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-const mockSpeak = jest.fn();
-const mockStop = jest.fn();
-
-jest.mock('expo-speech', () => ({
-  speak: (...args: unknown[]) => mockSpeak(...args),
-  stop: (...args: unknown[]) => mockStop(...args),
-}));
-
 const mockRequestRecordingPermissionsAsync = jest.fn();
 const mockAudioStreamStart = jest.fn();
 const mockAudioStreamStop = jest.fn();
@@ -78,14 +70,6 @@ global.WebSocket = MockWebSocket;
 
 const latestSocket = () => MockWebSocket.instances[MockWebSocket.instances.length - 1];
 
-type SpeechOptions = {
-  onDone?: () => void;
-  onError?: () => void;
-  onStopped?: () => void;
-};
-
-const speechOptions = (call: number): SpeechOptions => mockSpeak.mock.calls[call][1];
-
 const deferred = <T>() => {
   let resolve!: (value: T) => void;
   const promise = new Promise<T>((resolvePromise) => {
@@ -99,21 +83,17 @@ const renderVoiceAssistant = () =>
   renderHook(() =>
     useVoiceAssistant({
       isAgentRunning: false,
-      isVoiceModeActiveRef: { current: true },
       onTranscript: jest.fn(),
     })
   );
 
-const startAndOpenSession = async (
-  onTranscript: (transcript: string) => void = jest.fn(),
-  isVoiceModeActiveRef: { current: boolean } = { current: true }
-) => {
+const startAndOpenSession = async (onTranscript: (transcript: string) => void = jest.fn()) => {
   mockRequestRecordingPermissionsAsync.mockResolvedValue({ granted: true });
   mockFetchVoiceSessionToken.mockResolvedValue({ token: 'tok-123', model: 'gpt-realtime' });
 
   const { result, rerender } = await renderHook(
     ({ isAgentRunning }: { isAgentRunning: boolean }) =>
-      useVoiceAssistant({ isAgentRunning, isVoiceModeActiveRef, onTranscript }),
+      useVoiceAssistant({ isAgentRunning, onTranscript }),
     { initialProps: { isAgentRunning: false } }
   );
 
@@ -131,8 +111,6 @@ const startAndOpenSession = async (
 };
 
 beforeEach(() => {
-  mockSpeak.mockReset();
-  mockStop.mockReset();
   mockRequestRecordingPermissionsAsync.mockReset();
   mockAudioStreamStart.mockReset().mockResolvedValue(undefined);
   mockAudioStreamStop.mockReset();
@@ -146,7 +124,6 @@ test('starts idle', async () => {
   const { result } = await renderHook(() =>
     useVoiceAssistant({
       isAgentRunning: false,
-      isVoiceModeActiveRef: { current: true },
       onTranscript,
     })
   );
@@ -163,7 +140,6 @@ test('can start listening after the Strict Mode effect replay', async () => {
     () =>
       useVoiceAssistant({
         isAgentRunning: false,
-        isVoiceModeActiveRef: { current: true },
         onTranscript: jest.fn(),
       }),
     { wrapper: StrictMode }
@@ -181,7 +157,6 @@ test('denied microphone permission surfaces an error and stays idle-ish', async 
   const { result } = await renderHook(() =>
     useVoiceAssistant({
       isAgentRunning: false,
-      isVoiceModeActiveRef: { current: true },
       onTranscript,
     })
   );
@@ -205,7 +180,6 @@ test('grants permission, opens a realtime session, and reaches listening', async
   const { result } = await renderHook(() =>
     useVoiceAssistant({
       isAgentRunning: false,
-      isVoiceModeActiveRef: { current: true },
       onTranscript,
     })
   );
@@ -379,7 +353,6 @@ test('a socket error surfaces the unavailable message', async () => {
   const { result } = await renderHook(() =>
     useVoiceAssistant({
       isAgentRunning: false,
-      isVoiceModeActiveRef: { current: true },
       onTranscript: jest.fn(),
     })
   );
@@ -548,7 +521,6 @@ test('startListening does nothing while the agent is running', async () => {
   const { result } = await renderHook(() =>
     useVoiceAssistant({
       isAgentRunning: true,
-      isVoiceModeActiveRef: { current: true },
       onTranscript: jest.fn(),
     })
   );
@@ -566,7 +538,6 @@ test('a token fetch failure surfaces the unavailable message', async () => {
   const { result } = await renderHook(() =>
     useVoiceAssistant({
       isAgentRunning: false,
-      isVoiceModeActiveRef: { current: true },
       onTranscript: jest.fn(),
     })
   );
@@ -597,142 +568,126 @@ test('streams audio buffers over the open socket', async () => {
   expect(sentAudioMessage).toBeDefined();
 });
 
-test('plays queued speech one segment at a time in source order', async () => {
-  const { result } = await renderVoiceAssistant();
-
-  await act(async () => {
-    result.current.enqueueSpeech('First sentence.');
-    result.current.enqueueSpeech('Second sentence.');
-    result.current.flushSpeech();
+describe('keepSessionOpenRef (server voice mode)', () => {
+  const completed = (transcript: string) => ({
+    data: JSON.stringify({
+      transcript,
+      type: 'conversation.item.input_audio_transcription.completed',
+    }),
   });
 
-  expect(mockSpeak).toHaveBeenCalledTimes(1);
-  expect(mockSpeak.mock.calls[0][0]).toBe('First sentence.');
-  expect(mockSpeak.mock.calls[0][1]).toEqual(expect.objectContaining({ language: 'en-US' }));
+  const openKeptSession = async (onTranscript = jest.fn()) => {
+    mockRequestRecordingPermissionsAsync.mockResolvedValue({ granted: true });
+    mockFetchVoiceSessionToken.mockResolvedValue({ token: 'tok-123', model: 'gpt-realtime' });
 
-  await act(async () => speechOptions(0).onDone?.());
+    const { result } = await renderHook(() =>
+      useVoiceAssistant({
+        isAgentRunning: false,
+        keepSessionOpenRef: { current: true },
+        onTranscript,
+      })
+    );
 
-  expect(mockSpeak).toHaveBeenCalledTimes(2);
-  expect(mockSpeak.mock.calls[1][0]).toBe('Second sentence.');
-  expect(result.current.voiceState).toBe('speaking');
+    await act(async () => result.current.startListening());
+    await waitFor(() => expect(MockWebSocket.instances).toHaveLength(1));
+    await act(async () => latestSocket().onopen?.());
+    await waitFor(() => expect(result.current.voiceState).toBe('listening'));
 
-  await act(async () => speechOptions(1).onDone?.());
-  expect(result.current.voiceState).toBe('idle');
-});
+    return { onTranscript, result };
+  };
 
-test('uses a Vietnamese TTS voice for Vietnamese assistant text', async () => {
-  const { result } = await renderVoiceAssistant();
+  test('parks the session on a final transcript instead of closing it', async () => {
+    const { onTranscript, result } = await openKeptSession();
+    const socket = latestSocket();
 
-  await act(async () => {
-    result.current.enqueueSpeech('Bạn muốn đi du lịch ở đâu?');
-    result.current.flushSpeech();
+    await act(async () => socket.onmessage?.(completed('Weather in Hue?')));
+
+    expect(onTranscript).toHaveBeenCalledWith('Weather in Hue?');
+    expect(socket.readyState).toBe(MockWebSocket.OPEN);
+    expect(mockAudioStreamStop).toHaveBeenCalled();
+    expect(result.current.voiceState).toBe('idle');
   });
 
-  expect(mockSpeak.mock.calls[0][1]).toEqual(expect.objectContaining({ language: 'vi-VN' }));
-});
+  test('resumes the parked session without reconnecting', async () => {
+    const { result } = await openKeptSession();
+    const socket = latestSocket();
 
-test('speech queue ignores empty/whitespace text', async () => {
-  const { result } = await renderVoiceAssistant();
+    await act(async () => socket.onmessage?.(completed('Weather in Hue?')));
+    mockAudioStreamStart.mockClear();
+    await act(async () => result.current.startListening());
 
-  await act(async () => {
-    result.current.enqueueSpeech('   ');
-    result.current.flushSpeech();
+    expect(MockWebSocket.instances).toHaveLength(1);
+    expect(mockFetchVoiceSessionToken).toHaveBeenCalledTimes(1);
+    expect(socket.sent.at(-1)).toBe(JSON.stringify({ type: 'input_audio_buffer.clear' }));
+    expect(mockAudioStreamStart).toHaveBeenCalledTimes(1);
+    expect(result.current.voiceState).toBe('listening');
   });
 
-  expect(mockSpeak).not.toHaveBeenCalled();
-  expect(result.current.voiceState).toBe('idle');
-});
+  test('delivers the next turn from the resumed session', async () => {
+    const { onTranscript, result } = await openKeptSession();
+    const socket = latestSocket();
 
-test('stopSpeaking clears pending speech and ignores a stale completion callback', async () => {
-  const { result } = await renderVoiceAssistant();
+    await act(async () => socket.onmessage?.(completed('First question')));
+    await act(async () => result.current.startListening());
+    await act(async () => socket.onmessage?.(completed('Second question')));
 
-  await act(async () => {
-    result.current.enqueueSpeech('First.');
-    result.current.enqueueSpeech('Must not play.');
-    result.current.flushSpeech();
-  });
-  const staleDone = speechOptions(0).onDone;
-
-  await act(async () => result.current.stopSpeaking());
-  await act(async () => staleDone?.());
-
-  expect(mockSpeak).toHaveBeenCalledTimes(1);
-  expect(mockStop).toHaveBeenCalled();
-  expect(result.current.voiceState).toBe('idle');
-});
-
-test('ignores stale stopped and error callbacks after a new generation starts', async () => {
-  const { result } = await renderVoiceAssistant();
-
-  await act(async () => {
-    result.current.enqueueSpeech('Old.');
-    result.current.flushSpeech();
-  });
-  const oldOptions = speechOptions(0);
-
-  await act(async () => result.current.stopSpeaking());
-  await act(async () => {
-    result.current.enqueueSpeech('New.');
-    result.current.flushSpeech();
-  });
-  await act(async () => {
-    oldOptions.onStopped?.();
-    oldOptions.onError?.();
+    expect(onTranscript).toHaveBeenNthCalledWith(2, 'Second question');
   });
 
-  expect(result.current.voiceState).toBe('speaking');
-  expect(result.current.errorMessage).toBeNull();
-});
+  test('keeps listening on an empty final transcript', async () => {
+    const { onTranscript, result } = await openKeptSession();
+    const socket = latestSocket();
 
-test('a current TTS error clears the queue and surfaces the playback error', async () => {
-  const { result } = await renderVoiceAssistant();
+    await act(async () => socket.onmessage?.(completed('   ')));
 
-  await act(async () => {
-    result.current.enqueueSpeech('Fails.');
-    result.current.enqueueSpeech('Must be cleared.');
-    result.current.flushSpeech();
-  });
-  await act(async () => speechOptions(0).onError?.());
-
-  expect(mockSpeak).toHaveBeenCalledTimes(1);
-  expect(result.current.voiceState).toBe('error');
-  expect(result.current.errorMessage).toMatch(/Couldn't play/);
-});
-
-test('reaches thinking state once a voice-started turn hands off to the agent', async () => {
-  const { result, rerender } = await startAndOpenSession();
-
-  await act(async () => {
-    latestSocket().onmessage?.({
-      data: JSON.stringify({
-        type: 'conversation.item.input_audio_transcription.completed',
-        transcript: 'What is the weather?',
-      }),
-    });
+    expect(onTranscript).not.toHaveBeenCalled();
+    expect(socket.readyState).toBe(MockWebSocket.OPEN);
+    expect(result.current.voiceState).toBe('listening');
   });
 
-  await rerender({ isAgentRunning: true });
+  test('keeps listening when a manual stop commits an empty buffer', async () => {
+    const { result } = await openKeptSession();
+    const socket = latestSocket();
 
-  expect(result.current.voiceState).toBe('thinking');
+    await act(async () => result.current.stopListening());
+    mockAudioStreamStart.mockClear();
+    await act(async () =>
+      socket.onmessage?.({
+        data: JSON.stringify({
+          error: { code: 'input_audio_buffer_commit_empty', message: 'buffer too small' },
+          type: 'error',
+        }),
+      })
+    );
 
-  await rerender({ isAgentRunning: false });
-
-  expect(result.current.voiceState).toBe('idle');
-});
-
-test('does not reach thinking for a dictated transcript sent outside Voice Mode', async () => {
-  const { result, rerender } = await startAndOpenSession(jest.fn(), { current: false });
-
-  await act(async () => {
-    latestSocket().onmessage?.({
-      data: JSON.stringify({
-        type: 'conversation.item.input_audio_transcription.completed',
-        transcript: 'What is the weather?',
-      }),
-    });
+    expect(socket.readyState).toBe(MockWebSocket.OPEN);
+    expect(mockAudioStreamStart).toHaveBeenCalledTimes(1);
+    expect(result.current.errorMessage).toBeNull();
+    expect(result.current.voiceState).toBe('listening');
   });
 
-  await rerender({ isAgentRunning: true });
+  test('reconnects when the parked session was closed (expiry or network)', async () => {
+    const { result } = await openKeptSession();
+    const socket = latestSocket();
 
-  expect(result.current.voiceState).toBe('idle');
+    await act(async () => socket.onmessage?.(completed('First question')));
+    await act(async () => socket.close());
+
+    expect(result.current.errorMessage).toBeNull();
+
+    await act(async () => result.current.startListening());
+    await waitFor(() => expect(MockWebSocket.instances).toHaveLength(2));
+
+    expect(result.current.voiceState).toBe('connecting');
+  });
+
+  test('cancelListening still closes a parked session', async () => {
+    const { result } = await openKeptSession();
+    const socket = latestSocket();
+
+    await act(async () => socket.onmessage?.(completed('First question')));
+    await act(async () => result.current.cancelListening());
+
+    expect(socket.readyState).toBe(MockWebSocket.CLOSED);
+  });
 });

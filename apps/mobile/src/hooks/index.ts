@@ -13,6 +13,7 @@ export * from './useActiveThreadId';
 export * from './useTripState';
 export * from './useInterruptElement';
 export * from './useVoiceAssistant';
+export * from './useVoiceTurn';
 export * from './useChatVoice';
 export * from './useTravelActions';
 export * from './useTranscriptHistory';

@@ -1,15 +1,14 @@
 import { useAgent } from '@copilotkit/react-native/headless';
-import { useQuery } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { AGENT_NAME } from '@repo/constants';
 
 import { fetchThreadValues } from '../services/threadHistory';
-import { toAgUiMessage } from '../utils/langgraphMessage';
+import { toAgUiMessages } from '../utils/langgraphMessage';
 import { threadQueryKeys } from './threadQueryKeys';
 
 import type { Message } from '@copilotkit/react-native/headless';
-import type { LangGraphRawMessage, LangGraphThreadValues } from '../utils/langgraphMessage';
 
 const EMPTY_MESSAGES: Message[] = [];
 const isRealMessage = (message: Message): boolean =>
@@ -17,20 +16,11 @@ const isRealMessage = (message: Message): boolean =>
 
 export const useAgentThreadHistory = (threadId: string) => {
   const { agent } = useAgent({ agentId: AGENT_NAME });
+  const queryClient = useQueryClient();
   const activeThreadRef = useRef<string | null>(null);
   const query = useQuery({
     enabled: Boolean(threadId),
-    queryFn: async () => {
-      const values = await fetchThreadValues(threadId);
-      const rawMessages = ((values as LangGraphThreadValues | undefined)?.messages ??
-        []) as LangGraphRawMessage[];
-
-      return rawMessages.flatMap((message, index) => {
-        const converted = toAgUiMessage(message, `${threadId}:${index}`);
-
-        return converted ? [converted] : [];
-      });
-    },
+    queryFn: async () => toAgUiMessages(threadId, await fetchThreadValues(threadId)),
     queryKey: threadQueryKeys.history(threadId),
     retry: false,
   });
@@ -56,5 +46,13 @@ export const useAgentThreadHistory = (threadId: string) => {
     return () => clearTimeout(timeout);
   }, [threadId, messages, isLoading, hasRealLiveMessages, agent]);
 
-  return { messages, isLoading };
+  const reloadThread = useCallback(async () => {
+    agent.setMessages(toAgUiMessages(threadId, await fetchThreadValues(threadId)));
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: threadQueryKeys.history(threadId) }),
+      queryClient.invalidateQueries({ queryKey: threadQueryKeys.transcript(threadId) }),
+    ]);
+  }, [agent, queryClient, threadId]);
+
+  return { messages, isLoading, reloadThread };
 };

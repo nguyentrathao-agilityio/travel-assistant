@@ -5,17 +5,18 @@ import {
   BOOKING_ACTIONS,
   BOOKING_APPROVAL_DECISIONS,
   BOOKING_APPROVAL_REQUEST_TYPE,
+  BOOKING_CREATION_DECLINED_MESSAGE,
   BOOKING_DECISIONS,
   TOOL_NAMES,
 } from '@repo/constants';
 
 // Utils
-import { parseToolResult } from '@repo/utils';
+import { cancellationRejection, parseToolResult } from '@repo/utils';
 
 // Types
 import type { BookingApprovalRequest, BookingDecision } from '@repo/types';
 
-type EditableBookingDetails = Record<string, string | number | boolean | null>;
+export type EditableBookingDetails = Record<string, string | number | boolean | null>;
 
 interface ActionRequest {
   name: string;
@@ -130,4 +131,23 @@ export const parseBookingApprovalRequest = (value: unknown): BookingApprovalRequ
     ) as Record<string, string | number | boolean | null>,
     allowedDecisions: config?.allowedDecisions ?? [...BOOKING_APPROVAL_DECISIONS],
   };
+};
+
+/** Builds the interrupt resume payload for a booking-approval decision. */
+export const buildBookingDecisionResume = (
+  interruptValue: unknown,
+  decision: BookingDecision,
+  editedDetails?: EditableBookingDetails
+): HitlResponse | null => {
+  const request = parseBookingApprovalRequest(interruptValue);
+
+  if (!request) return null;
+
+  const rejectionMessage =
+    request.action === BOOKING_ACTIONS.CANCEL
+      ? cancellationRejection(request.referenceId)
+      : BOOKING_CREATION_DECLINED_MESSAGE;
+  const { actionRequests } = parseToolResult(interruptValue) as { actionRequests: ActionRequest[] };
+
+  return buildHitlResponse(decision, actionRequests[0]!, rejectionMessage, editedDetails);
 };

@@ -52,11 +52,14 @@ export const ChatScreen = ({
   onStop,
 }: ChatScreenProps) => {
   const {
+    agentTranscript,
     isVoiceModeActive,
     micLevel,
+    onApprovalDecision,
     onExitVoiceMode,
     onStopVoiceModeTurn,
     partialTranscript,
+    pendingApproval,
     voiceErrorMessage,
     voiceState,
   } = voice;
@@ -163,11 +166,14 @@ export const ChatScreen = ({
       />
       {isVoiceModeActive && (
         <VoiceModeOverlay
+          agentTranscript={agentTranscript}
           errorMessage={voiceErrorMessage}
           micLevel={micLevel}
+          onApprovalDecision={onApprovalDecision}
           onExit={onExitVoiceMode}
           onStopTurn={onStopVoiceModeTurn}
           partialTranscript={partialTranscript}
+          pendingApproval={pendingApproval}
           voiceState={voiceState}
         />
       )}

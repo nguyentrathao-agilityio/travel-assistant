@@ -248,3 +248,24 @@ test('unsubscribes from the copilotkit subscription on unmount', async () => {
 
   expect(subscription.unsubscribe).toHaveBeenCalledTimes(1);
 });
+
+test('resurfaceInterrupt re-runs the agent without adding a message', async () => {
+  const { agent, copilotkit } = setup();
+  const { result } = await renderHook(() => useChatAgent('thread-1'));
+
+  await act(async () => result.current.resurfaceInterrupt());
+
+  expect(agent.addMessage).not.toHaveBeenCalled();
+  expect(copilotkit.runAgent).toHaveBeenCalledWith({ agent });
+});
+
+test('resurfaceInterrupt does nothing while a run is active', async () => {
+  const agent = makeAgent();
+  agent.isRunning = true;
+  const { copilotkit } = setup(agent);
+  const { result } = await renderHook(() => useChatAgent('thread-1'));
+
+  await act(async () => result.current.resurfaceInterrupt());
+
+  expect(copilotkit.runAgent).not.toHaveBeenCalled();
+});

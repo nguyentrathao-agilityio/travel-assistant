@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Keyboard, Mic, X } from 'lucide-react-native';
-import { useEffect, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -19,15 +19,22 @@ import {
   VOICE_BAR_MAX_HEIGHT,
   VOICE_BAR_MIN_HEIGHT,
   VOICE_BAR_MULTIPLIERS,
+  VOICE_REPLY_CAPTION_STATES,
   VOICE_STATE_LABEL,
   VOICE_STATES,
 } from '../constants';
 
+// Components
+import { BookingApprovalCard } from './BookingApprovalCard';
+
 // Utils
 import { shellOpacity, shellSpacing, useShellTheme } from '../theme';
+import { buildBookingDecisionResume, parseBookingApprovalRequest } from '../utils/booking';
 
 // Types
 import type { VoiceState } from '../hooks';
+import type { BookingDecision } from '@repo/types';
+import type { EditableBookingDetails } from '../utils/booking';
 import type { ShellColors } from '../theme';
 import type { SharedValue } from 'react-native-reanimated';
 
@@ -35,7 +42,10 @@ interface VoiceModeOverlayProps {
   voiceState: VoiceState;
   errorMessage: string | null;
   partialTranscript: string;
+  agentTranscript?: string;
+  pendingApproval?: unknown | null;
   micLevel: SharedValue<number>;
+  onApprovalDecision?: (resume: unknown) => void;
   onExit: () => void;
   onStopTurn: () => void;
 }
@@ -138,7 +148,10 @@ export const VoiceModeOverlay = ({
   voiceState,
   errorMessage,
   partialTranscript,
+  agentTranscript = '',
+  pendingApproval = null,
   micLevel,
+  onApprovalDecision,
   onExit,
   onStopTurn,
 }: VoiceModeOverlayProps) => {
@@ -146,6 +159,18 @@ export const VoiceModeOverlay = ({
   const { colors } = useShellTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const canStopTurn = voiceState === VOICE_STATES.LISTENING || voiceState === VOICE_STATES.SPEAKING;
+  const approvalRequest =
+    voiceState === VOICE_STATES.AWAITING_APPROVAL
+      ? parseBookingApprovalRequest(pendingApproval)
+      : null;
+  const handleApprovalDecision = useCallback(
+    (decision: BookingDecision, editedDetails?: EditableBookingDetails) => {
+      const resume = buildBookingDecisionResume(pendingApproval, decision, editedDetails);
+
+      if (resume) onApprovalDecision?.(resume);
+    },
+    [onApprovalDecision, pendingApproval]
+  );
 
   return (
     <LinearGradient
@@ -157,10 +182,15 @@ export const VoiceModeOverlay = ({
       <View style={styles.center}>
         <Waveform colors={colors} micLevel={micLevel} voiceState={voiceState} />
         <Text style={styles.transcriptText}>
-          {partialTranscript || VOICE_STATE_LABEL[voiceState]}
+          {partialTranscript ||
+            (VOICE_REPLY_CAPTION_STATES.has(voiceState) && agentTranscript) ||
+            VOICE_STATE_LABEL[voiceState]}
         </Text>
-        {voiceState === VOICE_STATES.ERROR && errorMessage && (
-          <Text style={styles.errorText}>{errorMessage}</Text>
+        {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
+        {approvalRequest && (
+          <ScrollView contentContainerStyle={styles.approvalContent} style={styles.approval}>
+            <BookingApprovalCard onDecision={handleApprovalDecision} request={approvalRequest} />
+          </ScrollView>
         )}
       </View>
 
@@ -215,6 +245,13 @@ const createStyles = (colors: ShellColors) =>
       fontWeight: '600',
       lineHeight: 30,
       textAlign: 'center',
+    },
+    approval: {
+      alignSelf: 'stretch',
+      flexGrow: 0,
+    },
+    approvalContent: {
+      paddingBottom: shellSpacing.md,
     },
     errorText: {
       color: colors.danger,

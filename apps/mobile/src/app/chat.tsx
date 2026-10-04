@@ -48,12 +48,16 @@ export default function ChatRoute() {
     isReady,
     isRunning,
     error,
+    resurfaceInterrupt,
     sendMessage,
     stop,
   } = useChatAgent(threadId);
   const interruptElement = useInterruptElement();
-  const { isLoading: isAgentHistoryLoading, messages: historyMessages } =
-    useAgentThreadHistory(threadId);
+  const {
+    isLoading: isAgentHistoryLoading,
+    messages: historyMessages,
+    reloadThread,
+  } = useAgentThreadHistory(threadId);
   const {
     fetchNewer,
     fetchOlder,
@@ -91,14 +95,19 @@ export default function ChatRoute() {
     isAwaitingApproval: interruptElement !== null,
   });
 
+  const handleVoiceTurnSettled = useCallback(() => {
+    reloadThread().catch((caught) => console.warn('[voice] Failed to reload thread', caught));
+  }, [reloadThread]);
+
   // Voice is used to handle voice input and output for the chat.
   const voice = useChatVoice({
     autoStart: params.focusVoice === FOCUS_VOICE_ENABLED,
     isHistoryLoading,
     isReady,
     isRunning,
-    messages,
-    sendMessage,
+    onExitWithPendingApproval: resurfaceInterrupt,
+    onTurnSettled: handleVoiceTurnSettled,
+    threadId,
   });
 
   const handleBack = useCallback(() => {

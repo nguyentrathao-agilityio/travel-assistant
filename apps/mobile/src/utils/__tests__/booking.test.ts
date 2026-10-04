@@ -1,12 +1,18 @@
-import { buildHitlResponse, parseBookingApprovalRequest } from '../booking';
+import {
+  buildBookingDecisionResume,
+  buildHitlResponse,
+  parseBookingApprovalRequest,
+} from '../booking';
 
 import {
   BOOKING_ACTIONS,
   BOOKING_APPROVAL_DECISIONS,
   BOOKING_APPROVAL_REQUEST_TYPE,
+  BOOKING_CREATION_DECLINED_MESSAGE,
   BOOKING_DECISIONS,
   TOOL_NAMES,
 } from '@repo/constants';
+import { cancellationRejection } from '@repo/utils';
 
 describe('buildHitlResponse', () => {
   const actionRequest = { name: TOOL_NAMES.BOOK_FLIGHT, args: { flightId: 'f1', price: 200 } };
@@ -178,5 +184,47 @@ describe('parseBookingApprovalRequest', () => {
     expect(parseBookingApprovalRequest(null)).toBeNull();
     expect(parseBookingApprovalRequest('not json')).toBeNull();
     expect(parseBookingApprovalRequest(42)).toBeNull();
+  });
+});
+
+describe('buildBookingDecisionResume', () => {
+  const interruptValue = (name: string, args: Record<string, unknown>) => ({
+    actionRequests: [{ name, args, description: 'x' }],
+    reviewConfigs: [],
+  });
+
+  test('approves the single pending action', () => {
+    expect(
+      buildBookingDecisionResume(
+        interruptValue(TOOL_NAMES.BOOK_FLIGHT, { flightId: 'f1' }),
+        BOOKING_DECISIONS.APPROVE
+      )
+    ).toEqual({ decisions: [{ type: BOOKING_DECISIONS.APPROVE }] });
+  });
+
+  test('rejects a creation with the creation-declined message', () => {
+    expect(
+      buildBookingDecisionResume(
+        interruptValue(TOOL_NAMES.BOOK_HOTEL, { hotelId: 'h1' }),
+        BOOKING_DECISIONS.REJECT
+      )
+    ).toEqual({
+      decisions: [{ type: BOOKING_DECISIONS.REJECT, message: BOOKING_CREATION_DECLINED_MESSAGE }],
+    });
+  });
+
+  test('rejects a cancellation with the booking-specific message', () => {
+    expect(
+      buildBookingDecisionResume(
+        interruptValue(TOOL_NAMES.CANCEL_BOOKING, { bookingId: 'b1' }),
+        BOOKING_DECISIONS.REJECT
+      )
+    ).toEqual({
+      decisions: [{ type: BOOKING_DECISIONS.REJECT, message: cancellationRejection('b1') }],
+    });
+  });
+
+  test('returns null for a payload that is not a booking approval', () => {
+    expect(buildBookingDecisionResume({ foo: 1 }, BOOKING_DECISIONS.APPROVE)).toBeNull();
   });
 });

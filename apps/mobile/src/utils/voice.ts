@@ -1,7 +1,14 @@
+import { VOICE_TURN_ERROR_CODES } from '@repo/constants';
+import { VoiceTurnEventSchema, type VoiceTurnEvent } from '@repo/schemas';
+
 import {
+  REALTIME_EMPTY_COMMIT_ERROR_CODE,
+  VOICE_ERROR_MESSAGES,
+  VOICE_KEY_ERROR_CODES,
+  VOICE_STATES,
   VIETNAMESE_VOICE_LOCALE,
   VOICE_LOCALE,
-  VOICE_STATES,
+  VOICE_TURN_FALLBACK_ERROR,
   type VoiceState,
   type VoiceWebSocketPhase,
 } from '../constants';
@@ -14,69 +21,13 @@ interface RealtimeVoiceMessage {
   transcript?: unknown;
   delta?: unknown;
   item?: { content?: Array<{ transcript?: unknown }> };
-  error?: { message?: unknown };
-}
-
-export interface StreamingSpeechState {
-  messageId: string | null;
-  observedText: string;
-  pendingText: string;
-  completed: boolean;
-}
-
-interface StreamingSpeechSnapshot {
-  messageId: string;
-  text: string;
-  isComplete: boolean;
-}
-
-interface StreamingSpeechUpdate {
-  state: StreamingSpeechState;
-  segments: string[];
+  error?: { code?: unknown; message?: unknown };
 }
 
 export interface VoiceStateContext {
   errorMessage: string | null;
-  isAgentRunning: boolean;
-  isSpeaking: boolean;
-  isVoiceTurnActive: boolean;
   wsPhase: VoiceWebSocketPhase;
 }
-
-const VOICE_STATE_RULES: Record<VoiceState, (context: VoiceStateContext) => boolean> = {
-  [VOICE_STATES.ERROR]: ({ errorMessage }) => Boolean(errorMessage),
-  [VOICE_STATES.SPEAKING]: ({ isSpeaking }) => isSpeaking,
-  [VOICE_STATES.CONNECTING]: ({ wsPhase }) => wsPhase === VOICE_STATES.CONNECTING,
-  [VOICE_STATES.LISTENING]: ({ wsPhase }) => wsPhase === VOICE_STATES.LISTENING,
-  [VOICE_STATES.PROCESSING]: ({ wsPhase }) => wsPhase === VOICE_STATES.PROCESSING,
-  [VOICE_STATES.THINKING]: ({ isAgentRunning, isVoiceTurnActive }) =>
-    isVoiceTurnActive && isAgentRunning,
-  [VOICE_STATES.IDLE]: () => true,
-};
-
-// Normalizes text before sending it to device TTS.
-const normalizeSegment = (text: string): string => text.replace(/\s+/g, ' ').trim();
-
-// Splits complete sentences from the trailing partial text.
-const takeCompletedSegments = (input: string): { pending: string; segments: string[] } => {
-  const segments: string[] = [];
-  let start = 0;
-
-  for (let index = 0; index < input.length; index += 1) {
-    const character = input[index];
-
-    if (character !== '.' && character !== '!' && character !== '?' && character !== '\n') {
-      continue;
-    }
-
-    const segment = normalizeSegment(input.slice(start, index + (character === '\n' ? 0 : 1)));
-
-    if (segment) segments.push(segment);
-    start = index + 1;
-  }
-
-  return { pending: input.slice(start), segments };
-};
 
 // Converts PCM samples into an amplified 0..1 waveform level.
 export const calculateMicLevel = (buffer: ArrayBuffer, gain: number): number => {
@@ -115,18 +66,29 @@ export const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
 export const voiceLocaleForText = (text: string): string =>
   VIETNAMESE_TEXT_PATTERN.test(text) ? VIETNAMESE_VOICE_LOCALE : VOICE_LOCALE;
 
-// Extracts the final transcript from a realtime provider event.
-export const extractFinalTranscript = (raw: string): string | null => {
-  let message: RealtimeVoiceMessage;
-
+const parseRealtimeMessage = (raw: string): RealtimeVoiceMessage | null => {
   try {
-    message = JSON.parse(raw);
+    const message: unknown = JSON.parse(raw);
+
+    return typeof message === 'object' && message !== null ? message : null;
   } catch {
     return null;
   }
+};
 
-  if (typeof message.type !== 'string') return null;
-  if (!message.type.includes('transcription') || !message.type.endsWith('completed')) return null;
+const isTranscriptionEvent = (
+  message: RealtimeVoiceMessage | null,
+  suffix: 'completed' | 'delta'
+): message is RealtimeVoiceMessage =>
+  typeof message?.type === 'string' &&
+  message.type.includes('transcription') &&
+  message.type.endsWith(suffix);
+
+// Extracts the final transcript from a realtime provider event.
+export const extractFinalTranscript = (raw: string): string | null => {
+  const message = parseRealtimeMessage(raw);
+
+  if (!isTranscriptionEvent(message, 'completed')) return null;
 
   const transcript =
     typeof message.transcript === 'string'
@@ -136,103 +98,97 @@ export const extractFinalTranscript = (raw: string): string | null => {
   return typeof transcript === 'string' && transcript.trim().length > 0 ? transcript.trim() : null;
 };
 
-export const isFinalTranscriptEvent = (raw: string): boolean => {
-  try {
-    const message = JSON.parse(raw) as RealtimeVoiceMessage;
-
-    return (
-      typeof message.type === 'string' &&
-      message.type.includes('transcription') &&
-      message.type.endsWith('completed')
-    );
-  } catch {
-    return false;
-  }
-};
+export const isFinalTranscriptEvent = (raw: string): boolean =>
+  isTranscriptionEvent(parseRealtimeMessage(raw), 'completed');
 
 // Extracts an append-only partial transcript from a realtime event.
 export const extractTranscriptDelta = (raw: string): string | null => {
-  let message: RealtimeVoiceMessage;
+  const message = parseRealtimeMessage(raw);
 
-  try {
-    message = JSON.parse(raw);
-  } catch {
-    return null;
-  }
-
-  if (typeof message.type !== 'string') return null;
-  if (!message.type.includes('transcription') || !message.type.endsWith('delta')) return null;
+  if (!isTranscriptionEvent(message, 'delta')) return null;
 
   return typeof message.delta === 'string' && message.delta.length > 0 ? message.delta : null;
 };
 
 // Extracts a provider error message with a safe fallback.
 export const extractRealtimeErrorMessage = (raw: string): string | null => {
-  let message: RealtimeVoiceMessage;
+  const message = parseRealtimeMessage(raw);
 
-  try {
-    message = JSON.parse(raw);
-  } catch {
-    return null;
-  }
-
-  if (message.type !== 'error') return null;
+  if (message?.type !== 'error') return null;
 
   return typeof message.error?.message === 'string'
     ? message.error.message
     : 'Realtime voice session error';
 };
 
-// Creates an empty state for a new streamed assistant response.
-export const createStreamingSpeechState = (): StreamingSpeechState => ({
-  completed: false,
-  messageId: null,
-  observedText: '',
-  pendingText: '',
-});
+// True when a manual commit found no audio left to transcribe.
+export const isEmptyCommitError = (raw: string): boolean => {
+  const message = parseRealtimeMessage(raw);
 
-// Resets sentence streaming between voice turns.
-export const resetStreamingSpeech = (): StreamingSpeechState => createStreamingSpeechState();
-
-// Emits only newly completed speech segments from a growing response.
-export const collectStreamingSpeech = (
-  state: StreamingSpeechState,
-  snapshot: StreamingSpeechSnapshot
-): StreamingSpeechUpdate => {
-  if (state.messageId !== snapshot.messageId) state = createStreamingSpeechState();
-
-  const current = { ...state, messageId: snapshot.messageId };
-
-  if (current.completed) return { segments: [], state: current };
-
-  if (!snapshot.text.startsWith(current.observedText)) {
-    return {
-      segments: [],
-      state: {
-        ...current,
-        completed: snapshot.isComplete,
-        observedText: snapshot.text,
-        pendingText: '',
-      },
-    };
-  }
-
-  const appended = snapshot.text.slice(current.observedText.length);
-  const extracted = takeCompletedSegments(current.pendingText + appended);
-  const trailing = snapshot.isComplete ? normalizeSegment(extracted.pending) : '';
-
-  return {
-    segments: trailing ? [...extracted.segments, trailing] : extracted.segments,
-    state: {
-      completed: snapshot.isComplete,
-      messageId: snapshot.messageId,
-      observedText: snapshot.text,
-      pendingText: snapshot.isComplete ? '' : extracted.pending,
-    },
-  };
+  return message?.type === 'error' && message.error?.code === REALTIME_EMPTY_COMMIT_ERROR_CODE;
 };
 
 // Resolves the highest-priority UI state for the current voice session.
-export const resolveVoiceState = (context: VoiceStateContext): VoiceState =>
-  (Object.entries(VOICE_STATE_RULES).find(([, matches]) => matches(context))?.[0] as VoiceState) ??
-  VOICE_STATES.IDLE;
+export const resolveVoiceState = ({ errorMessage, wsPhase }: VoiceStateContext): VoiceState =>
+  errorMessage ? VOICE_STATES.ERROR : wsPhase;
+
+export interface ServerTurnState {
+  isRunning: boolean;
+  isSpeaking: boolean;
+  pendingApproval: unknown | null;
+}
+
+/** Overlay state in server mode: the voice turn (approval > speaking > thinking) wins over STT. */
+export const resolveServerVoiceState = (
+  turn: ServerTurnState,
+  sttState: VoiceState
+): VoiceState => {
+  if (turn.pendingApproval) return VOICE_STATES.AWAITING_APPROVAL;
+  if (turn.isSpeaking) return VOICE_STATES.SPEAKING;
+  if (turn.isRunning) return VOICE_STATES.THINKING;
+
+  return sttState;
+};
+
+/** Message for an `agent_end` error code. */
+export const voiceTurnErrorMessage = (code: string): string => {
+  if (code === VOICE_TURN_ERROR_CODES.INVALID_KEY) return VOICE_ERROR_MESSAGES.INVALID_KEY;
+  if (code === VOICE_TURN_ERROR_CODES.THREAD_BUSY) return VOICE_ERROR_MESSAGES.THREAD_BUSY;
+
+  return VOICE_ERROR_MESSAGES.AGENT_FAILED;
+};
+
+/** Message for a voice turn request that failed before or while streaming. */
+export const voiceTurnRequestErrorMessage = (error: unknown): string =>
+  VOICE_KEY_ERROR_CODES.has((error as { code?: unknown } | null)?.code)
+    ? VOICE_ERROR_MESSAGES.INVALID_KEY
+    : VOICE_ERROR_MESSAGES.CONNECTION_LOST;
+
+/** Parses one SSE `data` payload into a voice turn event, or `null` if it is not one. */
+export const parseVoiceTurnEvent = (data: string): VoiceTurnEvent | null => {
+  try {
+    const parsed = VoiceTurnEventSchema.safeParse(JSON.parse(data));
+
+    // Skip rather than throw, so a newer server event type cannot break an older app.
+    if (!parsed.success) console.warn('[voice] Skipping unknown voice turn event.', parsed.error);
+
+    return parsed.success ? parsed.data : null;
+  } catch (error) {
+    console.warn('[voice] Skipping malformed voice turn event.', error);
+
+    return null;
+  }
+};
+
+/** Reads the error code from a failed `/voice/turn` response body. */
+export const readVoiceTurnErrorCode = async (response: Response): Promise<string> => {
+  try {
+    const { error } = (await response.json()) as { error?: unknown };
+
+    return typeof error === 'string' ? error : VOICE_TURN_FALLBACK_ERROR;
+  } catch (error) {
+    console.warn('[voice] Unreadable voice turn error response.', error);
+
+    return VOICE_TURN_FALLBACK_ERROR;
+  }
+};

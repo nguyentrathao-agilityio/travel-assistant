@@ -17,6 +17,7 @@ interface UseChatAgentResult {
   isReady: boolean;
   error: string | null;
   sendMessage: (text: string) => Promise<void>;
+  resurfaceInterrupt: () => Promise<void>;
   stop: () => void;
 }
 
@@ -70,6 +71,18 @@ export const useChatAgent = (threadId: string): UseChatAgentResult => {
     [agent, copilotkit]
   );
 
+  const resurfaceInterrupt = useCallback(async () => {
+    if (isRunningRef.current) return;
+
+    try {
+      await copilotkit.runAgent({ agent });
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : 'Something went wrong. Please try again.'
+      );
+    }
+  }, [agent, copilotkit]);
+
   // Retries once — the client can silently drop the cancel request otherwise.
   const stop = useCallback(() => {
     agent.abortRun();
@@ -84,6 +97,7 @@ export const useChatAgent = (threadId: string): UseChatAgentResult => {
     isRunning: agent.isRunning,
     isReady,
     error,
+    resurfaceInterrupt,
     sendMessage,
     stop,
   };

@@ -2,14 +2,7 @@ import { ToolCallStatus, useInterrupt } from '@copilotkit/react-native/headless'
 import { z } from 'zod';
 
 // Constants
-import {
-  AGENT_NAME,
-  BOOKING_ACTIONS,
-  BOOKING_CREATION_DECLINED_MESSAGE,
-  BOOKING_STATUSES,
-  BOOKING_TYPES,
-  TOOL_NAMES,
-} from '@repo/constants';
+import { AGENT_NAME, BOOKING_STATUSES, BOOKING_TYPES, TOOL_NAMES } from '@repo/constants';
 
 // Components
 import { BookingApprovalCard } from '../components/BookingApprovalCard';
@@ -21,13 +14,12 @@ import { useInterruptElement } from './useInterruptElement';
 import { useRenderToolResult } from './useRenderToolResult';
 
 // Utils
+import { isBookingBlockedResult, isIntentionalRejectionResult, parseToolResult } from '@repo/utils';
 import {
-  cancellationRejection,
-  isBookingBlockedResult,
-  isIntentionalRejectionResult,
-} from '@repo/utils';
-import { buildHitlResponse, parseBookingApprovalRequest } from '../utils/booking';
-import { parseToolResult } from '@repo/utils';
+  buildBookingDecisionResume,
+  parseBookingApprovalRequest,
+  type EditableBookingDetails,
+} from '../utils/booking';
 import { isToolPending } from '../utils/toolResult';
 
 // Types
@@ -89,23 +81,11 @@ export const useBookingAction = () => {
 
       const handleDecision = (
         decision: BookingDecision,
-        editedDetails?: Record<string, string | number | boolean | null>
+        editedDetails?: EditableBookingDetails
       ) => {
-        const rejectionMessage =
-          approvalRequest.action === BOOKING_ACTIONS.CANCEL
-            ? cancellationRejection(approvalRequest.referenceId)
-            : BOOKING_CREATION_DECLINED_MESSAGE;
-        const parsedValue = parseToolResult(event.value) as {
-          actionRequests: Array<{ name: string; args: Record<string, unknown> }>;
-        };
-        const hitlResponse = buildHitlResponse(
-          decision,
-          parsedValue.actionRequests[0],
-          rejectionMessage,
-          editedDetails
-        );
+        const hitlResponse = buildBookingDecisionResume(event.value, decision, editedDetails);
 
-        void resolve(hitlResponse);
+        if (hitlResponse) void resolve(hitlResponse);
       };
 
       return <BookingApprovalCard onDecision={handleDecision} request={approvalRequest} />;

@@ -1,15 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Constants
-import { VOICE_STATES } from '../constants';
+import {
+  VOICE_ERROR_MESSAGES,
+  VOICE_MAX_SILENT_RESTARTS,
+  VOICE_STATES,
+  VOICE_STT_SESSION_STATES,
+} from '../constants';
+
+// Utils
+import { resolveServerVoiceState } from '../utils/voice';
 
 // Hooks
 import { useVoiceAssistant } from './useVoiceAssistant';
 import { useVoiceModeConversation } from './useVoiceModeConversation';
+import { useVoiceTurn } from './useVoiceTurn';
 
 // Types
 import type { VoiceState } from '../constants';
-import type { Message } from '@copilotkit/react-native/headless';
 import type { SharedValue } from 'react-native-reanimated';
 
 interface UseChatVoiceOptions {
@@ -17,14 +25,18 @@ interface UseChatVoiceOptions {
   isHistoryLoading: boolean;
   isReady: boolean;
   isRunning: boolean;
-  messages: Message[];
-  sendMessage: (text: string) => void;
+  threadId?: string;
+  onTurnSettled?: () => void;
+  onExitWithPendingApproval?: () => void;
 }
 
 export interface ChatVoiceProps {
+  agentTranscript: string;
   dictatedTranscript: { text: string; id: number } | null;
   isVoiceModeActive: boolean;
+  isVoiceTurnRunning: boolean;
   micLevel: SharedValue<number>;
+  onApprovalDecision: (resume: unknown) => void;
   onExitVoiceMode: () => void;
   onStartListening: () => void;
   onStartVoiceMode: () => void;
@@ -32,19 +44,23 @@ export interface ChatVoiceProps {
   onStopSpeaking: () => void;
   onStopVoiceModeTurn: () => void;
   partialTranscript: string;
+  pendingApproval: unknown | null;
   voiceErrorMessage: string | null;
   voiceState: VoiceState;
 }
 
-// Owns the whole voice pipeline for the chat screen: dictate-to-composer, hands-free
-// voice mode, and auto-starting listening when the route opened with focusVoice=1.
+/**
+ * Chat-screen voice: dictation fills the composer; voice mode loops
+ * listen (STT) → /voice/turn (reply + TTS) → listen, with approval and silent-restart handling.
+ */
 export const useChatVoice = ({
   autoStart,
   isHistoryLoading,
   isReady,
   isRunning,
-  messages,
-  sendMessage,
+  threadId,
+  onTurnSettled,
+  onExitWithPendingApproval,
 }: UseChatVoiceOptions): ChatVoiceProps => {
   const [dictatedTranscript, setDictatedTranscript] = useState<{
     text: string;
@@ -52,61 +68,132 @@ export const useChatVoice = ({
   } | null>(null);
 
   const isVoiceModeActiveRef = useRef(false);
+  const startListeningRef = useRef<() => void>(() => {});
+  const silentRestartsRef = useRef(0);
+  const hasAutoStartedRef = useRef(false);
+
+  const handleTurnFinished = useCallback(() => {
+    if (isVoiceModeActiveRef.current) startListeningRef.current();
+  }, []);
+
+  const voiceTurn = useVoiceTurn({
+    onFinished: handleTurnFinished,
+    onSettled: onTurnSettled,
+    threadId: threadId ?? '',
+  });
+  const {
+    agentTranscript,
+    errorMessage: turnError,
+    isRunning: isTurnRunning,
+    isSpeaking: isTurnSpeaking,
+    pendingApproval,
+    respondToApproval,
+    start: startVoiceTurn,
+    stop: stopVoiceTurn,
+  } = voiceTurn;
 
   const handleTranscript = useCallback(
     (text: string) => {
       if (isVoiceModeActiveRef.current) {
-        sendMessage(text); // Voice Mode: auto-send, the loop continues on its own.
+        silentRestartsRef.current = 0;
+        startVoiceTurn(text);
         return;
       }
 
       setDictatedTranscript({ text, id: Date.now() }); // Dictate: let the user review first.
     },
-    [sendMessage]
+    [startVoiceTurn]
   );
 
   const voice = useVoiceAssistant({
     isAgentRunning: isRunning,
-    isVoiceModeActiveRef,
+    keepSessionOpenRef: isVoiceModeActiveRef,
     onTranscript: handleTranscript,
   });
-  const voiceMode = useVoiceModeConversation({ isRunning, messages, voice });
+  const voiceMode = useVoiceModeConversation({ voice });
+
+  startListeningRef.current = voice.startListening;
 
   useEffect(() => {
     isVoiceModeActiveRef.current = voiceMode.isActive;
   }, [voiceMode.isActive]);
 
+  // Set before start(): listening begins in this tick.
+  const startVoiceMode = useCallback(() => {
+    isVoiceModeActiveRef.current = true;
+    voiceMode.start();
+  }, [voiceMode.start]);
+
+  const hasPendingApproval = pendingApproval !== null;
+
+  const exitVoiceMode = useCallback(() => {
+    isVoiceModeActiveRef.current = false;
+    stopVoiceTurn();
+    voiceMode.stop();
+
+    if (hasPendingApproval) onExitWithPendingApproval?.();
+  }, [hasPendingApproval, onExitWithPendingApproval, stopVoiceTurn, voiceMode.stop]);
+
+  const isTurnActive = isTurnRunning || isTurnSpeaking;
+
   const onStopVoiceModeTurn = useCallback(() => {
-    if (voice.voiceState === VOICE_STATES.SPEAKING) {
-      voice.stopSpeaking();
+    if (isTurnActive) {
+      stopVoiceTurn();
+      voice.startListening();
       return;
     }
 
     voice.stopListening();
-  }, [voice]);
+  }, [isTurnActive, stopVoiceTurn, voice]);
 
-  const hasAutoStartedRef = useRef(false);
+  const previousSttStateRef = useRef(voice.voiceState);
+
+  const sttState = voice.voiceState;
+  const sttError = voice.errorMessage;
+  const restartListening = voice.startListening;
+
+  useEffect(() => {
+    const previous = previousSttStateRef.current;
+    previousSttStateRef.current = sttState;
+
+    if (previous === sttState) return;
+    if (!voiceMode.isActive || isTurnActive || pendingApproval) return;
+
+    const endedSilently = sttState === VOICE_STATES.IDLE && VOICE_STT_SESSION_STATES.has(previous);
+    const heardNothing =
+      sttState === VOICE_STATES.ERROR && sttError === VOICE_ERROR_MESSAGES.NO_SPEECH;
+
+    if (!endedSilently && !heardNothing) return;
+    if (silentRestartsRef.current >= VOICE_MAX_SILENT_RESTARTS) return;
+
+    silentRestartsRef.current += 1;
+    restartListening();
+  }, [isTurnActive, restartListening, sttError, sttState, voiceMode.isActive, pendingApproval]);
 
   useEffect(() => {
     if (hasAutoStartedRef.current) return;
     if (!autoStart || !isReady || isHistoryLoading) return;
 
     hasAutoStartedRef.current = true;
-    voiceMode.start();
-  }, [autoStart, isReady, isHistoryLoading, voiceMode.start]);
+    startVoiceMode();
+  }, [autoStart, isReady, isHistoryLoading, startVoiceMode]);
 
   return {
+    agentTranscript,
     dictatedTranscript,
     isVoiceModeActive: voiceMode.isActive,
+    isVoiceTurnRunning: isTurnRunning,
     micLevel: voice.micLevel,
-    onExitVoiceMode: voiceMode.stop,
+    onApprovalDecision: respondToApproval,
+    onExitVoiceMode: exitVoiceMode,
     onStartListening: voice.startListening,
-    onStartVoiceMode: voiceMode.start,
+    onStartVoiceMode: startVoiceMode,
     onStopListening: voice.stopListening,
-    onStopSpeaking: voice.stopSpeaking,
+    onStopSpeaking: stopVoiceTurn,
     onStopVoiceModeTurn,
     partialTranscript: voice.partialTranscript,
-    voiceErrorMessage: voice.errorMessage,
-    voiceState: voice.voiceState,
+    pendingApproval,
+    voiceErrorMessage: turnError ?? sttError,
+    voiceState: resolveServerVoiceState(voiceTurn, voice.voiceState),
   };
 };

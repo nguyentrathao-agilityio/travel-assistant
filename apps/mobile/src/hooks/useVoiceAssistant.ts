@@ -1,4 +1,3 @@
-import * as Speech from 'expo-speech';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -24,9 +23,9 @@ import {
   extractFinalTranscript,
   isFinalTranscriptEvent,
   extractRealtimeErrorMessage,
+  isEmptyCommitError,
   extractTranscriptDelta,
   resolveVoiceState,
-  voiceLocaleForText,
 } from '../utils/voice';
 
 // Types
@@ -66,7 +65,7 @@ export type { VoiceState } from '../constants';
 
 interface UseVoiceAssistantOptions {
   isAgentRunning: boolean;
-  isVoiceModeActiveRef: RefObject<boolean>;
+  keepSessionOpenRef?: RefObject<boolean>;
   onTranscript: (text: string) => void;
 }
 
@@ -76,22 +75,18 @@ interface UseVoiceAssistantResult {
   isPermissionDenied: boolean;
   partialTranscript: string;
   micLevel: SharedValue<number>;
-  enqueueSpeech: (text: string) => void;
-  flushSpeech: () => void;
   startListening: () => void;
   stopListening: () => void;
   cancelListening: () => void;
-  stopSpeaking: () => void;
 }
 
-/** Coordinates realtime STT, queued device TTS, and voice state for the existing chat flow. */
+/** OpenAI Realtime STT: dictation closes per utterance; voice mode parks the session between turns. */
 export const useVoiceAssistant = ({
   isAgentRunning,
-  isVoiceModeActiveRef,
+  keepSessionOpenRef,
   onTranscript,
 }: UseVoiceAssistantOptions): UseVoiceAssistantResult => {
   const [wsPhase, setWsPhase] = useState<VoiceWebSocketPhase>(VOICE_STATES.IDLE);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPermissionDenied, setIsPermissionDenied] = useState(false);
   const [partialTranscript, setPartialTranscript] = useState('');
@@ -99,28 +94,15 @@ export const useVoiceAssistant = ({
   const wsRef = useRef<WebSocket | null>(null);
   const wsPhaseRef = useRef<VoiceWebSocketPhase>(VOICE_STATES.IDLE);
   const hasFinalizedRef = useRef(false);
-  const isVoiceTurnActiveRef = useRef(false);
-  const wasAgentRunningRef = useRef(isAgentRunning);
   const connectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isAudioStreamStoppedRef = useRef(true);
-  const speechQueueRef = useRef<string[]>([]);
-  const speechGenerationRef = useRef(0);
-  const isSpeechActiveRef = useRef(false);
   const sessionGenerationRef = useRef(0);
   const isMountedRef = useRef(true);
   const isFinalizingRef = useRef(false);
   const isAgentRunningRef = useRef(isAgentRunning);
+  const isParkedRef = useRef(false);
 
   isAgentRunningRef.current = isAgentRunning;
-
-  useEffect(() => {
-    const wasRunning = wasAgentRunningRef.current;
-    wasAgentRunningRef.current = isAgentRunning;
-
-    if (wasRunning && !isAgentRunning) {
-      isVoiceTurnActiveRef.current = false;
-    }
-  }, [isAgentRunning]);
 
   const handleAudioBuffer = useCallback(
     (buffer: AudioStreamBuffer) => {
@@ -166,6 +148,7 @@ export const useVoiceAssistant = ({
   const closeSession = useCallback(
     (targetSocket: WebSocket | null = wsRef.current) => {
       stopAudioStream();
+      isParkedRef.current = false;
 
       if (wsRef.current === targetSocket) wsRef.current = null;
 
@@ -224,70 +207,52 @@ export const useVoiceAssistant = ({
 
   useEffect(() => clearConnectTimeout, [clearConnectTimeout]);
 
-  const finishSpeechGeneration = useCallback((generation: number) => {
-    if (generation !== speechGenerationRef.current) return;
-
-    speechQueueRef.current = [];
-    isSpeechActiveRef.current = false;
-    setIsSpeaking(false);
-  }, []);
-
-  const playNextSpeech = useCallback(
-    function playNext(generation: number): void {
-      if (generation !== speechGenerationRef.current || isSpeechActiveRef.current) return;
-
-      const text = speechQueueRef.current.shift();
-
-      if (!text) {
-        setIsSpeaking(false);
-        return;
-      }
-
-      isSpeechActiveRef.current = true;
-      setIsSpeaking(true);
-      Speech.speak(text, {
-        language: voiceLocaleForText(text),
-        onDone: () => {
-          if (generation !== speechGenerationRef.current) return;
-
-          isSpeechActiveRef.current = false;
-          playNext(generation);
-        },
-        onError: () => {
-          if (generation !== speechGenerationRef.current) return;
-
-          finishSpeechGeneration(generation);
-          setErrorMessage(VOICE_ERROR_MESSAGES.TTS_FAILED);
-        },
-        onStopped: () => finishSpeechGeneration(generation),
-      });
+  const failSession = useCallback(
+    (socket?: WebSocket) => {
+      hasFinalizedRef.current = true;
+      setPartialTranscript('');
+      closeSession(socket);
+      setPhase(VOICE_STATES.IDLE);
+      setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
     },
-    [finishSpeechGeneration]
+    [closeSession, setPhase]
   );
 
-  const enqueueSpeech = useCallback((text: string) => {
-    const normalized = text.replace(/\s+/g, ' ').trim();
+  const continueListening = useCallback(
+    (socket: WebSocket) => {
+      isFinalizingRef.current = false;
+      setPartialTranscript('');
 
-    if (normalized) speechQueueRef.current.push(normalized);
-  }, []);
+      if (isAudioStreamStoppedRef.current) {
+        isAudioStreamStoppedRef.current = false;
+        audioStream.start().catch(() => failSession(socket));
+      }
 
-  const flushSpeech = useCallback(() => {
-    if (speechQueueRef.current.length === 0) return;
+      setPhase(VOICE_STATES.LISTENING);
+    },
+    [audioStream, failSession, setPhase]
+  );
 
-    setErrorMessage(null);
-    playNextSpeech(speechGenerationRef.current);
-  }, [playNextSpeech]);
-
-  const stopSpeaking = useCallback(() => {
-    speechGenerationRef.current += 1;
-    speechQueueRef.current = [];
-    isSpeechActiveRef.current = false;
-    Speech.stop();
-    setIsSpeaking(false);
-  }, []);
+  const resumeParkedSession = useCallback(
+    (socket: WebSocket) => {
+      isParkedRef.current = false;
+      hasFinalizedRef.current = false;
+      setErrorMessage(null);
+      socket.send(JSON.stringify({ type: 'input_audio_buffer.clear' }));
+      continueListening(socket);
+    },
+    [continueListening]
+  );
 
   const startListening = useCallback(() => {
     if (wsPhaseRef.current !== VOICE_STATES.IDLE || isAgentRunningRef.current) return;
+
+    const parkedSocket = wsRef.current;
+
+    if (isParkedRef.current && parkedSocket?.readyState === WebSocket.OPEN) {
+      resumeParkedSession(parkedSocket);
+      return;
+    }
 
     const generation = sessionGenerationRef.current + 1;
     sessionGenerationRef.current = generation;
@@ -295,7 +260,6 @@ export const useVoiceAssistant = ({
       isMountedRef.current && sessionGenerationRef.current === generation;
 
     setErrorMessage(null);
-    stopSpeaking();
     isFinalizingRef.current = false;
     setPhase(VOICE_STATES.CONNECTING);
 
@@ -346,16 +310,12 @@ export const useVoiceAssistant = ({
                 type: 'session.update',
               })
             );
-            audioStream.start().catch(() => {
-              closeSession();
-              setPhase(VOICE_STATES.IDLE);
-              setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
-            });
+            audioStream.start().catch(() => failSession(socket));
             setPhase(VOICE_STATES.LISTENING);
           };
 
           socket.onmessage = (event) => {
-            if (!isCurrentSession() || wsRef.current !== socket) return;
+            if (!isCurrentSession() || wsRef.current !== socket || isParkedRef.current) return;
 
             const data = typeof event.data === 'string' ? event.data : '';
             const transcript = extractFinalTranscript(data);
@@ -365,14 +325,26 @@ export const useVoiceAssistant = ({
 
               hasFinalizedRef.current = true;
 
-              if (isVoiceModeActiveRef.current) {
-                isVoiceTurnActiveRef.current = true;
+              setPartialTranscript('');
+
+              if (keepSessionOpenRef?.current) {
+                stopAudioStream();
+                isParkedRef.current = true;
+              } else {
+                closeSession();
               }
 
-              setPartialTranscript('');
-              closeSession();
               setPhase(VOICE_STATES.IDLE);
               onTranscript(transcript);
+              return;
+            }
+
+            // Voice mode keeps listening after an empty transcript or an empty manual commit.
+            if (
+              keepSessionOpenRef?.current &&
+              (isFinalTranscriptEvent(data) || isEmptyCommitError(data))
+            ) {
+              continueListening(socket);
               return;
             }
 
@@ -391,31 +363,18 @@ export const useVoiceAssistant = ({
               return;
             }
 
-            const providerError = extractRealtimeErrorMessage(data);
-
-            if (providerError) {
-              hasFinalizedRef.current = true;
-              setPartialTranscript('');
-              closeSession();
-              setPhase(VOICE_STATES.IDLE);
-              setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
-            }
+            if (extractRealtimeErrorMessage(data)) failSession(socket);
           };
 
           socket.onerror = () => {
-            if (!isCurrentSession() || wsRef.current !== socket) return;
-
-            hasFinalizedRef.current = true;
-            setPartialTranscript('');
-            closeSession();
-            setPhase(VOICE_STATES.IDLE);
-            setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
+            if (isCurrentSession() && wsRef.current === socket) failSession(socket);
           };
 
           socket.onclose = () => {
             if (!isCurrentSession() || wsRef.current !== socket) return;
 
             wsRef.current = null;
+            isParkedRef.current = false;
             stopAudioStream();
             setPartialTranscript('');
 
@@ -433,7 +392,17 @@ export const useVoiceAssistant = ({
         setErrorMessage(VOICE_ERROR_MESSAGES.STT_UNAVAILABLE);
         setPhase(VOICE_STATES.IDLE);
       });
-  }, [audioStream, closeSession, onTranscript, setPhase, stopAudioStream, stopSpeaking]);
+  }, [
+    audioStream,
+    closeSession,
+    continueListening,
+    failSession,
+    keepSessionOpenRef,
+    onTranscript,
+    resumeParkedSession,
+    setPhase,
+    stopAudioStream,
+  ]);
 
   const stopListening = useCallback(() => {
     const socket = wsRef.current;
@@ -461,27 +430,16 @@ export const useVoiceAssistant = ({
     setPhase(VOICE_STATES.IDLE);
   }, [closeSession, setPhase]);
 
-  useEffect(() => stopSpeaking, [stopSpeaking]);
-
-  const voiceState = resolveVoiceState({
-    errorMessage,
-    isAgentRunning,
-    isSpeaking,
-    isVoiceTurnActive: isVoiceTurnActiveRef.current,
-    wsPhase,
-  });
+  const voiceState = resolveVoiceState({ errorMessage, wsPhase });
 
   return {
-    enqueueSpeech,
     cancelListening,
     errorMessage,
-    flushSpeech,
     isPermissionDenied,
     micLevel,
     partialTranscript,
     startListening,
     stopListening,
-    stopSpeaking,
     voiceState,
   };
 };

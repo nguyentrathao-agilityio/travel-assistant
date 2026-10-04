@@ -22,7 +22,12 @@ jest.mock('../../services/threadHistory', () => ({
 const mockToAgUiMessage = jest.fn();
 
 jest.mock('../../utils/langgraphMessage', () => ({
-  toAgUiMessage: (message: unknown, fallbackId: string) => mockToAgUiMessage(message, fallbackId),
+  toAgUiMessages: (threadId: string, values?: { messages?: unknown[] }) =>
+    (values?.messages ?? []).flatMap((message, index) => {
+      const converted = mockToAgUiMessage(message, `${threadId}:${index}`);
+
+      return converted ? [converted] : [];
+    }),
 }));
 
 import { fetchThreadValues } from '../../services/threadHistory';
@@ -56,7 +61,11 @@ beforeEach(() => {
 test('returns empty, non-loading state when threadId is empty', async () => {
   const { result } = await renderHook(() => useAgentThreadHistory(''), { wrapper });
 
-  expect(result.current).toEqual({ messages: [], isLoading: false });
+  expect(result.current).toEqual({
+    messages: [],
+    isLoading: false,
+    reloadThread: expect.any(Function),
+  });
   expect(fetchThreadValues).not.toHaveBeenCalled();
 });
 
@@ -201,4 +210,28 @@ test('clears and seeds history again after switching threads', async () => {
 
   await waitFor(() => expect(mockAgentMessages[0]?.id).toBe('thread-2-message'));
   expect(mockSetMessages).toHaveBeenCalledWith([]);
+});
+
+test('reloadThread replaces live messages with the server thread', async () => {
+  (fetchThreadValues as jest.Mock).mockResolvedValue({
+    messages: [
+      { type: 'human', id: 'h1', content: 'hi' },
+      { type: 'ai', id: 'a1', content: 'Hello' },
+    ],
+  });
+  mockToAgUiMessage.mockImplementation(
+    (message: { id: string; type: string; content: string }) => ({
+      content: message.content,
+      id: message.id,
+      role: message.type === 'human' ? 'user' : 'assistant',
+    })
+  );
+  const { result } = await renderHook(() => useAgentThreadHistory('thread-1'), { wrapper });
+
+  await act(async () => result.current.reloadThread());
+
+  expect(mockSetMessages).toHaveBeenLastCalledWith([
+    expect.objectContaining({ id: 'h1', role: 'user' }),
+    expect.objectContaining({ id: 'a1', role: 'assistant' }),
+  ]);
 });

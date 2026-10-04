@@ -133,3 +133,14 @@ export const toAgUiMessage = (message: LangGraphRawMessage, fallbackId: string):
 
   return null;
 };
+
+/** Converts a thread's LangGraph state values into chat messages. */
+export const toAgUiMessages = (threadId: string, values: unknown): Message[] => {
+  const rawMessages = (values as LangGraphThreadValues | undefined)?.messages ?? [];
+
+  return rawMessages.flatMap((message, index) => {
+    const converted = toAgUiMessage(message, `${threadId}:${index}`);
+
+    return converted ? [converted] : [];
+  });
+};

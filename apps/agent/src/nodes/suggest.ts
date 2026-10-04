@@ -14,6 +14,9 @@ import {
 import { createChatModel, openAiApiKeyFromConfig } from '@/infrastructure/llm';
 import { withLangfuseTracing } from '@/infrastructure/observability';
 
+// Utils
+import { messageContentText } from '@/utils';
+
 // State
 import type { GraphStateType, GraphStateUpdate } from '@/state';
 
@@ -57,16 +60,7 @@ const findSuggestTool = (state: GraphStateType): OpenAiFunctionTool | null => {
   return null;
 };
 
-const messageText = (message: BaseMessage): string => {
-  const { content } = message;
-
-  if (typeof content === 'string') return content.trim();
-
-  return content
-    .map((part) => (typeof part === 'object' && 'text' in part ? String(part.text) : ''))
-    .join('')
-    .trim();
-};
+const messageText = (message: BaseMessage): string => messageContentText(message.content).trim();
 
 const speakerOf = (message: BaseMessage): string | null => {
   if (message instanceof HumanMessage) return 'User';

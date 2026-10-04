@@ -3,6 +3,7 @@ import { buildBookingContext } from './sections/booking-context';
 import { BOOKING_RULES_SECTION } from './sections/booking-rules';
 import { buildClientContext } from './sections/client-context';
 import { buildMemoryContext } from './sections/memory-context';
+import { VOICE_MODE_SECTION } from './sections/voice-mode';
 import { BASE_SYSTEM_PROMPT } from './templates';
 
 // State
@@ -18,7 +19,8 @@ export interface AgentPromptSections {
 export const buildAgentSystemPrompt = (
   state: GraphStateType,
   sections: AgentPromptSections,
-  memories: string[] = []
+  memories: string[] = [],
+  options: { voiceMode?: boolean } = {}
 ): string =>
   [
     BASE_SYSTEM_PROMPT,
@@ -27,6 +29,7 @@ export const buildAgentSystemPrompt = (
     sections.includeBookingContext ? buildBookingContext(state) : null,
     buildClientContext(state),
     sections.includeMemoryContext ? buildMemoryContext(memories) : null,
+    options.voiceMode ? VOICE_MODE_SECTION : null,
   ]
     .filter((part): part is string => Boolean(part))
     .join('\n\n');

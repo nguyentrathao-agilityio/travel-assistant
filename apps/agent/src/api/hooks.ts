@@ -6,9 +6,12 @@ import type {
   ErrorHookContext,
 } from '@copilotkit/runtime/v2';
 
-const REQUEST_START_HEADER_NAME = 'x-cpk-request-start';
-const HTTP_STATUS_BAD_REQUEST = 400;
-const UNREGISTERED_AGENT_ERROR_CODE = 'invalid_request';
+// Constants
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  REQUEST_START_HEADER_NAME,
+  UNREGISTERED_AGENT_ERROR_CODE,
+} from '@/constants';
 
 /** Creates logging hooks and rejects requests for unknown agents. */
 export const createCopilotKitHooks = (

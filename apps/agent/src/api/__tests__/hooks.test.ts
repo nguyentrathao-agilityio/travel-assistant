@@ -9,7 +9,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // Api
 import { createCopilotKitHooks } from '@/api/hooks';
 
-const REQUEST_START_HEADER_NAME = 'x-cpk-request-start';
+// Constants
+import { REQUEST_START_HEADER_NAME } from '@/constants';
 
 const makeRequest = (headers: Record<string, string> = {}): Request =>
   new Request('https://example.com/chat', { method: 'POST', headers });

@@ -3,6 +3,7 @@ export * from './endpoints';
 export * from './messages';
 export * from './envs';
 export * from './headers';
+export * from './http';
 export * from './route';
 export * from './classify';
 export * from './retry';

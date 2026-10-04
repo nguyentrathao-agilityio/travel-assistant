@@ -28,3 +28,14 @@ export const fetchAndValidate = async <T>(
 
   return parsed.data;
 };
+
+/** Reads a JSON request body, returning `null` (and logging) when it is not valid JSON. */
+export const readJsonBody = async (request: Request): Promise<unknown> => {
+  try {
+    return await request.json();
+  } catch (error) {
+    console.warn('[http] Invalid JSON body.', error);
+
+    return null;
+  }
+};

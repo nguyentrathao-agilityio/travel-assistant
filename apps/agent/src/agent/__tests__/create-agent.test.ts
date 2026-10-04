@@ -186,7 +186,8 @@ describe('createSpecializedAgent', () => {
     expect(buildAgentSystemPromptMock).toHaveBeenCalledWith(
       fakeState,
       { ...sections, includeMemoryContext: true },
-      ['likes window seats']
+      ['likes window seats'],
+      { voiceMode: false }
     );
   });
 
@@ -248,6 +249,8 @@ describe('createSpecializedAgent', () => {
     await dynamicPromptFn(fakeState);
 
     expect(searchMemoriesMock).not.toHaveBeenCalled();
-    expect(buildAgentSystemPromptMock).toHaveBeenCalledWith(fakeState, sections, []);
+    expect(buildAgentSystemPromptMock).toHaveBeenCalledWith(fakeState, sections, [], {
+      voiceMode: false,
+    });
   });
 });

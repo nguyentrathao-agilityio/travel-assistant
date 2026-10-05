@@ -2,10 +2,19 @@ import { z } from 'zod';
 
 import { VOICE_TURN_EVENT_TYPES } from '@repo/constants';
 
+// Ids become store namespace labels and object keys: letters, digits and '-' only.
+const voiceAudioIdSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(100)
+  .regex(/^[A-Za-z0-9-]+$/);
+
 export const VoiceTurnRequestSchema = z.union([
   z.object({
     threadId: z.string().trim().min(1),
     transcript: z.string().trim().min(1),
+    messageId: voiceAudioIdSchema.optional(),
     clientDate: z.string().optional(),
     clientTimezone: z.string().optional(),
   }),
@@ -50,3 +59,21 @@ export const VoiceTurnEventSchema = z.discriminatedUnion('type', [
 
 export type VoiceTurnRequest = z.infer<typeof VoiceTurnRequestSchema>;
 export type VoiceTurnEvent = z.infer<typeof VoiceTurnEventSchema>;
+
+export const VoiceAudioUploadRequestSchema = z.object({
+  threadId: voiceAudioIdSchema,
+  messageId: voiceAudioIdSchema,
+  byteLength: z.number().int().positive(),
+  durationMs: z.number().int().positive(),
+});
+
+export const VoiceAudioUploadUrlSchema = z.object({ uploadUrl: z.string().url() });
+
+export const VoiceAudioListSchema = z.object({
+  recordings: z.array(z.object({ messageId: z.string(), durationMs: z.number() })),
+});
+
+export const VoiceAudioPlaybackUrlSchema = z.object({ url: z.string().url() });
+
+export type VoiceAudioUploadRequest = z.infer<typeof VoiceAudioUploadRequestSchema>;
+export type VoiceAudioList = z.infer<typeof VoiceAudioListSchema>;

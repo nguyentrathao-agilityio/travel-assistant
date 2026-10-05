@@ -15,21 +15,10 @@ export interface VoiceSpeechQueueDeps {
 
 export const defaultVoiceSpeechQueueDeps: VoiceSpeechQueueDeps = {
   speak: (text, { onDone, onError }) => {
-    console.warn('[voice-debug] speak', text.slice(0, 30));
-    Speech.speak(text, {
-      language: voiceLocaleForText(text),
-      onDone,
-      onError,
-      onStopped: () => console.warn('[voice-debug] native onStopped'),
-    });
+    Speech.speak(text, { language: voiceLocaleForText(text), onDone, onError });
   },
   stop: () => {
-    console.warn('[voice-debug] Speech.stop()');
-    void Speech.stop().then(() =>
-      Speech.isSpeakingAsync().then((speaking) =>
-        console.warn('[voice-debug] after stop, native isSpeaking =', speaking)
-      )
-    );
+    void Speech.stop();
   },
 };
 
@@ -95,7 +84,6 @@ export const createVoiceSpeechQueue = (deps: VoiceSpeechQueueDeps, onIdle: () =>
       settleIfIdle();
     },
     clear() {
-      console.warn('[voice-debug] clear', { isSpeaking, pending: pending.length });
       generation += 1;
       pending = [];
 

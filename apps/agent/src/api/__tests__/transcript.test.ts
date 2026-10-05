@@ -9,10 +9,11 @@ const page = { messages: [], previousCursor: null, hasPreviousPage: false };
 describe('transcript routes', () => {
   const fetchPage = vi.fn();
   const deleteThread = vi.fn();
+  const deleteThreadAudio = vi.fn().mockResolvedValue(undefined);
   const logger = { info: vi.fn(), error: vi.fn() };
   const createApp = () => {
     const app = new Hono();
-    registerTranscriptRoutes(app, { fetchPage, deleteThread, logger });
+    registerTranscriptRoutes(app, { fetchPage, deleteThread, deleteThreadAudio, logger });
     return app;
   };
 
@@ -66,5 +67,16 @@ describe('transcript routes', () => {
     );
     expect(deleteThread).toHaveBeenCalledTimes(2);
     expect(deleteThread).toHaveBeenCalledWith('thread-1');
+  });
+
+  it('deletes thread audio best-effort when the transcript is deleted', async () => {
+    deleteThread.mockResolvedValue(undefined);
+    deleteThreadAudio.mockRejectedValueOnce(new Error('bucket down'));
+
+    const response = await createApp().request('/threads/t1/messages', { method: 'DELETE' });
+
+    expect(response.status).toBe(204);
+    expect(deleteThread).toHaveBeenCalledWith('t1');
+    expect(deleteThreadAudio).toHaveBeenCalledWith('t1');
   });
 });

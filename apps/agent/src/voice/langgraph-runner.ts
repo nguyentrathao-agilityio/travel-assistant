@@ -28,7 +28,7 @@ import {
 } from '@/utils';
 
 export type RunRequest =
-  | { kind: typeof VOICE_RUN_REQUEST_KINDS.INPUT; transcript: string }
+  | { kind: typeof VOICE_RUN_REQUEST_KINDS.INPUT; transcript: string; messageId?: string }
   | { kind: typeof VOICE_RUN_REQUEST_KINDS.RESUME; resume: unknown };
 
 export type RunEvent =
@@ -138,7 +138,13 @@ async function* streamGraph(
     ...(request.kind === VOICE_RUN_REQUEST_KINDS.INPUT
       ? {
           input: {
-            messages: [{ role: 'user', content: request.transcript }],
+            messages: [
+              {
+                ...(request.messageId && { id: request.messageId }),
+                role: 'user',
+                content: request.transcript,
+              },
+            ],
             ...(clientDate && { clientDate }),
             ...(clientTimezone && { clientTimezone }),
           },

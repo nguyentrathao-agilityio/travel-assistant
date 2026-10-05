@@ -64,3 +64,10 @@ export const VOICE_RUN_STREAM_OPTIONS = {
 } as const;
 
 export const VOICE_INVALID_KEY_ERROR_PATTERN = /api key|401|invalid_api_key/i;
+
+export const VOICE_AUDIO_ROUTE_PATTERN = '/voice/audio/*';
+export const VOICE_AUDIO_OBJECT_PREFIX = 'voice';
+export const VOICE_AUDIO_FILE_EXTENSION = 'wav';
+export const VOICE_AUDIO_UPLOAD_URL_TTL_SECONDS = 300;
+export const VOICE_AUDIO_PLAYBACK_URL_TTL_SECONDS = 900;
+export const VOICE_AUDIO_LIST_LIMIT = 1000;

@@ -1,3 +1,7 @@
 export const HTTP_STATUS_BAD_REQUEST = 400;
 export const HTTP_STATUS_CONFLICT = 409;
 export const UNREGISTERED_AGENT_ERROR_CODE = 'invalid_request';
+export const HTTP_STATUS_NO_CONTENT = 204;
+export const HTTP_STATUS_NOT_FOUND = 404;
+export const HTTP_STATUS_PAYLOAD_TOO_LARGE = 413;
+export const HTTP_STATUS_SERVICE_UNAVAILABLE = 503;

@@ -77,6 +77,19 @@ describe('POST /voice/turn', () => {
     expect(requests).toEqual([{ kind: 'input', transcript: 'weather?' }]);
   });
 
+  it('passes a client message id through to the runner', async () => {
+    const requests: RunRequest[] = [];
+    const { app } = appWith({
+      async *run(request) {
+        requests.push(request);
+      },
+    });
+
+    await (await post(app, { messageId: 'm-1', threadId: 't1', transcript: 'hi' })).text();
+
+    expect(requests).toEqual([{ kind: 'input', messageId: 'm-1', transcript: 'hi' }]);
+  });
+
   it('turns a resume body into a resume request', async () => {
     const requests: RunRequest[] = [];
     const { app } = appWith({

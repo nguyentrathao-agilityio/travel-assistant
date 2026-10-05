@@ -43,11 +43,15 @@ const toRunRequest = (
     };
   }
 
-  const { transcript, clientDate, clientTimezone } = body;
+  const { transcript, messageId, clientDate, clientTimezone } = body;
 
   return {
     clientContext: { clientDate, clientTimezone },
-    request: { kind: VOICE_RUN_REQUEST_KINDS.INPUT, transcript },
+    request: {
+      kind: VOICE_RUN_REQUEST_KINDS.INPUT,
+      transcript,
+      ...(messageId && { messageId }),
+    },
   };
 };
 

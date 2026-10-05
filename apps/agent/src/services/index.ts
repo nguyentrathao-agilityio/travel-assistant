@@ -9,3 +9,4 @@ export * from './destination-explorer';
 export * from './booking';
 export * from './memory';
 export * from './transcript';
+export * from './voice-audio';

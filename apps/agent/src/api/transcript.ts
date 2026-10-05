@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { TranscriptPageSchema } from '@repo/schemas';
 
 import { transcriptStore } from '@/infrastructure/persistence';
+
+import { getVoiceAudioService } from './voice-audio';
 import {
   InvalidTranscriptCursorError,
   fetchTranscriptPage as fetchTranscriptPageService,
@@ -19,6 +21,7 @@ interface TranscriptRouteLogger {
 interface TranscriptRouteDependencies {
   fetchPage(threadId: string, cursor: string | null, limit: number): Promise<TranscriptPage>;
   deleteThread(threadId: string): Promise<void>;
+  deleteThreadAudio(threadId: string): Promise<void>;
   logger: TranscriptRouteLogger;
 }
 
@@ -30,6 +33,7 @@ const querySchema = z.object({
 const defaultDependencies: TranscriptRouteDependencies = {
   fetchPage: (threadId, cursor, limit) => fetchTranscriptPageService(threadId, cursor, limit),
   deleteThread: (threadId) => transcriptStore.deleteThread(threadId),
+  deleteThreadAudio: (threadId) => getVoiceAudioService().deleteThreadAudio(threadId),
   logger: console,
 };
 
@@ -93,6 +97,13 @@ export const registerTranscriptRoutes = (
 
     try {
       await dependencies.deleteThread(threadId);
+      await dependencies.deleteThreadAudio(threadId).catch((error: unknown) => {
+        dependencies.logger.error('[transcript-api]', {
+          operation: 'delete-audio',
+          status: 'error',
+          errorType: error instanceof Error ? error.name : 'UnknownError',
+        });
+      });
       dependencies.logger.info('[transcript-api]', {
         operation: 'delete',
         status: 'success',

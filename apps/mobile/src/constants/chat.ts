@@ -53,3 +53,11 @@ export const CHAT_LIST_WINDOW_SIZE = 7;
 export const CHAT_LIST_INITIAL_NUM_TO_RENDER = 12;
 export const CHAT_LIST_MAX_TO_RENDER_PER_BATCH = 8;
 export const MAINTAIN_VISIBLE_CONTENT_POSITION = { minIndexForVisible: 0 };
+// Within this many px of the newest message, the inverted list follows content as it grows.
+export const CHAT_LIST_AUTOSCROLL_THRESHOLD = 40;
+export const LIVE_END_VISIBLE_CONTENT_POSITION = {
+  ...MAINTAIN_VISIBLE_CONTENT_POSITION,
+  autoscrollToTopThreshold: CHAT_LIST_AUTOSCROLL_THRESHOLD,
+};
+// Scrolled further than this from the newest message shows the scroll-to-latest button.
+export const CHAT_SCROLL_TO_LATEST_THRESHOLD = 200;

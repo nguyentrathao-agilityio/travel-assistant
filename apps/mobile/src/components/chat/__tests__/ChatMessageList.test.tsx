@@ -5,7 +5,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 
 import { ChatMessageList } from '../ChatMessageList';
-import { CHAT_LIST_INITIAL_NUM_TO_RENDER, CHAT_LIST_WINDOW_SIZE } from '../../../constants';
+import {
+  CHAT_LIST_AUTOSCROLL_THRESHOLD,
+  CHAT_SCROLL_TO_LATEST_THRESHOLD,
+  CHAT_LIST_INITIAL_NUM_TO_RENDER,
+  CHAT_LIST_WINDOW_SIZE,
+} from '../../../constants';
 import { ThemeProvider } from '../../../theme';
 import { SAFE_AREA_INITIAL_METRICS } from '../../../test/fixtures';
 
@@ -104,13 +109,46 @@ test('keeps a short new chat aligned to the top like a normal list', async () =>
   });
 });
 
-test('keeps the visible message anchored while transcript pages change', async () => {
+test('follows streamed replies at the live end so they never hide under the composer', async () => {
   const { captured, restore } = captureFlatListProps();
 
-  await renderList();
+  await renderList({ hasNewer: false });
+
+  expect(captured.props?.maintainVisibleContentPosition).toEqual({
+    autoscrollToTopThreshold: CHAT_LIST_AUTOSCROLL_THRESHOLD,
+    minIndexForVisible: 0,
+  });
+  restore();
+});
+
+test('keeps the visible message anchored without autoscroll while newer pages remain', async () => {
+  const { captured, restore } = captureFlatListProps();
+
+  await renderList({ hasNewer: true });
 
   expect(captured.props?.maintainVisibleContentPosition).toEqual({ minIndexForVisible: 0 });
   restore();
+});
+
+test('shows a scroll-to-latest button only once scrolled away from the newest message', async () => {
+  const scrollToOffset = jest
+    .spyOn(FlatList.prototype, 'scrollToOffset')
+    .mockImplementation(() => {});
+
+  await renderList();
+
+  expect(screen.queryByTestId('scroll-to-latest')).toBeNull();
+
+  await fireEvent.scroll(list(), {
+    nativeEvent: { contentOffset: { y: CHAT_SCROLL_TO_LATEST_THRESHOLD + 1 } },
+  });
+  await fireEvent.press(screen.getByTestId('scroll-to-latest'));
+
+  expect(scrollToOffset).toHaveBeenCalledWith({ animated: true, offset: 0 });
+
+  await fireEvent.scroll(list(), { nativeEvent: { contentOffset: { y: 0 } } });
+
+  expect(screen.queryByTestId('scroll-to-latest')).toBeNull();
 });
 
 test('scrollToLatest scrolls the inverted list back to offset 0', async () => {

@@ -1,8 +1,8 @@
 import type { Message, Suggestion } from '@copilotkit/react-native/headless';
-import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { ScrollViewProps } from 'react-native';
+import type { NativeScrollEvent, NativeSyntheticEvent, ScrollViewProps } from 'react-native';
 import type { SharedValue } from 'react-native-reanimated';
 
 // Constants
@@ -10,7 +10,9 @@ import {
   CHAT_LIST_INITIAL_NUM_TO_RENDER,
   CHAT_LIST_MAX_TO_RENDER_PER_BATCH,
   CHAT_LIST_WINDOW_SIZE,
+  CHAT_SCROLL_TO_LATEST_THRESHOLD,
   LIST_PAGINATION_THRESHOLD,
+  LIVE_END_VISIBLE_CONTENT_POSITION,
   MAINTAIN_VISIBLE_CONTENT_POSITION,
 } from '../../constants';
 
@@ -18,6 +20,7 @@ import {
 import { MessageBubble, ThinkingIndicator } from '../MessageBubble';
 import { SuggestionChips } from '../SuggestionChips';
 import { ChatScrollView } from './ChatScrollView';
+import { ScrollToLatestButton } from './ScrollToLatestButton';
 
 // Utils
 import { shellSpacing, useShellTheme } from '../../theme';
@@ -81,9 +84,19 @@ export const ChatMessageList = forwardRef<ChatMessageListHandle, ChatMessageList
     const isAwaitingApproval = interruptElement !== null;
     const canLoadOlder = hasOlder && !isLoadingOlder && !olderError;
 
-    useImperativeHandle(ref, () => ({
-      scrollToLatest: (animated = true) => listRef.current?.scrollToOffset({ animated, offset: 0 }),
-    }));
+    const [isAwayFromLatest, setIsAwayFromLatest] = useState(false);
+
+    const scrollToLatest = useCallback((animated = true) => {
+      listRef.current?.scrollToOffset({ animated, offset: 0 });
+    }, []);
+
+    useImperativeHandle(ref, () => ({ scrollToLatest }), [scrollToLatest]);
+
+    const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      setIsAwayFromLatest(event.nativeEvent.contentOffset.y > CHAT_SCROLL_TO_LATEST_THRESHOLD);
+    }, []);
+
+    const handleScrollToLatestPress = useCallback(() => scrollToLatest(), [scrollToLatest]);
 
     const renderScrollComponent = useCallback(
       (props: ScrollViewProps) => (
@@ -117,45 +130,56 @@ export const ChatMessageList = forwardRef<ChatMessageListHandle, ChatMessageList
     ) : null;
 
     return (
-      <FlatList
-        contentContainerStyle={styles.content}
-        data={newestFirstRows}
-        initialNumToRender={CHAT_LIST_INITIAL_NUM_TO_RENDER}
-        inverted
-        keyExtractor={(item) => item.id}
-        ListFooterComponent={olderHistoryRow}
-        ListHeaderComponent={
-          <>
-            {isRunning && !hasEmptyAssistantRow ? (
-              <View style={styles.typingIndicatorWrap}>
-                <ThinkingIndicator />
-              </View>
-            ) : null}
-            {interruptElement ? <View style={styles.interruptWrap}>{interruptElement}</View> : null}
-            {!isRunning && !isAwaitingApproval && suggestions.length > 0 ? (
-              <SuggestionChips suggestions={suggestions} onSelect={onSuggestionPress} />
-            ) : null}
-          </>
-        }
-        maintainVisibleContentPosition={MAINTAIN_VISIBLE_CONTENT_POSITION}
-        maxToRenderPerBatch={CHAT_LIST_MAX_TO_RENDER_PER_BATCH}
-        onEndReached={canLoadOlder ? onLoadOlder : undefined}
-        onEndReachedThreshold={LIST_PAGINATION_THRESHOLD}
-        onStartReached={hasNewer ? onLoadNewer : undefined}
-        ref={listRef}
-        renderItem={({ item }) => (
-          <MessageBubble message={item} toolMessageIndex={toolMessageIndex} />
-        )}
-        renderScrollComponent={renderScrollComponent}
-        style={styles.list}
-        testID="chat-message-list"
-        windowSize={CHAT_LIST_WINDOW_SIZE}
-      />
+      <View style={styles.list}>
+        <FlatList
+          contentContainerStyle={styles.content}
+          data={newestFirstRows}
+          initialNumToRender={CHAT_LIST_INITIAL_NUM_TO_RENDER}
+          inverted
+          keyExtractor={(item) => item.id}
+          ListFooterComponent={olderHistoryRow}
+          ListHeaderComponent={
+            <>
+              {isRunning && !hasEmptyAssistantRow ? (
+                <View style={styles.typingIndicatorWrap}>
+                  <ThinkingIndicator />
+                </View>
+              ) : null}
+              {interruptElement ? (
+                <View style={styles.interruptWrap}>{interruptElement}</View>
+              ) : null}
+              {!isRunning && !isAwaitingApproval && suggestions.length > 0 ? (
+                <SuggestionChips suggestions={suggestions} onSelect={onSuggestionPress} />
+              ) : null}
+            </>
+          }
+          maintainVisibleContentPosition={
+            hasNewer ? MAINTAIN_VISIBLE_CONTENT_POSITION : LIVE_END_VISIBLE_CONTENT_POSITION
+          }
+          maxToRenderPerBatch={CHAT_LIST_MAX_TO_RENDER_PER_BATCH}
+          onEndReached={canLoadOlder ? onLoadOlder : undefined}
+          onEndReachedThreshold={LIST_PAGINATION_THRESHOLD}
+          onScroll={handleScroll}
+          onStartReached={hasNewer ? onLoadNewer : undefined}
+          ref={listRef}
+          renderItem={({ item }) => (
+            <MessageBubble message={item} toolMessageIndex={toolMessageIndex} />
+          )}
+          renderScrollComponent={renderScrollComponent}
+          scrollEventThrottle={SCROLL_EVENT_THROTTLE_MS}
+          style={styles.list}
+          testID="chat-message-list"
+          windowSize={CHAT_LIST_WINDOW_SIZE}
+        />
+        {isAwayFromLatest ? <ScrollToLatestButton onPress={handleScrollToLatestPress} /> : null}
+      </View>
     );
   }
 );
 
 ChatMessageList.displayName = 'ChatMessageList';
+
+const SCROLL_EVENT_THROTTLE_MS = 16;
 
 const styles = StyleSheet.create({
   list: {

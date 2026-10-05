@@ -9,11 +9,14 @@ import { ChatLayout, VoiceModeOverlay } from '../components';
 import { ChatComposer } from '../components/chat/ChatComposer';
 import { ChatEmptyState } from '../components/chat/ChatEmptyState';
 import { ChatHeader } from '../components/chat/ChatHeader';
+import { MessagePlaybackProvider } from '../components/chat/MessagePlaybackContext';
 import {
   ChatMessageList,
   type ChatMessageListHandle,
   type OlderHistoryProps,
 } from '../components/chat/ChatMessageList';
+import { useMessagePlayback } from '../hooks/useMessagePlayback';
+import { useVoiceAudioList } from '../hooks/useVoiceAudioList';
 import { shellSpacing, useShellTheme } from '../theme';
 import { renderableMessages } from '../utils/chatMessages';
 
@@ -67,6 +70,15 @@ export const ChatScreen = ({
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [isTakingLong, setIsTakingLong] = useState(false);
   const messageListRef = useRef<ChatMessageListHandle>(null);
+  const recordings = useVoiceAudioList(threadId);
+  const playback = useMessagePlayback({ threadId });
+  const playbackValue = useMemo(() => ({ ...playback, recordings }), [playback, recordings]);
+  const { stop: stopPlayback } = playback;
+
+  useEffect(() => {
+    if (isVoiceModeActive) stopPlayback();
+  }, [isVoiceModeActive, stopPlayback]);
+
   const extraContentPadding = useSharedValue(0);
   const isAwaitingApproval = interruptElement !== null;
   const hasRenderableMessages = renderableMessages(messages).length > 0;
@@ -128,17 +140,19 @@ export const ChatScreen = ({
       onSuggestionPress={handleSuggestionPress}
     />
   ) : (
-    <ChatMessageList
-      key={threadId}
-      ref={messageListRef}
-      {...history}
-      extraContentPadding={extraContentPadding}
-      interruptElement={interruptElement}
-      isRunning={isRunning}
-      messages={messages}
-      onSuggestionPress={handleSuggestionPress}
-      suggestions={suggestions}
-    />
+    <MessagePlaybackProvider value={playbackValue}>
+      <ChatMessageList
+        key={threadId}
+        ref={messageListRef}
+        {...history}
+        extraContentPadding={extraContentPadding}
+        interruptElement={interruptElement}
+        isRunning={isRunning}
+        messages={messages}
+        onSuggestionPress={handleSuggestionPress}
+        suggestions={suggestions}
+      />
+    </MessagePlaybackProvider>
   );
 
   return (

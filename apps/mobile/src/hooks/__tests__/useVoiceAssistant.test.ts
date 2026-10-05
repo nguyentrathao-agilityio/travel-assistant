@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { StrictMode } from 'react';
 
 import { REALTIME_VOICE_WS_URL } from '../../constants';
+import { VOICE_RECORDING_MAX_PCM_BYTES } from '../../utils/wav';
 import { useVoiceAssistant } from '../useVoiceAssistant';
 
 jest.mock('react-native-reanimated', () => {
@@ -217,7 +218,7 @@ test('delivers a completed transcript and returns to idle', async () => {
     });
   });
 
-  expect(onTranscript).toHaveBeenCalledWith('Show me hotels in Da Nang');
+  expect(onTranscript).toHaveBeenCalledWith('Show me hotels in Da Nang', null);
   expect(result.current.voiceState).toBe('idle');
   expect(latestSocket().readyState).toBe(MockWebSocket.CLOSED);
 });
@@ -270,7 +271,7 @@ test('clears partialTranscript once the transcript finalizes', async () => {
     });
   });
 
-  expect(onTranscript).toHaveBeenCalledWith('Show me hotels in Da Nang');
+  expect(onTranscript).toHaveBeenCalledWith('Show me hotels in Da Nang', null);
   expect(result.current.partialTranscript).toBe('');
 });
 
@@ -602,7 +603,7 @@ describe('keepSessionOpenRef (server voice mode)', () => {
 
     await act(async () => socket.onmessage?.(completed('Weather in Hue?')));
 
-    expect(onTranscript).toHaveBeenCalledWith('Weather in Hue?');
+    expect(onTranscript).toHaveBeenCalledWith('Weather in Hue?', null);
     expect(socket.readyState).toBe(MockWebSocket.OPEN);
     expect(mockAudioStreamStop).toHaveBeenCalled();
     expect(result.current.voiceState).toBe('idle');
@@ -631,7 +632,7 @@ describe('keepSessionOpenRef (server voice mode)', () => {
     await act(async () => result.current.startListening());
     await act(async () => socket.onmessage?.(completed('Second question')));
 
-    expect(onTranscript).toHaveBeenNthCalledWith(2, 'Second question');
+    expect(onTranscript).toHaveBeenNthCalledWith(2, 'Second question', null);
   });
 
   test('keeps listening on an empty final transcript', async () => {
@@ -690,4 +691,46 @@ describe('keepSessionOpenRef (server voice mode)', () => {
 
     expect(socket.readyState).toBe(MockWebSocket.CLOSED);
   });
+});
+
+const emitFinalTranscript = async (transcript: string) => {
+  await act(async () => {
+    latestSocket().onmessage?.({
+      data: JSON.stringify({
+        type: 'conversation.item.input_audio_transcription.completed',
+        transcript,
+      }),
+    });
+  });
+};
+
+const pushAudio = async (byteLength: number) => {
+  await act(async () => {
+    capturedOnBuffer?.({ data: new ArrayBuffer(byteLength) });
+  });
+};
+
+test('hands the utterance audio to onTranscript and starts a fresh buffer for the next one', async () => {
+  const onTranscript = jest.fn();
+
+  await startAndOpenSession(onTranscript);
+  await pushAudio(4);
+  await pushAudio(4);
+  await emitFinalTranscript('hi');
+
+  expect(onTranscript).toHaveBeenCalledWith('hi', {
+    byteLength: 8,
+    chunks: [expect.any(ArrayBuffer), expect.any(ArrayBuffer)],
+  });
+});
+
+test('caps the buffered audio at the max duration', async () => {
+  const onTranscript = jest.fn();
+
+  await startAndOpenSession(onTranscript);
+  await pushAudio(VOICE_RECORDING_MAX_PCM_BYTES - 50);
+  await pushAudio(150);
+  await emitFinalTranscript('long');
+
+  expect(onTranscript.mock.calls[0]![1].byteLength).toBe(VOICE_RECORDING_MAX_PCM_BYTES);
 });

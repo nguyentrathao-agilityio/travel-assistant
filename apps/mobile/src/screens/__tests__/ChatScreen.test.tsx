@@ -15,6 +15,20 @@ import type { ReactElement } from 'react';
 
 const mockRenderToolCall = jest.fn();
 
+const mockStopPlayback = jest.fn();
+
+jest.mock('../../hooks/useVoiceAudioList', () => ({
+  useVoiceAudioList: () => new Map<string, number>(),
+}));
+jest.mock('../../hooks/useMessagePlayback', () => ({
+  useMessagePlayback: () => ({
+    playingId: null,
+    playRecording: jest.fn(),
+    speakReply: jest.fn(),
+    stop: mockStopPlayback,
+  }),
+}));
+
 jest.mock('@copilotkit/react-native/headless', () => ({
   useRenderToolCall: () => mockRenderToolCall,
 }));
@@ -439,4 +453,14 @@ test('a dictated transcript is merged into the draft without being sent', async 
 
   expect(screen.getByPlaceholderText('Write here…')).toHaveProp('value', 'Plan a trip');
   expect(onSend).not.toHaveBeenCalled();
+});
+
+test('stops playback when voice mode starts', async () => {
+  await renderScreen({ voice: { isVoiceModeActive: false } });
+
+  expect(mockStopPlayback).not.toHaveBeenCalled();
+
+  await renderScreen({ voice: { isVoiceModeActive: true } });
+
+  expect(mockStopPlayback).toHaveBeenCalled();
 });

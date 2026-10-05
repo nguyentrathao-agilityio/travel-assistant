@@ -1,6 +1,7 @@
 import { VOICE_ERROR_MESSAGES, VOICE_STATES } from '../../constants';
 import { toAgUiMessages } from '../langgraphMessage';
 import {
+  formatClipDuration,
   parseVoiceTurnEvent,
   resolveServerVoiceState,
   voiceTurnErrorMessage,
@@ -68,5 +69,13 @@ describe('toAgUiMessages', () => {
       expect.objectContaining({ id: 'a1', role: 'assistant' }),
     ]);
     expect(toAgUiMessages('thread-1', undefined)).toEqual([]);
+  });
+});
+
+describe('formatClipDuration', () => {
+  it('formats as m:ss and rounds short clips up to one second', () => {
+    expect(formatClipDuration(300)).toBe('0:01');
+    expect(formatClipDuration(4200)).toBe('0:05');
+    expect(formatClipDuration(65_000)).toBe('1:05');
   });
 });

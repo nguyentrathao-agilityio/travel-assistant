@@ -159,11 +159,12 @@ export const useVoiceTurn = ({
   }, [resetApproval]);
 
   const start = useCallback(
-    (transcript: string) => {
+    (transcript: string, messageId?: string) => {
       resetApproval();
       run({
         clientDate: todayClientIso(),
         clientTimezone: clientTimezone(),
+        ...(messageId && { messageId }),
         threadId: latestRef.current.threadId,
         transcript,
       });

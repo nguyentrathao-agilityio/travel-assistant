@@ -4,4 +4,5 @@ export const threadQueryKeys = {
   list: () => [...threadQueryKeys.all, 'list'] as const,
   history: (threadId: string) => [...threadQueryKeys.all, 'history', threadId] as const,
   transcript: (threadId: string) => [...threadQueryKeys.all, 'transcript', threadId] as const,
+  voiceAudio: (threadId: string) => [...threadQueryKeys.all, 'voice-audio', threadId] as const,
 };

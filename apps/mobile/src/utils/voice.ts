@@ -192,3 +192,10 @@ export const readVoiceTurnErrorCode = async (response: Response): Promise<string
     return VOICE_TURN_FALLBACK_ERROR;
   }
 };
+
+/** Formats a recording length as `m:ss`, rounding up so a short clip never reads `0:00`. */
+export const formatClipDuration = (durationMs: number): string => {
+  const totalSeconds = Math.max(1, Math.ceil(durationMs / 1000));
+
+  return `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, '0')}`;
+};

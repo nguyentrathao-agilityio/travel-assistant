@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react-native';
 
 import { VOICE_ERROR_MESSAGES } from '../../constants';
@@ -23,7 +24,10 @@ const mockTurn = {
 };
 let mockVoiceModeActive = true;
 let capturedVoiceOptions:
-  | { keepSessionOpenRef?: { current: boolean }; onTranscript(text: string): void }
+  | {
+      keepSessionOpenRef?: { current: boolean };
+      onTranscript(text: string, recording?: unknown): void;
+    }
   | undefined;
 let capturedTurnOptions: { onFinished?(): void; onSettled?(): void; threadId: string } | undefined;
 const mockStartVoiceMode = jest.fn();
@@ -31,7 +35,7 @@ const mockStartVoiceMode = jest.fn();
 jest.mock('../useVoiceAssistant', () => ({
   useVoiceAssistant: (options: {
     keepSessionOpenRef?: { current: boolean };
-    onTranscript(text: string): void;
+    onTranscript(text: string, recording?: unknown): void;
   }) => {
     capturedVoiceOptions = options;
 
@@ -55,22 +59,38 @@ jest.mock('../useVoiceModeConversation', () => ({
   }),
 }));
 
+const mockUploadVoiceRecording = jest.fn();
+
+jest.mock('expo-crypto', () => ({ randomUUID: () => 'm-uuid' }));
+jest.mock('../../services/voiceAudio', () => ({
+  uploadVoiceRecording: (...args: unknown[]) => mockUploadVoiceRecording(...args),
+}));
+
 const onTurnSettled = jest.fn();
+let queryClient: QueryClient;
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
 
 const render = () =>
-  renderHook(() =>
-    useChatVoice({
-      autoStart: false,
-      isHistoryLoading: false,
-      isReady: true,
-      isRunning: false,
-      onTurnSettled,
-      threadId: 'thread-1',
-    })
+  renderHook(
+    () =>
+      useChatVoice({
+        autoStart: false,
+        isHistoryLoading: false,
+        isReady: true,
+        isRunning: false,
+        onTurnSettled,
+        threadId: 'thread-1',
+      }),
+    { wrapper }
   );
 
 beforeEach(() => {
   jest.clearAllMocks();
+  queryClient = new QueryClient();
+  mockUploadVoiceRecording.mockResolvedValue(undefined);
   mockVoiceModeActive = true;
   Object.assign(mockVoice, { errorMessage: null, voiceState: 'idle' });
   Object.assign(mockTurn, {
@@ -87,7 +107,7 @@ test('voice mode sends transcripts to the voice turn', async () => {
 
   await act(async () => capturedVoiceOptions!.onTranscript('weather?'));
 
-  expect(mockTurn.start).toHaveBeenCalledWith('weather?');
+  expect(mockTurn.start).toHaveBeenCalledWith('weather?', 'm-uuid');
   expect(capturedTurnOptions).toMatchObject({ onSettled: onTurnSettled, threadId: 'thread-1' });
 });
 
@@ -191,16 +211,18 @@ test('stops auto-restarting after three silent sessions in a row', async () => {
 test('exiting with a pending approval hands it back to the chat', async () => {
   const onExitWithPendingApproval = jest.fn();
   mockTurn.pendingApproval = { actionRequests: [] };
-  const { result } = await renderHook(() =>
-    useChatVoice({
-      autoStart: false,
-      isHistoryLoading: false,
-      isReady: true,
-      isRunning: false,
-      onExitWithPendingApproval,
-      onTurnSettled,
-      threadId: 'thread-1',
-    })
+  const { result } = await renderHook(
+    () =>
+      useChatVoice({
+        autoStart: false,
+        isHistoryLoading: false,
+        isReady: true,
+        isRunning: false,
+        onExitWithPendingApproval,
+        onTurnSettled,
+        threadId: 'thread-1',
+      }),
+    { wrapper }
   );
 
   await act(async () => result.current.onExitVoiceMode());
@@ -211,15 +233,17 @@ test('exiting with a pending approval hands it back to the chat', async () => {
 
 test('exiting without a pending approval does not touch the chat run', async () => {
   const onExitWithPendingApproval = jest.fn();
-  const { result } = await renderHook(() =>
-    useChatVoice({
-      autoStart: false,
-      isHistoryLoading: false,
-      isReady: true,
-      isRunning: false,
-      onExitWithPendingApproval,
-      threadId: 'thread-1',
-    })
+  const { result } = await renderHook(
+    () =>
+      useChatVoice({
+        autoStart: false,
+        isHistoryLoading: false,
+        isReady: true,
+        isRunning: false,
+        onExitWithPendingApproval,
+        threadId: 'thread-1',
+      }),
+    { wrapper }
   );
 
   await act(async () => result.current.onExitVoiceMode());
@@ -243,14 +267,16 @@ test('keeps the STT session open in voice mode only', async () => {
 });
 
 test('route auto-start enters voice mode instead of composer dictation', async () => {
-  await renderHook(() =>
-    useChatVoice({
-      autoStart: true,
-      isHistoryLoading: false,
-      isReady: true,
-      isRunning: false,
-      threadId: 'thread-1',
-    })
+  await renderHook(
+    () =>
+      useChatVoice({
+        autoStart: true,
+        isHistoryLoading: false,
+        isReady: true,
+        isRunning: false,
+        threadId: 'thread-1',
+      }),
+    { wrapper }
   );
 
   expect(mockStartVoiceMode).toHaveBeenCalledTimes(1);
@@ -269,4 +295,50 @@ test('voice mode is flagged before start(), so the first transcript keeps the se
   await act(async () => result.current.onStartVoiceMode());
 
   expect(keepOpenAtStart).toBe(true);
+});
+
+const recording = { byteLength: 4, chunks: [new ArrayBuffer(4)] };
+
+test('uploads the voice-mode recording under the new message id', async () => {
+  await render();
+
+  await act(async () => capturedVoiceOptions!.onTranscript('hi', recording));
+
+  expect(mockTurn.start).toHaveBeenCalledWith('hi', 'm-uuid');
+  expect(mockUploadVoiceRecording).toHaveBeenCalledWith({
+    messageId: 'm-uuid',
+    recording,
+    threadId: 'thread-1',
+  });
+});
+
+test('invalidates the voice audio list after a successful upload', async () => {
+  await render();
+  const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
+
+  await act(async () => capturedVoiceOptions!.onTranscript('hi', recording));
+
+  expect(invalidate).toHaveBeenCalledWith({ queryKey: ['threads', 'voice-audio', 'thread-1'] });
+});
+
+test('a failed upload is logged and never blocks the turn', async () => {
+  const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+  mockUploadVoiceRecording.mockRejectedValue(new Error('bucket down'));
+  await render();
+
+  await act(async () => capturedVoiceOptions!.onTranscript('hi', recording));
+
+  expect(mockTurn.start).toHaveBeenCalledWith('hi', 'm-uuid');
+  expect(warn).toHaveBeenCalled();
+  warn.mockRestore();
+});
+
+test('never uploads dictation', async () => {
+  mockVoiceModeActive = false;
+  await render();
+
+  await act(async () => capturedVoiceOptions!.onTranscript('hi', recording));
+
+  expect(mockUploadVoiceRecording).not.toHaveBeenCalled();
+  expect(mockTurn.start).not.toHaveBeenCalled();
 });

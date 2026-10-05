@@ -120,6 +120,14 @@ describe('useVoiceTurn', () => {
     expect(onFinished).toHaveBeenCalledTimes(1);
   });
 
+  it('sends the client message id with the transcript', async () => {
+    const { calls, hook } = await setup();
+
+    await act(async () => hook.result.current.start('weather?', 'm-1'));
+
+    expect(calls[0]!.body).toMatchObject({ messageId: 'm-1', transcript: 'weather?' });
+  });
+
   it('holds on approval, then resumes on the same thread with the given payload', async () => {
     const { calls, hook, onFinished, queue } = await setup();
 

@@ -1,3 +1,5 @@
+import { useQueryClient } from '@tanstack/react-query';
+import { randomUUID } from 'expo-crypto';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Constants
@@ -8,6 +10,9 @@ import {
   VOICE_STT_SESSION_STATES,
 } from '../constants';
 
+// Services
+import { uploadVoiceRecording } from '../services/voiceAudio';
+
 // Utils
 import { resolveServerVoiceState } from '../utils/voice';
 
@@ -15,9 +20,11 @@ import { resolveServerVoiceState } from '../utils/voice';
 import { useVoiceAssistant } from './useVoiceAssistant';
 import { useVoiceModeConversation } from './useVoiceModeConversation';
 import { useVoiceTurn } from './useVoiceTurn';
+import { threadQueryKeys } from './threadQueryKeys';
 
 // Types
 import type { VoiceState } from '../constants';
+import type { VoiceRecording } from '../utils/wav';
 import type { SharedValue } from 'react-native-reanimated';
 
 interface UseChatVoiceOptions {
@@ -67,6 +74,7 @@ export const useChatVoice = ({
     id: number;
   } | null>(null);
 
+  const queryClient = useQueryClient();
   const isVoiceModeActiveRef = useRef(false);
   const startListeningRef = useRef<() => void>(() => {});
   const silentRestartsRef = useRef(0);
@@ -93,16 +101,26 @@ export const useChatVoice = ({
   } = voiceTurn;
 
   const handleTranscript = useCallback(
-    (text: string) => {
-      if (isVoiceModeActiveRef.current) {
-        silentRestartsRef.current = 0;
-        startVoiceTurn(text);
+    (text: string, recording: VoiceRecording | null) => {
+      if (!isVoiceModeActiveRef.current) {
+        setDictatedTranscript({ text, id: Date.now() }); // Dictate: let the user review first.
         return;
       }
 
-      setDictatedTranscript({ text, id: Date.now() }); // Dictate: let the user review first.
+      const messageId = randomUUID();
+
+      silentRestartsRef.current = 0;
+      startVoiceTurn(text, messageId);
+
+      if (!recording || !threadId) return;
+
+      uploadVoiceRecording({ messageId, recording, threadId })
+        .then(() =>
+          queryClient.invalidateQueries({ queryKey: threadQueryKeys.voiceAudio(threadId) })
+        )
+        .catch((error: unknown) => console.warn('[voice] Recording upload failed.', error));
     },
-    [startVoiceTurn]
+    [queryClient, startVoiceTurn, threadId]
   );
 
   const voice = useVoiceAssistant({

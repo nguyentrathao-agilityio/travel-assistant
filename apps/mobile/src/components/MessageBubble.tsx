@@ -1,9 +1,11 @@
 import { useRenderToolCall } from '@copilotkit/react-native/headless';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { AccessibilityInfo, Animated, StyleSheet, Text, View } from 'react-native';
 
 // Components
 import { MarkdownText } from './common/MarkdownText';
+import { useMessagePlaybackContext } from './chat/MessagePlaybackContext';
+import { PlaybackButton } from './chat/PlaybackButton';
 
 // Utils
 import { shellRadii, shellSpacing, useShellTheme } from '../theme';
@@ -102,6 +104,21 @@ export const MessageBubble = ({ message, toolMessageIndex }: MessageBubbleProps)
   const isThinking = !isUser && !text && !toolCalls?.length;
   const { colors } = useShellTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const playback = useMessagePlaybackContext();
+  const recordingDurationMs = isUser ? playback?.recordings.get(message.id) : undefined;
+  const canReplay = Boolean(playback && text && (!isUser || recordingDurationMs !== undefined));
+  const isPlaying = playback?.playingId === message.id;
+  const isLoading = playback?.loadingId === message.id;
+  const handleReplay = useCallback(() => {
+    if (!playback) return;
+
+    if (isUser) {
+      playback.playRecording(message.id);
+      return;
+    }
+
+    playback.speakReply(message.id, text);
+  }, [isUser, message.id, playback, text]);
 
   return (
     <View style={[styles.row, isUser ? styles.rowUser : styles.rowAssistant]}>
@@ -110,6 +127,15 @@ export const MessageBubble = ({ message, toolMessageIndex }: MessageBubbleProps)
       ) : !!text ? (
         <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleAssistant]}>
           <MarkdownText style={styles.bubbleText}>{text}</MarkdownText>
+          {canReplay ? (
+            <PlaybackButton
+              durationMs={recordingDurationMs}
+              isLoading={isLoading}
+              isPlaying={isPlaying}
+              onPress={handleReplay}
+              testID={`play-${message.id}`}
+            />
+          ) : null}
         </View>
       ) : null}
       {toolCalls?.map((toolCall) => (

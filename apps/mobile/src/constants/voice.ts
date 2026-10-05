@@ -77,3 +77,6 @@ export const VOICE_REPLY_CAPTION_STATES: ReadonlySet<VoiceState> = new Set([
   VOICE_STATES.SPEAKING,
   VOICE_STATES.AWAITING_APPROVAL,
 ]);
+
+export const VOICE_AUDIO_UNAVAILABLE_STATUS = 503;
+export const SPEECH_MARKDOWN_NOISE_PATTERN = /[*_`#>|]/g;

@@ -27,6 +27,7 @@ import {
   extractTranscriptDelta,
   resolveVoiceState,
 } from '../utils/voice';
+import { VOICE_RECORDING_MAX_PCM_BYTES, type VoiceRecording } from '../utils/wav';
 
 // Types
 import type { AudioStream, AudioStreamBuffer, AudioStreamResult } from 'expo-audio';
@@ -66,7 +67,7 @@ export type { VoiceState } from '../constants';
 interface UseVoiceAssistantOptions {
   isAgentRunning: boolean;
   keepSessionOpenRef?: RefObject<boolean>;
-  onTranscript: (text: string) => void;
+  onTranscript: (text: string, recording: VoiceRecording | null) => void;
 }
 
 interface UseVoiceAssistantResult {
@@ -101,6 +102,7 @@ export const useVoiceAssistant = ({
   const isFinalizingRef = useRef(false);
   const isAgentRunningRef = useRef(isAgentRunning);
   const isParkedRef = useRef(false);
+  const recordingRef = useRef<VoiceRecording>({ byteLength: 0, chunks: [] });
 
   isAgentRunningRef.current = isAgentRunning;
 
@@ -117,6 +119,17 @@ export const useVoiceAssistant = ({
         })
       );
 
+      const recording = recordingRef.current;
+      const room = VOICE_RECORDING_MAX_PCM_BYTES - recording.byteLength;
+
+      if (room > 0) {
+        const chunk =
+          buffer.data.byteLength > room ? buffer.data.slice(0, room) : buffer.data.slice(0);
+
+        recording.chunks.push(chunk);
+        recording.byteLength += chunk.byteLength;
+      }
+
       micLevel.value = withTiming(calculateMicLevel(buffer.data, MIC_LEVEL_GAIN), {
         duration: 80,
       });
@@ -130,6 +143,10 @@ export const useVoiceAssistant = ({
     onBuffer: handleAudioBuffer,
     sampleRate: REALTIME_VOICE_SAMPLE_RATE,
   });
+
+  const resetRecording = useCallback(() => {
+    recordingRef.current = { byteLength: 0, chunks: [] };
+  }, []);
 
   // Multiple cleanup paths can stop and release the native stream, so keep this idempotent.
   const stopAudioStream = useCallback(() => {
@@ -220,6 +237,7 @@ export const useVoiceAssistant = ({
 
   const continueListening = useCallback(
     (socket: WebSocket) => {
+      resetRecording();
       isFinalizingRef.current = false;
       setPartialTranscript('');
 
@@ -230,7 +248,7 @@ export const useVoiceAssistant = ({
 
       setPhase(VOICE_STATES.LISTENING);
     },
-    [audioStream, failSession, setPhase]
+    [audioStream, failSession, resetRecording, setPhase]
   );
 
   const resumeParkedSession = useCallback(
@@ -296,6 +314,7 @@ export const useVoiceAssistant = ({
             }
 
             isAudioStreamStoppedRef.current = false;
+            resetRecording();
             socket.send(
               JSON.stringify({
                 session: {
@@ -335,7 +354,11 @@ export const useVoiceAssistant = ({
               }
 
               setPhase(VOICE_STATES.IDLE);
-              onTranscript(transcript);
+
+              const recording = recordingRef.current;
+
+              resetRecording();
+              onTranscript(transcript, recording.byteLength > 0 ? recording : null);
               return;
             }
 
@@ -399,6 +422,7 @@ export const useVoiceAssistant = ({
     failSession,
     keepSessionOpenRef,
     onTranscript,
+    resetRecording,
     resumeParkedSession,
     setPhase,
     stopAudioStream,

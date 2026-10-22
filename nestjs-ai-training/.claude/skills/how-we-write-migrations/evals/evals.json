@@ -1,0 +1,62 @@
+{
+  "skill_name": "how-we-write-migrations",
+  "evals": [
+    {
+      "id": 0,
+      "name": "add-invitations-table",
+      "prompt": "I'm working on TL-007 (invitations). Add the invitations table to the schema and create the migration per the design — the schema part is already approved in the ticket.",
+      "expected_output": "Adds InvitationStatus enum and Invitation model per architecture §3.2.1 (uuid @db.Uuid ids/FKs, tokenHash unique, expiresAt, role default MEMBER, status default PENDING, timestamps, @@map invitations, relations to Board/User), migration named for invitations, applied, migrate diff clean, tests pass, no commit.",
+      "files": [
+        "worktree migwt/mig1-<with|base>, dev DB seeded with 1 admin + 3 boards (one NULL description)"
+      ],
+      "assertions": [
+        "Schema has model Invitation mapped to the invitations table",
+        "InvitationStatus enum has PENDING, ACCEPTED, EXPIRED, CANCELLED",
+        "Invitation id and foreign keys use @db.Uuid",
+        "tokenHash is unique",
+        "A new migration for invitations is applied to the dev DB and the table exists",
+        "prisma migrate diff shows no difference between DB and schema",
+        "Unit and e2e tests pass after the change",
+        "No requirement IDs in schema.prisma comments",
+        "architecture.md or the ticket records the schema change",
+        "No commits were made"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "rename-board-description",
+      "prompt": "Please rename the description column on the boards table to summary (the PO approved it). Existing data must be kept.",
+      "expected_output": "Field renamed to summary in schema; migration uses ALTER TABLE boards RENAME COLUMN description TO summary (no DROP/ADD); existing descriptions preserved in the dev DB; code/DTO/tests updated or flagged; migrate diff clean; no commit.",
+      "files": [
+        "worktree migwt/mig2-<with|base>, dev DB seeded with 1 admin + 3 boards (one NULL description)"
+      ],
+      "assertions": [
+        "Board model has summary and no description field",
+        "Migration renames the column (RENAME COLUMN) instead of DROP + ADD",
+        "Existing description values are preserved under summary in the dev DB",
+        "prisma migrate diff shows no difference between DB and schema",
+        "Application code no longer refers to the old description field",
+        "Unit and e2e tests pass after the change",
+        "No commits were made"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "add-required-board-position",
+      "prompt": "Add a position column (integer, required) to boards for ordering — it's approved. The local DB already has a few boards.",
+      "expected_output": "Migration adds position nullable, backfills existing rows (e.g. ROW_NUMBER by createdAt), then SET NOT NULL — or a justified default; applies on the seeded dev DB with no NULLs; schema has position Int; migrate diff clean; no commit.",
+      "files": [
+        "worktree migwt/mig3-<with|base>, dev DB seeded with 1 admin + 3 boards (one NULL description)"
+      ],
+      "assertions": [
+        "Board model has a required position Int field",
+        "Migration does not add a bare NOT NULL column without a default or backfill",
+        "Existing seeded boards have distinct non-null positions",
+        "Existing boards are ordered by creation time (Roadmap < Bugs < Ideas)",
+        "prisma migrate diff shows no difference between DB and schema",
+        "Unit and e2e tests pass after the change",
+        "No commits were made"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "skill_name": "clean-comments",
+  "evals": [
+    {
+      "id": 1,
+      "name": "restating-comments-service",
+      "prompt": "/clean-comments",
+      "expected_output": "All 6 added comments in src/users/users.service.ts that restate code (incl. trailing comment and signature-only TSDoc on a private method) are removed; code and the 2 pre-existing comments are unchanged.",
+      "files": [
+        "fixtures/eval-1/users.service.ts -> nestjs-ai-training/src/users/users.service.ts (uncommitted)"
+      ],
+      "assertions": [
+        "Every planted restating comment is removed",
+        "Non-comment code is identical to the input",
+        "Pre-existing comments from HEAD are untouched",
+        "Report includes git diff --stat and a per-file removed/shortened count"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "changelog-and-commented-out-code-controller",
+      "prompt": "/clean-comments src/auth",
+      "expected_output": "Changelog comments ('Updated: ... as requested', 'fixed: ...', 'Added ...', 'previously ...') and commented-out code in src/auth/auth.controller.ts are removed; code (including the trailing-comment line) is unchanged.",
+      "files": [
+        "fixtures/eval-2/auth.controller.ts -> nestjs-ai-training/src/auth/auth.controller.ts (uncommitted)"
+      ],
+      "assertions": [
+        "Every changelog comment is removed",
+        "Every commented-out code line is removed",
+        "Non-comment code is identical to the input",
+        "Report includes git diff --stat and a per-file removed/shortened count"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "keep-why-comment-and-eslint-directive",
+      "prompt": "/clean-comments",
+      "expected_output": "The 2-line 'why' comment (case-sensitive index, D-16) and the eslint-disable-next-line directive are both kept; the file is left unchanged and the report lists both under Kept with a reason.",
+      "files": [
+        "fixtures/eval-3/users.service.ts -> nestjs-ai-training/src/users/users.service.ts (uncommitted)"
+      ],
+      "assertions": [
+        "The why comment is kept",
+        "The eslint-disable-next-line directive is kept",
+        "Non-comment code is identical to the input",
+        "Report lists kept comments with a reason"
+      ]
+    }
+  ]
+}

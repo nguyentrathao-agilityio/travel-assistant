@@ -1,0 +1,71 @@
+// Source: docs/source/trello-lite-database-design.md, decisions in
+// docs/requirements.md §11 and the sketch in docs/architecture.md §3.2.1.
+
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  runtime                = "nodejs"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Codes, not labels.
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  // Case-sensitive.
+  username     String   @unique
+  // Stored lowercased by the application.
+  email        String   @unique
+  // bcrypt hash; column named as in the DB design.
+  passwordHash String   @map("password")
+  role         Role     @default(MEMBER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  createdBoards Board[]
+  memberships   BoardMember[]
+
+  @@map("users")
+}
+
+model Board {
+  id          String        @id @default(uuid()) @db.Uuid
+  // Not unique.
+  name        String
+  description String?
+  // The design's `created_by`.
+  createdById String        @db.Uuid
+  createdBy   User          @relation(fields: [createdById], references: [id])
+  // Archived when set (soft delete).
+  deletedAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  members     BoardMember[]
+
+  @@index([deletedAt, createdAt])
+  @@map("boards")
+}
+
+// No role column while invitations only grant MEMBER.
+model BoardMember {
+  id        String   @id @default(uuid()) @db.Uuid
+  boardId   String   @db.Uuid
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([boardId, userId])
+  @@index([userId])
+  @@map("board_members")
+}

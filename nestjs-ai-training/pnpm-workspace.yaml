@@ -1,0 +1,8 @@
+allowBuilds:
+  '@parcel/watcher': false
+  # Downloads the schema engine used by `prisma migrate`.
+  '@prisma/engines': true
+  # Usage telemetry pulled in by @nestjs/swagger; not needed.
+  '@scarf/scarf': false
+  prisma: false
+  unrs-resolver: false

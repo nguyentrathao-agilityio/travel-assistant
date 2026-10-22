@@ -1,0 +1,43 @@
+{
+  "skill_name": "release-checklist",
+  "evals": [
+    {
+      "id": 0,
+      "name": "ready-branch",
+      "prompt": "Is TL-006 ready to merge into eval/target-tl006? Please check before I open the MR.",
+      "expected_output": "Runs lint, unit, e2e and build (all pass), notes eval/target-tl006 has no origin copy and falls back to the local branch, flags the schema migration and new controller as approval/manual items, finds the ticket In review with all boxes ticked, and gives a Ready (or Ready with caveats) verdict without committing or pushing.",
+      "files": [
+        "worktree on branch eval/tl-006-ready-N (TL-006 before merge), target eval/target-tl006"
+      ],
+      "assertions": [
+        "Reports a real result for each of lint, unit tests, e2e tests and build",
+        "E2E tests actually ran and are reported as passed with a count",
+        "Verdict is Ready or Ready with caveats, not Not ready",
+        "Flags the schema/migration change as needing approval",
+        "Notes there is no origin copy of eval/target-tl006 and the local branch was used",
+        "No commits, pushes or tracked-file edits were made in the worktree"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "broken-branch",
+      "prompt": "I'm done with TL-099 — can you check it before I merge into feat/ai-tool-training?",
+      "expected_output": "Verdict Not ready. Catches it.only in boards.service.spec.ts, console.log and an AC-BOARD-11 comment in boards.service.ts, schema.prisma change without a migration, MAX_BOARDS_PER_MEMBER missing from .env.example, ticket status In progress with unticked boxes, README index saying In review (mismatch), and blocking question Q-50.",
+      "files": [
+        "worktree on branch eval/tl-099-broken-N (planted problems), target feat/ai-tool-training"
+      ],
+      "assertions": [
+        "Verdict is Not ready",
+        "Catches the it.only focused test in boards.service.spec.ts",
+        "Catches the console.log debug output in boards.service.ts",
+        "Catches schema.prisma changed without a migration",
+        "Catches MAX_BOARDS_PER_MEMBER missing from .env.example",
+        "Catches the ticket status In progress with unticked checklist boxes",
+        "Catches the README index status (In review) not matching the ticket",
+        "Catches the open blocking question Q-50",
+        "Catches the AC-BOARD-11 requirement ID in a code comment",
+        "No commits, pushes or tracked-file edits were made in the worktree"
+      ]
+    }
+  ]
+}

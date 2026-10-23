@@ -174,6 +174,10 @@ E2E tests need PostgreSQL running and `TEST_DATABASE_URL` set;
   (requirements, designed items, acceptance criteria, source Q&A copy,
   assumptions, deviations, contradictions), `docs/clarifying-questions.md`
   (all questions and their status), `docs/architecture.md`, `docs/tickets/`.
+- **Claude Code hooks:** scripts live in `.claude/hooks/` (need `jq`).
+  `.claude/settings.json` here and `../.claude/settings.json` at the repo
+  root register the same hooks and must stay in sync. After changing
+  `block-forbidden.sh`, run `.claude/hooks/block-forbidden.test.sh`.
 
 ## Workflow: Read → Plan → Test → Implement → Verify → Review
 

@@ -30,3 +30,7 @@ pnpm-debug.log*
 Thumbs.db
 
 /src/generated/
+
+# Claude Code personal settings and Playwright MCP output
+.claude/settings.local.json
+.playwright-mcp/
